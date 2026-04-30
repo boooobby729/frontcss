@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>暗黑模式特效集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif;overflow-x:hidden}
+  .back{position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+  .effect-section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 40px;position:relative;border-bottom:1px solid rgba(255,255,255,.05)}
+  .effect-section h2{font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:8px;text-align:center}
+  .effect-section .desc{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:40px;text-align:center;max-width:600px}
+  .demo-area{width:100%;max-width:900px;min-height:350px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-radius:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)}
+</style>
+</head>
+<body>
+<a href="index.html" class="back">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#theme-toggle">主题切换</a>
+  <a href="#glow-cards">发光卡片</a>
+  <a href="#shadow-layers">多层阴影</a>
+  <a href="#neon-border">霓虹边框</a>
+  <a href="#dark-gradient">暗色渐变</a>
+  <a href="#spotlight-card">聚光卡片</a>
+</div>
+
+<!-- 1. Theme Toggle Animation -->
+<section class="effect-section" id="theme-toggle">
+  <h2>1. 主题切换动画</h2>
+  <p class="desc">点击切换暗/亮主题，使用圆形扩展的 clip-path 过渡动画</p>
+  <div class="demo-area" id="toggle-area">
+    <style>
+      .toggle-demo{width:400px;height:280px;border-radius:12px;position:relative;overflow:hidden;background:var(--bg);transition:background .01s}
+      .toggle-demo{--bg:#1a1a2e;--fg:#f5f5f7;--card-bg:#16213e;--accent:#0f3460}
+      .toggle-demo.light{--bg:#f8f9fa;--fg:#1a1a2e;--card-bg:#ffffff;--accent:#e8edf2}
+      .toggle-overlay{position:absolute;inset:0;background:var(--overlay-bg,#f8f9fa);clip-path:circle(0% at var(--cx,50%) var(--cy,50%));transition:clip-path .7s cubic-bezier(.4,0,.2,1)}
+      .toggle-demo.animating .toggle-overlay{clip-path:circle(150% at var(--cx,50%) var(--cy,50%))}
+      .toggle-btn{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;z-index:10;transition:background .3s}
+      .toggle-btn:hover{background:rgba(255,255,255,.2)}
+      .toggle-content{padding:30px;position:relative;z-index:5}
+      .toggle-content h3{font-size:1.2rem;color:var(--fg);margin-bottom:8px}
+      .toggle-content p{font-size:.8rem;color:var(--fg);opacity:.6;line-height:1.5}
+      .toggle-card{background:var(--card-bg);border-radius:8px;padding:16px;margin-top:16px;border:1px solid rgba(255,255,255,.05)}
+      .toggle-card .bar{height:8px;border-radius:4px;background:var(--accent);margin-bottom:8px}
+      .toggle-card .bar:nth-child(1){width:80%}
+      .toggle-card .bar:nth-child(2){width:60%}
+      .toggle-card .bar:nth-child(3){width:40%}
+    </style>
+    <div class="toggle-demo" id="toggleDemo">
+      <div class="toggle-overlay" id="toggleOverlay"></div>
+      <button class="toggle-btn" id="toggleBtn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" id="toggleIcon">
+          <circle cx="10" cy="10" r="4"/>
+          <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.2 4.2l1.4 1.4M14.4 14.4l1.4 1.4M4.2 15.8l1.4-1.4M14.4 5.6l1.4-1.4"/>
+        </svg>
+      </button>
+      <div class="toggle-content">
+        <h3>Dark Mode Preview</h3>
+        <p>Click the sun/moon icon to see the expanding circle theme transition.</p>
+        <div class="toggle-card">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('toggleDemo');
+  const overlay = document.getElementById('toggleOverlay');
+  const btn = document.getElementById('toggleBtn');
+  let isDark = true;
+  
+  btn.addEventListener('click', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const demoRect = demo.getBoundingClientRect();
+    const cx = ((rect.left + rect.width/2 - demoRect.left) / demoRect.width * 100) + '%';
+    const cy = ((rect.top + rect.height/2 - demoRect.top) / demoRect.height * 100) + '%';
+    
+    overlay.style.setProperty('--cx', cx);
+    overlay.style.setProperty('--cy', cy);
+    overlay.style.setProperty('--overlay-bg', isDark ? '#f8f9fa' : '#1a1a2e');
+    
+    demo.classList.add('animating');
+    
+    setTimeout(() => {
+      isDark = !isDark;
+      demo.classList.toggle('light', !isDark);
+      demo.classList.remove('animating');
+      overlay.style.clipPath = 'circle(0% at ' + cx + ' ' + cy + ')';
+    }, 700);
+  });
+})();
+</script>
+
+<!-- 2. Glow Cards -->
+<section class="effect-section" id="glow-cards">
+  <h2>2. 发光卡片效果</h2>
+  <p class="desc">悬停时卡片边缘产生柔和的渐变辉光，背景添加动态光斑</p>
+  <div class="demo-area" style="gap:20px;padding:40px;flex-wrap:wrap">
+    <style>
+      .glow-card{width:200px;height:140px;border-radius:16px;background:#111;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.08);transition:transform .3s,border-color .3s}
+      .glow-card:hover{transform:translateY(-4px);border-color:rgba(99,102,241,.4)}
+      .glow-card::before{content:'';position:absolute;inset:-2px;border-radius:18px;background:conic-gradient(from var(--angle,0deg),transparent,rgba(99,102,241,.5),transparent,rgba(168,85,247,.5),transparent);opacity:0;transition:opacity .4s;z-index:-1;animation:glowSpin 4s linear infinite}
+      .glow-card:hover::before{opacity:1}
+      .glow-card::after{content:'';position:absolute;inset:0;border-radius:16px;background:#111}
+      .glow-card-inner{position:relative;z-index:1;padding:20px;height:100%;display:flex;flex-direction:column;justify-content:flex-end}
+      .glow-card-inner h4{color:#fff;font-size:.9rem;margin-bottom:4px}
+      .glow-card-inner p{color:rgba(255,255,255,.4);font-size:.72rem}
+      @keyframes glowSpin{to{--angle:360deg}}
+      @property --angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+    </style>
+    <div class="glow-card"><div class="glow-card-inner"><h4>Analytics</h4><p>Real-time metrics</p></div></div>
+    <div class="glow-card"><div class="glow-card-inner"><h4>Dashboard</h4><p>Overview panel</p></div></div>
+    <div class="glow-card"><div class="glow-card-inner"><h4>Settings</h4><p>Configuration</p></div></div>
+  </div>
+</section>
+
+<!-- 3. Multi-layer Shadow -->
+<section class="effect-section" id="shadow-layers">
+  <h2>3. 多层暗色阴影</h2>
+  <p class="desc">利用多层 box-shadow 和 drop-shadow 创建深度丰富的暗色立体效果</p>
+  <div class="demo-area" style="gap:40px;padding:60px">
+    <style>
+      .shadow-element{width:160px;height:100px;border-radius:16px;background:linear-gradient(145deg,#1e1e2e,#151520);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-size:.8rem;font-weight:500;transition:all .4s cubic-bezier(.25,.1,.25,1);cursor:pointer}
+      .shadow-s1{box-shadow:0 4px 6px rgba(0,0,0,.3),0 10px 20px rgba(0,0,0,.25),0 1px 0 rgba(255,255,255,.05) inset}
+      .shadow-s1:hover{transform:translateY(-8px);box-shadow:0 12px 24px rgba(0,0,0,.4),0 24px 48px rgba(0,0,0,.3),0 1px 0 rgba(255,255,255,.08) inset}
+      .shadow-s2{box-shadow:8px 8px 16px #0a0a10,-8px -8px 16px #1e1e28,0 1px 0 rgba(255,255,255,.04) inset}
+      .shadow-s2:hover{box-shadow:12px 12px 24px #0a0a10,-12px -12px 24px #1e1e28,0 1px 0 rgba(255,255,255,.08) inset;transform:scale(1.03)}
+      .shadow-s3{box-shadow:0 0 0 1px rgba(99,102,241,.2),0 8px 32px rgba(99,102,241,.1),0 2px 8px rgba(99,102,241,.05)}
+      .shadow-s3:hover{box-shadow:0 0 0 1px rgba(99,102,241,.4),0 12px 40px rgba(99,102,241,.2),0 4px 12px rgba(99,102,241,.1);transform:translateY(-4px)}
+    </style>
+    <div class="shadow-element shadow-s1">Elevation</div>
+    <div class="shadow-element shadow-s2">Neumorphic</div>
+    <div class="shadow-element shadow-s3">Glow Ring</div>
+  </div>
+</section>
+
+<!-- 4. Neon Border Animation -->
+<section class="effect-section" id="neon-border">
+  <h2>4. 霓虹边框流动</h2>
+  <p class="desc">边框上有发光粒子沿路径运动，形成霓虹灯管的视觉效果</p>
+  <div class="demo-area" style="padding:60px">
+    <style>
+      .neon-box{width:300px;height:180px;position:relative;border-radius:12px;display:flex;align-items:center;justify-content:center}
+      .neon-box::before{content:'';position:absolute;inset:0;border-radius:12px;padding:2px;background:conic-gradient(from var(--neon-angle,0deg),#ff0080,#7928ca,#0070f3,#00dfd8,#ff0080);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;-webkit-mask-composite:xor;animation:neonRotate 3s linear infinite}
+      .neon-box::after{content:'';position:absolute;inset:0;border-radius:12px;background:conic-gradient(from var(--neon-angle,0deg),#ff0080,#7928ca,#0070f3,#00dfd8,#ff0080);filter:blur(15px);opacity:.3;animation:neonRotate 3s linear infinite;z-index:-1}
+      .neon-inner{font-size:1.5rem;font-weight:700;color:#fff;text-shadow:0 0 10px rgba(121,40,202,.5)}
+      @keyframes neonRotate{to{--neon-angle:360deg}}
+      @property --neon-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+    </style>
+    <div class="neon-box">
+      <span class="neon-inner">NEON</span>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Dark Gradient Mesh -->
+<section class="effect-section" id="dark-gradient">
+  <h2>5. 暗色 Mesh 渐变</h2>
+  <p class="desc">多个彩色模糊圆形叠加，创造深邃的暗色渐变网格背景</p>
+  <div class="demo-area" style="background:#000;min-height:400px;overflow:hidden;position:relative">
+    <style>
+      .mesh-blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.4;animation:meshFloat 8s ease-in-out infinite}
+      .mesh-blob:nth-child(1){width:400px;height:400px;background:#4f46e5;top:-20%;left:-10%;animation-delay:0s}
+      .mesh-blob:nth-child(2){width:350px;height:350px;background:#7c3aed;bottom:-20%;right:-10%;animation-delay:-2s}
+      .mesh-blob:nth-child(3){width:300px;height:300px;background:#0891b2;top:30%;left:40%;animation-delay:-4s}
+      .mesh-blob:nth-child(4){width:250px;height:250px;background:#be185d;bottom:10%;left:20%;animation-delay:-6s}
+      @keyframes meshFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.05)}66%{transform:translate(-20px,30px) scale(.95)}}
+      .mesh-text{position:relative;z-index:10;font-size:2.5rem;font-weight:800;color:#fff;text-align:center;line-height:1.3}
+    </style>
+    <div class="mesh-blob"></div>
+    <div class="mesh-blob"></div>
+    <div class="mesh-blob"></div>
+    <div class="mesh-blob"></div>
+    <div class="mesh-text">Dark Mesh<br>Gradient</div>
+  </div>
+</section>
+
+<!-- 6. Spotlight Card -->
+<section class="effect-section" id="spotlight-card">
+  <h2>6. 聚光灯卡片</h2>
+  <p class="desc">鼠标在卡片上移动时，产生跟随光标的圆形高光区域，突出暗色中的细节</p>
+  <div class="demo-area" style="gap:20px;padding:40px;flex-wrap:wrap">
+    <style>
+      .spot-card{width:260px;height:160px;border-radius:12px;background:#0f0f14;border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden;cursor:none;padding:24px}
+      .spot-card::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);transform:translate(-50%,-50%);left:var(--mx,-100px);top:var(--my,-100px);pointer-events:none;transition:opacity .3s;opacity:0}
+      .spot-card:hover::before{opacity:1}
+      .spot-card h4{color:#fff;font-size:.95rem;margin-bottom:6px;position:relative;z-index:1}
+      .spot-card p{color:rgba(255,255,255,.35);font-size:.76rem;line-height:1.5;position:relative;z-index:1}
+    </style>
+    <div class="spot-card" onmousemove="this.style.setProperty('--mx',event.offsetX+'px');this.style.setProperty('--my',event.offsetY+'px')">
+      <h4>Feature One</h4>
+      <p>Move your mouse over this card to see the spotlight follow effect.</p>
+    </div>
+    <div class="spot-card" onmousemove="this.style.setProperty('--mx',event.offsetX+'px');this.style.setProperty('--my',event.offsetY+'px')">
+      <h4>Feature Two</h4>
+      <p>The radial gradient creates a soft light that highlights content below.</p>
+    </div>
+    <div class="spot-card" onmousemove="this.style.setProperty('--mx',event.offsetX+'px');this.style.setProperty('--my',event.offsetY+'px')">
+      <h4>Feature Three</h4>
+      <p>Pure CSS with a tiny bit of inline JS for mouse tracking.</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

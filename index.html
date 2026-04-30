@@ -89,6 +89,11 @@
   [data-cat="dataviz"]{--accent:#fb923c}
   [data-cat="hover"]{--accent:#22d3ee}
   [data-cat="genart"]{--accent:#e879f9}
+  [data-cat="typo"]{--accent:#38bdf8}
+  [data-cat="darkmode"]{--accent:#818cf8}
+  [data-cat="glass"]{--accent:#f0abfc}
+  [data-cat="marquee"]{--accent:#fb923c}
+  [data-cat="clippath"]{--accent:#4ade80}
 
   /* Preview Animations */
   .p-bounce{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2997ff,#5e5ce6);animation:pBounce 1.4s cubic-bezier(.36,0,.66,1) infinite}
@@ -174,10 +179,10 @@
 <section class="hero">
   <p class="hero-overline">Frontend Effects Library</p>
   <h1>Build something<br><em>extraordinary.</em></h1>
-  <p class="hero-sub">595+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+  <p class="hero-sub">625+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="hero-stat-num" data-target="595" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
-    <div class="hero-stat"><div class="hero-stat-num" data-target="40" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" data-target="625" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
 </section>
@@ -219,6 +224,11 @@
     <button class="filter-btn" data-cat="dataviz">数据可视化</button>
     <button class="filter-btn" data-cat="hover">悬停效果</button>
     <button class="filter-btn" data-cat="genart">生成艺术</button>
+    <button class="filter-btn" data-cat="typo">排版动画</button>
+    <button class="filter-btn" data-cat="darkmode">暗黑特效</button>
+    <button class="filter-btn" data-cat="glass">毛玻璃</button>
+    <button class="filter-btn" data-cat="marquee">无限滚动</button>
+    <button class="filter-btn" data-cat="clippath">裁剪路径</button>
   </div>
 </div>
 
@@ -564,6 +574,41 @@
       </div>
       <div class="card-content"><h3>生成艺术效果集</h3><p>Perlin 流场线、动态 Voronoi 碎片、递归分形树、万花尺曲线、细胞自动机、奇异吸引子。</p></div>
       <div class="card-footer"><span class="tag">Perlin Noise</span><span class="tag">Lorenz</span><span class="count">6 种效果</span></div>
+    </a>
+
+    <!-- 41 -->
+    <a class="card" data-cat="typo" href="41-typography-animations.html">
+      <div class="card-visual" style="background:#0a0a12"><div style="font-size:2.2rem;font-weight:100;color:#38bdf8;letter-spacing:.05em;transition:font-weight .3s">Aa</div></div>
+      <div class="card-content"><h3>排版动画效果集</h3><p>逐字揭示、波浪排版、弹性字重、环形文字、分屏标题、可变字体动态排版。</p></div>
+      <div class="card-footer"><span class="tag">typography</span><span class="tag">variable font</span><span class="count">6 种效果</span></div>
+    </a>
+
+    <!-- 42 -->
+    <a class="card" data-cat="darkmode" href="42-dark-mode-effects.html">
+      <div class="card-visual" style="background:#0a0a12"><div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 65% 35%,#1a1a2e 45%,#818cf8);box-shadow:0 0 20px rgba(129,140,248,.3)"></div></div>
+      <div class="card-content"><h3>暗黑模式特效集</h3><p>主题切换动画、发光卡片、多层阴影、霓虹边框流动、暗色 Mesh 渐变、聚光灯卡片。</p></div>
+      <div class="card-footer"><span class="tag">dark mode</span><span class="tag">glow</span><span class="count">6 种效果</span></div>
+    </a>
+
+    <!-- 43 -->
+    <a class="card" data-cat="glass" href="43-glassmorphism-cards.html">
+      <div class="card-visual" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)"><div style="width:80px;height:50px;border-radius:10px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25)"></div></div>
+      <div class="card-content"><h3>毛玻璃卡片效果集</h3><p>基础毛玻璃、层叠玻璃、形变毛玻璃、玻璃导航、极光玻璃、定价卡片。</p></div>
+      <div class="card-footer"><span class="tag">glassmorphism</span><span class="tag">backdrop-filter</span><span class="count">6 种效果</span></div>
+    </a>
+
+    <!-- 44 -->
+    <a class="card" data-cat="marquee" href="44-infinite-scrollers.html">
+      <div class="card-visual" style="background:#0a0a12;overflow:hidden"><div style="display:flex;gap:8px;animation:pScroll 3s linear infinite"><span style="white-space:nowrap;color:rgba(255,255,255,.3);font-size:.75rem">SCROLL SCROLL SCROLL SCROLL</span><span style="white-space:nowrap;color:rgba(255,255,255,.3);font-size:.75rem">SCROLL SCROLL SCROLL SCROLL</span></div></div>
+      <div class="card-content"><h3>无限滚动动画集</h3><p>基础跑马灯、Logo 滚动墙、垂直滚动、变速跑马灯、卡片轮播、大字票带。</p></div>
+      <div class="card-footer"><span class="tag">marquee</span><span class="tag">infinite scroll</span><span class="count">6 种效果</span></div>
+    </a>
+
+    <!-- 45 -->
+    <a class="card" data-cat="clippath" href="45-clip-path-animations.html">
+      <div class="card-visual" style="background:#0a0a12"><div style="width:60px;height:60px;background:linear-gradient(135deg,#4ade80,#06b6d4);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%)"></div></div>
+      <div class="card-content"><h3>裁剪路径动画集</h3><p>圆形展开揭示、多边形变形、对角擦除、文字裁剪、悬停揭示、形状网格。</p></div>
+      <div class="card-footer"><span class="tag">clip-path</span><span class="tag">polygon</span><span class="count">6 种效果</span></div>
     </a>
 
   </div>

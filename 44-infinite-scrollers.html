@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>无限滚动动画效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif;overflow-x:hidden}
+  .back{position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+  .effect-section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 20px;position:relative;border-bottom:1px solid rgba(255,255,255,.05)}
+  .effect-section h2{font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:8px;text-align:center}
+  .effect-section .desc{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:40px;text-align:center;max-width:600px}
+</style>
+</head>
+<body>
+<a href="index.html" class="back">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#marquee-basic">基础跑马灯</a>
+  <a href="#logo-scroll">Logo 滚动</a>
+  <a href="#vertical-scroll">垂直滚动</a>
+  <a href="#speed-scroll">变速跑马灯</a>
+  <a href="#card-carousel">卡片轮播</a>
+  <a href="#text-ticker">文字票带</a>
+</div>
+
+<!-- 1. Basic Infinite Marquee -->
+<section class="effect-section" id="marquee-basic">
+  <h2>1. 基础无限跑马灯</h2>
+  <p class="desc">纯 CSS animation + translate 实现无缝循环滚动，无需 JS</p>
+  <div style="width:100%;overflow:hidden;padding:40px 0">
+    <style>
+      .marquee-track{display:flex;width:max-content;animation:marquee 20s linear infinite}
+      .marquee-track:hover{animation-play-state:paused}
+      @keyframes marquee{to{transform:translateX(-50%)}}
+      .marquee-item{padding:16px 40px;margin:0 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;white-space:nowrap;font-size:1.1rem;font-weight:600;color:rgba(255,255,255,.7);flex-shrink:0}
+    </style>
+    <div class="marquee-track">
+      <div class="marquee-item">React</div>
+      <div class="marquee-item">Vue.js</div>
+      <div class="marquee-item">Svelte</div>
+      <div class="marquee-item">Angular</div>
+      <div class="marquee-item">Next.js</div>
+      <div class="marquee-item">Nuxt</div>
+      <div class="marquee-item">Tailwind CSS</div>
+      <div class="marquee-item">TypeScript</div>
+      <div class="marquee-item">React</div>
+      <div class="marquee-item">Vue.js</div>
+      <div class="marquee-item">Svelte</div>
+      <div class="marquee-item">Angular</div>
+      <div class="marquee-item">Next.js</div>
+      <div class="marquee-item">Nuxt</div>
+      <div class="marquee-item">Tailwind CSS</div>
+      <div class="marquee-item">TypeScript</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Logo Scroll Wall -->
+<section class="effect-section" id="logo-scroll">
+  <h2>2. Logo 滚动墙</h2>
+  <p class="desc">多行不同方向、不同速度的 Logo 滚动，常用于合作伙伴展示</p>
+  <div style="width:100%;overflow:hidden;display:flex;flex-direction:column;gap:16px;padding:40px 0">
+    <style>
+      .logo-row{display:flex;width:max-content}
+      .logo-row.left{animation:marquee 25s linear infinite}
+      .logo-row.right{animation:marqueeR 30s linear infinite}
+      @keyframes marqueeR{to{transform:translateX(50%)}}
+      .logo-item{width:120px;height:60px;margin:0 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:rgba(255,255,255,.4);font-weight:600;flex-shrink:0;transition:background .3s,border-color .3s}
+      .logo-item:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
+    </style>
+    <div class="logo-row left">
+      <div class="logo-item">Figma</div><div class="logo-item">Sketch</div><div class="logo-item">Adobe XD</div><div class="logo-item">Framer</div><div class="logo-item">Webflow</div><div class="logo-item">Notion</div><div class="logo-item">Linear</div><div class="logo-item">Vercel</div>
+      <div class="logo-item">Figma</div><div class="logo-item">Sketch</div><div class="logo-item">Adobe XD</div><div class="logo-item">Framer</div><div class="logo-item">Webflow</div><div class="logo-item">Notion</div><div class="logo-item">Linear</div><div class="logo-item">Vercel</div>
+    </div>
+    <div class="logo-row right" style="transform:translateX(-50%)">
+      <div class="logo-item">GitHub</div><div class="logo-item">GitLab</div><div class="logo-item">Stripe</div><div class="logo-item">Supabase</div><div class="logo-item">Railway</div><div class="logo-item">Planetscale</div><div class="logo-item">Prisma</div><div class="logo-item">Turbo</div>
+      <div class="logo-item">GitHub</div><div class="logo-item">GitLab</div><div class="logo-item">Stripe</div><div class="logo-item">Supabase</div><div class="logo-item">Railway</div><div class="logo-item">Planetscale</div><div class="logo-item">Prisma</div><div class="logo-item">Turbo</div>
+    </div>
+    <div class="logo-row left" style="animation-duration:35s">
+      <div class="logo-item">Slack</div><div class="logo-item">Discord</div><div class="logo-item">Zoom</div><div class="logo-item">Loom</div><div class="logo-item">Miro</div><div class="logo-item">Jira</div><div class="logo-item">Asana</div><div class="logo-item">Monday</div>
+      <div class="logo-item">Slack</div><div class="logo-item">Discord</div><div class="logo-item">Zoom</div><div class="logo-item">Loom</div><div class="logo-item">Miro</div><div class="logo-item">Jira</div><div class="logo-item">Asana</div><div class="logo-item">Monday</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Vertical Scroll -->
+<section class="effect-section" id="vertical-scroll">
+  <h2>3. 垂直无限滚动</h2>
+  <p class="desc">纵向滚动列表，适合通知提示、评论流、实时数据展示</p>
+  <div style="display:flex;gap:30px;padding:40px">
+    <style>
+      .v-scroll-container{width:280px;height:300px;overflow:hidden;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);position:relative}
+      .v-scroll-container::before,.v-scroll-container::after{content:'';position:absolute;left:0;right:0;height:60px;z-index:10;pointer-events:none}
+      .v-scroll-container::before{top:0;background:linear-gradient(to bottom,#060608,transparent)}
+      .v-scroll-container::after{bottom:0;background:linear-gradient(to top,#060608,transparent)}
+      .v-scroll-track{animation:vScroll 12s linear infinite}
+      @keyframes vScroll{to{transform:translateY(-50%)}}
+      .v-scroll-item{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+      .v-scroll-avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0}
+      .v-scroll-text{font-size:.78rem;color:rgba(255,255,255,.6);line-height:1.4}
+      .v-scroll-text strong{color:#fff;font-weight:600}
+    </style>
+    <div class="v-scroll-container">
+      <div class="v-scroll-track" id="vTrack1"></div>
+    </div>
+    <div class="v-scroll-container">
+      <div class="v-scroll-track" id="vTrack2" style="animation-direction:reverse;animation-duration:15s"></div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const names = ['Alice','Bob','Carol','David','Emma','Frank','Grace','Henry'];
+  const actions = ['completed a task','left a comment','joined the team','uploaded a file','created a project','sent a message','shared a link','updated profile'];
+  const colors = ['#f43f5e','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#14b8a6'];
+  
+  function populateTrack(track) {
+    let html = '';
+    for(let r = 0; r < 2; r++) {
+      for(let i = 0; i < 8; i++) {
+        html += `<div class="v-scroll-item">
+          <div class="v-scroll-avatar" style="background:${colors[i]}"></div>
+          <div class="v-scroll-text"><strong>${names[i]}</strong> ${actions[i]}</div>
+        </div>`;
+      }
+    }
+    track.innerHTML = html;
+  }
+  populateTrack(document.getElementById('vTrack1'));
+  populateTrack(document.getElementById('vTrack2'));
+})();
+</script>
+
+<!-- 4. Speed Variation Marquee -->
+<section class="effect-section" id="speed-scroll">
+  <h2>4. 悬停变速跑马灯</h2>
+  <p class="desc">悬停时减速/加速/反向，使用 CSS 变量动态控制动画速度</p>
+  <div style="width:100%;overflow:hidden;padding:40px 0">
+    <style>
+      .speed-track{display:flex;width:max-content;animation:marquee var(--speed,20s) linear infinite}
+      .speed-container{overflow:hidden;margin-bottom:20px;padding:10px 0;position:relative}
+      .speed-container:hover .speed-track{--speed:60s}
+      .speed-container.reverse:hover .speed-track{animation-direction:reverse;--speed:15s}
+      .speed-tag{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;margin:0 8px;background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(168,85,247,.1));border:1px solid rgba(99,102,241,.25);border-radius:980px;color:rgba(255,255,255,.8);font-size:.85rem;font-weight:500;white-space:nowrap;flex-shrink:0;transition:border-color .3s,background .3s}
+      .speed-tag:hover{border-color:rgba(99,102,241,.5);background:rgba(99,102,241,.2)}
+      .speed-dot{width:6px;height:6px;border-radius:50%;background:#6366f1}
+    </style>
+    <div class="speed-container">
+      <div class="speed-track" style="--speed:18s">
+        <div class="speed-tag"><span class="speed-dot"></span>Animation</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Interaction</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Motion Design</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Transition</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Micro-motion</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Parallax</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Scroll-driven</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Physics</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Animation</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Interaction</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Motion Design</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Transition</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Micro-motion</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Parallax</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Scroll-driven</div>
+        <div class="speed-tag"><span class="speed-dot"></span>Physics</div>
+      </div>
+    </div>
+    <div class="speed-container reverse">
+      <div class="speed-track" style="--speed:22s;animation-direction:reverse">
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>Canvas</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>WebGL</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>SVG Filter</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>Shader</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>3D Transform</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>Blend Mode</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>Clip Path</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>Canvas</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>WebGL</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>SVG Filter</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>Shader</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>3D Transform</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>Blend Mode</div>
+        <div class="speed-tag"><span class="speed-dot" style="background:#ec4899"></span>Clip Path</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Card Carousel -->
+<section class="effect-section" id="card-carousel">
+  <h2>5. 无限卡片轮播</h2>
+  <p class="desc">3D 透视卡片无限循环滚动，带有景深虚化效果</p>
+  <div style="width:100%;overflow:hidden;padding:60px 0;perspective:1000px">
+    <style>
+      .carousel-track{display:flex;width:max-content;animation:marquee 30s linear infinite}
+      .carousel-card{width:280px;height:180px;margin:0 16px;border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);padding:24px;display:flex;flex-direction:column;justify-content:flex-end;flex-shrink:0;transition:transform .3s,box-shadow .3s;position:relative;overflow:hidden}
+      .carousel-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent,#6366f1);opacity:.6}
+      .carousel-card:hover{transform:scale(1.05) translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+      .carousel-card h4{color:#fff;font-size:1rem;margin-bottom:4px}
+      .carousel-card p{color:rgba(255,255,255,.4);font-size:.75rem;line-height:1.4}
+      .carousel-card .num{position:absolute;top:16px;right:20px;font-size:2.5rem;font-weight:900;color:rgba(255,255,255,.04)}
+    </style>
+    <div class="carousel-track">
+      <div class="carousel-card" style="--card-accent:#f43f5e"><span class="num">01</span><h4>Motion Design</h4><p>Principles of animation timing and easing</p></div>
+      <div class="carousel-card" style="--card-accent:#8b5cf6"><span class="num">02</span><h4>Micro Interactions</h4><p>Small details that enhance user experience</p></div>
+      <div class="carousel-card" style="--card-accent:#06b6d4"><span class="num">03</span><h4>Visual Feedback</h4><p>Responsive elements that communicate state</p></div>
+      <div class="carousel-card" style="--card-accent:#10b981"><span class="num">04</span><h4>Scroll Effects</h4><p>Parallax, reveal, and scroll-driven animation</p></div>
+      <div class="carousel-card" style="--card-accent:#f59e0b"><span class="num">05</span><h4>Page Transitions</h4><p>Seamless navigation between views</p></div>
+      <div class="carousel-card" style="--card-accent:#ec4899"><span class="num">06</span><h4>Creative Coding</h4><p>Generative art and algorithmic visuals</p></div>
+      <div class="carousel-card" style="--card-accent:#f43f5e"><span class="num">01</span><h4>Motion Design</h4><p>Principles of animation timing and easing</p></div>
+      <div class="carousel-card" style="--card-accent:#8b5cf6"><span class="num">02</span><h4>Micro Interactions</h4><p>Small details that enhance user experience</p></div>
+      <div class="carousel-card" style="--card-accent:#06b6d4"><span class="num">03</span><h4>Visual Feedback</h4><p>Responsive elements that communicate state</p></div>
+      <div class="carousel-card" style="--card-accent:#10b981"><span class="num">04</span><h4>Scroll Effects</h4><p>Parallax, reveal, and scroll-driven animation</p></div>
+      <div class="carousel-card" style="--card-accent:#f59e0b"><span class="num">05</span><h4>Page Transitions</h4><p>Seamless navigation between views</p></div>
+      <div class="carousel-card" style="--card-accent:#ec4899"><span class="num">06</span><h4>Creative Coding</h4><p>Generative art and algorithmic visuals</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Text Ticker -->
+<section class="effect-section" id="text-ticker">
+  <h2>6. 大字票带动画</h2>
+  <p class="desc">超大字号文字作为装饰性背景滚动，常见于创意工作室网站</p>
+  <div style="width:100%;overflow:hidden;padding:40px 0">
+    <style>
+      .ticker-line{display:flex;width:max-content;white-space:nowrap}
+      .ticker-line:nth-child(1){animation:marquee 15s linear infinite}
+      .ticker-line:nth-child(2){animation:marquee 20s linear infinite reverse}
+      .ticker-text{font-size:clamp(3rem,8vw,7rem);font-weight:900;letter-spacing:-.03em;margin:0 20px;flex-shrink:0}
+      .ticker-text.outline{-webkit-text-stroke:1.5px rgba(255,255,255,.3);color:transparent}
+      .ticker-text.fill{color:rgba(255,255,255,.08)}
+      .ticker-text.gradient{background:linear-gradient(90deg,#6366f1,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:.4}
+    </style>
+    <div class="ticker-line">
+      <span class="ticker-text outline">DESIGN</span>
+      <span class="ticker-text fill">DEVELOP</span>
+      <span class="ticker-text gradient">CREATE</span>
+      <span class="ticker-text outline">ANIMATE</span>
+      <span class="ticker-text fill">INSPIRE</span>
+      <span class="ticker-text gradient">INNOVATE</span>
+      <span class="ticker-text outline">DESIGN</span>
+      <span class="ticker-text fill">DEVELOP</span>
+      <span class="ticker-text gradient">CREATE</span>
+      <span class="ticker-text outline">ANIMATE</span>
+      <span class="ticker-text fill">INSPIRE</span>
+      <span class="ticker-text gradient">INNOVATE</span>
+    </div>
+    <div class="ticker-line" style="margin-top:-10px">
+      <span class="ticker-text gradient">MOTION</span>
+      <span class="ticker-text outline">VISUAL</span>
+      <span class="ticker-text fill">EFFECT</span>
+      <span class="ticker-text gradient">PIXEL</span>
+      <span class="ticker-text outline">CRAFT</span>
+      <span class="ticker-text fill">CODE</span>
+      <span class="ticker-text gradient">MOTION</span>
+      <span class="ticker-text outline">VISUAL</span>
+      <span class="ticker-text fill">EFFECT</span>
+      <span class="ticker-text gradient">PIXEL</span>
+      <span class="ticker-text outline">CRAFT</span>
+      <span class="ticker-text fill">CODE</span>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

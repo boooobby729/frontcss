@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>裁剪路径动画效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif;overflow-x:hidden}
+  .back{position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+  .effect-section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 40px;position:relative;border-bottom:1px solid rgba(255,255,255,.05)}
+  .effect-section h2{font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:8px;text-align:center}
+  .effect-section .desc{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:40px;text-align:center;max-width:600px}
+  .demo-area{width:100%;max-width:900px;min-height:400px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-radius:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)}
+</style>
+</head>
+<body>
+<a href="index.html" class="back">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#circle-reveal">圆形展开</a>
+  <a href="#polygon-morph">多边形变形</a>
+  <a href="#diagonal-wipe">对角擦除</a>
+  <a href="#text-clip">文字裁剪</a>
+  <a href="#hover-reveal">悬停揭示</a>
+  <a href="#shape-grid">形状网格</a>
+</div>
+
+<!-- 1. Circle Reveal -->
+<section class="effect-section" id="circle-reveal">
+  <h2>1. 圆形展开揭示</h2>
+  <p class="desc">点击后从点击位置展开圆形 clip-path，揭示新内容或切换场景</p>
+  <div class="demo-area" id="circleDemo" style="cursor:pointer;background:#1a1a2e">
+    <style>
+      .circle-reveal-overlay{position:absolute;inset:0;background:linear-gradient(135deg,#6366f1,#ec4899);clip-path:circle(0% at 50% 50%);transition:clip-path .8s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center}
+      .circle-reveal-overlay.active{clip-path:circle(150% at var(--cx,50%) var(--cy,50%))}
+      .circle-reveal-overlay span{color:#fff;font-size:2rem;font-weight:800}
+      .circle-hint{color:rgba(255,255,255,.4);font-size:.9rem}
+    </style>
+    <span class="circle-hint">Click anywhere</span>
+    <div class="circle-reveal-overlay" id="circleOverlay"><span>Revealed!</span></div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('circleDemo');
+  const overlay = document.getElementById('circleOverlay');
+  let active = false;
+  
+  demo.addEventListener('click', (e) => {
+    const rect = demo.getBoundingClientRect();
+    const cx = ((e.clientX - rect.left) / rect.width * 100) + '%';
+    const cy = ((e.clientY - rect.top) / rect.height * 100) + '%';
+    overlay.style.setProperty('--cx', cx);
+    overlay.style.setProperty('--cy', cy);
+    
+    if (!active) {
+      overlay.classList.add('active');
+    } else {
+      overlay.classList.remove('active');
+    }
+    active = !active;
+  });
+})();
+</script>
+
+<!-- 2. Polygon Morph -->
+<section class="effect-section" id="polygon-morph">
+  <h2>2. 多边形路径变形</h2>
+  <p class="desc">clip-path: polygon() 在不同形状间平滑过渡，自动循环播放</p>
+  <div class="demo-area">
+    <style>
+      .poly-morph{width:250px;height:250px;background:linear-gradient(135deg,#06b6d4,#8b5cf6,#f43f5e);animation:polyMorph 6s ease-in-out infinite;position:relative}
+      .poly-morph::after{content:'';position:absolute;inset:0;background:inherit;filter:blur(40px);opacity:.4;animation:polyMorph 6s ease-in-out infinite}
+      @keyframes polyMorph{
+        0%{clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%)}
+        25%{clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)}
+        50%{clip-path:polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%)}
+        75%{clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)}
+        100%{clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%)}
+      }
+      .poly-label{position:absolute;bottom:30px;color:rgba(255,255,255,.4);font-size:.75rem}
+    </style>
+    <div class="poly-morph"></div>
+    <span class="poly-label">Pentagon → Hexagon → Diamond → repeat</span>
+  </div>
+</section>
+
+<!-- 3. Diagonal Wipe -->
+<section class="effect-section" id="diagonal-wipe">
+  <h2>3. 对角擦除过渡</h2>
+  <p class="desc">斜线方向的 clip-path 过渡，常用于图片切换和页面转场</p>
+  <div class="demo-area" style="padding:40px;gap:20px">
+    <style>
+      .wipe-card{width:280px;height:200px;position:relative;border-radius:12px;overflow:hidden;cursor:pointer}
+      .wipe-card .layer-a,.wipe-card .layer-b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#fff;transition:clip-path .6s cubic-bezier(.77,0,.18,1)}
+      .wipe-card .layer-a{background:linear-gradient(135deg,#1e293b,#334155);clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+      .wipe-card .layer-b{background:linear-gradient(135deg,#6366f1,#a855f7);clip-path:polygon(100% 0,100% 0,100% 100%,100% 100%)}
+      .wipe-card:hover .layer-a{clip-path:polygon(0 0,0 0,0 100%,0 100%)}
+      .wipe-card:hover .layer-b{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+      
+      .wipe-card-2 .layer-a{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+      .wipe-card-2 .layer-b{background:linear-gradient(135deg,#ec4899,#f43f5e);clip-path:polygon(0 100%,100% 100%,100% 100%,0 100%)}
+      .wipe-card-2:hover .layer-a{clip-path:polygon(0 0,100% 0,100% 0,0 0)}
+      .wipe-card-2:hover .layer-b{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+    </style>
+    <div class="wipe-card">
+      <div class="layer-a">Before</div>
+      <div class="layer-b">After</div>
+    </div>
+    <div class="wipe-card wipe-card-2">
+      <div class="layer-a">Scene A</div>
+      <div class="layer-b">Scene B</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Text Clip Animation -->
+<section class="effect-section" id="text-clip">
+  <h2>4. 文字裁剪动画</h2>
+  <p class="desc">使用 background-clip: text 配合动态渐变或视频纹理填充文字</p>
+  <div class="demo-area" style="flex-direction:column;gap:30px;padding:40px">
+    <style>
+      .clip-text-gradient{font-size:clamp(3rem,7vw,5rem);font-weight:900;letter-spacing:-.04em;background:linear-gradient(45deg,#ff0080,#7928ca,#0070f3,#00dfd8,#ff0080);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:clipGrad 5s ease infinite}
+      @keyframes clipGrad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+      
+      .clip-text-reveal{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;color:#fff;position:relative;overflow:hidden;display:inline-block}
+      .clip-text-reveal::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,#060608 50%);animation:clipReveal 3s ease-in-out infinite alternate}
+      @keyframes clipReveal{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+      
+      .clip-text-stroke{font-size:clamp(3rem,7vw,5rem);font-weight:900;letter-spacing:-.03em;-webkit-text-stroke:2px #fff;color:transparent;position:relative}
+      .clip-text-stroke::before{content:attr(data-text);position:absolute;inset:0;background:linear-gradient(90deg,#6366f1,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:0;clip-path:inset(0 50% 0 0);animation:strokeFill 2.5s ease-in-out infinite alternate}
+      @keyframes strokeFill{to{clip-path:inset(0 0 0 0)}}
+    </style>
+    <div class="clip-text-gradient">GRADIENT FLOW</div>
+    <div class="clip-text-reveal">LIGHT SWEEP</div>
+    <div class="clip-text-stroke" data-text="FILL ME">FILL ME</div>
+  </div>
+</section>
+
+<!-- 5. Hover Reveal with Clip-path -->
+<section class="effect-section" id="hover-reveal">
+  <h2>5. 悬停裁剪揭示</h2>
+  <p class="desc">鼠标悬停时 clip-path 从不同方向展开，揭示隐藏的内容层</p>
+  <div class="demo-area" style="gap:20px;padding:40px;flex-wrap:wrap">
+    <style>
+      .reveal-card{width:200px;height:140px;position:relative;border-radius:12px;overflow:hidden;cursor:pointer}
+      .reveal-card .bg{position:absolute;inset:0;background:#1a1a2e;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:.85rem}
+      .reveal-card .fg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;font-weight:600;transition:clip-path .4s cubic-bezier(.4,0,.2,1)}
+      .reveal-card:nth-child(1) .fg{background:linear-gradient(135deg,#6366f1,#8b5cf6);clip-path:circle(0% at 50% 50%)}
+      .reveal-card:nth-child(1):hover .fg{clip-path:circle(100% at 50% 50%)}
+      .reveal-card:nth-child(2) .fg{background:linear-gradient(135deg,#ec4899,#f43f5e);clip-path:inset(100% 0 0 0)}
+      .reveal-card:nth-child(2):hover .fg{clip-path:inset(0 0 0 0)}
+      .reveal-card:nth-child(3) .fg{background:linear-gradient(135deg,#06b6d4,#10b981);clip-path:polygon(50% 50%,50% 50%,50% 50%,50% 50%)}
+      .reveal-card:nth-child(3):hover .fg{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+      .reveal-card:nth-child(4) .fg{background:linear-gradient(135deg,#f59e0b,#ef4444);clip-path:inset(0 100% 0 0)}
+      .reveal-card:nth-child(4):hover .fg{clip-path:inset(0 0 0 0)}
+    </style>
+    <div class="reveal-card"><div class="bg">Circle</div><div class="fg">Revealed!</div></div>
+    <div class="reveal-card"><div class="bg">Bottom Up</div><div class="fg">Revealed!</div></div>
+    <div class="reveal-card"><div class="bg">Diamond</div><div class="fg">Revealed!</div></div>
+    <div class="reveal-card"><div class="bg">Left to Right</div><div class="fg">Revealed!</div></div>
+  </div>
+</section>
+
+<!-- 6. Animated Shape Grid -->
+<section class="effect-section" id="shape-grid">
+  <h2>6. 形状裁剪网格</h2>
+  <p class="desc">网格中的每个单元格使用不同的 clip-path 形状，并带有悬停展开动画</p>
+  <div class="demo-area" style="padding:40px">
+    <style>
+      .shape-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:500px}
+      .shape-cell{aspect-ratio:1;background:linear-gradient(135deg,var(--c1,#6366f1),var(--c2,#8b5cf6));border-radius:4px;transition:clip-path .4s cubic-bezier(.4,0,.2,1),transform .3s;cursor:pointer}
+      .shape-cell:nth-child(1){clip-path:polygon(50% 0%,100% 100%,0% 100%)}
+      .shape-cell:nth-child(2){clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%)}
+      .shape-cell:nth-child(3){clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)}
+      .shape-cell:nth-child(4){clip-path:circle(45%)}
+      .shape-cell:nth-child(5){clip-path:polygon(0 0,100% 0,100% 75%,50% 100%,0 75%)}
+      .shape-cell:nth-child(6){clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+      .shape-cell:nth-child(7){clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%)}
+      .shape-cell:nth-child(8){clip-path:polygon(0 0,100% 0,85% 100%,15% 100%)}
+      .shape-cell:nth-child(9){clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%)}
+      .shape-cell:nth-child(10){clip-path:ellipse(45% 35%)}
+      .shape-cell:nth-child(11){clip-path:polygon(0 30%,50% 0%,100% 30%,100% 70%,50% 100%,0 70%)}
+      .shape-cell:nth-child(12){clip-path:polygon(10% 0,90% 0,100% 10%,100% 90%,90% 100%,10% 100%,0 90%,0 10%)}
+      .shape-cell:hover{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)!important;transform:scale(1.05);z-index:1}
+    </style>
+    <div class="shape-grid">
+      <div class="shape-cell" style="--c1:#f43f5e;--c2:#fb923c"></div>
+      <div class="shape-cell" style="--c1:#8b5cf6;--c2:#6366f1"></div>
+      <div class="shape-cell" style="--c1:#06b6d4;--c2:#0ea5e9"></div>
+      <div class="shape-cell" style="--c1:#10b981;--c2:#34d399"></div>
+      <div class="shape-cell" style="--c1:#f59e0b;--c2:#fbbf24"></div>
+      <div class="shape-cell" style="--c1:#ec4899;--c2:#f472b6"></div>
+      <div class="shape-cell" style="--c1:#14b8a6;--c2:#2dd4bf"></div>
+      <div class="shape-cell" style="--c1:#a855f7;--c2:#c084fc"></div>
+      <div class="shape-cell" style="--c1:#ef4444;--c2:#f87171"></div>
+      <div class="shape-cell" style="--c1:#3b82f6;--c2:#60a5fa"></div>
+      <div class="shape-cell" style="--c1:#84cc16;--c2:#a3e635"></div>
+      <div class="shape-cell" style="--c1:#d946ef;--c2:#e879f9"></div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

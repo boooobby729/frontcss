@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>排版动画效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif;overflow-x:hidden}
+  .back{position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+  .effect-section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 40px;position:relative;border-bottom:1px solid rgba(255,255,255,.05)}
+  .effect-section h2{font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:8px;text-align:center}
+  .effect-section .desc{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:40px;text-align:center;max-width:600px}
+  .demo-area{width:100%;max-width:900px;min-height:300px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-radius:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)}
+</style>
+</head>
+<body>
+<a href="index.html" class="back">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#stagger-reveal">逐字揭示</a>
+  <a href="#wave-text">波浪排版</a>
+  <a href="#elastic-weight">弹性字重</a>
+  <a href="#circular-text">环形文字</a>
+  <a href="#split-screen">分屏标题</a>
+  <a href="#variable-font">可变字体</a>
+</div>
+
+<!-- 1. Stagger Character Reveal -->
+<section class="effect-section" id="stagger-reveal">
+  <h2>1. 逐字错位揭示</h2>
+  <p class="desc">字符依次从下方弹入，带有弹性缓动和透明度渐变，适用于标题展示</p>
+  <div class="demo-area">
+    <div id="stagger-container" style="font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-.03em;line-height:1.1;text-align:center;color:#fff;cursor:pointer" data-text="Typography Matters">
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const container = document.getElementById('stagger-container');
+  const text = container.dataset.text;
+  
+  function createChars() {
+    container.innerHTML = '';
+    [...text].forEach((char, i) => {
+      const span = document.createElement('span');
+      span.textContent = char === ' ' ? '\u00A0' : char;
+      span.style.cssText = `
+        display:inline-block;
+        opacity:0;
+        transform:translateY(60px) rotateX(-40deg);
+        transition:all .6s cubic-bezier(.175,.885,.32,1.275);
+        transition-delay:${i * 0.04}s;
+      `;
+      container.appendChild(span);
+    });
+    
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        container.querySelectorAll('span').forEach(s => {
+          s.style.opacity = '1';
+          s.style.transform = 'translateY(0) rotateX(0)';
+        });
+      });
+    });
+  }
+  
+  createChars();
+  container.addEventListener('click', () => {
+    container.querySelectorAll('span').forEach(s => {
+      s.style.opacity = '0';
+      s.style.transform = 'translateY(60px) rotateX(-40deg)';
+    });
+    setTimeout(createChars, 600);
+  });
+})();
+</script>
+
+<!-- 2. Wave Text Layout -->
+<section class="effect-section" id="wave-text">
+  <h2>2. 波浪排版动画</h2>
+  <p class="desc">文字沿正弦曲线波动，每个字符独立做 Y 轴位移动画，形成流动的视觉节奏</p>
+  <div class="demo-area">
+    <div id="wave-container" style="font-size:3.5rem;font-weight:700;letter-spacing:.05em;color:#fff;display:flex;align-items:center;justify-content:center"></div>
+  </div>
+</section>
+<script>
+(function(){
+  const container = document.getElementById('wave-container');
+  const text = 'WAVE MOTION';
+  [...text].forEach((char, i) => {
+    const span = document.createElement('span');
+    span.textContent = char === ' ' ? '\u00A0' : char;
+    span.style.cssText = `
+      display:inline-block;
+      animation:wave 2s ease-in-out infinite;
+      animation-delay:${i * 0.08}s;
+      background:linear-gradient(180deg,#60a5fa,#a78bfa);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    `;
+    container.appendChild(span);
+  });
+  
+  const style = document.createElement('style');
+  style.textContent = `@keyframes wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}`;
+  document.head.appendChild(style);
+})();
+</script>
+
+<!-- 3. Elastic Font Weight -->
+<section class="effect-section" id="elastic-weight">
+  <h2>3. 弹性字重变化</h2>
+  <p class="desc">鼠标悬停时字重从 100 到 900 渐变，模拟可变字体的弹性过渡效果</p>
+  <div class="demo-area">
+    <div id="weight-container" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:20px"></div>
+  </div>
+</section>
+<script>
+(function(){
+  const container = document.getElementById('weight-container');
+  const text = 'ELASTIC';
+  [...text].forEach((char, i) => {
+    const span = document.createElement('span');
+    span.textContent = char;
+    span.style.cssText = `
+      display:inline-block;
+      font-size:5rem;
+      font-weight:100;
+      color:#f5f5f7;
+      transition:font-weight .3s,transform .3s cubic-bezier(.34,1.56,.64,1),color .3s;
+      cursor:default;
+      line-height:1;
+    `;
+    span.addEventListener('mouseenter', () => {
+      span.style.fontWeight = '900';
+      span.style.transform = 'scale(1.15)';
+      span.style.color = '#60a5fa';
+    });
+    span.addEventListener('mouseleave', () => {
+      span.style.fontWeight = '100';
+      span.style.transform = 'scale(1)';
+      span.style.color = '#f5f5f7';
+    });
+    container.appendChild(span);
+  });
+})();
+</script>
+
+<!-- 4. Circular Text -->
+<section class="effect-section" id="circular-text">
+  <h2>4. 环形文字动画</h2>
+  <p class="desc">字符沿圆形路径排列并持续旋转，常用于 Badge、Logo 装饰元素</p>
+  <div class="demo-area">
+    <div id="circular-container" style="width:280px;height:280px;position:relative;animation:spin 12s linear infinite"></div>
+  </div>
+</section>
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script>
+(function(){
+  const container = document.getElementById('circular-container');
+  const text = 'CREATIVE FRONTEND EFFECTS • ';
+  const radius = 120;
+  const chars = [...text];
+  const angleStep = 360 / chars.length;
+  
+  chars.forEach((char, i) => {
+    const span = document.createElement('span');
+    span.textContent = char;
+    span.style.cssText = `
+      position:absolute;
+      left:50%;top:50%;
+      font-size:1rem;
+      font-weight:600;
+      color:rgba(255,255,255,.7);
+      transform-origin:0 ${radius}px;
+      transform:rotate(${angleStep * i}deg);
+      letter-spacing:.02em;
+    `;
+    container.appendChild(span);
+  });
+})();
+</script>
+
+<!-- 5. Split Screen Title -->
+<section class="effect-section" id="split-screen">
+  <h2>5. 分屏标题动画</h2>
+  <p class="desc">标题从中间分裂为上下两半，悬停时分离显示底层内容，适合作品展示</p>
+  <div class="demo-area" style="cursor:pointer">
+    <div id="split-text" style="position:relative;font-size:clamp(3rem,8vw,6rem);font-weight:900;letter-spacing:-.04em;line-height:1;overflow:hidden">
+      <div class="split-top" style="position:relative;overflow:hidden;height:.55em;transition:transform .5s cubic-bezier(.77,0,.18,1)">
+        <span style="display:block;color:#fff">SPLIT</span>
+      </div>
+      <div class="split-bottom" style="position:relative;overflow:hidden;height:.55em;transition:transform .5s cubic-bezier(.77,0,.18,1)">
+        <span style="display:block;transform:translateY(-.55em);color:#fff">SPLIT</span>
+      </div>
+      <div class="split-reveal" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1rem;font-weight:400;color:#60a5fa;opacity:0;transition:opacity .4s .1s;white-space:nowrap">hover to reveal</div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const el = document.getElementById('split-text');
+  const top = el.querySelector('.split-top');
+  const bottom = el.querySelector('.split-bottom');
+  const reveal = el.querySelector('.split-reveal');
+  
+  el.addEventListener('mouseenter', () => {
+    top.style.transform = 'translateY(-12px)';
+    bottom.style.transform = 'translateY(12px)';
+    reveal.style.opacity = '1';
+  });
+  el.addEventListener('mouseleave', () => {
+    top.style.transform = 'translateY(0)';
+    bottom.style.transform = 'translateY(0)';
+    reveal.style.opacity = '0';
+  });
+})();
+</script>
+
+<!-- 6. Variable Font Playground -->
+<section class="effect-section" id="variable-font">
+  <h2>6. 可变字体动态排版</h2>
+  <p class="desc">模拟可变字体的 weight/width/slant 轴动画，鼠标位置控制字体参数变化</p>
+  <div class="demo-area" id="variable-area" style="cursor:crosshair;padding:40px">
+    <div id="variable-text" style="font-size:clamp(2rem,5vw,4rem);font-weight:400;color:#fff;text-align:center;line-height:1.3;transition:font-weight .1s,font-stretch .1s,letter-spacing .1s">
+      Move your cursor<br>to reshape me
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const area = document.getElementById('variable-area');
+  const text = document.getElementById('variable-text');
+  
+  area.addEventListener('mousemove', (e) => {
+    const rect = area.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    
+    const weight = Math.round(100 + x * 800);
+    const stretch = 75 + y * 50;
+    const spacing = (-0.05 + x * 0.15).toFixed(3);
+    
+    text.style.fontWeight = weight;
+    text.style.fontStretch = stretch + '%';
+    text.style.letterSpacing = spacing + 'em';
+    text.style.color = `hsl(${Math.round(200 + x * 60)}, 70%, ${60 + y * 20}%)`;
+  });
+  
+  area.addEventListener('mouseleave', () => {
+    text.style.fontWeight = '400';
+    text.style.fontStretch = '100%';
+    text.style.letterSpacing = '0em';
+    text.style.color = '#fff';
+  });
+})();
+</script>
+
+</body>
+</html>

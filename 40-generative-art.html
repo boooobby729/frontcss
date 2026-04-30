@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生成艺术效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden}
+  .demo canvas{position:absolute;inset:0;width:100%;height:100%}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#flow-field">流场线</a>
+  <a href="#voronoi">Voronoi 碎片</a>
+  <a href="#recursive-tree">递归树</a>
+  <a href="#spirograph">万花尺</a>
+  <a href="#cellular">细胞自动机</a>
+  <a href="#attractor">奇异吸引子</a>
+</div>
+
+<!-- ===== 1. Flow Field ===== -->
+<section class="effect-section" id="flow-field">
+  <h2>1. Perlin 流场线</h2>
+  <p class="desc">Canvas 2D + Simplex Noise — 基于噪声场的粒子流动路径，每条线跟随场方向绘制轨迹</p>
+  <div class="demo"><canvas id="flow-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('flow-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize();
+  
+  // Simple noise
+  function noise(x,y){
+    const n=Math.sin(x*12.9898+y*78.233)*43758.5453;
+    return (n-Math.floor(n))*2-1;
+  }
+  function smoothNoise(x,y){
+    const ix=Math.floor(x),iy=Math.floor(y);
+    const fx=x-ix,fy=y-iy;
+    const ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);
+    const a=noise(ix,iy),b=noise(ix+1,iy),c=noise(ix,iy+1),d=noise(ix+1,iy+1);
+    return a*(1-ux)*(1-uy)+b*ux*(1-uy)+c*(1-ux)*uy+d*ux*uy;
+  }
+  
+  const scale=0.003;
+  let zOff=0;
+  const particles=[];
+  const numParticles=800;
+  
+  for(let i=0;i<numParticles;i++){
+    particles.push({x:Math.random()*W,y:Math.random()*H,hue:Math.random()*360});
+  }
+  
+  ctx.fillStyle='#060608';ctx.fillRect(0,0,W,H);
+  
+  function animate(){
+    ctx.fillStyle='rgba(6,6,8,0.02)';
+    ctx.fillRect(0,0,W,H);
+    zOff+=0.002;
+    
+    particles.forEach(p=>{
+      const angle=smoothNoise(p.x*scale+zOff,p.y*scale)*Math.PI*4;
+      const vx=Math.cos(angle)*2;
+      const vy=Math.sin(angle)*2;
+      
+      ctx.beginPath();
+      ctx.moveTo(p.x,p.y);
+      p.x+=vx; p.y+=vy;
+      ctx.lineTo(p.x,p.y);
+      ctx.strokeStyle=`hsla(${p.hue+zOff*50},70%,55%,0.3)`;
+      ctx.lineWidth=0.8;
+      ctx.stroke();
+      
+      if(p.x<0||p.x>W||p.y<0||p.y>H){
+        p.x=Math.random()*W;
+        p.y=Math.random()*H;
+      }
+    });
+    
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+<!-- ===== 2. Voronoi ===== -->
+<section class="effect-section" id="voronoi">
+  <h2>2. 动态 Voronoi 碎片</h2>
+  <p class="desc">Canvas 2D — 移动的种子点实时生成 Voronoi 图，每个区域着色并描边形成碎片玻璃效果</p>
+  <div class="demo"><canvas id="voronoi-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('voronoi-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  const seeds=[];
+  const numSeeds=30;
+  for(let i=0;i<numSeeds;i++){
+    seeds.push({
+      x:Math.random()*W, y:Math.random()*H,
+      vx:(Math.random()-.5)*2, vy:(Math.random()-.5)*2,
+      hue:Math.random()*360
+    });
+  }
+  
+  const step=6;
+  function draw(){
+    seeds.forEach(s=>{
+      s.x+=s.vx; s.y+=s.vy;
+      if(s.x<0||s.x>W) s.vx*=-1;
+      if(s.y<0||s.y>H) s.vy*=-1;
+    });
+    
+    const imgData=ctx.createImageData(W,H);
+    const d=imgData.data;
+    
+    for(let y=0;y<H;y+=step){
+      for(let x=0;x<W;x+=step){
+        let minDist=Infinity, minIdx=0, secondDist=Infinity;
+        for(let i=0;i<seeds.length;i++){
+          const dx=x-seeds[i].x, dy=y-seeds[i].y;
+          const dist=dx*dx+dy*dy;
+          if(dist<minDist){secondDist=minDist;minDist=dist;minIdx=i;}
+          else if(dist<secondDist) secondDist=dist;
+        }
+        
+        const edge=Math.sqrt(secondDist)-Math.sqrt(minDist);
+        const isEdge=edge<8;
+        const hue=seeds[minIdx].hue;
+        const light=isEdge?15:30+Math.sqrt(minDist)*0.02;
+        
+        for(let sy=0;sy<step&&y+sy<H;sy++){
+          for(let sx=0;sx<step&&x+sx<W;sx++){
+            const idx=((y+sy)*W+(x+sx))*4;
+            const rgb=hslToRgb(hue/360,0.5,light/100);
+            d[idx]=rgb[0]; d[idx+1]=rgb[1]; d[idx+2]=rgb[2]; d[idx+3]=255;
+          }
+        }
+      }
+    }
+    ctx.putImageData(imgData,0,0);
+    requestAnimationFrame(draw);
+  }
+  
+  function hslToRgb(h,s,l){let r,g,b;if(s===0){r=g=b=l;}else{const q=l<.5?l*(1+s):l+s-l*s;const p=2*l-q;r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3);}return [Math.round(r*255),Math.round(g*255),Math.round(b*255)];}
+  function hue2rgb(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<.5)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;}
+  
+  draw();
+})();
+</script>
+
+<!-- ===== 3. Recursive Tree ===== -->
+<section class="effect-section" id="recursive-tree">
+  <h2>3. 递归分形树</h2>
+  <p class="desc">Canvas 2D 递归绘制 — 从树干开始递归分叉生长，带随机角度、粗细衰减和风力摇摆</p>
+  <div class="demo"><canvas id="tree-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('tree-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize();
+  
+  let wind=0;
+  let t=0;
+  
+  function drawBranch(x,y,angle,len,width,depth){
+    if(depth>12||len<2) return;
+    
+    const windEffect=wind*Math.sin(t+depth*0.5)*0.02;
+    const endX=x+Math.cos(angle+windEffect)*len;
+    const endY=y+Math.sin(angle+windEffect)*len;
+    
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(endX,endY);
+    
+    const hue=120+depth*10;
+    const light=25+depth*5;
+    ctx.strokeStyle=`hsl(${hue},40%,${light}%)`;
+    ctx.lineWidth=width;
+    ctx.lineCap='round';
+    ctx.stroke();
+    
+    if(depth>8){
+      // Leaves
+      ctx.beginPath();
+      ctx.arc(endX,endY,2+Math.random()*3,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${100+Math.random()*60},60%,45%,0.6)`;
+      ctx.fill();
+    }
+    
+    const newLen=len*0.72;
+    const newWidth=width*0.7;
+    const spread=0.4+Math.random()*0.3;
+    drawBranch(endX,endY,angle-spread,newLen,newWidth,depth+1);
+    drawBranch(endX,endY,angle+spread,newLen,newWidth,depth+1);
+    if(Math.random()>0.6){
+      drawBranch(endX,endY,angle+(Math.random()-.5)*0.3,newLen*0.8,newWidth*0.8,depth+1);
+    }
+  }
+  
+  function animate(){
+    t+=0.02;
+    wind=Math.sin(t*0.5)*3;
+    ctx.fillStyle='rgba(6,6,8,0.1)';
+    ctx.fillRect(0,0,W,H);
+    drawBranch(W/2,H*0.85,-Math.PI/2,H*0.22,8,0);
+    requestAnimationFrame(animate);
+  }
+  ctx.fillStyle='#060608';ctx.fillRect(0,0,W,H);
+  animate();
+})();
+</script>
+
+<!-- ===== 4. Spirograph ===== -->
+<section class="effect-section" id="spirograph">
+  <h2>4. 万花尺（Spirograph）</h2>
+  <p class="desc">Canvas 2D 参数方程 — 多个旋转圆组合的参数曲线实时绘制，产生精美的对称图案</p>
+  <div class="demo"><canvas id="spiro-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('spiro-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize();
+  
+  const cx=()=>W/2, cy=()=>H/2;
+  let angle=0;
+  const R=150, r=89, d=120;
+  let hue=0;
+  let prevX=null, prevY=null;
+  
+  ctx.fillStyle='#060608'; ctx.fillRect(0,0,W,H);
+  ctx.lineWidth=0.8;
+  
+  function draw(){
+    for(let i=0;i<8;i++){
+      angle+=0.02;
+      hue=(hue+0.3)%360;
+      
+      const x=cx()+(R-r)*Math.cos(angle)+d*Math.cos((R-r)/r*angle);
+      const y=cy()+(R-r)*Math.sin(angle)-d*Math.sin((R-r)/r*angle);
+      
+      if(prevX!==null){
+        ctx.beginPath();
+        ctx.moveTo(prevX,prevY);
+        ctx.lineTo(x,y);
+        ctx.strokeStyle=`hsla(${hue},80%,55%,0.6)`;
+        ctx.stroke();
+      }
+      prevX=x; prevY=y;
+    }
+    
+    // Slow fade
+    ctx.fillStyle='rgba(6,6,8,0.005)';
+    ctx.fillRect(0,0,W,H);
+    
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+<!-- ===== 5. Cellular Automaton (Game of Life) ===== -->
+<section class="effect-section" id="cellular">
+  <h2>5. 细胞自动机（生命游戏）</h2>
+  <p class="desc">Canvas 2D — Conway's Game of Life 的彩色变体，细胞根据存活时间着色，呈现生命演化之美</p>
+  <div class="demo"><canvas id="life-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('life-canvas');
+  const ctx=canvas.getContext('2d');
+  const CELL=4;
+  let cols,rows;
+  function resize(){
+    canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight;
+    cols=Math.floor(canvas.width/CELL);
+    rows=Math.floor(canvas.height/CELL);
+    initGrid();
+  }
+  
+  let grid, ages;
+  function initGrid(){
+    grid=new Uint8Array(cols*rows);
+    ages=new Uint16Array(cols*rows);
+    for(let i=0;i<grid.length;i++) grid[i]=Math.random()>.7?1:0;
+  }
+  resize(); window.addEventListener('resize',resize);
+  
+  function step(){
+    const next=new Uint8Array(cols*rows);
+    for(let y=0;y<rows;y++){
+      for(let x=0;x<cols;x++){
+        let neighbors=0;
+        for(let dy=-1;dy<=1;dy++){
+          for(let dx=-1;dx<=1;dx++){
+            if(dx===0&&dy===0) continue;
+            const nx=(x+dx+cols)%cols, ny=(y+dy+rows)%rows;
+            neighbors+=grid[ny*cols+nx];
+          }
+        }
+        const idx=y*cols+x;
+        if(grid[idx]){
+          next[idx]=(neighbors===2||neighbors===3)?1:0;
+        }else{
+          next[idx]=neighbors===3?1:0;
+        }
+        if(next[idx]) ages[idx]++; else ages[idx]=0;
+      }
+    }
+    grid=next;
+  }
+  
+  function draw(){
+    ctx.fillStyle='#060608';ctx.fillRect(0,0,canvas.width,canvas.height);
+    for(let y=0;y<rows;y++){
+      for(let x=0;x<cols;x++){
+        const idx=y*cols+x;
+        if(grid[idx]){
+          const age=Math.min(ages[idx],60);
+          const hue=(age*6+200)%360;
+          ctx.fillStyle=`hsl(${hue},70%,${40+age*0.5}%)`;
+          ctx.fillRect(x*CELL,y*CELL,CELL-1,CELL-1);
+        }
+      }
+    }
+  }
+  
+  let frameCount=0;
+  function animate(){
+    frameCount++;
+    if(frameCount%3===0) step();
+    draw();
+    
+    // Randomly seed if too empty
+    if(frameCount%300===0){
+      const alive=grid.reduce((s,v)=>s+v,0);
+      if(alive<cols*rows*0.05){
+        for(let i=0;i<100;i++){
+          const x=Math.floor(cols/2+(Math.random()-.5)*20);
+          const y=Math.floor(rows/2+(Math.random()-.5)*20);
+          if(x>=0&&x<cols&&y>=0&&y<rows) grid[y*cols+x]=1;
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+<!-- ===== 6. Strange Attractor ===== -->
+<section class="effect-section" id="attractor">
+  <h2>6. 奇异吸引子（Lorenz）</h2>
+  <p class="desc">Canvas 2D — Lorenz 系统的实时积分绘制，粒子轨迹呈现混沌蝴蝶形态</p>
+  <div class="demo"><canvas id="lorenz-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('lorenz-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize();
+  
+  // Lorenz system parameters
+  const sigma=10, rho=28, beta=8/3;
+  const dt=0.005;
+  
+  const trails=[];
+  for(let i=0;i<5;i++){
+    trails.push({
+      x:0.1+Math.random()*0.1,
+      y:0, z:25,
+      hue:i*72,
+      points:[]
+    });
+  }
+  
+  ctx.fillStyle='#060608'; ctx.fillRect(0,0,W,H);
+  
+  function animate(){
+    ctx.fillStyle='rgba(6,6,8,0.015)';
+    ctx.fillRect(0,0,W,H);
+    
+    trails.forEach(trail=>{
+      for(let i=0;i<4;i++){
+        const dx=sigma*(trail.y-trail.x)*dt;
+        const dy=(trail.x*(rho-trail.z)-trail.y)*dt;
+        const dz=(trail.x*trail.y-beta*trail.z)*dt;
+        trail.x+=dx; trail.y+=dy; trail.z+=dz;
+        
+        // Project to 2D
+        const scale=12;
+        const px=W/2+trail.x*scale;
+        const py=H/2-trail.z*scale+350;
+        
+        trail.points.push({x:px,y:py});
+        if(trail.points.length>2){
+          const p0=trail.points[trail.points.length-2];
+          const p1=trail.points[trail.points.length-1];
+          ctx.beginPath();
+          ctx.moveTo(p0.x,p0.y);
+          ctx.lineTo(p1.x,p1.y);
+          ctx.strokeStyle=`hsla(${trail.hue},70%,55%,0.5)`;
+          ctx.lineWidth=0.8;
+          ctx.stroke();
+        }
+        if(trail.points.length>500) trail.points.shift();
+      }
+    });
+    
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>渐变与色彩动画效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#mesh-grad">Mesh 渐变</a>
+  <a href="#conic-grad">锥形渐变</a>
+  <a href="#color-cycle">色彩循环</a>
+  <a href="#gradient-border">渐变边框</a>
+  <a href="#aurora-grad">极光渐变</a>
+  <a href="#noise-grad">噪声渐变</a>
+</div>
+
+<!-- ===== 1. Mesh Gradient ===== -->
+<section class="effect-section" id="mesh-grad">
+  <h2>1. Mesh 流体渐变</h2>
+  <p class="desc">CSS 多层径向渐变 + animation — 多个渐变源点独立运动，形成 Apple 风格流动 Mesh 渐变</p>
+  <div class="demo mesh-demo">
+    <div class="mesh-layer" style="--c:rgba(99,102,241,.6);--x:30%;--y:30%;--dur:8s"></div>
+    <div class="mesh-layer" style="--c:rgba(236,72,153,.5);--x:70%;--y:60%;--dur:10s;animation-delay:-3s"></div>
+    <div class="mesh-layer" style="--c:rgba(6,182,212,.5);--x:50%;--y:80%;--dur:12s;animation-delay:-6s"></div>
+    <div class="mesh-layer" style="--c:rgba(16,185,129,.4);--x:80%;--y:20%;--dur:9s;animation-delay:-2s"></div>
+    <div style="position:relative;z-index:10;text-align:center">
+      <h3 style="font-size:clamp(2rem,5vw,4rem);font-weight:900;color:#fff;letter-spacing:-.03em">Fluid Mesh</h3>
+      <p style="color:rgba(255,255,255,.5);font-size:1rem;margin-top:8px">Apple-style gradient background</p>
+    </div>
+  </div>
+</section>
+<style>
+.mesh-demo{background:#0a0a12;position:relative}
+.mesh-layer{
+  position:absolute;
+  left:var(--x);top:var(--y);
+  width:50%;height:50%;
+  background:radial-gradient(circle,var(--c) 0%,transparent 70%);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  animation:meshMove var(--dur) ease-in-out infinite;
+  filter:blur(40px);
+}
+@keyframes meshMove{
+  0%,100%{transform:translate(-50%,-50%) scale(1)}
+  25%{transform:translate(-30%,-70%) scale(1.2)}
+  50%{transform:translate(-70%,-30%) scale(0.8)}
+  75%{transform:translate(-60%,-60%) scale(1.1)}
+}
+</style>
+
+<!-- ===== 2. Conic Gradient ===== -->
+<section class="effect-section" id="conic-grad">
+  <h2>2. 锥形渐变旋转</h2>
+  <p class="desc">CSS conic-gradient + animation — 锥形渐变持续旋转，形成光盘/雷达扫描效果</p>
+  <div class="demo" style="background:#000;gap:60px;flex-wrap:wrap">
+    <div class="conic-ring" style="--c1:#6366f1;--c2:#a78bfa;--c3:#38bdf8;width:180px;height:180px">
+      <div class="conic-inner"></div>
+    </div>
+    <div class="conic-ring radar" style="--c1:#10b981;--c2:transparent;--c3:transparent;width:180px;height:180px">
+      <div class="conic-inner"></div>
+      <!-- Radar dots -->
+      <div class="radar-dot" style="top:25%;left:60%"></div>
+      <div class="radar-dot" style="top:55%;left:30%"></div>
+      <div class="radar-dot" style="top:70%;left:65%"></div>
+    </div>
+    <div class="conic-ring" style="--c1:#f43f5e;--c2:#fbbf24;--c3:#a78bfa;width:180px;height:180px;animation-duration:2s">
+      <div class="conic-inner"></div>
+    </div>
+  </div>
+</section>
+<style>
+.conic-ring{
+  border-radius:50%;position:relative;
+  background:conic-gradient(from 0deg,var(--c1),var(--c2),var(--c3),transparent);
+  animation:conicSpin 4s linear infinite;
+  display:flex;align-items:center;justify-content:center;
+}
+.conic-inner{width:85%;height:85%;border-radius:50%;background:#000}
+@keyframes conicSpin{to{transform:rotate(360deg)}}
+.radar{background:conic-gradient(from 0deg,var(--c1),transparent 30%,transparent)}
+.radar-dot{position:absolute;width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:radarBlink 2s ease infinite}
+@keyframes radarBlink{0%,80%{opacity:0}90%{opacity:1}100%{opacity:0}}
+</style>
+
+<!-- ===== 3. Color Cycle ===== -->
+<section class="effect-section" id="color-cycle">
+  <h2>3. 色彩循环动画</h2>
+  <p class="desc">CSS hue-rotate filter + animation — 色相持续旋转，单一元素产生彩虹循环效果</p>
+  <div class="demo" style="background:#000;flex-direction:column;gap:40px">
+    <div class="cycle-text">SPECTRUM</div>
+    <div class="cycle-bars">
+      <div class="cycle-bar" style="--d:0s"></div>
+      <div class="cycle-bar" style="--d:.1s"></div>
+      <div class="cycle-bar" style="--d:.2s"></div>
+      <div class="cycle-bar" style="--d:.3s"></div>
+      <div class="cycle-bar" style="--d:.4s"></div>
+      <div class="cycle-bar" style="--d:.5s"></div>
+      <div class="cycle-bar" style="--d:.6s"></div>
+      <div class="cycle-bar" style="--d:.7s"></div>
+      <div class="cycle-bar" style="--d:.8s"></div>
+      <div class="cycle-bar" style="--d:.9s"></div>
+      <div class="cycle-bar" style="--d:1s"></div>
+      <div class="cycle-bar" style="--d:1.1s"></div>
+    </div>
+    <div class="cycle-orbs">
+      <div class="cycle-orb" style="--d:0s"></div>
+      <div class="cycle-orb" style="--d:.5s"></div>
+      <div class="cycle-orb" style="--d:1s"></div>
+      <div class="cycle-orb" style="--d:1.5s"></div>
+      <div class="cycle-orb" style="--d:2s"></div>
+    </div>
+  </div>
+</section>
+<style>
+.cycle-text{
+  font-size:clamp(3rem,8vw,6rem);font-weight:900;letter-spacing:-.03em;
+  background:linear-gradient(90deg,#f43f5e,#fbbf24,#10b981,#3b82f6,#a78bfa,#f43f5e);
+  background-size:200% 100%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:cycleGrad 3s linear infinite;
+}
+@keyframes cycleGrad{to{background-position:-200% 0}}
+.cycle-bars{display:flex;gap:6px;align-items:flex-end}
+.cycle-bar{
+  width:12px;height:50px;border-radius:6px;
+  background:linear-gradient(180deg,#6366f1,#38bdf8);
+  animation:cycleBar 1.5s ease-in-out infinite,cycleHue 4s linear infinite;
+  animation-delay:var(--d),var(--d);
+}
+@keyframes cycleBar{0%,100%{height:20px;opacity:.4}50%{height:60px;opacity:1}}
+@keyframes cycleHue{to{filter:hue-rotate(360deg)}}
+.cycle-orbs{display:flex;gap:20px}
+.cycle-orb{
+  width:24px;height:24px;border-radius:50%;
+  background:#6366f1;
+  animation:cycleOrbPulse 2s ease-in-out infinite,cycleHue 3s linear infinite;
+  animation-delay:var(--d),var(--d);
+}
+@keyframes cycleOrbPulse{0%,100%{transform:scale(.7);opacity:.4}50%{transform:scale(1.3);opacity:1}}
+</style>
+
+<!-- ===== 4. Gradient Border ===== -->
+<section class="effect-section" id="gradient-border">
+  <h2>4. 动态渐变边框</h2>
+  <p class="desc">CSS conic-gradient + background-clip — 旋转渐变实现动态发光边框，多种样式</p>
+  <div class="demo" style="background:#0a0a0f;gap:40px;flex-wrap:wrap;padding:40px">
+    <div class="gborder-card">
+      <div class="gborder-content">
+        <h3>Rotating</h3>
+        <p>Conic gradient border</p>
+      </div>
+    </div>
+    <div class="gborder-card style2">
+      <div class="gborder-content">
+        <h3>Pulse</h3>
+        <p>Breathing glow border</p>
+      </div>
+    </div>
+    <div class="gborder-card style3">
+      <div class="gborder-content">
+        <h3>Rainbow</h3>
+        <p>Full spectrum rotation</p>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+.gborder-card{
+  position:relative;padding:2px;border-radius:16px;
+  background:conic-gradient(from var(--angle,0deg),#6366f1,#a78bfa,#38bdf8,#6366f1);
+  animation:gborderSpin 3s linear infinite;
+}
+@property --angle{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes gborderSpin{to{--angle:360deg}}
+.gborder-card.style2{
+  background:linear-gradient(135deg,#ec4899,#f43f5e,#ec4899);
+  background-size:200% 200%;
+  animation:gborderPulse 2s ease infinite;
+}
+@keyframes gborderPulse{0%,100%{background-position:0% 50%;opacity:.5}50%{background-position:100% 50%;opacity:1}}
+.gborder-card.style3{
+  background:conic-gradient(from var(--angle,0deg),#f43f5e,#fbbf24,#10b981,#3b82f6,#a78bfa,#f43f5e);
+  animation:gborderSpin 2s linear infinite;
+}
+.gborder-content{
+  background:#0a0a0f;border-radius:14px;padding:32px;
+  display:flex;flex-direction:column;align-items:center;min-width:160px;
+}
+.gborder-content h3{font-size:1.1rem;font-weight:700;color:#fff}
+.gborder-content p{font-size:.75rem;color:rgba(255,255,255,.4);margin-top:6px}
+</style>
+
+<!-- ===== 5. Aurora Gradient ===== -->
+<section class="effect-section" id="aurora-grad">
+  <h2>5. 极光流动渐变</h2>
+  <p class="desc">CSS multi-layer gradient + animation — 多层渐变独立移动模拟极光流动效果</p>
+  <div class="demo aurora-flow">
+    <div class="aurora-band" style="--c:rgba(0,255,128,.15);--h:40%;--top:15%;--dur:6s"></div>
+    <div class="aurora-band" style="--c:rgba(0,150,255,.12);--h:35%;--top:30%;--dur:8s;animation-delay:-2s"></div>
+    <div class="aurora-band" style="--c:rgba(150,0,255,.1);--h:30%;--top:45%;--dur:10s;animation-delay:-4s"></div>
+    <div class="aurora-band" style="--c:rgba(255,100,200,.08);--h:25%;--top:55%;--dur:7s;animation-delay:-1s"></div>
+    <div style="position:relative;z-index:10;text-align:center">
+      <h3 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:800;color:#fff;letter-spacing:-.02em">Northern Lights</h3>
+      <p style="color:rgba(255,255,255,.35);font-size:.9rem;margin-top:8px">Flowing aurora gradient</p>
+    </div>
+  </div>
+</section>
+<style>
+.aurora-flow{background:linear-gradient(180deg,#000510,#000a1a,#000510);position:relative}
+.aurora-band{
+  position:absolute;left:-20%;top:var(--top);
+  width:140%;height:var(--h);
+  background:linear-gradient(90deg,transparent,var(--c),transparent);
+  filter:blur(40px);
+  animation:auroraDrift var(--dur) ease-in-out infinite;
+}
+@keyframes auroraDrift{
+  0%,100%{transform:translateX(0) scaleY(1)}
+  25%{transform:translateX(10%) scaleY(1.3)}
+  50%{transform:translateX(-5%) scaleY(0.8)}
+  75%{transform:translateX(8%) scaleY(1.1)}
+}
+</style>
+
+<!-- ===== 6. Noise Gradient ===== -->
+<section class="effect-section" id="noise-grad">
+  <h2>6. 噪声渐变纹理</h2>
+  <p class="desc">Canvas 2D Perlin Noise + 渐变着色 — 噪声生成动态渐变纹理，色相随时间循环变化</p>
+  <div class="demo" style="background:#000">
+    <canvas id="noise-grad-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const section=document.getElementById('noise-grad').querySelector('.demo');
+  const canvas=document.getElementById('noise-grad-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=section.clientWidth/3;h=canvas.height=section.clientHeight/3;}
+  resize();window.addEventListener('resize',resize);
+
+  // Simple noise
+  function hash(n){return Math.sin(n*127.1+n*311.7)*43758.5453%1;}
+  function noise2D(x,y){
+    const ix=Math.floor(x),iy=Math.floor(y);
+    const fx=x-ix,fy=y-iy;
+    const ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);
+    const a=hash(ix+iy*57),b=hash(ix+1+iy*57),c=hash(ix+(iy+1)*57),d=hash(ix+1+(iy+1)*57);
+    return a+(b-a)*ux+(c-a)*uy+(a-b-c+d)*ux*uy;
+  }
+  function fbm(x,y,oct){
+    let v=0,amp=0.5,freq=1;
+    for(let i=0;i<oct;i++){v+=noise2D(x*freq,y*freq)*amp;amp*=0.5;freq*=2;}
+    return v;
+  }
+
+  function hsl2rgb(h,s,l){
+    const c=(1-Math.abs(2*l-1))*s;
+    const x=c*(1-Math.abs((h/60)%2-1));
+    const m=l-c/2;
+    let r=0,g=0,b=0;
+    if(h<60){r=c;g=x;}else if(h<120){r=x;g=c;}else if(h<180){g=c;b=x;}
+    else if(h<240){g=x;b=c;}else if(h<300){r=x;b=c;}else{r=c;b=x;}
+    return[(r+m)*255|0,(g+m)*255|0,(b+m)*255|0];
+  }
+
+  function render(){
+    const t=performance.now()*0.0002;
+    const img=ctx.createImageData(w,h);
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const nx=x/w*4+t;const ny=y/h*4;
+        const n=fbm(nx,ny,4);
+        const hue=(n*360+t*200)%360;
+        const [r,g,b]=hsl2rgb(hue,0.7,0.15+n*0.35);
+        const i=(y*w+x)*4;
+        img.data[i]=r;img.data[i+1]=g;img.data[i+2]=b;img.data[i+3]=255;
+      }
+    }
+    ctx.putImageData(img,0,0);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

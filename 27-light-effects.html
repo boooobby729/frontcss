@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光效集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; }
+  .effect-section { position: relative; }
+  .effect-section h2 { font-size: 2rem; font-weight: 800; color: #fff; padding: 30px 30px 0; position: relative; z-index: 10; }
+  .effect-section .desc { color: rgba(255,255,255,.45); font-size: .85rem; padding: 8px 30px 16px; position: relative; z-index: 10; }
+  .demo { width: 100%; height: 80vh; position: relative; overflow: hidden; }
+  .demo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .nav { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 6px; }
+  .nav a { color: #555; font-size: .75rem; text-decoration: none; padding: 4px 10px; border-radius: 4px; transition: all .2s; }
+  .nav a:hover { color: #fff; background: #ffffff10; }
+</style>
+</head>
+<body>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#lens-flare">镜头光斑</a>
+  <a href="#god-rays">体积光柱</a>
+  <a href="#neon-sign">霓虹灯管</a>
+  <a href="#spotlight">聚光灯</a>
+  <a href="#light-rays">光线散射</a>
+  <a href="#caustics">焦散水面</a>
+</div>
+
+<!-- ===================== Effect 1: Lens Flare ===================== -->
+<section class="effect-section" id="lens-flare">
+  <h2>1. 镜头光斑</h2>
+  <p class="desc">Canvas 2D — 鼠标拖动光源，多层光晕 + 彩虹衍射环 + 星芒 + 鬼影，模拟真实镜头光学效应</p>
+  <div class="demo" id="flare-demo" style="background:radial-gradient(ellipse at 30% 40%,#0a0a1a,#000);cursor:crosshair">
+    <canvas id="flare-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('flare-demo');
+  const canvas = document.getElementById('flare-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  let light = { x: w * 0.35, y: h * 0.3 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    light.x = e.clientX - r.left;
+    light.y = e.clientY - r.top;
+  });
+
+  // Draw a single flare element
+  function drawFlare(x, y, radius, alpha, hue, type) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (type === 'glow') {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      g.addColorStop(0, `hsla(${hue},80%,95%,1)`);
+      g.addColorStop(0.1, `hsla(${hue},70%,80%,0.8)`);
+      g.addColorStop(0.4, `hsla(${hue},60%,60%,0.3)`);
+      g.addColorStop(1, `hsla(${hue},50%,40%,0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+    } else if (type === 'ring') {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = `hsla(${hue},90%,70%,${alpha})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    } else if (type === 'star') {
+      const spikes = 6, outer = radius, inner = radius * 0.3;
+      ctx.beginPath();
+      for (let i = 0; i < spikes * 2; i++) {
+        const r2 = i % 2 === 0 ? outer : inner;
+        const a = (i * Math.PI) / spikes - Math.PI / 2;
+        i === 0 ? ctx.moveTo(x + Math.cos(a)*r2, y + Math.sin(a)*r2)
+                : ctx.lineTo(x + Math.cos(a)*r2, y + Math.sin(a)*r2);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `hsla(${hue},80%,90%,${alpha})`;
+      ctx.fill();
+    } else if (type === 'streak') {
+      // Horizontal streak
+      const sg = ctx.createLinearGradient(x - radius, y, x + radius, y);
+      sg.addColorStop(0, 'transparent');
+      sg.addColorStop(0.5, `hsla(${hue},70%,90%,${alpha})`);
+      sg.addColorStop(1, 'transparent');
+      ctx.fillStyle = sg;
+      ctx.fillRect(x - radius, y - 1.5, radius * 2, 3);
+      // Vertical streak
+      const sg2 = ctx.createLinearGradient(x, y - radius * 0.6, x, y + radius * 0.6);
+      sg2.addColorStop(0, 'transparent');
+      sg2.addColorStop(0.5, `hsla(${hue},70%,90%,${alpha * 0.5})`);
+      sg2.addColorStop(1, 'transparent');
+      ctx.fillStyle = sg2;
+      ctx.fillRect(x - 1.5, y - radius * 0.6, 3, radius * 1.2);
+    }
+    ctx.restore();
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Background stars
+    ctx.fillStyle = 'rgba(0,0,0,0.95)';
+    ctx.fillRect(0, 0, w, h);
+
+    // Subtle background stars
+    for (let i = 0; i < 80; i++) {
+      const sx = (Math.sin(i * 127.1) * 0.5 + 0.5) * w;
+      const sy = (Math.sin(i * 311.7) * 0.5 + 0.5) * h;
+      const ss = Math.sin(i * 43.7) * 0.5 + 1;
+      ctx.beginPath();
+      ctx.arc(sx, sy, ss * 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,220,255,${0.2 + Math.sin(i) * 0.1})`;
+      ctx.fill();
+    }
+
+    const cx = w / 2, cy = h / 2;
+    // Vector from light to center (for ghost placement)
+    const dx = cx - light.x, dy = cy - light.y;
+
+    // === Main light source ===
+    drawFlare(light.x, light.y, 200, 0.9, 45, 'glow');   // warm core
+    drawFlare(light.x, light.y, 80,  0.95, 50, 'glow');  // bright center
+    drawFlare(light.x, light.y, 20,  1.0, 55, 'glow');   // hot spot
+    drawFlare(light.x, light.y, 120, 0.6, 40, 'star');   // star burst
+    drawFlare(light.x, light.y, 350, 0.5, 45, 'streak'); // lens streak
+
+    // === Rainbow diffraction rings ===
+    const ringHues = [0, 30, 60, 120, 180, 240, 280];
+    ringHues.forEach((hue, i) => {
+      drawFlare(light.x, light.y, 90 + i * 28, 0.12 - i * 0.01, hue, 'ring');
+    });
+
+    // === Lens ghosts (along axis through center) ===
+    const ghosts = [
+      { t: 0.3, r: 40,  a: 0.25, h: 200 },
+      { t: 0.5, r: 25,  a: 0.2,  h: 160 },
+      { t: 0.7, r: 60,  a: 0.15, h: 280 },
+      { t: 0.9, r: 15,  a: 0.3,  h: 50  },
+      { t: 1.1, r: 80,  a: 0.1,  h: 320 },
+      { t: 1.4, r: 35,  a: 0.18, h: 100 },
+      { t: 1.7, r: 20,  a: 0.22, h: 240 },
+    ];
+    ghosts.forEach(g => {
+      const gx = light.x + dx * g.t;
+      const gy = light.y + dy * g.t;
+      drawFlare(gx, gy, g.r, g.a, g.h, 'glow');
+      drawFlare(gx, gy, g.r * 0.4, g.a * 0.8, g.h, 'ring');
+    });
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 2: God Rays / Volumetric Light ===================== -->
+<section class="effect-section" id="god-rays">
+  <h2>2. 体积光柱（神光）</h2>
+  <p class="desc">WebGL GLSL — 径向模糊叠加模拟丁达尔效应，光线穿透云层/粒子的体积散射感</p>
+  <div class="demo" id="godrays-demo" style="background:#000">
+    <canvas id="godrays-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('godrays-demo');
+  const canvas = document.getElementById('godrays-canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) { demo.innerHTML = '<p style="color:#888;padding:40px">WebGL not supported</p>'; return; }
+
+  let w, h;
+  function resize(){
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+    gl.viewport(0, 0, w, h);
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  const VS = `
+    attribute vec2 a_pos;
+    void main(){ gl_Position = vec4(a_pos, 0.0, 1.0); }
+  `;
+  const FS = `
+    precision highp float;
+    uniform vec2 u_res;
+    uniform float u_time;
+    uniform vec2 u_light;
+
+    // Hash / noise
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+    float noise(vec2 p){
+      vec2 i = floor(p), f = fract(p);
+      f = f*f*(3.0-2.0*f);
+      return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),
+                 mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+    }
+    float fbm(vec2 p){
+      float v=0.0, a=0.5;
+      for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.1; a*=0.5; }
+      return v;
+    }
+
+    void main(){
+      vec2 uv = gl_FragCoord.xy / u_res;
+      vec2 lp = u_light / u_res;
+      lp.y = 1.0 - lp.y;
+
+      // --- Occluder cloud layer ---
+      float cloud = fbm(uv * 3.0 + vec2(u_time * 0.04, 0.0));
+      cloud = smoothstep(0.45, 0.75, cloud);
+
+      // --- Radial blur (god rays) ---
+      vec2 dir = uv - lp;
+      float dist = length(dir);
+      vec3 rays = vec3(0.0);
+      int SAMPLES = 64;
+      float decay = 0.97, weight = 0.015, exposure = 1.2;
+      vec2 step2 = dir / float(SAMPLES) * 0.3;
+      vec2 sampleUV = uv;
+      float illum = 1.0;
+      for(int i = 0; i < 64; i++){
+        sampleUV -= step2;
+        vec2 suv = clamp(sampleUV, 0.0, 1.0);
+        float sc = fbm(suv * 3.0 + vec2(u_time * 0.04, 0.0));
+        sc = smoothstep(0.45, 0.75, sc);
+        float sample_val = (1.0 - sc) * weight * illum;
+        // Warm light color
+        rays += vec3(sample_val * 1.2, sample_val * 0.85, sample_val * 0.4);
+        illum *= decay;
+      }
+      rays *= exposure;
+
+      // Radial falloff from light source
+      float falloff = 1.0 - smoothstep(0.0, 0.8, dist);
+      rays *= falloff * 1.5;
+
+      // --- Sky gradient ---
+      float skyT = uv.y;
+      vec3 sky = mix(vec3(0.05, 0.08, 0.18), vec3(0.02, 0.04, 0.12), skyT);
+      sky = mix(sky, vec3(0.3, 0.18, 0.05), (1.0 - skyT) * 0.4);
+
+      // --- Combine ---
+      vec3 col = sky;
+      col += rays;
+      // Cloud shading
+      vec3 cloudCol = mix(vec3(0.15, 0.12, 0.08), vec3(0.6, 0.55, 0.45), cloud);
+      col = mix(col, cloudCol, cloud * 0.7);
+
+      // Light source bloom
+      float bloom = exp(-dist * 8.0) * 2.0;
+      col += vec3(1.0, 0.85, 0.5) * bloom;
+
+      col = pow(col, vec3(0.85)); // gamma
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  function compile(type, src){
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+  gl.linkProgram(prog); gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes   = gl.getUniformLocation(prog, 'u_res');
+  const uTime  = gl.getUniformLocation(prog, 'u_time');
+  const uLight = gl.getUniformLocation(prog, 'u_light');
+
+  let lightPos = { x: 0, y: 0 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    lightPos.x = e.clientX - r.left;
+    lightPos.y = e.clientY - r.top;
+  });
+
+  function render(t){
+    gl.uniform2f(uRes, w, h);
+    gl.uniform1f(uTime, t * 0.001);
+    const lx = lightPos.x || w * 0.5;
+    const ly = lightPos.y || h * 0.25;
+    gl.uniform2f(uLight, lx, ly);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+})();
+</script>
+
+<!-- ===================== Effect 3: Neon Sign ===================== -->
+<section class="effect-section" id="neon-sign">
+  <h2>3. 霓虹灯管</h2>
+  <p class="desc">CSS text-shadow 多层叠加 + SVG 路径描边 + 闪烁动画，模拟真实霓虹灯管发光质感</p>
+  <div class="demo" id="neon-demo" style="background:radial-gradient(ellipse at center,#0a0510,#000);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:50px">
+
+    <!-- Neon text -->
+    <div style="text-align:center">
+      <div class="neon-text" style="font-size:clamp(3rem,8vw,7rem);font-weight:900;letter-spacing:0.05em;font-family:'SF Pro Display',-apple-system,sans-serif">OPEN</div>
+      <div class="neon-text-pink" style="font-size:clamp(1.2rem,3vw,2.5rem);font-weight:700;letter-spacing:0.3em;margin-top:10px">24 HOURS</div>
+    </div>
+
+    <!-- Neon tube SVG shapes -->
+    <div style="display:flex;gap:clamp(20px,4vw,60px);align-items:center">
+      <!-- Circle -->
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#ff2d78" stroke-width="3"
+          style="filter:drop-shadow(0 0 4px #ff2d78) drop-shadow(0 0 12px #ff2d78) drop-shadow(0 0 30px #ff2d78);animation:neonFlicker 4s ease-in-out infinite"/>
+      </svg>
+      <!-- Heart -->
+      <svg width="110" height="100" viewBox="0 0 110 100">
+        <path d="M55,85 C55,85 10,55 10,30 C10,15 22,5 35,5 C44,5 52,10 55,17 C58,10 66,5 75,5 C88,5 100,15 100,30 C100,55 55,85 55,85Z"
+          fill="none" stroke="#00f5ff" stroke-width="3" stroke-linejoin="round"
+          style="filter:drop-shadow(0 0 4px #00f5ff) drop-shadow(0 0 12px #00f5ff) drop-shadow(0 0 30px #00f5ff);animation:neonFlicker2 6s ease-in-out infinite"/>
+      </svg>
+      <!-- Star -->
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35"
+          fill="none" stroke="#ffe600" stroke-width="3" stroke-linejoin="round"
+          style="filter:drop-shadow(0 0 4px #ffe600) drop-shadow(0 0 12px #ffe600) drop-shadow(0 0 30px #ffe600);animation:neonFlicker3 5s ease-in-out infinite"/>
+      </svg>
+      <!-- Arrow -->
+      <svg width="120" height="60" viewBox="0 0 120 60">
+        <path d="M10,30 L90,30 M70,10 L90,30 L70,50" fill="none" stroke="#39ff14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+          style="filter:drop-shadow(0 0 4px #39ff14) drop-shadow(0 0 12px #39ff14) drop-shadow(0 0 30px #39ff14);animation:neonFlicker 3s ease-in-out infinite"/>
+      </svg>
+    </div>
+  </div>
+</section>
+<style>
+  .neon-text {
+    color: #fff;
+    text-shadow:
+      0 0 5px #fff,
+      0 0 10px #fff,
+      0 0 20px #ff2d78,
+      0 0 40px #ff2d78,
+      0 0 80px #ff2d78,
+      0 0 120px #ff2d78;
+    animation: neonFlicker 4s ease-in-out infinite;
+  }
+  .neon-text-pink {
+    color: #fff;
+    text-shadow:
+      0 0 5px #fff,
+      0 0 10px #00f5ff,
+      0 0 25px #00f5ff,
+      0 0 60px #00f5ff,
+      0 0 100px #00f5ff;
+    animation: neonFlicker2 6s ease-in-out infinite;
+  }
+  @keyframes neonFlicker {
+    0%,19%,21%,23%,25%,54%,56%,100% {
+      opacity: 1;
+      text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff2d78, 0 0 40px #ff2d78, 0 0 80px #ff2d78;
+    }
+    20%,24%,55% { opacity: 0.7; text-shadow: none; }
+  }
+  @keyframes neonFlicker2 {
+    0%,30%,32%,70%,100% { opacity: 1; }
+    31%,71%,73% { opacity: 0.6; }
+    72% { opacity: 0.8; }
+  }
+  @keyframes neonFlicker3 {
+    0%,45%,47%,100% { opacity: 1; }
+    46%,80%,82% { opacity: 0.5; }
+    81% { opacity: 0.9; }
+  }
+</style>
+
+<!-- ===================== Effect 4: Spotlight ===================== -->
+<section class="effect-section" id="spotlight">
+  <h2>4. 聚光灯追踪</h2>
+  <p class="desc">Canvas 2D radialGradient — 鼠标控制聚光灯位置，暗室环境中光锥照亮内容，边缘柔和衰减</p>
+  <div class="demo" id="spot-demo" style="cursor:none">
+    <canvas id="spot-canvas"></canvas>
+    <!-- Content layer -->
+    <div id="spot-content" style="position:absolute;inset:0;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:clamp(16px,3vw,40px);padding:40px;pointer-events:none">
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('spot-demo');
+  const canvas = document.getElementById('spot-canvas');
+  const ctx = canvas.getContext('2d');
+  const content = document.getElementById('spot-content');
+  let w, h;
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  // Populate content cards
+  const items = ['Typography', 'Color', 'Layout', 'Motion', 'Texture', 'Space', 'Form', 'Light', 'Shadow', 'Depth'];
+  items.forEach(text => {
+    const el = document.createElement('div');
+    el.style.cssText = `
+      width:clamp(80px,12vw,140px);height:clamp(80px,12vw,140px);
+      border-radius:16px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;align-items:center;justify-content:center;
+      color:rgba(255,255,255,0.7);font-size:clamp(.7rem,1.2vw,1rem);
+      font-weight:600;letter-spacing:.05em;
+    `;
+    el.textContent = text;
+    content.appendChild(el);
+  });
+
+  let mouse = { x: w / 2, y: h / 2 };
+  let target = { x: w / 2, y: h / 2 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    target.x = e.clientX - r.left;
+    target.y = e.clientY - r.top;
+  });
+
+  function render(){
+    // Smooth follow
+    mouse.x += (target.x - mouse.x) * 0.12;
+    mouse.y += (target.y - mouse.y) * 0.12;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Dark overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.92)';
+    ctx.fillRect(0, 0, w, h);
+
+    // Spotlight cutout using composite
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+
+    const spotR = Math.min(w, h) * 0.22;
+    const spot = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, spotR);
+    spot.addColorStop(0,   'rgba(0,0,0,1)');
+    spot.addColorStop(0.5, 'rgba(0,0,0,0.95)');
+    spot.addColorStop(0.8, 'rgba(0,0,0,0.5)');
+    spot.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = spot;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+
+    // Warm tint overlay on spotlight area
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-atop';
+    const tint = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, spotR);
+    tint.addColorStop(0,   'rgba(255,240,200,0.08)');
+    tint.addColorStop(0.6, 'rgba(255,220,150,0.03)');
+    tint.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = tint;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+
+    // Custom cursor dot
+    ctx.beginPath();
+    ctx.arc(mouse.x, mouse.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,240,200,0.9)';
+    ctx.fill();
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 5: Light Rays Scatter ===================== -->
+<section class="effect-section" id="light-rays">
+  <h2>5. 光线散射</h2>
+  <p class="desc">Canvas 2D — 点光源向四周发射光线，光线沿途激活漂浮粒子，模拟丁达尔散射效果</p>
+  <div class="demo" id="rays-demo" style="background:#000;cursor:crosshair">
+    <canvas id="rays-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('rays-demo');
+  const canvas = document.getElementById('rays-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  let light = { x: 0, y: 0 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    light.x = e.clientX - r.left;
+    light.y = e.clientY - r.top;
+  });
+
+  const NUM_RAYS = 120;
+  const NUM_PARTICLES = 200;
+  const particles = [];
+
+  for (let i = 0; i < NUM_PARTICLES; i++) {
+    particles.push({
+      x: Math.random() * 2000,
+      y: Math.random() * 1200,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.2,
+      size: Math.random() * 2 + 0.5,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+
+  function pointOnSegment(px, py, ax, ay, bx, by) {
+    const dx = bx - ax, dy = by - ay;
+    const t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
+    const tc = Math.max(0, Math.min(1, t));
+    const cx2 = ax + tc * dx, cy2 = ay + tc * dy;
+    const dist = Math.sqrt((px - cx2) ** 2 + (py - cy2) ** 2);
+    return dist;
+  }
+
+  function render() {
+    const t = performance.now() * 0.001;
+    const lx = light.x || w * 0.5;
+    const ly = light.y || h * 0.4;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw rays
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < NUM_RAYS; i++) {
+      const angle = (i / NUM_RAYS) * Math.PI * 2;
+      const len = Math.min(w, h) * (0.6 + Math.random() * 0.4);
+      const ex = lx + Math.cos(angle) * len;
+      const ey = ly + Math.sin(angle) * len;
+
+      // Vary ray brightness
+      const brightness = 0.03 + Math.sin(angle * 3 + t * 0.5) * 0.015 + Math.random() * 0.01;
+      const hue = 35 + Math.sin(angle + t * 0.3) * 15;
+
+      const rg = ctx.createLinearGradient(lx, ly, ex, ey);
+      rg.addColorStop(0,   `hsla(${hue},90%,80%,${brightness * 4})`);
+      rg.addColorStop(0.15,`hsla(${hue},80%,70%,${brightness * 2})`);
+      rg.addColorStop(0.5, `hsla(${hue},70%,60%,${brightness})`);
+      rg.addColorStop(1,   `hsla(${hue},60%,50%,0)`);
+
+      ctx.beginPath();
+      ctx.moveTo(lx, ly);
+      ctx.lineTo(ex, ey);
+      ctx.strokeStyle = rg;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Light source core
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const coreG = ctx.createRadialGradient(lx, ly, 0, lx, ly, 80);
+    coreG.addColorStop(0,   'rgba(255,240,180,0.9)');
+    coreG.addColorStop(0.2, 'rgba(255,200,100,0.4)');
+    coreG.addColorStop(0.6, 'rgba(255,160,50,0.1)');
+    coreG.addColorStop(1,   'rgba(255,120,20,0)');
+    ctx.fillStyle = coreG;
+    ctx.fillRect(lx - 80, ly - 80, 160, 160);
+    ctx.restore();
+
+    // Floating dust particles lit by rays
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+
+      // Check if particle is near any ray
+      const dx = p.x - lx, dy = p.y - ly;
+      const distToLight = Math.sqrt(dx * dx + dy * dy);
+      const angleToP = Math.atan2(dy, dx);
+
+      // Find nearest ray angle
+      const nearestRayIdx = Math.round((angleToP / (Math.PI * 2) + 1) % 1 * NUM_RAYS);
+      const nearestAngle = (nearestRayIdx / NUM_RAYS) * Math.PI * 2;
+      const angleDiff = Math.abs(angleToP - nearestAngle);
+      const inRay = angleDiff < 0.08 || angleDiff > Math.PI * 2 - 0.08;
+
+      const falloff = Math.max(0, 1 - distToLight / (Math.min(w, h) * 0.6));
+      const lit = inRay ? falloff * 0.9 : falloff * 0.05;
+
+      if (lit > 0.01) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,230,160,${lit * 0.8})`;
+        ctx.fill();
+        ctx.restore();
+      }
+    });
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 6: Caustics ===================== -->
+<section class="effect-section" id="caustics">
+  <h2>6. 焦散水面</h2>
+  <p class="desc">WebGL GLSL — 模拟水面折射产生的焦散光斑，光线穿过波动水面在底部形成动态光网</p>
+  <div class="demo" id="caustics-demo" style="background:#000">
+    <canvas id="caustics-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('caustics-demo');
+  const canvas = document.getElementById('caustics-canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) { demo.innerHTML = '<p style="color:#888;padding:40px">WebGL not supported</p>'; return; }
+
+  let w, h;
+  function resize(){
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+    gl.viewport(0, 0, w, h);
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  const VS = `attribute vec2 a_pos; void main(){ gl_Position = vec4(a_pos,0,1); }`;
+  const FS = `
+    precision highp float;
+    uniform vec2  u_res;
+    uniform float u_time;
+
+    float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+    float noise(vec2 p){
+      vec2 i=floor(p), f=fract(p);
+      f=f*f*(3.0-2.0*f);
+      return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),
+                 mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+    }
+
+    // Water surface height
+    float water(vec2 p, float t){
+      float h = 0.0;
+      h += sin(p.x*4.0 + t*1.2) * 0.3;
+      h += sin(p.y*3.5 - t*0.9) * 0.25;
+      h += sin((p.x+p.y)*5.0 + t*1.5) * 0.15;
+      h += sin((p.x-p.y)*4.5 - t*1.1) * 0.12;
+      h += noise(p*6.0 + t*0.3) * 0.18;
+      return h;
+    }
+
+    void main(){
+      vec2 uv = gl_FragCoord.xy / u_res;
+      float t = u_time;
+
+      // Compute water normal via finite differences
+      float eps = 0.008;
+      float hC = water(uv, t);
+      float hR = water(uv + vec2(eps, 0.0), t);
+      float hU = water(uv + vec2(0.0, eps), t);
+      vec2 grad = vec2(hR - hC, hU - hC) / eps;
+
+      // Refracted UV — light bends through water
+      float depth = 0.35;
+      vec2 refractUV = uv + grad * depth;
+
+      // Caustic intensity: convergence of refracted rays
+      // Jacobian determinant approximation
+      float eps2 = 0.012;
+      vec2 gradR = vec2(water(uv+vec2(eps2,0),t)-hC, water(uv+vec2(0,eps2),t)-hC)/eps2;
+      float jac = abs(1.0 + (gradR.x + gradR.y) * depth * 2.0);
+      float caustic = 1.0 / max(jac, 0.3);
+      caustic = pow(caustic, 2.5);
+      caustic = clamp(caustic, 0.0, 4.0);
+
+      // Second layer of caustics (different frequency)
+      float hC2 = water(uv * 1.7 + vec2(0.3, 0.1), t * 0.8);
+      float hR2 = water(uv * 1.7 + vec2(eps+0.3, 0.1), t * 0.8);
+      float hU2 = water(uv * 1.7 + vec2(0.3, eps+0.1), t * 0.8);
+      vec2 grad2 = vec2(hR2-hC2, hU2-hC2)/eps;
+      float jac2 = abs(1.0 + (grad2.x+grad2.y)*depth*1.5);
+      float caustic2 = 1.0/max(jac2,0.4);
+      caustic2 = pow(caustic2, 2.0);
+      caustic2 = clamp(caustic2, 0.0, 3.0);
+
+      float totalCaustic = caustic * 0.6 + caustic2 * 0.4;
+
+      // Pool floor color
+      vec3 floorCol = mix(vec3(0.02,0.06,0.12), vec3(0.04,0.10,0.20), uv.y);
+      // Tile pattern
+      vec2 tile = fract(uv * 12.0);
+      float grout = step(0.92, tile.x) + step(0.92, tile.y);
+      floorCol = mix(floorCol, floorCol * 0.6, grout * 0.5);
+
+      // Caustic light color — warm white to cyan
+      vec3 causticCol = mix(
+        vec3(0.4, 0.8, 1.0),
+        vec3(1.0, 0.98, 0.85),
+        totalCaustic * 0.3
+      );
+
+      vec3 col = floorCol + causticCol * totalCaustic * 0.55;
+
+      // Water surface tint at top
+      float waterSurface = smoothstep(0.85, 1.0, uv.y);
+      vec3 waterCol = vec3(0.05, 0.15, 0.3) + vec3(0.1,0.3,0.5) * (hC * 0.5 + 0.5);
+      col = mix(col, waterCol, waterSurface * 0.8);
+
+      // Vignette
+      float vig = 1.0 - smoothstep(0.4, 1.0, length(uv - 0.5) * 1.4);
+      col *= vig * 0.4 + 0.6;
+
+      col = pow(col, vec3(0.9));
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  function compile(type, src){
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s); return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+  gl.linkProgram(prog); gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes  = gl.getUniformLocation(prog, 'u_res');
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+
+  function render(t){
+    gl.uniform2f(uRes, w, h);
+    gl.uniform1f(uTime, t * 0.001);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

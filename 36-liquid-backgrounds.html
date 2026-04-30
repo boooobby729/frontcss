@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>液态流体背景效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden}
+  .demo canvas{position:absolute;inset:0;width:100%;height:100%}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#lava-lamp">熔岩灯</a>
+  <a href="#metaball">Metaball 融合</a>
+  <a href="#fluid-sim">流体模拟</a>
+  <a href="#ink-drop">墨滴扩散</a>
+  <a href="#plasma">等离子体</a>
+  <a href="#caustics">水面焦散</a>
+</div>
+
+<!-- ===== 1. Lava Lamp ===== -->
+<section class="effect-section" id="lava-lamp">
+  <h2>1. 熔岩灯流体</h2>
+  <p class="desc">SVG feTurbulence + feDisplacementMap + CSS 动画 — 多个色块受热运动产生熔岩灯般的有机形变</p>
+  <div class="demo" style="display:flex;align-items:center;justify-content:center;background:#0a0012">
+    <svg width="0" height="0"><defs>
+      <filter id="lava-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo"/>
+      </filter>
+    </defs></svg>
+    <div id="lava-container" style="width:400px;height:500px;border-radius:50px;overflow:hidden;position:relative;background:linear-gradient(180deg,#1a0030,#0a0018);filter:url(#lava-goo)"></div>
+  </div>
+</section>
+<script>
+(function(){
+  const container = document.getElementById('lava-container');
+  const blobs = [];
+  const colors = ['#ff006e','#8338ec','#3a86ff','#fb5607','#ffbe0b'];
+  for(let i=0;i<8;i++){
+    const blob = document.createElement('div');
+    const size = 60 + Math.random()*80;
+    Object.assign(blob.style,{
+      position:'absolute',
+      width:size+'px',height:size+'px',
+      borderRadius:'50%',
+      background:colors[i%colors.length],
+      opacity:'0.8',
+      left:Math.random()*300+'px',
+      top:Math.random()*400+'px'
+    });
+    container.appendChild(blob);
+    blobs.push({el:blob,x:Math.random()*300,y:Math.random()*400,vx:(Math.random()-.5)*.8,vy:(Math.random()-.5)*.6-0.3,size});
+  }
+  function animate(){
+    blobs.forEach(b=>{
+      b.x+=b.vx; b.y+=b.vy;
+      if(b.x<-b.size||b.x>400) b.vx*=-1;
+      if(b.y<-b.size) {b.y=500; b.vx=(Math.random()-.5)*.8;}
+      if(b.y>500+b.size) {b.y=-b.size; b.vx=(Math.random()-.5)*.8;}
+      b.el.style.transform=`translate(${b.x}px,${b.y}px)`;
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+<!-- ===== 2. Metaball Fusion ===== -->
+<section class="effect-section" id="metaball">
+  <h2>2. Metaball 融合体</h2>
+  <p class="desc">Canvas 2D 像素操作 — 基于距离场的 Metaball 实时渲染，球体相互靠近时产生流体融合效果</p>
+  <div class="demo"><canvas id="metaball-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas = document.getElementById('metaball-canvas');
+  const ctx = canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  const balls = [];
+  for(let i=0;i<6;i++){
+    balls.push({x:Math.random()*800,y:Math.random()*600,r:60+Math.random()*50,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3});
+  }
+  
+  function draw(){
+    const imgData = ctx.createImageData(W,H);
+    const d = imgData.data;
+    // Sample every 4th pixel for performance
+    const step = 3;
+    for(let y=0;y<H;y+=step){
+      for(let x=0;x<W;x+=step){
+        let sum = 0;
+        for(const b of balls){
+          const dx=x-b.x, dy=y-b.y;
+          sum += (b.r*b.r)/(dx*dx+dy*dy+1);
+        }
+        if(sum>1){
+          const idx=(y*W+x)*4;
+          const t=Math.min(sum-1,1);
+          // Fill step x step block
+          for(let sy=0;sy<step&&y+sy<H;sy++){
+            for(let sx=0;sx<step&&x+sx<W;sx++){
+              const i2=((y+sy)*W+(x+sx))*4;
+              d[i2]=Math.floor(99+157*t);
+              d[i2+1]=Math.floor(102-60*t);
+              d[i2+2]=Math.floor(241);
+              d[i2+3]=255;
+            }
+          }
+        }
+      }
+    }
+    ctx.putImageData(imgData,0,0);
+  }
+  
+  function update(){
+    balls.forEach(b=>{
+      b.x+=b.vx; b.y+=b.vy;
+      if(b.x<0||b.x>W) b.vx*=-1;
+      if(b.y<0||b.y>H) b.vy*=-1;
+    });
+    draw();
+    requestAnimationFrame(update);
+  }
+  update();
+})();
+</script>
+
+<!-- ===== 3. Fluid Simulation ===== -->
+<section class="effect-section" id="fluid-sim">
+  <h2>3. 简化流体模拟</h2>
+  <p class="desc">Canvas 2D — 基于扩散方程的简化 Navier-Stokes 流体模拟，鼠标拖动注入速度与染料</p>
+  <div class="demo"><canvas id="fluid-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas = document.getElementById('fluid-canvas');
+  const ctx = canvas.getContext('2d');
+  let W,H,N=128;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  // Simplified dye diffusion
+  let density = new Float32Array(N*N);
+  let densityPrev = new Float32Array(N*N);
+  let velX = new Float32Array(N*N);
+  let velY = new Float32Array(N*N);
+  
+  let mouseX=0,mouseY=0,pmouseX=0,pmouseY=0,mouseDown=false;
+  canvas.addEventListener('mousemove',e=>{
+    pmouseX=mouseX; pmouseY=mouseY;
+    const r=canvas.getBoundingClientRect();
+    mouseX=(e.clientX-r.left)/W*N; mouseY=(e.clientY-r.top)/H*N;
+    if(mouseDown){
+      const ix=Math.floor(mouseX), iy=Math.floor(mouseY);
+      if(ix>0&&ix<N-1&&iy>0&&iy<N-1){
+        const idx=iy*N+ix;
+        density[idx]+=50;
+        velX[idx]+=(mouseX-pmouseX)*5;
+        velY[idx]+=(mouseY-pmouseY)*5;
+      }
+    }
+  });
+  canvas.addEventListener('mousedown',()=>mouseDown=true);
+  canvas.addEventListener('mouseup',()=>mouseDown=false);
+  // Auto inject
+  let t=0;
+  
+  function diffuse(arr, prev, diff){
+    const a = diff*0.016*N*N;
+    for(let k=0;k<4;k++){
+      for(let j=1;j<N-1;j++){
+        for(let i=1;i<N-1;i++){
+          const idx=j*N+i;
+          arr[idx]=(prev[idx]+a*(arr[idx-1]+arr[idx+1]+arr[idx-N]+arr[idx+N]))/(1+4*a);
+        }
+      }
+    }
+  }
+  
+  function advect(d, d0, vx, vy){
+    const dt = 0.016*N;
+    for(let j=1;j<N-1;j++){
+      for(let i=1;i<N-1;i++){
+        const idx=j*N+i;
+        let x=i-dt*vx[idx], y=j-dt*vy[idx];
+        x=Math.max(0.5,Math.min(N-1.5,x));
+        y=Math.max(0.5,Math.min(N-1.5,y));
+        const i0=Math.floor(x),j0=Math.floor(y);
+        const s1=x-i0, s0=1-s1, t1=y-j0, t0=1-t1;
+        d[idx]=s0*(t0*d0[j0*N+i0]+t1*d0[(j0+1)*N+i0])+s1*(t0*d0[j0*N+i0+1]+t1*d0[(j0+1)*N+i0+1]);
+      }
+    }
+  }
+  
+  function render(){
+    t+=0.02;
+    // Auto inject
+    const cx=N/2+Math.sin(t*2)*N/4, cy=N/2+Math.cos(t*3)*N/4;
+    const ci=Math.floor(cx), cj=Math.floor(cy);
+    if(ci>1&&ci<N-2&&cj>1&&cj<N-2){
+      density[cj*N+ci]+=8;
+      velX[cj*N+ci]+=Math.cos(t*5)*2;
+      velY[cj*N+ci]+=Math.sin(t*5)*2;
+    }
+    
+    // Step
+    densityPrev.set(density);
+    diffuse(density, densityPrev, 0.5);
+    densityPrev.set(density);
+    advect(density, densityPrev, velX, velY);
+    
+    // Decay
+    for(let i=0;i<N*N;i++) density[i]*=0.99;
+    
+    // Draw
+    const imgData = ctx.createImageData(W,H);
+    const d = imgData.data;
+    const scaleX=W/N, scaleY=H/N;
+    for(let j=0;j<N;j++){
+      for(let i=0;i<N;i++){
+        const v = Math.min(density[j*N+i]*4, 255);
+        const px=Math.floor(i*scaleX), py=Math.floor(j*scaleY);
+        const pw=Math.ceil(scaleX), ph=Math.ceil(scaleY);
+        for(let sy=0;sy<ph&&py+sy<H;sy++){
+          for(let sx=0;sx<pw&&px+sx<W;sx++){
+            const idx=((py+sy)*W+(px+sx))*4;
+            const hue=(v*2+t*50)%360;
+            const rgb=hslToRgb(hue/360,0.8,Math.min(v/255*0.6,0.6));
+            d[idx]=rgb[0]; d[idx+1]=rgb[1]; d[idx+2]=rgb[2]; d[idx+3]=255;
+          }
+        }
+      }
+    }
+    ctx.putImageData(imgData,0,0);
+    requestAnimationFrame(render);
+  }
+  
+  function hslToRgb(h,s,l){
+    let r,g,b;
+    if(s===0){r=g=b=l;}else{
+      const q=l<0.5?l*(1+s):l+s-l*s;
+      const p=2*l-q;
+      r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3);
+    }
+    return [Math.round(r*255),Math.round(g*255),Math.round(b*255)];
+  }
+  function hue2rgb(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;}
+  
+  render();
+})();
+</script>
+
+<!-- ===== 4. Ink Drop ===== -->
+<section class="effect-section" id="ink-drop">
+  <h2>4. 墨滴扩散</h2>
+  <p class="desc">Canvas 2D + Perlin Noise — 模拟墨水滴入水中的有机扩散效果，带分形触须</p>
+  <div class="demo"><canvas id="ink-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas = document.getElementById('ink-canvas');
+  const ctx = canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  class InkDrop{
+    constructor(x,y,color){
+      this.x=x; this.y=y; this.color=color;
+      this.particles=[]; this.age=0; this.maxAge=300;
+      for(let i=0;i<120;i++){
+        const angle=Math.random()*Math.PI*2;
+        const speed=0.5+Math.random()*3;
+        this.particles.push({
+          x,y,
+          vx:Math.cos(angle)*speed,
+          vy:Math.sin(angle)*speed,
+          size:2+Math.random()*6,
+          life:80+Math.random()*200,
+          age:0,
+          wobble:Math.random()*Math.PI*2
+        });
+      }
+    }
+    update(){
+      this.age++;
+      this.particles.forEach(p=>{
+        p.age++;
+        p.wobble+=0.05;
+        p.vx+=Math.sin(p.wobble)*0.05 + (Math.random()-.5)*0.1;
+        p.vy+=Math.cos(p.wobble)*0.03 + (Math.random()-.5)*0.1 + 0.02;
+        p.vx*=0.98; p.vy*=0.98;
+        p.x+=p.vx; p.y+=p.vy;
+        p.size*=0.998;
+      });
+    }
+    draw(ctx){
+      this.particles.forEach(p=>{
+        if(p.age>p.life) return;
+        const alpha = Math.max(0, 1 - p.age/p.life) * 0.6;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fillStyle=this.color.replace('1)',alpha+')');
+        ctx.fill();
+      });
+    }
+    get alive(){return this.age<this.maxAge;}
+  }
+  
+  const drops = [];
+  const inkColors = [
+    'rgba(99,102,241,1)','rgba(236,72,153,1)','rgba(6,182,212,1)',
+    'rgba(168,85,247,1)','rgba(34,197,94,1)'
+  ];
+  
+  // Auto-drop
+  let dropTimer=0;
+  function autoAdd(){
+    drops.push(new InkDrop(
+      100+Math.random()*(W-200),
+      50+Math.random()*H*0.3,
+      inkColors[Math.floor(Math.random()*inkColors.length)]
+    ));
+  }
+  
+  canvas.addEventListener('click',e=>{
+    const r=canvas.getBoundingClientRect();
+    drops.push(new InkDrop(e.clientX-r.left,e.clientY-r.top,inkColors[Math.floor(Math.random()*inkColors.length)]));
+  });
+  
+  function animate(){
+    ctx.fillStyle='rgba(6,6,8,0.03)';
+    ctx.fillRect(0,0,W,H);
+    
+    dropTimer++;
+    if(dropTimer%90===0) autoAdd();
+    
+    for(let i=drops.length-1;i>=0;i--){
+      drops[i].update();
+      drops[i].draw(ctx);
+      if(!drops[i].alive) drops.splice(i,1);
+    }
+    requestAnimationFrame(animate);
+  }
+  ctx.fillStyle='#060608';
+  ctx.fillRect(0,0,W,H);
+  autoAdd();
+  animate();
+})();
+</script>
+
+<!-- ===== 5. Plasma ===== -->
+<section class="effect-section" id="plasma">
+  <h2>5. 等离子体效果</h2>
+  <p class="desc">Canvas 2D 数学函数 — 经典等离子体算法，多层正弦波叠加产生迷幻流动色彩</p>
+  <div class="demo"><canvas id="plasma-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas = document.getElementById('plasma-canvas');
+  const ctx = canvas.getContext('2d');
+  // Use smaller buffer for performance
+  const PW=320, PH=200;
+  canvas.width=PW; canvas.height=PH;
+  canvas.style.imageRendering='auto';
+  let t=0;
+  
+  const imgData = ctx.createImageData(PW,PH);
+  
+  function render(){
+    t+=0.03;
+    const d=imgData.data;
+    for(let y=0;y<PH;y++){
+      for(let x=0;x<PW;x++){
+        const v1=Math.sin(x*0.03+t);
+        const v2=Math.sin(y*0.04-t*0.7);
+        const v3=Math.sin((x+y)*0.02+t*0.5);
+        const v4=Math.sin(Math.sqrt((x-PW/2)*(x-PW/2)+(y-PH/2)*(y-PH/2))*0.04-t);
+        const v=(v1+v2+v3+v4)/4;
+        const idx=(y*PW+x)*4;
+        d[idx]=Math.floor((Math.sin(v*Math.PI*2)*0.5+0.5)*180+50);
+        d[idx+1]=Math.floor((Math.cos(v*Math.PI*2+2)*0.5+0.5)*100+30);
+        d[idx+2]=Math.floor((Math.sin(v*Math.PI*2+4)*0.5+0.5)*220+35);
+        d[idx+3]=255;
+      }
+    }
+    ctx.putImageData(imgData,0,0);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 6. Water Caustics ===== -->
+<section class="effect-section" id="caustics">
+  <h2>6. 水面焦散光纹</h2>
+  <p class="desc">Canvas 2D — 模拟光线穿过水面折射产生的焦散图案（Caustics），实时波纹驱动</p>
+  <div class="demo"><canvas id="caustics-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas = document.getElementById('caustics-canvas');
+  const ctx = canvas.getContext('2d');
+  const CW=256, CH=192;
+  canvas.width=CW; canvas.height=CH;
+  canvas.style.imageRendering='auto';
+  let t=0;
+  
+  // Simple 2D noise approximation
+  function noise2d(x,y){
+    const n = Math.sin(x*12.9898+y*78.233)*43758.5453;
+    return n-Math.floor(n);
+  }
+  
+  function smoothNoise(x,y){
+    const ix=Math.floor(x), iy=Math.floor(y);
+    const fx=x-ix, fy=y-iy;
+    const a=noise2d(ix,iy), b=noise2d(ix+1,iy);
+    const c=noise2d(ix,iy+1), d=noise2d(ix+1,iy+1);
+    const ux=fx*fx*(3-2*fx), uy=fy*fy*(3-2*fy);
+    return a*(1-ux)*(1-uy)+b*ux*(1-uy)+c*(1-ux)*uy+d*ux*uy;
+  }
+  
+  function fbm(x,y,octaves){
+    let v=0, amp=0.5, freq=1;
+    for(let i=0;i<octaves;i++){
+      v+=smoothNoise(x*freq,y*freq)*amp;
+      amp*=0.5; freq*=2;
+    }
+    return v;
+  }
+  
+  const imgData = ctx.createImageData(CW,CH);
+  
+  function render(){
+    t+=0.015;
+    const d=imgData.data;
+    for(let y=0;y<CH;y++){
+      for(let x=0;x<CW;x++){
+        const nx=x/CW*4, ny=y/CH*4;
+        // Wave displacement
+        const dx=fbm(nx+t*0.5,ny+t*0.3,4)*2-1;
+        const dy=fbm(nx+t*0.3+5,ny-t*0.4+5,4)*2-1;
+        // Caustic pattern from convergence
+        const c1=fbm(nx+dx*0.8,ny+dy*0.8,3);
+        const c2=fbm(nx*1.5+dx*0.5+t*0.2,ny*1.5+dy*0.5-t*0.15,3);
+        const caustic=Math.pow(c1*c2*4,2);
+        const intensity=Math.min(caustic,1);
+        
+        const idx=(y*CW+x)*4;
+        d[idx]=Math.floor(10+intensity*60);
+        d[idx+1]=Math.floor(30+intensity*140);
+        d[idx+2]=Math.floor(60+intensity*195);
+        d[idx+3]=255;
+      }
+    }
+    ctx.putImageData(imgData,0,0);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>表单交互动画集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0f;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif;min-height:100vh;padding:60px 40px}
+  h1{text-align:center;font-size:2.4rem;margin-bottom:12px;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .subtitle{text-align:center;color:#666;margin-bottom:60px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:32px;max-width:1400px;margin:0 auto}
+  .card{background:#13131a;border:1px solid #1e1e2e;border-radius:16px;overflow:hidden;transition:border-color .3s}
+  .card:hover{border-color:#667eea33}
+  .stage{width:100%;min-height:200px;display:flex;align-items:center;justify-content:center;padding:32px;flex-direction:column;gap:16px}
+  .card-info{padding:16px 24px;border-top:1px solid #1e1e2e}
+  .card-info h3{font-size:.95rem;color:#ccc;margin-bottom:4px}
+  .card-info .tag{font-size:.7rem;color:#667eea;background:#667eea18;padding:3px 10px;border-radius:20px;display:inline-block}
+
+  /* 1. Floating Label */
+  .float-group{position:relative;width:260px}
+  .float-input{width:100%;padding:14px 0 6px;background:none;border:none;border-bottom:2px solid #333;color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .3s}
+  .float-input:focus{border-color:#667eea}
+  .float-label{position:absolute;top:14px;left:0;color:#666;font-size:1rem;pointer-events:none;transition:all .3s}
+  .float-input:focus~.float-label,.float-input:not(:placeholder-shown)~.float-label{top:-6px;font-size:.72rem;color:#667eea}
+  .float-bar{position:absolute;bottom:0;left:50%;width:0;height:2px;background:#667eea;transition:all .3s}
+  .float-input:focus~.float-bar{left:0;width:100%}
+
+  /* 2. Outlined Input */
+  .outlined-group{position:relative;width:260px}
+  .outlined-input{width:100%;padding:14px 16px;background:none;border:2px solid #333;border-radius:8px;color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .3s}
+  .outlined-input:focus{border-color:#667eea}
+  .outlined-label{position:absolute;top:14px;left:12px;color:#666;font-size:1rem;pointer-events:none;transition:all .3s;background:#13131a;padding:0 6px}
+  .outlined-input:focus~.outlined-label,.outlined-input:not(:placeholder-shown)~.outlined-label{top:-10px;font-size:.72rem;color:#667eea}
+
+  /* 3. Underline Expand */
+  .underline-group{position:relative;width:260px}
+  .underline-input{width:100%;padding:12px 0;background:none;border:none;border-bottom:1px solid #333;color:#fff;font-size:1rem;outline:none;font-family:inherit}
+  .underline-group::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:linear-gradient(90deg,#667eea,#f093fb);transition:width .4s}
+  .underline-group:focus-within::after{width:100%}
+
+  /* 4. Search Morph */
+  .search-morph{width:48px;height:48px;border-radius:50%;background:#1e1e2e;border:2px solid #333;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);overflow:hidden;position:relative}
+  .search-morph.open{width:260px;border-radius:24px;border-color:#667eea}
+  .search-morph svg{width:20px;height:20px;fill:none;stroke:#888;stroke-width:2;flex-shrink:0;transition:stroke .3s}
+  .search-morph.open svg{stroke:#667eea}
+  .search-morph input{width:0;border:none;background:none;color:#fff;font-size:.9rem;outline:none;padding:0;transition:all .3s;font-family:inherit}
+  .search-morph.open input{width:180px;padding:0 12px}
+
+  /* 5. Password Strength */
+  .pw-group{width:260px}
+  .pw-input{width:100%;padding:12px 16px;background:#1a1a24;border:1px solid #333;border-radius:8px;color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .3s}
+  .pw-input:focus{border-color:#667eea}
+  .pw-bar{height:4px;background:#1e1e2e;border-radius:2px;margin-top:8px;overflow:hidden}
+  .pw-fill{height:100%;width:0;border-radius:2px;transition:all .3s}
+  .pw-text{font-size:.72rem;color:#666;margin-top:4px}
+
+  /* 6. Checkbox Animated */
+  .custom-cb{display:flex;align-items:center;gap:12px;cursor:pointer;font-size:.9rem;color:#ccc}
+  .custom-cb input{display:none}
+  .cb-visual{width:24px;height:24px;border:2px solid #444;border-radius:6px;position:relative;transition:all .3s;display:flex;align-items:center;justify-content:center}
+  .custom-cb input:checked~.cb-visual{background:#667eea;border-color:#667eea}
+  .cb-visual svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .1s}
+  .custom-cb input:checked~.cb-visual svg{stroke-dashoffset:0}
+
+  /* 7. Radio Custom */
+  .custom-radio{display:flex;gap:16px}
+  .radio-item{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem;color:#ccc}
+  .radio-item input{display:none}
+  .radio-dot{width:20px;height:20px;border:2px solid #444;border-radius:50%;position:relative;transition:border-color .3s}
+  .radio-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:#667eea;transform:scale(0);transition:transform .3s cubic-bezier(.68,-.55,.27,1.55)}
+  .radio-item input:checked~.radio-dot{border-color:#667eea}
+  .radio-item input:checked~.radio-dot::after{transform:scale(1)}
+
+  /* 8. Range Slider */
+  .range-wrap{width:260px;position:relative}
+  .range-slider{-webkit-appearance:none;width:100%;height:6px;background:#1e1e2e;border-radius:3px;outline:none}
+  .range-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;cursor:pointer;box-shadow:0 2px 10px rgba(102,126,234,.4)}
+  .range-value{text-align:center;color:#667eea;font-size:1.2rem;font-weight:700;margin-top:8px}
+
+  /* 9. OTP Input */
+  .otp-group{display:flex;gap:10px}
+  .otp-input{width:44px;height:52px;background:#1a1a24;border:2px solid #333;border-radius:10px;color:#fff;font-size:1.2rem;text-align:center;outline:none;font-family:inherit;caret-color:#667eea;transition:border-color .3s}
+  .otp-input:focus{border-color:#667eea;box-shadow:0 0 0 3px #667eea22}
+
+  /* 10. Textarea Auto-grow */
+  .auto-textarea{width:260px;min-height:48px;max-height:160px;padding:12px 16px;background:#1a1a24;border:1px solid #333;border-radius:10px;color:#fff;font-size:.9rem;outline:none;resize:none;font-family:inherit;transition:border-color .3s;overflow:auto}
+  .auto-textarea:focus{border-color:#667eea}
+  .char-count{font-size:.7rem;color:#555;text-align:right;width:260px}
+
+  /* === EXPANDED === */
+
+  /* 11. Float Label */
+  .float-field { position: relative; width: 220px; }
+  .float-field input { width: 100%; padding: 16px 12px 6px; background: #13131a; border: 1px solid #333; border-radius: 10px; color: #ccc; font-size: .9rem; outline: none; transition: border-color .3s; font-family: inherit; }
+  .float-field input:focus { border-color: #667eea; }
+  .float-field label { position: absolute; top: 50%; left: 12px; transform: translateY(-50%); color: #666; font-size: .85rem; transition: all .3s; pointer-events: none; }
+  .float-field input:focus + label, .float-field input:not(:placeholder-shown) + label { top: 6px; transform: translateY(0); font-size: .65rem; color: #667eea; }
+
+  /* 12. OTP Input */
+  .otp-group { display: flex; gap: 8px; }
+  .otp-input { width: 44px; height: 52px; background: #13131a; border: 1px solid #333; border-radius: 10px; text-align: center; color: #fff; font-size: 1.2rem; font-weight: 700; outline: none; transition: border-color .3s; caret-color: #667eea; font-family: inherit; }
+  .otp-input:focus { border-color: #667eea; box-shadow: 0 0 0 3px #667eea22; }
+
+  /* 13. Star Rating */
+  .star-rating { display: flex; gap: 4px; flex-direction: row-reverse; justify-content: center; }
+  .star-rating input { display: none; }
+  .star-rating label { font-size: 1.8rem; color: #333; cursor: pointer; transition: color .2s; }
+  .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: #ffa500; }
+
+  /* 14. Chip Input */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; background: #13131a; border: 1px solid #333; border-radius: 10px; padding: 8px 12px; min-width: 220px; }
+  .chip { padding: 4px 12px; background: #667eea22; border: 1px solid #667eea44; border-radius: 20px; font-size: .75rem; color: #667eea; display: flex; align-items: center; gap: 6px; }
+  .chip-x { cursor: pointer; font-size: .6rem; opacity: .6; }
+  .chip-x:hover { opacity: 1; }
+
+  /* 15. Segmented Control */
+  .seg-ctrl { display: flex; background: #13131a; border-radius: 10px; padding: 3px; border: 1px solid #333; }
+  .seg-opt { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: .8rem; color: #888; transition: all .3s; text-align: center; }
+  .seg-opt.active { background: #667eea; color: #fff; }
+
+  /* 16. Date Picker Style */
+  .date-field { display: flex; align-items: center; gap: 8px; background: #13131a; border: 1px solid #333; border-radius: 10px; padding: 12px 16px; width: 220px; }
+  .date-field span { color: #888; font-size: .85rem; }
+  .date-icon { color: #667eea; }
+
+  /* 17. Slider With Value */
+  .slider-group { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .slider-val { font-size: 1.4rem; font-weight: 700; color: #667eea; }
+  .slider-bar { width: 200px; -webkit-appearance: none; height: 6px; background: #1a1a2e; border-radius: 3px; outline: none; }
+  .slider-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #667eea; border-radius: 50%; cursor: pointer; }
+
+  /* 18. Color Picker Preview */
+  .color-pick { display: flex; align-items: center; gap: 12px; }
+  .color-swatch { width: 40px; height: 40px; border-radius: 10px; border: 2px solid #333; cursor: pointer; transition: transform .2s; }
+  .color-swatch:hover { transform: scale(1.1); }
+
+  /* 19. Textarea Counter */
+  .ta-wrap { width: 240px; position: relative; }
+  .ta-wrap textarea { width: 100%; height: 80px; background: #13131a; border: 1px solid #333; border-radius: 10px; padding: 12px; color: #ccc; font-size: .85rem; resize: none; outline: none; font-family: inherit; }
+  .ta-wrap textarea:focus { border-color: #667eea; }
+  .ta-count { position: absolute; bottom: 8px; right: 12px; font-size: .7rem; color: #555; }
+
+  /* 20. Multi Step Indicator */
+  .ms-steps { display: flex; align-items: center; gap: 6px; }
+  .ms-dot { width: 10px; height: 10px; border-radius: 50%; background: #333; transition: all .3s; cursor: pointer; }
+  .ms-dot.active { background: #667eea; width: 30px; border-radius: 5px; }
+
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+  <h1>表单交互动画集</h1>
+  <p class="subtitle">20 种表单元素交互效果 · Form Interactions</p>
+  <div class="grid">
+
+    <!-- 1. Floating Label -->
+    <div class="card">
+      <div class="stage">
+        <div class="float-group">
+          <input class="float-input" placeholder=" " type="text">
+          <label class="float-label">Username</label>
+          <div class="float-bar"></div>
+        </div>
+        <div class="float-group">
+          <input class="float-input" placeholder=" " type="email">
+          <label class="float-label">Email</label>
+          <div class="float-bar"></div>
+        </div>
+      </div>
+      <div class="card-info"><h3>浮动标签输入框</h3><span class="tag">:placeholder-shown + label</span></div>
+    </div>
+
+    <!-- 2. Outlined -->
+    <div class="card">
+      <div class="stage">
+        <div class="outlined-group">
+          <input class="outlined-input" placeholder=" " type="text">
+          <label class="outlined-label">Full Name</label>
+        </div>
+      </div>
+      <div class="card-info"><h3>轮廓浮动标签</h3><span class="tag">border + notch label</span></div>
+    </div>
+
+    <!-- 3. Underline Expand -->
+    <div class="card">
+      <div class="stage">
+        <div class="underline-group">
+          <input class="underline-input" placeholder="Type something...">
+        </div>
+      </div>
+      <div class="card-info"><h3>渐变下划线展开</h3><span class="tag">::after width transition</span></div>
+    </div>
+
+    <!-- 4. Search Morph -->
+    <div class="card">
+      <div class="stage">
+        <div class="search-morph" onclick="this.classList.add('open');this.querySelector('input').focus()">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input placeholder="Search..." onblur="this.parentElement.classList.remove('open')">
+        </div>
+      </div>
+      <div class="card-info"><h3>搜索框变形</h3><span class="tag">circle to pill morph</span></div>
+    </div>
+
+    <!-- 5. Password Strength -->
+    <div class="card">
+      <div class="stage">
+        <div class="pw-group">
+          <input class="pw-input" type="password" placeholder="Enter password" oninput="checkPw(this.value)">
+          <div class="pw-bar"><div class="pw-fill" id="pwFill"></div></div>
+          <div class="pw-text" id="pwText">Enter a password</div>
+        </div>
+      </div>
+      <div class="card-info"><h3>密码强度指示器</h3><span class="tag">dynamic width + color</span></div>
+    </div>
+
+    <!-- 6. Animated Checkbox -->
+    <div class="card">
+      <div class="stage" style="flex-direction:row;gap:24px;">
+        <label class="custom-cb"><input type="checkbox"><span class="cb-visual"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 4"/></svg></span>Option A</label>
+        <label class="custom-cb"><input type="checkbox" checked><span class="cb-visual"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 4"/></svg></span>Option B</label>
+      </div>
+      <div class="card-info"><h3>SVG 勾选复选框</h3><span class="tag">stroke-dashoffset reveal</span></div>
+    </div>
+
+    <!-- 7. Custom Radio -->
+    <div class="card">
+      <div class="stage">
+        <div class="custom-radio">
+          <label class="radio-item"><input type="radio" name="r1" checked><span class="radio-dot"></span>Small</label>
+          <label class="radio-item"><input type="radio" name="r1"><span class="radio-dot"></span>Medium</label>
+          <label class="radio-item"><input type="radio" name="r1"><span class="radio-dot"></span>Large</label>
+        </div>
+      </div>
+      <div class="card-info"><h3>弹性单选按钮</h3><span class="tag">scale bounce ::after</span></div>
+    </div>
+
+    <!-- 8. Range Slider -->
+    <div class="card">
+      <div class="stage">
+        <div class="range-wrap">
+          <input class="range-slider" type="range" min="0" max="100" value="50" oninput="document.getElementById('rangeVal').textContent=this.value">
+          <div class="range-value" id="rangeVal">50</div>
+        </div>
+      </div>
+      <div class="card-info"><h3>渐变滑块</h3><span class="tag">range + thumb gradient</span></div>
+    </div>
+
+    <!-- 9. OTP Input -->
+    <div class="card">
+      <div class="stage">
+        <div class="otp-group">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this)">
+        </div>
+      </div>
+      <div class="card-info"><h3>OTP 验证码输入</h3><span class="tag">auto-focus next + border</span></div>
+    </div>
+
+    <!-- 10. Auto-grow Textarea -->
+    <div class="card">
+      <div class="stage">
+        <textarea class="auto-textarea" placeholder="Write something..." oninput="autoGrow(this);updateCount(this)" maxlength="200"></textarea>
+        <div class="char-count"><span id="charNum">0</span>/200</div>
+      </div>
+      <div class="card-info"><h3>自动增长文本域</h3><span class="tag">scrollHeight auto + counter</span></div>
+    </div>
+
+  
+    <div class="card"><h3>浮动标签</h3><span class="tag">:focus + label position</span><div class="stage"><div class="float-field"><input placeholder=" " type="text"><label>Your Name</label></div></div></div>
+    <div class="card"><h3>OTP 验证码</h3><span class="tag">单字符 input 组</span><div class="stage"><div class="otp-group"><input class="otp-input" maxlength="1" value="4"><input class="otp-input" maxlength="1" value="2"><input class="otp-input" maxlength="1"><input class="otp-input" maxlength="1"></div></div></div>
+    <div class="card"><h3>星级评分</h3><span class="tag">radio + :checked ~</span><div class="stage"><div class="star-rating"><input type="radio" id="s5" name="star"><label for="s5">★</label><input type="radio" id="s4" name="star"><label for="s4">★</label><input type="radio" id="s3" name="star" checked><label for="s3">★</label><input type="radio" id="s2" name="star"><label for="s2">★</label><input type="radio" id="s1" name="star"><label for="s1">★</label></div></div></div>
+    <div class="card"><h3>标签输入</h3><span class="tag">chip flex-wrap</span><div class="stage"><div class="chip-group"><span class="chip">React <span class="chip-x">×</span></span><span class="chip">Vue <span class="chip-x">×</span></span><span class="chip">CSS <span class="chip-x">×</span></span></div></div></div>
+    <div class="card"><h3>分段控制器</h3><span class="tag">segmented control</span><div class="stage"><div class="seg-ctrl"><span class="seg-opt active" onclick="this.parentElement.querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('active'));this.classList.add('active')">Day</span><span class="seg-opt" onclick="this.parentElement.querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('active'));this.classList.add('active')">Week</span><span class="seg-opt" onclick="this.parentElement.querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('active'));this.classList.add('active')">Month</span></div></div></div>
+    <div class="card"><h3>日期选择样式</h3><span class="tag">icon + text</span><div class="stage"><div class="date-field"><span class="date-icon">📅</span><span>2024-12-25</span></div></div></div>
+    <div class="card"><h3>数值滑块</h3><span class="tag">range + value display</span><div class="stage"><div class="slider-group"><div class="slider-val">60</div><input type="range" class="slider-bar" value="60" oninput="this.previousElementSibling.textContent=this.value"></div></div></div>
+    <div class="card"><h3>色彩选择器</h3><span class="tag">swatch preview</span><div class="stage"><div class="color-pick"><div class="color-swatch" style="background:#667eea"></div><div class="color-swatch" style="background:#f093fb"></div><div class="color-swatch" style="background:#43e97b"></div><div class="color-swatch" style="background:#f5576c"></div><div class="color-swatch" style="background:#ffa500"></div></div></div></div>
+    <div class="card"><h3>字数统计</h3><span class="tag">textarea counter</span><div class="stage"><div class="ta-wrap"><textarea placeholder="Write something..." oninput="this.nextElementSibling.textContent=this.value.length+'/200'"></textarea><div class="ta-count">0/200</div></div></div></div>
+    <div class="card"><h3>多步指示器</h3><span class="tag">dot 胶囊切换</span><div class="stage"><div class="ms-steps"><div class="ms-dot active" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div><div class="ms-dot" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div><div class="ms-dot" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div><div class="ms-dot" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div></div></div></div>
+
+  </div>
+
+<script>
+  // Password strength
+  function checkPw(v){
+    const fill=document.getElementById('pwFill');
+    const text=document.getElementById('pwText');
+    let s=0;
+    if(v.length>4)s++;if(v.length>8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+    const levels=[{w:'0%',c:'#333',t:'Enter a password'},{w:'20%',c:'#f5576c',t:'Very weak'},{w:'40%',c:'#ff6b6b',t:'Weak'},{w:'60%',c:'#fee140',t:'Fair'},{w:'80%',c:'#43e97b',t:'Strong'},{w:'100%',c:'#667eea',t:'Very strong'}];
+    const l=levels[s];
+    fill.style.width=l.w;fill.style.background=l.c;text.textContent=l.t;text.style.color=l.c;
+  }
+
+  // OTP auto-focus
+  function otpNext(el){
+    if(el.value.length===1&&el.nextElementSibling){el.nextElementSibling.focus();}
+  }
+
+  // Auto-grow textarea
+  function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px';}
+  function updateCount(el){document.getElementById('charNum').textContent=el.value.length;}
+</script>
+<script src="copy-effect.js"></script>
+</body>
+</html>

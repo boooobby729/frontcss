@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光标特效集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; overflow-x: hidden; }
+  .section { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor: none; }
+  .section h2 { font-size: 2.5rem; font-weight: 800; color: #fff; position: relative; z-index: 2; pointer-events: none; }
+  .section p { color: rgba(255,255,255,.5); margin-top: 12px; position: relative; z-index: 2; pointer-events: none; }
+  .tag { font-size: .75rem; color: #667eea; background: rgba(102,126,234,.15); padding: 4px 14px; border-radius: 20px; position: relative; z-index: 2; margin-top: 16px; pointer-events: none; }
+  .nav { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 6px; cursor: auto; }
+  .nav a { color: #555; font-size: .75rem; text-decoration: none; padding: 4px 10px; border-radius: 4px; transition: all .2s; cursor: pointer; }
+  .nav a:hover { color: #fff; background: #ffffff10; }
+
+  /* Shared cursor styles */
+  .custom-cursor { position: fixed; pointer-events: none; z-index: 9999; transition: opacity .3s; }
+</style>
+</head>
+<body>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);cursor:pointer;">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#spotlight">Spotlight</a>
+  <a href="#trail">Trail</a>
+  <a href="#glow">Glow Ring</a>
+  <a href="#magnetic">Magnetic</a>
+  <a href="#morph">Morph</a>
+  <a href="#invert">Invert</a>
+  <a href="#ripple">Ripple</a>
+  <a href="#emoji">Emoji Rain</a>
+  <a href="#crosshair">Crosshair</a>
+  <a href="#bubble">Bubble</a>
+  <a href="#rainbow">Rainbow</a>
+  <a href="#text-follow">Text Follow</a>
+  <a href="#spring">Spring</a>
+  <a href="#galaxy-cursor">Galaxy</a>
+  <a href="#elastic">Elastic Band</a>
+  <a href="#torch">Torch</a>
+  <a href="#ink">Ink Drip</a>
+  <a href="#neon-cursor">Neon Glow</a>
+  <a href="#magnet-field">Field</a>
+  <a href="#cursor-clock">Clock</a>
+</div>
+
+<!-- 1. Spotlight Cursor -->
+<div class="section" id="spotlight" data-effect="spotlight">
+  <h2>聚光灯光标</h2>
+  <p>鼠标照亮周围区域，其余暗化</p>
+  <span class="tag">radial-gradient mask + mousemove</span>
+</div>
+
+<!-- 2. Particle Trail -->
+<div class="section" id="trail" data-effect="trail">
+  <canvas id="trailCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>粒子拖尾</h2>
+  <p>鼠标移动留下彩色粒子尾迹</p>
+  <span class="tag">Canvas particle + fade</span>
+</div>
+
+<!-- 3. Glow Ring -->
+<div class="section" id="glow" data-effect="glow">
+  <h2>发光环光标</h2>
+  <p>大小双环跟随鼠标，外环带延迟</p>
+  <span class="tag">inner dot + outer ring + lerp</span>
+</div>
+
+<!-- 4. Magnetic Cursor -->
+<div class="section" id="magnetic" data-effect="magnetic" style="cursor:auto;">
+  <h2>磁吸光标</h2>
+  <p>按钮被鼠标吸引偏移</p>
+  <span class="tag">transform translate + distance</span>
+  <div style="display:flex;gap:24px;margin-top:32px;position:relative;z-index:2;">
+    <button class="mag-btn" style="padding:16px 40px;background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:50px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:transform .2s;">Magnetic</button>
+    <button class="mag-btn" style="padding:16px 40px;background:linear-gradient(135deg,#43e97b,#38f9d7);border:none;border-radius:50px;color:#000;font-size:1rem;font-weight:600;cursor:pointer;transition:transform .2s;">Button</button>
+    <button class="mag-btn" style="padding:16px 40px;background:linear-gradient(135deg,#f5576c,#fa709a);border:none;border-radius:50px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:transform .2s;">Attract</button>
+  </div>
+</div>
+
+<!-- 5. Morphing Cursor -->
+<div class="section" id="morph" data-effect="morph">
+  <h2>变形光标</h2>
+  <p>悬停文字时光标变形放大</p>
+  <span class="tag">scale + border-radius morph</span>
+  <div style="display:flex;gap:40px;margin-top:32px;position:relative;z-index:2;">
+    <span class="morph-target" style="font-size:1.4rem;color:#fff;font-weight:600;cursor:pointer;">Hover Link</span>
+    <span class="morph-target" style="font-size:1.4rem;color:#f093fb;font-weight:600;cursor:pointer;">Explore</span>
+    <span class="morph-target" style="font-size:1.4rem;color:#43e97b;font-weight:600;cursor:pointer;">Discover</span>
+  </div>
+</div>
+
+<!-- 6. Invert Cursor (mix-blend-mode) -->
+<div class="section" id="invert" data-effect="invert" style="background:linear-gradient(135deg,#fff,#e0e0e0);">
+  <h2 style="color:#000;">反色光标</h2>
+  <p style="color:rgba(0,0,0,.5);">mix-blend-mode 实现鼠标区域反色</p>
+  <span class="tag" style="color:#000;background:rgba(0,0,0,.1);">mix-blend-mode: difference</span>
+</div>
+
+<!-- 7. Ripple Click -->
+<div class="section" id="ripple" data-effect="ripple">
+  <canvas id="rippleCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>涟漪点击</h2>
+  <p>点击产生水波纹扩散效果</p>
+  <span class="tag">Canvas ring + expanding radius</span>
+</div>
+
+<!-- 8. Emoji Rain -->
+<div class="section" id="emoji" data-effect="emoji">
+  <h2>Emoji 雨</h2>
+  <p>鼠标移动洒落 Emoji 表情</p>
+  <span class="tag">DOM particles + gravity</span>
+</div>
+
+<!-- 9. Crosshair -->
+<div class="section" id="crosshair" data-effect="crosshair">
+  <h2>十字准星</h2>
+  <p>全屏十字线跟随光标</p>
+  <span class="tag">horizontal + vertical lines</span>
+</div>
+
+<!-- 10. Bubble Cursor -->
+<div class="section" id="bubble" data-effect="bubble">
+  <canvas id="bubbleCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>气泡光标</h2>
+  <p>光标留下渐隐的彩色气泡</p>
+  <span class="tag">Canvas circles + fade out</span>
+</div>
+
+<!-- 11. Rainbow Trail -->
+<div class="section" id="rainbow" data-effect="rainbow">
+  <canvas id="rainbowCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>彩虹拖尾</h2>
+  <p>光标拖出渐变彩虹轨迹</p>
+  <span class="tag">HSL hue rotation + line segments</span>
+</div>
+
+<!-- 12. Text Follow Cursor -->
+<div class="section" id="text-follow" data-effect="textfollow">
+  <h2>文字跟随</h2>
+  <p>文字沿光标轨迹排列成环</p>
+  <span class="tag">circular text + rotation</span>
+</div>
+
+<!-- 13. Spring Cursor -->
+<div class="section" id="spring" data-effect="spring">
+  <canvas id="springCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>弹簧光标</h2>
+  <p>多个节点以弹簧物理跟随光标</p>
+  <span class="tag">spring physics + chain nodes</span>
+</div>
+
+<!-- 14. Galaxy Cursor -->
+<div class="section" id="galaxy-cursor" data-effect="galaxycursor">
+  <canvas id="galaxyCursorCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>星尘光标</h2>
+  <p>光标周围旋转的星尘粒子</p>
+  <span class="tag">orbiting particles + sparkle</span>
+</div>
+
+<!-- 15. Elastic Band -->
+<div class="section" id="elastic" data-effect="elastic">
+  <canvas id="elasticCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>弹性绳索</h2>
+  <p>点击两点之间生成弹性绳索</p>
+  <span class="tag">click anchor + elastic line</span>
+</div>
+
+<!-- 16. Torch Cursor -->
+<div class="section" id="torch" data-effect="torch" style="background:#030308;">
+  <canvas id="torchCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>火把光标</h2>
+  <p>鼠标周围是温暖火光，其余区域一片漆黑</p>
+  <span class="tag">Canvas radialGradient + warm tone</span>
+</div>
+
+<!-- 17. Ink Drip -->
+<div class="section" id="ink" data-effect="ink">
+  <canvas id="inkCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>墨水滴落</h2>
+  <p>点击产生墨水扩散效果</p>
+  <span class="tag">Canvas circles + expanding + fade</span>
+</div>
+
+<!-- 18. Neon Glow Cursor -->
+<div class="section" id="neon-cursor" data-effect="neoncursor">
+  <canvas id="neonCursorCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>霓虹光影</h2>
+  <p>光标留下明亮的霓虹光影轨迹</p>
+  <span class="tag">Canvas glow trail + hue shift</span>
+</div>
+
+<!-- 19. Magnetic Field -->
+<div class="section" id="magnet-field" data-effect="field">
+  <canvas id="fieldCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>磁场力线</h2>
+  <p>粒子被光标排斥形成磁场线效果</p>
+  <span class="tag">repel force + grid particles</span>
+</div>
+
+<!-- 20. Clock Cursor -->
+<div class="section" id="cursor-clock" data-effect="clockcursor">
+  <canvas id="clockCursorCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <h2>时钟光标</h2>
+  <p>光标位置显示实时时钟</p>
+  <span class="tag">Canvas arc + real time</span>
+</div>
+
+<!-- Cursor elements -->
+<div id="cursorDot" class="custom-cursor" style="width:8px;height:8px;background:#fff;border-radius:50%;"></div>
+<div id="cursorRing" class="custom-cursor" style="width:40px;height:40px;border:2px solid rgba(255,255,255,.5);border-radius:50%;transition:width .3s,height .3s,border-color .3s;"></div>
+<div id="cursorSpotlight" class="custom-cursor" style="width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.08),transparent 60%);opacity:0;"></div>
+<div id="cursorInvert" class="custom-cursor" style="width:60px;height:60px;border-radius:50%;background:#fff;mix-blend-mode:difference;opacity:0;"></div>
+<div id="cursorCrosshairH" class="custom-cursor" style="width:100%;height:1px;background:rgba(102,126,234,.4);left:0;opacity:0;"></div>
+<div id="cursorCrosshairV" class="custom-cursor" style="width:1px;height:100%;background:rgba(102,126,234,.4);top:0;opacity:0;"></div>
+<div id="cursorTextCircle" class="custom-cursor" style="width:100px;height:100px;opacity:0;font-size:10px;color:#667eea;letter-spacing:2px;"></div>
+
+<script>
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  const spotlight = document.getElementById('cursorSpotlight');
+  const invertCursor = document.getElementById('cursorInvert');
+  const trailCanvas = document.getElementById('trailCanvas');
+  const trailCtx = trailCanvas.getContext('2d');
+
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  let currentSection = '';
+  let trailParticles = [];
+
+  // Resize trail canvas
+  function resizeTrail() {
+    const s = trailCanvas.parentElement;
+    if (s) { trailCanvas.width = s.offsetWidth; trailCanvas.height = s.offsetHeight; }
+  }
+  resizeTrail();
+  window.addEventListener('resize', resizeTrail);
+
+  // Mouse tracking
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+
+    // Detect section
+    const el = document.elementFromPoint(mx, my);
+    const sec = el ? el.closest('.section') : null;
+    currentSection = sec ? sec.dataset.effect : '';
+
+    // Spotlight
+    if (currentSection === 'spotlight') {
+      spotlight.style.opacity = '1';
+      spotlight.style.left = (mx - 150) + 'px';
+      spotlight.style.top = (my - 150) + 'px';
+      sec.style.background = `radial-gradient(circle 200px at ${mx}px ${my - sec.getBoundingClientRect().top}px, rgba(30,30,50,1), rgba(10,10,15,1))`;
+    } else {
+      spotlight.style.opacity = '0';
+    }
+
+    // Trail particles
+    if (currentSection === 'trail') {
+      const rect = trailCanvas.parentElement.getBoundingClientRect();
+      for (let i = 0; i < 3; i++) {
+        trailParticles.push({
+          x: mx - rect.left + (Math.random() - .5) * 10,
+          y: my - rect.top + (Math.random() - .5) * 10,
+          vx: (Math.random() - .5) * 2,
+          vy: (Math.random() - .5) * 2 - 1,
+          life: 1,
+          color: ['#667eea','#f093fb','#43e97b','#f5576c','#fee140'][Math.floor(Math.random()*5)],
+          r: 2 + Math.random() * 3
+        });
+      }
+    }
+
+    // Glow ring cursors
+    dot.style.display = (currentSection === 'glow' || currentSection === 'morph') ? 'block' : 'none';
+    ring.style.display = (currentSection === 'glow' || currentSection === 'morph') ? 'block' : 'none';
+
+    // Invert
+    if (currentSection === 'invert') {
+      invertCursor.style.opacity = '1';
+      invertCursor.style.left = (mx - 30) + 'px';
+      invertCursor.style.top = (my - 30) + 'px';
+    } else {
+      invertCursor.style.opacity = '0';
+    }
+
+    // Dot follows immediately
+    dot.style.left = (mx - 4) + 'px';
+    dot.style.top = (my - 4) + 'px';
+
+    // Morph cursor
+    if (currentSection === 'morph') {
+      const target = el ? el.closest('.morph-target') : null;
+      if (target) {
+        ring.style.width = '60px'; ring.style.height = '60px';
+        ring.style.borderColor = 'rgba(240,147,251,.6)';
+        ring.style.borderRadius = '50%';
+      } else {
+        ring.style.width = '40px'; ring.style.height = '40px';
+        ring.style.borderColor = 'rgba(255,255,255,.5)';
+      }
+    }
+  });
+
+  // Smooth ring follow
+  function animateRing() {
+    rx += (mx - rx) * .12;
+    ry += (my - ry) * .12;
+    const rw = parseInt(ring.style.width) || 40;
+    ring.style.left = (rx - rw/2) + 'px';
+    ring.style.top = (ry - rw/2) + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Trail animation
+  function animateTrail() {
+    trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+    trailParticles = trailParticles.filter(p => p.life > 0);
+    trailParticles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      p.vy += .02;
+      p.life -= .02;
+      trailCtx.globalAlpha = p.life;
+      trailCtx.beginPath();
+      trailCtx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+      trailCtx.fillStyle = p.color;
+      trailCtx.fill();
+    });
+    trailCtx.globalAlpha = 1;
+    requestAnimationFrame(animateTrail);
+  }
+  animateTrail();
+
+  // Magnetic buttons
+  document.querySelectorAll('.mag-btn').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      const bx = r.left + r.width / 2, by = r.top + r.height / 2;
+      const dx = e.clientX - bx, dy = e.clientY - by;
+      btn.style.transform = `translate(${dx * .3}px, ${dy * .3}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+    });
+  });
+
+  // === 7. Ripple Click ===
+  const rippleCanvas = document.getElementById('rippleCanvas');
+  const rippleCtx = rippleCanvas.getContext('2d');
+  let ripples = [];
+
+  function resizeRipple() {
+    const s = rippleCanvas.parentElement;
+    if (s) { rippleCanvas.width = s.offsetWidth; rippleCanvas.height = s.offsetHeight; }
+  }
+  resizeRipple();
+  window.addEventListener('resize', resizeRipple);
+
+  document.getElementById('ripple').addEventListener('click', e => {
+    const rect = rippleCanvas.parentElement.getBoundingClientRect();
+    const colors = ['#667eea', '#f093fb', '#43e97b', '#f5576c'];
+    ripples.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, r: 0, maxR: 150 + Math.random() * 100, life: 1, color: colors[Math.floor(Math.random() * 4)] });
+  });
+
+  function animateRipples() {
+    rippleCtx.clearRect(0, 0, rippleCanvas.width, rippleCanvas.height);
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const rp = ripples[i];
+      rp.r += 3;
+      rp.life = 1 - rp.r / rp.maxR;
+      if (rp.life <= 0) { ripples.splice(i, 1); continue; }
+      rippleCtx.beginPath();
+      rippleCtx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+      rippleCtx.strokeStyle = rp.color;
+      rippleCtx.globalAlpha = rp.life * .6;
+      rippleCtx.lineWidth = 2;
+      rippleCtx.stroke();
+      // Inner glow
+      rippleCtx.globalAlpha = rp.life * .1;
+      rippleCtx.fillStyle = rp.color;
+      rippleCtx.fill();
+    }
+    rippleCtx.globalAlpha = 1;
+    requestAnimationFrame(animateRipples);
+  }
+  animateRipples();
+
+  // === 8. Emoji Rain ===
+  const emojiContainer = document.getElementById('emoji');
+  const emojis = ['✨', '🌟', '💫', '⭐', '🔮', '💎', '🎆', '🌈', '🦋', '🍀'];
+
+  document.addEventListener('mousemove', e => {
+    if (currentSection !== 'emoji') return;
+    if (Math.random() > .3) return;
+    const em = document.createElement('span');
+    em.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    em.style.cssText = `position:absolute;left:${e.clientX - emojiContainer.getBoundingClientRect().left}px;top:${e.clientY - emojiContainer.getBoundingClientRect().top}px;font-size:${14 + Math.random() * 16}px;pointer-events:none;z-index:5;transition:all 1.5s ease-out;opacity:1;`;
+    emojiContainer.appendChild(em);
+    requestAnimationFrame(() => {
+      em.style.transform = `translateY(${60 + Math.random() * 80}px) rotate(${(Math.random() - .5) * 90}deg)`;
+      em.style.opacity = '0';
+    });
+    setTimeout(() => em.remove(), 1600);
+  });
+
+  // === 9. Crosshair ===
+  const crossH = document.getElementById('cursorCrosshairH');
+  const crossV = document.getElementById('cursorCrosshairV');
+
+  // === 10. Bubble Cursor ===
+  const bubbleCanvas = document.getElementById('bubbleCanvas');
+  const bubbleCtx = bubbleCanvas.getContext('2d');
+  let bubbles = [];
+
+  function resizeBubble() {
+    const s = bubbleCanvas.parentElement;
+    if (s) { bubbleCanvas.width = s.offsetWidth; bubbleCanvas.height = s.offsetHeight; }
+  }
+  resizeBubble();
+  window.addEventListener('resize', resizeBubble);
+
+  function animateBubbles() {
+    bubbleCtx.clearRect(0, 0, bubbleCanvas.width, bubbleCanvas.height);
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+      const b = bubbles[i];
+      b.y -= b.speed;
+      b.x += Math.sin(b.wobble) * .5;
+      b.wobble += .05;
+      b.life -= .008;
+      if (b.life <= 0) { bubbles.splice(i, 1); continue; }
+      bubbleCtx.beginPath();
+      bubbleCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      bubbleCtx.strokeStyle = b.color;
+      bubbleCtx.globalAlpha = b.life * .5;
+      bubbleCtx.lineWidth = 1.5;
+      bubbleCtx.stroke();
+      // Highlight
+      bubbleCtx.beginPath();
+      bubbleCtx.arc(b.x - b.r * .3, b.y - b.r * .3, b.r * .2, 0, Math.PI * 2);
+      bubbleCtx.fillStyle = 'rgba(255,255,255,.4)';
+      bubbleCtx.fill();
+    }
+    bubbleCtx.globalAlpha = 1;
+    requestAnimationFrame(animateBubbles);
+  }
+  animateBubbles();
+
+  // === 11. Rainbow Trail ===
+  const rainbowCanvas = document.getElementById('rainbowCanvas');
+  const rainbowCtx = rainbowCanvas.getContext('2d');
+  let rainbowPoints = [];
+
+  function resizeRainbow() {
+    const s = rainbowCanvas.parentElement;
+    if (s) { rainbowCanvas.width = s.offsetWidth; rainbowCanvas.height = s.offsetHeight; }
+  }
+  resizeRainbow();
+  window.addEventListener('resize', resizeRainbow);
+
+  function animateRainbow() {
+    rainbowCtx.clearRect(0, 0, rainbowCanvas.width, rainbowCanvas.height);
+    for (let i = rainbowPoints.length - 1; i >= 0; i--) {
+      rainbowPoints[i].life -= .015;
+      if (rainbowPoints[i].life <= 0) { rainbowPoints.splice(i, 1); }
+    }
+    if (rainbowPoints.length > 1) {
+      for (let i = 1; i < rainbowPoints.length; i++) {
+        const p = rainbowPoints[i - 1], q = rainbowPoints[i];
+        rainbowCtx.beginPath();
+        rainbowCtx.moveTo(p.x, p.y);
+        rainbowCtx.lineTo(q.x, q.y);
+        rainbowCtx.strokeStyle = `hsla(${q.hue},80%,60%,${q.life * .7})`;
+        rainbowCtx.lineWidth = 3 * q.life;
+        rainbowCtx.lineCap = 'round';
+        rainbowCtx.stroke();
+      }
+    }
+    requestAnimationFrame(animateRainbow);
+  }
+  animateRainbow();
+
+  // === 12. Text Follow Cursor ===
+  const textCircle = document.getElementById('cursorTextCircle');
+  const circleText = 'CREATIVE · CURSOR · EFFECT · ';
+  let textAngle = 0;
+
+  function renderTextCircle() {
+    textCircle.innerHTML = '';
+    const chars = circleText.split('');
+    chars.forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.textContent = ch;
+      span.style.cssText = `position:absolute;left:50%;top:0;transform-origin:0 50px;transform:rotate(${(360 / chars.length) * i + textAngle}deg);display:inline-block;`;
+      textCircle.appendChild(span);
+    });
+    textAngle += .5;
+  }
+
+  // === 13. Spring Cursor ===
+  const springCanvas = document.getElementById('springCanvas');
+  const springCtx = springCanvas.getContext('2d');
+  const NODES = 8;
+  let springNodes = [];
+  for (let i = 0; i < NODES; i++) springNodes.push({ x: 0, y: 0, vx: 0, vy: 0 });
+
+  function resizeSpring() {
+    const s = springCanvas.parentElement;
+    if (s) { springCanvas.width = s.offsetWidth; springCanvas.height = s.offsetHeight; }
+  }
+  resizeSpring();
+  window.addEventListener('resize', resizeSpring);
+
+  function animateSpring() {
+    springCtx.clearRect(0, 0, springCanvas.width, springCanvas.height);
+    if (currentSection === 'spring') {
+      const rect = springCanvas.parentElement.getBoundingClientRect();
+      const targetX = mx - rect.left, targetY = my - rect.top;
+      springNodes.forEach((n, i) => {
+        const tx = i === 0 ? targetX : springNodes[i - 1].x;
+        const ty = i === 0 ? targetY : springNodes[i - 1].y;
+        const k = .15 - i * .01;
+        n.vx += (tx - n.x) * k; n.vy += (ty - n.y) * k;
+        n.vx *= .7; n.vy *= .7;
+        n.x += n.vx; n.y += n.vy;
+      });
+      // Draw chain
+      springCtx.beginPath();
+      springCtx.moveTo(springNodes[0].x, springNodes[0].y);
+      springNodes.forEach(n => springCtx.lineTo(n.x, n.y));
+      springCtx.strokeStyle = 'rgba(102,126,234,.5)';
+      springCtx.lineWidth = 2; springCtx.stroke();
+      // Draw nodes
+      springNodes.forEach((n, i) => {
+        const r = 6 - i * .5;
+        springCtx.beginPath(); springCtx.arc(n.x, n.y, Math.max(2, r), 0, Math.PI * 2);
+        springCtx.fillStyle = `hsla(${240 + i * 15},70%,65%,.8)`;
+        springCtx.fill();
+      });
+    }
+    requestAnimationFrame(animateSpring);
+  }
+  animateSpring();
+
+  // === 14. Galaxy Cursor ===
+  const galaxyCCanvas = document.getElementById('galaxyCursorCanvas');
+  const galaxyCCtx = galaxyCCanvas.getContext('2d');
+  const ORBIT_NUM = 30;
+  let orbitParticles = [];
+  let gcAngle = 0;
+
+  function resizeGalaxyC() {
+    const s = galaxyCCanvas.parentElement;
+    if (s) { galaxyCCanvas.width = s.offsetWidth; galaxyCCanvas.height = s.offsetHeight; }
+  }
+  resizeGalaxyC();
+  window.addEventListener('resize', resizeGalaxyC);
+
+  for (let i = 0; i < ORBIT_NUM; i++) {
+    orbitParticles.push({ angle: Math.random() * Math.PI * 2, dist: 15 + Math.random() * 45, speed: .02 + Math.random() * .04, r: 1 + Math.random() * 2, hue: Math.random() * 60 + 220 });
+  }
+
+  function animateGalaxyC() {
+    galaxyCCtx.clearRect(0, 0, galaxyCCanvas.width, galaxyCCanvas.height);
+    if (currentSection === 'galaxycursor') {
+      const rect = galaxyCCanvas.parentElement.getBoundingClientRect();
+      const cx = mx - rect.left, cy = my - rect.top;
+      orbitParticles.forEach(p => {
+        p.angle += p.speed;
+        const x = cx + Math.cos(p.angle) * p.dist;
+        const y = cy + Math.sin(p.angle) * p.dist * .7;
+        galaxyCCtx.globalAlpha = .6 + Math.sin(p.angle * 3) * .3;
+        galaxyCCtx.beginPath(); galaxyCCtx.arc(x, y, p.r, 0, Math.PI * 2);
+        galaxyCCtx.fillStyle = `hsl(${p.hue},70%,65%)`;
+        galaxyCCtx.fill();
+      });
+      // Center glow
+      galaxyCCtx.globalAlpha = .2;
+      const grd = galaxyCCtx.createRadialGradient(cx, cy, 0, cx, cy, 30);
+      grd.addColorStop(0, 'rgba(102,126,234,.5)'); grd.addColorStop(1, 'transparent');
+      galaxyCCtx.fillStyle = grd;
+      galaxyCCtx.fillRect(cx - 30, cy - 30, 60, 60);
+      galaxyCCtx.globalAlpha = 1;
+    }
+    requestAnimationFrame(animateGalaxyC);
+  }
+  animateGalaxyC();
+
+  // === 15. Elastic Band ===
+  const elasticCanvas = document.getElementById('elasticCanvas');
+  const elasticCtx = elasticCanvas.getContext('2d');
+  let anchors = [];
+
+  function resizeElastic() {
+    const s = elasticCanvas.parentElement;
+    if (s) { elasticCanvas.width = s.offsetWidth; elasticCanvas.height = s.offsetHeight; }
+  }
+  resizeElastic();
+  window.addEventListener('resize', resizeElastic);
+
+  document.getElementById('elastic').addEventListener('click', e => {
+    const rect = elasticCanvas.parentElement.getBoundingClientRect();
+    anchors.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, life: 3 });
+    if (anchors.length > 5) anchors.shift();
+  });
+
+  function animateElastic() {
+    elasticCtx.clearRect(0, 0, elasticCanvas.width, elasticCanvas.height);
+    if (currentSection === 'elastic' && anchors.length > 0) {
+      const rect = elasticCanvas.parentElement.getBoundingClientRect();
+      const curX = mx - rect.left, curY = my - rect.top;
+      anchors.forEach((a, i) => {
+        a.life -= .005;
+        if (a.life <= 0) return;
+        // Draw elastic curve
+        elasticCtx.beginPath();
+        elasticCtx.moveTo(a.x, a.y);
+        const cpx = (a.x + curX) / 2, cpy = (a.y + curY) / 2 + 40 * Math.sin(Date.now() * .003 + i);
+        elasticCtx.quadraticCurveTo(cpx, cpy, curX, curY);
+        elasticCtx.strokeStyle = `hsla(${240 + i * 30},70%,65%,${Math.min(1, a.life) * .6})`;
+        elasticCtx.lineWidth = 2; elasticCtx.stroke();
+        // Anchor dot
+        elasticCtx.beginPath(); elasticCtx.arc(a.x, a.y, 4, 0, Math.PI * 2);
+        elasticCtx.fillStyle = `hsla(${240 + i * 30},70%,65%,${Math.min(1, a.life)})`;
+        elasticCtx.fill();
+      });
+      anchors = anchors.filter(a => a.life > 0);
+    }
+    requestAnimationFrame(animateElastic);
+  }
+  animateElastic();
+
+  // Extend mousemove for new effects
+  const origMouseMove = document.onmousemove;
+  document.addEventListener('mousemove', e => {
+    // Crosshair
+    if (currentSection === 'crosshair') {
+      crossH.style.opacity = '1'; crossV.style.opacity = '1';
+      crossH.style.top = my + 'px';
+      crossV.style.left = mx + 'px';
+    } else {
+      crossH.style.opacity = '0'; crossV.style.opacity = '0';
+    }
+
+    // Bubble
+    if (currentSection === 'bubble') {
+      const rect = bubbleCanvas.parentElement.getBoundingClientRect();
+      if (Math.random() > .5) {
+        const colors = ['#667eea', '#f093fb', '#43e97b', '#38f9d7'];
+        bubbles.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, r: 5 + Math.random() * 15, speed: .5 + Math.random(), wobble: Math.random() * Math.PI * 2, life: 1, color: colors[Math.floor(Math.random() * 4)] });
+      }
+    }
+
+    // Rainbow trail
+    if (currentSection === 'rainbow') {
+      const rect = rainbowCanvas.parentElement.getBoundingClientRect();
+      rainbowPoints.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, hue: (Date.now() * .1) % 360, life: 1 });
+      if (rainbowPoints.length > 100) rainbowPoints.shift();
+    }
+
+    // Text follow
+    if (currentSection === 'textfollow') {
+      textCircle.style.opacity = '1';
+      textCircle.style.left = (mx - 50) + 'px';
+      textCircle.style.top = (my - 50) + 'px';
+      renderTextCircle();
+    } else {
+      textCircle.style.opacity = '0';
+    }
+  });
+
+  // === 16. Torch Cursor ===
+  const torchCanvas = document.getElementById('torchCanvas');
+  const torchCtx = torchCanvas.getContext('2d');
+
+  function resizeTorch() {
+    const s = torchCanvas.parentElement;
+    if (s) { torchCanvas.width = s.offsetWidth; torchCanvas.height = s.offsetHeight; }
+  }
+  resizeTorch();
+  window.addEventListener('resize', resizeTorch);
+
+  function animateTorch() {
+    const tw = torchCanvas.width, th = torchCanvas.height;
+    torchCtx.fillStyle = '#030308';
+    torchCtx.fillRect(0, 0, tw, th);
+    if (currentSection === 'torch') {
+      const rect = torchCanvas.parentElement.getBoundingClientRect();
+      const cx = mx - rect.left, cy = my - rect.top;
+      torchCtx.globalCompositeOperation = 'lighter';
+      const grd = torchCtx.createRadialGradient(cx, cy, 0, cx, cy, 180);
+      grd.addColorStop(0, 'rgba(255,200,100,.25)');
+      grd.addColorStop(.4, 'rgba(255,150,50,.1)');
+      grd.addColorStop(1, 'transparent');
+      torchCtx.fillStyle = grd;
+      torchCtx.fillRect(0, 0, tw, th);
+      // Flicker
+      const grd2 = torchCtx.createRadialGradient(cx + (Math.random() - .5) * 5, cy + (Math.random() - .5) * 5, 0, cx, cy, 100);
+      grd2.addColorStop(0, 'rgba(255,220,150,.15)');
+      grd2.addColorStop(1, 'transparent');
+      torchCtx.fillStyle = grd2;
+      torchCtx.fillRect(0, 0, tw, th);
+      torchCtx.globalCompositeOperation = 'source-over';
+    }
+    requestAnimationFrame(animateTorch);
+  }
+  animateTorch();
+
+  // === 17. Ink Drip ===
+  const inkCanvas = document.getElementById('inkCanvas');
+  const inkCtx = inkCanvas.getContext('2d');
+  let inkDrops = [];
+
+  function resizeInk() {
+    const s = inkCanvas.parentElement;
+    if (s) { inkCanvas.width = s.offsetWidth; inkCanvas.height = s.offsetHeight; }
+  }
+  resizeInk();
+  window.addEventListener('resize', resizeInk);
+
+  document.getElementById('ink').addEventListener('click', e => {
+    const rect = inkCanvas.parentElement.getBoundingClientRect();
+    const hues = [220, 260, 280, 300];
+    inkDrops.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, r: 0, maxR: 80 + Math.random() * 60, life: 1, hue: hues[Math.floor(Math.random() * 4)] });
+  });
+
+  function animateInk() {
+    inkCtx.fillStyle = 'rgba(10,10,15,.03)';
+    inkCtx.fillRect(0, 0, inkCanvas.width, inkCanvas.height);
+    for (let i = inkDrops.length - 1; i >= 0; i--) {
+      const d = inkDrops[i];
+      d.r += (d.maxR - d.r) * .05;
+      d.life -= .006;
+      if (d.life <= 0) { inkDrops.splice(i, 1); continue; }
+      inkCtx.globalAlpha = d.life * .4;
+      const grd = inkCtx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r);
+      grd.addColorStop(0, `hsla(${d.hue},60%,30%,.6)`);
+      grd.addColorStop(.7, `hsla(${d.hue},50%,20%,.2)`);
+      grd.addColorStop(1, 'transparent');
+      inkCtx.fillStyle = grd;
+      inkCtx.beginPath(); inkCtx.arc(d.x, d.y, d.r, 0, Math.PI * 2); inkCtx.fill();
+    }
+    inkCtx.globalAlpha = 1;
+    requestAnimationFrame(animateInk);
+  }
+  animateInk();
+
+  // === 18. Neon Glow Trail ===
+  const neonCCanvas = document.getElementById('neonCursorCanvas');
+  const neonCCtx = neonCCanvas.getContext('2d');
+  let neonTrail = [];
+
+  function resizeNeonC() {
+    const s = neonCCanvas.parentElement;
+    if (s) { neonCCanvas.width = s.offsetWidth; neonCCanvas.height = s.offsetHeight; }
+  }
+  resizeNeonC();
+  window.addEventListener('resize', resizeNeonC);
+
+  document.addEventListener('mousemove', e => {
+    if (currentSection !== 'neoncursor') return;
+    const rect = neonCCanvas.parentElement.getBoundingClientRect();
+    neonTrail.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, life: 1, hue: (Date.now() * .15) % 360 });
+    if (neonTrail.length > 60) neonTrail.shift();
+  });
+
+  function animateNeonC() {
+    neonCCtx.fillStyle = 'rgba(10,10,15,.15)';
+    neonCCtx.fillRect(0, 0, neonCCanvas.width, neonCCanvas.height);
+    for (let i = neonTrail.length - 1; i >= 0; i--) {
+      neonTrail[i].life -= .02;
+      if (neonTrail[i].life <= 0) { neonTrail.splice(i, 1); continue; }
+    }
+    if (neonTrail.length > 1) {
+      for (let i = 1; i < neonTrail.length; i++) {
+        const p = neonTrail[i - 1], q = neonTrail[i];
+        neonCCtx.beginPath(); neonCCtx.moveTo(p.x, p.y); neonCCtx.lineTo(q.x, q.y);
+        neonCCtx.strokeStyle = `hsla(${q.hue},100%,60%,${q.life * .8})`;
+        neonCCtx.lineWidth = 3; neonCCtx.stroke();
+        // Glow
+        neonCCtx.strokeStyle = `hsla(${q.hue},100%,60%,${q.life * .2})`;
+        neonCCtx.lineWidth = 10; neonCCtx.stroke();
+      }
+    }
+    requestAnimationFrame(animateNeonC);
+  }
+  animateNeonC();
+
+  // === 19. Magnetic Field ===
+  const fieldCanvas = document.getElementById('fieldCanvas');
+  const fieldCtx = fieldCanvas.getContext('2d');
+  let fieldParticles = [];
+
+  function resizeField() {
+    const s = fieldCanvas.parentElement;
+    if (s) {
+      fieldCanvas.width = s.offsetWidth; fieldCanvas.height = s.offsetHeight;
+      // Reset particles on grid
+      fieldParticles = [];
+      const spacing = 25;
+      for (let y = 0; y < fieldCanvas.height; y += spacing) {
+        for (let x = 0; x < fieldCanvas.width; x += spacing) {
+          fieldParticles.push({ ox: x, oy: y, x: x, y: y });
+        }
+      }
+    }
+  }
+  resizeField();
+  window.addEventListener('resize', resizeField);
+
+  function animateField() {
+    fieldCtx.clearRect(0, 0, fieldCanvas.width, fieldCanvas.height);
+    if (currentSection === 'field') {
+      const rect = fieldCanvas.parentElement.getBoundingClientRect();
+      const cx = mx - rect.left, cy = my - rect.top;
+      fieldParticles.forEach(p => {
+        const dx = p.ox - cx, dy = p.oy - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150 && dist > 0) {
+          const force = (150 - dist) / 150 * 20;
+          p.x = p.ox + (dx / dist) * force;
+          p.y = p.oy + (dy / dist) * force;
+        } else {
+          p.x += (p.ox - p.x) * .1;
+          p.y += (p.oy - p.y) * .1;
+        }
+        const d = Math.sqrt((p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy));
+        const alpha = d < 200 ? .2 + (200 - d) / 200 * .6 : .15;
+        fieldCtx.beginPath(); fieldCtx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+        fieldCtx.fillStyle = `rgba(102,126,234,${alpha})`; fieldCtx.fill();
+      });
+    }
+    requestAnimationFrame(animateField);
+  }
+  animateField();
+
+  // === 20. Clock Cursor ===
+  const clockCCanvas = document.getElementById('clockCursorCanvas');
+  const clockCCtx = clockCCanvas.getContext('2d');
+
+  function resizeClockC() {
+    const s = clockCCanvas.parentElement;
+    if (s) { clockCCanvas.width = s.offsetWidth; clockCCanvas.height = s.offsetHeight; }
+  }
+  resizeClockC();
+  window.addEventListener('resize', resizeClockC);
+
+  function animateClockC() {
+    clockCCtx.clearRect(0, 0, clockCCanvas.width, clockCCanvas.height);
+    if (currentSection === 'clockcursor') {
+      const rect = clockCCanvas.parentElement.getBoundingClientRect();
+      const cx = mx - rect.left, cy = my - rect.top;
+      const now = new Date();
+      const sec = now.getSeconds() + now.getMilliseconds() / 1000;
+      const min = now.getMinutes() + sec / 60;
+      const hr = (now.getHours() % 12) + min / 60;
+      const R = 35;
+      // Face
+      clockCCtx.beginPath(); clockCCtx.arc(cx, cy, R, 0, Math.PI * 2);
+      clockCCtx.strokeStyle = 'rgba(102,126,234,.4)'; clockCCtx.lineWidth = 1.5; clockCCtx.stroke();
+      // Hour marks
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+        clockCCtx.beginPath();
+        clockCCtx.moveTo(cx + Math.cos(a) * (R - 5), cy + Math.sin(a) * (R - 5));
+        clockCCtx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R);
+        clockCCtx.strokeStyle = 'rgba(255,255,255,.3)'; clockCCtx.lineWidth = 1; clockCCtx.stroke();
+      }
+      // Hour hand
+      const ha = (hr / 12) * Math.PI * 2 - Math.PI / 2;
+      clockCCtx.beginPath(); clockCCtx.moveTo(cx, cy);
+      clockCCtx.lineTo(cx + Math.cos(ha) * R * .5, cy + Math.sin(ha) * R * .5);
+      clockCCtx.strokeStyle = '#fff'; clockCCtx.lineWidth = 2.5; clockCCtx.lineCap = 'round'; clockCCtx.stroke();
+      // Minute hand
+      const ma = (min / 60) * Math.PI * 2 - Math.PI / 2;
+      clockCCtx.beginPath(); clockCCtx.moveTo(cx, cy);
+      clockCCtx.lineTo(cx + Math.cos(ma) * R * .7, cy + Math.sin(ma) * R * .7);
+      clockCCtx.strokeStyle = '#888'; clockCCtx.lineWidth = 1.5; clockCCtx.stroke();
+      // Second hand
+      const sa = (sec / 60) * Math.PI * 2 - Math.PI / 2;
+      clockCCtx.beginPath(); clockCCtx.moveTo(cx, cy);
+      clockCCtx.lineTo(cx + Math.cos(sa) * R * .85, cy + Math.sin(sa) * R * .85);
+      clockCCtx.strokeStyle = '#f5576c'; clockCCtx.lineWidth = 1; clockCCtx.stroke();
+      // Center dot
+      clockCCtx.beginPath(); clockCCtx.arc(cx, cy, 2, 0, Math.PI * 2);
+      clockCCtx.fillStyle = '#f5576c'; clockCCtx.fill();
+    }
+    requestAnimationFrame(animateClockC);
+  }
+  animateClockC();
+</script>
+<script src="copy-effect.js"></script>
+</body>
+</html>

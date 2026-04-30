@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>液态金属效果集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; }
+  .section { height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; }
+  .section canvas { position: absolute; inset: 0; }
+  .section h2 { font-size: 2.5rem; font-weight: 800; color: #fff; position: relative; z-index: 2; }
+  .section p { color: rgba(255,255,255,.5); margin-top: 12px; position: relative; z-index: 2; }
+  .tag { font-size: .75rem; color: #c0c0c0; background: rgba(192,192,192,.15); padding: 4px 14px; border-radius: 20px; position: relative; z-index: 2; margin-top: 16px; }
+  .nav { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 6px; }
+  .nav a { color: #555; font-size: .75rem; text-decoration: none; padding: 4px 10px; border-radius: 4px; transition: all .2s; }
+  .nav a:hover { color: #fff; background: #ffffff10; }
+
+  /* === 1. SVG Filter Liquid Metal === */
+  .svg-metal-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .svg-metal-blob { width: 400px; height: 400px; background: linear-gradient(135deg, #b8c6db 0%, #f5f7fa 25%, #8e9eab 50%, #eef2f3 75%, #b8c6db 100%); border-radius: 50%; filter: url(#liquid-metal-filter); animation: blobMorph 6s ease-in-out infinite; }
+  @keyframes blobMorph {
+    0%, 100% { border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%; transform: scale(1) rotate(0deg); }
+    25% { border-radius: 40% 60% 55% 45% / 55% 45% 60% 40%; transform: scale(1.02) rotate(2deg); }
+    50% { border-radius: 50% 50% 40% 60% / 45% 55% 50% 50%; transform: scale(.98) rotate(-1deg); }
+    75% { border-radius: 55% 45% 60% 40% / 60% 40% 45% 55%; transform: scale(1.01) rotate(1deg); }
+  }
+
+  /* === Effect Sections (4-8) === */
+  .effect-section { position: relative; padding: 0; }
+  .effect-section h2 { font-size: 2rem; font-weight: 800; color: #fff; padding: 30px 30px 0; }
+  .effect-section .desc { color: rgba(255,255,255,.45); font-size: .85rem; padding: 8px 30px 0; }
+  .demo { width: 100%; height: 80vh; position: relative; }
+  .demo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* === 2. Canvas Metaball === */
+  #metaballCanvas { width: 100%; height: 100%; }
+
+  /* === 3. WebGL Shader === */
+  #shaderCanvas { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#svg-metal">SVG 滤镜</a>
+  <a href="#metaball-metal">Metaball</a>
+  <a href="#shader-metal">WebGL Shader</a>
+  <a href="#chrome-text">Chrome 文字</a>
+  <a href="#conic-metal">锥形金属</a>
+  <a href="#liquid-glass">液态玻璃</a>
+  <a href="#ferrofluid">磁性流体</a>
+  <a href="#sdf-blob">SDF Blob</a>
+</div>
+
+<!-- SVG Filters (hidden) -->
+<svg style="position:absolute;width:0;height:0">
+  <defs>
+    <filter id="liquid-metal-filter" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence id="turbulence" type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="1" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feSpecularLighting in="noise" surfaceScale="3" specularConstant="1.2" specularExponent="20" lighting-color="#ffffff" result="specular">
+        <fePointLight x="200" y="100" z="300"/>
+      </feSpecularLighting>
+      <feComposite in="specular" in2="displaced" operator="in" result="lit"/>
+      <feBlend in="displaced" in2="lit" mode="screen"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- 1. SVG Filter Liquid Metal -->
+<div class="section" id="svg-metal">
+  <div class="svg-metal-container">
+    <div class="svg-metal-blob"></div>
+  </div>
+  <h2>SVG 滤镜液态金属</h2>
+  <p>feTurbulence 噪声 + feDisplacementMap 扭曲 + feSpecularLighting 高光</p>
+  <span class="tag">纯 CSS/SVG · 零 JS · 性能最优</span>
+</div>
+
+<!-- 2. Canvas Metaball -->
+<div class="section" id="metaball-metal">
+  <canvas id="metaballCanvas"></canvas>
+  <h2>Metaball 液态金属</h2>
+  <p>鼠标移动引起金属液滴融合</p>
+  <span class="tag">Canvas 2D + 阈值化 + 金属渐变填充</span>
+</div>
+
+<!-- 3. WebGL Shader -->
+<div class="section" id="shader-metal">
+  <canvas id="shaderCanvas"></canvas>
+  <h2>WebGL 液态金属</h2>
+  <p>GLSL 噪声场 + 环境映射 + Fresnel 反射</p>
+  <span class="tag">WebGL Fragment Shader · 实时光照</span>
+</div>
+
+<script>
+// ============================================================
+// 1. SVG Filter Animation (animate turbulence seed)
+// ============================================================
+(function() {
+  const turb = document.getElementById('turbulence');
+  let t = 0;
+  function animateTurb() {
+    t += 0.002;
+    const bx = 0.012 + Math.sin(t) * 0.005;
+    const by = 0.015 + Math.cos(t * 0.7) * 0.004;
+    turb.setAttribute('baseFrequency', bx + ' ' + by);
+    requestAnimationFrame(animateTurb);
+  }
+  animateTurb();
+})();
+
+// ============================================================
+// 2. Canvas Metaball Liquid Metal
+// ============================================================
+(function() {
+  const canvas = document.getElementById('metaballCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  let mouse = { x: -1000, y: -1000 };
+  const balls = [];
+  const NUM_BALLS = 8;
+
+  function resize() {
+    const s = canvas.parentElement;
+    w = canvas.width = s.offsetWidth;
+    h = canvas.height = s.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  canvas.parentElement.addEventListener('mousemove', e => {
+    const r = canvas.parentElement.getBoundingClientRect();
+    mouse.x = e.clientX - r.left;
+    mouse.y = e.clientY - r.top;
+  });
+  canvas.parentElement.addEventListener('mouseleave', () => {
+    mouse.x = -1000; mouse.y = -1000;
+  });
+
+  // Initialize metaballs
+  for (let i = 0; i < NUM_BALLS; i++) {
+    balls.push({
+      x: Math.random() * 800 + 200,
+      y: Math.random() * 600 + 100,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5,
+      r: 60 + Math.random() * 80
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Update ball positions
+    for (const b of balls) {
+      b.x += b.vx;
+      b.y += b.vy;
+      if (b.x < b.r || b.x > w - b.r) b.vx *= -1;
+      if (b.y < b.r || b.y > h - b.r) b.vy *= -1;
+
+      // Mouse attraction
+      const dx = mouse.x - b.x;
+      const dy = mouse.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 300) {
+        b.vx += dx * 0.0003;
+        b.vy += dy * 0.0003;
+      }
+      // Damping
+      b.vx *= 0.999;
+      b.vy *= 0.999;
+    }
+
+    // Render metaballs using threshold on distance field
+    const imageData = ctx.createImageData(w, h);
+    const data = imageData.data;
+    const step = 2; // sample every 2px for performance
+
+    for (let py = 0; py < h; py += step) {
+      for (let px = 0; px < w; px += step) {
+        let sum = 0;
+        for (const b of balls) {
+          const dx = px - b.x;
+          const dy = py - b.y;
+          sum += (b.r * b.r) / (dx * dx + dy * dy + 1);
+        }
+
+        if (sum > 1.0) {
+          // Metal gradient based on field strength
+          const intensity = Math.min(sum - 1.0, 2.0) / 2.0;
+          // Silver-chrome color palette
+          const base = 120 + intensity * 135;
+          const highlight = Math.pow(intensity, 3) * 255;
+          const r = Math.min(255, base + highlight * 0.3);
+          const g = Math.min(255, base + highlight * 0.3);
+          const b2 = Math.min(255, base * 0.95 + highlight * 0.5);
+          const alpha = 255;
+
+          // Fill the step x step block
+          for (let sy = 0; sy < step && py + sy < h; sy++) {
+            for (let sx = 0; sx < step && px + sx < w; sx++) {
+              const idx = ((py + sy) * w + (px + sx)) * 4;
+              data[idx] = r;
+              data[idx + 1] = g;
+              data[idx + 2] = b2;
+              data[idx + 3] = alpha;
+            }
+          }
+        }
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    // Add specular highlights via gradient overlay
+    for (const b of balls) {
+      const grad = ctx.createRadialGradient(
+        b.x - b.r * 0.3, b.y - b.r * 0.3, 0,
+        b.x, b.y, b.r * 1.2
+      );
+      grad.addColorStop(0, 'rgba(255,255,255,0.15)');
+      grad.addColorStop(0.5, 'rgba(255,255,255,0.02)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ============================================================
+// 3. WebGL Liquid Metal Shader
+// ============================================================
+(function() {
+  const canvas = document.getElementById('shaderCanvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) { console.warn('WebGL not supported'); return; }
+
+  let w, h;
+  let mouse = { x: 0.5, y: 0.5 };
+
+  function resize() {
+    const s = canvas.parentElement;
+    w = canvas.width = s.offsetWidth;
+    h = canvas.height = s.offsetHeight;
+    gl.viewport(0, 0, w, h);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  canvas.parentElement.addEventListener('mousemove', e => {
+    const r = canvas.parentElement.getBoundingClientRect();
+    mouse.x = (e.clientX - r.left) / r.width;
+    mouse.y = 1.0 - (e.clientY - r.top) / r.height;
+  });
+
+  // Vertex shader
+  const vsSource = `
+    attribute vec2 aPosition;
+    void main() { gl_Position = vec4(aPosition, 0.0, 1.0); }
+  `;
+
+  // Fragment shader - liquid metal with Simplex noise + Fresnel
+  const fsSource = `
+    precision highp float;
+    uniform float uTime;
+    uniform vec2 uResolution;
+    uniform vec2 uMouse;
+
+    // Simplex-like noise
+    vec3 mod289(vec3 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
+    vec2 mod289v2(vec2 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
+    vec3 permute(vec3 x) { return mod289(((x * 34.0) + 1.0) * x); }
+
+    float snoise(vec2 v) {
+      const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+      vec2 i = floor(v + dot(v, C.yy));
+      vec2 x0 = v - i + dot(i, C.xx);
+      vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+      vec4 x12 = x0.xyxy + C.xxzz;
+      x12.xy -= i1;
+      i = mod289v2(i);
+      vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+      m = m * m; m = m * m;
+      vec3 x = 2.0 * fract(p * C.www) - 1.0;
+      vec3 h = abs(x) - 0.5;
+      vec3 ox = floor(x + 0.5);
+      vec3 a0 = x - ox;
+      m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+      vec3 g;
+      g.x = a0.x * x0.x + h.x * x0.y;
+      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+      return 130.0 * dot(m, g);
+    }
+
+    float fbm(vec2 p) {
+      float f = 0.0;
+      f += 0.5 * snoise(p); p *= 2.01;
+      f += 0.25 * snoise(p); p *= 2.02;
+      f += 0.125 * snoise(p); p *= 2.03;
+      f += 0.0625 * snoise(p);
+      return f;
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / uResolution;
+      vec2 p = (gl_FragCoord.xy - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
+
+      // Mouse influence
+      vec2 mp = (uMouse - 0.5) * 2.0;
+      float mouseDist = length(p - mp);
+      float mouseInfluence = smoothstep(0.8, 0.0, mouseDist) * 0.3;
+
+      // Animated noise field for displacement
+      float t = uTime * 0.3;
+      float n1 = fbm(p * 2.0 + vec2(t, t * 0.7));
+      float n2 = fbm(p * 3.0 - vec2(t * 0.5, t * 0.3) + mouseInfluence);
+      float n3 = fbm(vec2(n1, n2) * 2.0 + t * 0.2);
+
+      // Surface normal approximation from noise
+      float eps = 0.01;
+      float nx = fbm(p * 2.0 + vec2(t + eps, t * 0.7)) - fbm(p * 2.0 + vec2(t - eps, t * 0.7));
+      float ny = fbm(p * 2.0 + vec2(t, t * 0.7 + eps)) - fbm(p * 2.0 + vec2(t, t * 0.7 - eps));
+      vec3 normal = normalize(vec3(nx * 15.0, ny * 15.0, 1.0));
+
+      // View direction (straight on)
+      vec3 viewDir = vec3(0.0, 0.0, 1.0);
+
+      // Fresnel effect
+      float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
+
+      // Environment reflection (fake HDRI)
+      vec3 reflected = reflect(-viewDir, normal);
+      float envAngle = atan(reflected.y, reflected.x);
+      float envGrad = reflected.y * 0.5 + 0.5;
+
+      // Chrome/metal color palette
+      vec3 darkMetal = vec3(0.15, 0.15, 0.18);
+      vec3 midMetal = vec3(0.55, 0.58, 0.65);
+      vec3 brightMetal = vec3(0.9, 0.92, 0.95);
+      vec3 warmHighlight = vec3(1.0, 0.95, 0.85);
+
+      // Build metal color from environment
+      vec3 metalColor = mix(darkMetal, midMetal, smoothstep(-0.3, 0.3, n3));
+      metalColor = mix(metalColor, brightMetal, smoothstep(0.2, 0.8, envGrad + n1 * 0.3));
+
+      // Specular highlights
+      vec3 lightDir = normalize(vec3(0.5, 0.8, 1.0));
+      float spec = pow(max(dot(reflected, lightDir), 0.0), 40.0);
+      float spec2 = pow(max(dot(reflected, normalize(vec3(-0.3, 0.5, 1.0))), 0.0), 60.0);
+
+      // Combine
+      vec3 color = metalColor;
+      color += warmHighlight * spec * 0.8;
+      color += vec3(0.7, 0.8, 1.0) * spec2 * 0.4;
+      color = mix(color, brightMetal, fresnel * 0.6);
+
+      // Subtle color tint variation
+      color += vec3(0.05, 0.0, 0.08) * n2;
+
+      // Vignette
+      float vignette = 1.0 - smoothstep(0.4, 1.4, length(p));
+      color *= 0.7 + 0.3 * vignette;
+
+      // Tone mapping
+      color = color / (color + vec3(1.0));
+      color = pow(color, vec3(1.0 / 2.2));
+
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+
+  // Compile shaders
+  function compileShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('Shader error:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  const vs = compileShader(gl.VERTEX_SHADER, vsSource);
+  const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
+  if (!vs || !fs) return;
+
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program link error:', gl.getProgramInfoLog(program));
+    return;
+  }
+  gl.useProgram(program);
+
+  // Full-screen quad
+  const verts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(program, 'aPosition');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  // Uniforms
+  const uTime = gl.getUniformLocation(program, 'uTime');
+  const uRes = gl.getUniformLocation(program, 'uResolution');
+  const uMouse = gl.getUniformLocation(program, 'uMouse');
+
+  const startTime = performance.now();
+  function render() {
+    const t = (performance.now() - startTime) * 0.001;
+    gl.uniform1f(uTime, t);
+    gl.uniform2f(uRes, w, h);
+    gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 4: Chrome Text ===================== -->
+<section class="effect-section" id="chrome-text">
+  <h2>4. Chrome 金属文字</h2>
+  <p class="desc">CSS conic-gradient + background-clip 实现镜面 Chrome 文字，结合动画旋转产生流动高光</p>
+  <div class="demo" id="chrome-text-demo" style="display:flex;align-items:center;justify-content:center;background:#111;cursor:crosshair;overflow:hidden">
+    <div id="chrome-text-el" style="
+      font-size: clamp(48px, 12vw, 160px);
+      font-weight: 900;
+      font-family: 'Arial Black', Impact, sans-serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: conic-gradient(
+        from var(--chrome-angle, 0deg) at var(--mx, 50%) var(--my, 50%),
+        #2a2a2a 0deg,
+        #e8e8e8 40deg,
+        #ffffff 60deg,
+        #a0a0a0 90deg,
+        #4a4a4a 130deg,
+        #e0e0e0 170deg,
+        #f8f8f8 200deg,
+        #8a8a8a 240deg,
+        #3a3a3a 280deg,
+        #d0d0d0 320deg,
+        #2a2a2a 360deg
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6)) drop-shadow(0 0 30px rgba(180,180,200,0.15));
+      user-select: none;
+      line-height: 1;
+      position: relative;
+    ">LIQUID METAL</div>
+  </div>
+</section>
+<script>
+(function(){
+  const el = document.getElementById('chrome-text-el');
+  const demo = document.getElementById('chrome-text-demo');
+  let angle = 0;
+  let mx = 50, my = 50;
+
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    mx = ((e.clientX - r.left) / r.width * 100);
+    my = ((e.clientY - r.top) / r.height * 100);
+  });
+
+  function animate() {
+    angle += 0.3;
+    el.style.setProperty('--chrome-angle', angle + 'deg');
+    el.style.setProperty('--mx', mx + '%');
+    el.style.setProperty('--my', my + '%');
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+<!-- ===================== Effect 5: Conic Metallic Disc ===================== -->
+<section class="effect-section" id="conic-metal">
+  <h2>5. 锥形金属旋转盘</h2>
+  <p class="desc">Canvas 2D 绘制锥形渐变金属圆盘，多层高光叠加 + 旋转动画模拟 CD/金属旋转光泽</p>
+  <div class="demo" id="conic-metal-demo" style="background:#0a0a0f;display:flex;align-items:center;justify-content:center">
+    <canvas id="conic-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('conic-metal-demo');
+  const canvas = document.getElementById('conic-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, cx, cy, radius;
+
+  function resize() {
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+    cx = w / 2;
+    cy = h / 2;
+    radius = Math.min(w, h) * 0.38;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let angle = 0;
+
+  function drawMetalDisc(t) {
+    ctx.clearRect(0, 0, w, h);
+
+    // Main disc with conic gradient simulation (radial sectors)
+    const sectors = 360;
+    for (let i = 0; i < sectors; i++) {
+      const a1 = (i / sectors) * Math.PI * 2 + angle;
+      const a2 = ((i + 1.5) / sectors) * Math.PI * 2 + angle;
+
+      // Multi-frequency brightness
+      const norm = i / sectors;
+      const b1 = Math.sin(norm * Math.PI * 2 * 3) * 0.15;
+      const b2 = Math.sin(norm * Math.PI * 2 * 7 + t * 2) * 0.08;
+      const b3 = Math.sin(norm * Math.PI * 2 * 13 + t * 0.5) * 0.05;
+      const brightness = 0.45 + b1 + b2 + b3;
+
+      const r = Math.floor(180 * brightness + 20);
+      const g = Math.floor(185 * brightness + 22);
+      const b = Math.floor(200 * brightness + 25);
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius, a1, a2);
+      ctx.closePath();
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fill();
+    }
+
+    // Inner ring groove
+    for (let ring = 0; ring < 5; ring++) {
+      const ringR = radius * (0.2 + ring * 0.15);
+      ctx.beginPath();
+      ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(0,0,0,${0.08 + ring * 0.02})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Specular highlight arc
+    ctx.save();
+    const hlGrad = ctx.createRadialGradient(
+      cx - radius * 0.3, cy - radius * 0.3, radius * 0.1,
+      cx, cy, radius
+    );
+    hlGrad.addColorStop(0, 'rgba(255,255,255,0.35)');
+    hlGrad.addColorStop(0.3, 'rgba(255,255,255,0.08)');
+    hlGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.globalCompositeOperation = 'screen';
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fillStyle = hlGrad;
+    ctx.fill();
+    ctx.restore();
+
+    // Center hole
+    const holeGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 0.1);
+    holeGrad.addColorStop(0, '#0a0a0f');
+    holeGrad.addColorStop(0.7, '#1a1a22');
+    holeGrad.addColorStop(1, '#2a2a33');
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.08, 0, Math.PI * 2);
+    ctx.fillStyle = holeGrad;
+    ctx.fill();
+
+    // Edge rim
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(200,205,220,0.3)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function loop() {
+    const t = performance.now() * 0.001;
+    angle += 0.005;
+    drawMetalDisc(t);
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+
+<!-- ===================== Effect 6: Liquid Glass (Apple-inspired) ===================== -->
+<section class="effect-section" id="liquid-glass">
+  <h2>6. 液态玻璃（Apple 风格）</h2>
+  <p class="desc">Canvas 2D 模拟 Apple WWDC25 风格液态玻璃 — Metaball 融合 + 彩色背景折射 + 高光边缘</p>
+  <div class="demo" id="liquid-glass-demo" style="position:relative;overflow:hidden;background:#000">
+    <canvas id="glass-canvas"></canvas>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,0.9);font-size:clamp(24px,5vw,56px);font-weight:800;letter-spacing:0.1em;text-shadow:0 2px 30px rgba(0,0,0,0.4);z-index:2;pointer-events:none;text-align:center;mix-blend-mode:overlay">
+      Liquid Glass
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('liquid-glass-demo');
+  const canvas = document.getElementById('glass-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize() {
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const mouse = { x: w / 2, y: h / 2 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    mouse.x = e.clientX - r.left;
+    mouse.y = e.clientY - r.top;
+  });
+
+  // Glass blobs
+  const blobs = [
+    { x: 0, y: 0, r: 120, vx: 0.4, vy: 0.3, phase: 0 },
+    { x: 0, y: 0, r: 90, vx: -0.3, vy: 0.5, phase: 1.5 },
+    { x: 0, y: 0, r: 100, vx: 0.5, vy: -0.3, phase: 3.0 },
+    { x: 0, y: 0, r: 70, vx: -0.4, vy: -0.4, phase: 4.5 },
+  ];
+  blobs.forEach(b => { b.x = w * (0.3 + Math.random() * 0.4); b.y = h * (0.3 + Math.random() * 0.4); });
+
+  // Offscreen canvas for metaball threshold
+  const offCanvas = document.createElement('canvas');
+  const offCtx = offCanvas.getContext('2d');
+
+  function drawGlass(t) {
+    offCanvas.width = w;
+    offCanvas.height = h;
+
+    // Animated gradient background
+    const angle = t * 0.15;
+    const gx = w * 0.5 + Math.cos(angle) * w * 0.4;
+    const gy = h * 0.5 + Math.sin(angle) * h * 0.4;
+    const bgGrad = ctx.createLinearGradient(gx, gy, w - gx, h - gy);
+    bgGrad.addColorStop(0, '#667eea');
+    bgGrad.addColorStop(0.25, '#764ba2');
+    bgGrad.addColorStop(0.5, '#f093fb');
+    bgGrad.addColorStop(0.75, '#f5576c');
+    bgGrad.addColorStop(1, '#4facfe');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Move blobs
+    blobs.forEach(b => {
+      b.x += Math.sin(t * 0.7 + b.phase) * 1.5;
+      b.y += Math.cos(t * 0.5 + b.phase * 0.7) * 1.2;
+      // Attract toward mouse gently
+      const dx = mouse.x - b.x, dy = mouse.y - b.y;
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      b.x += (dx / dist) * 0.5;
+      b.y += (dy / dist) * 0.5;
+      // Keep in bounds
+      b.x = Math.max(b.r, Math.min(w - b.r, b.x));
+      b.y = Math.max(b.r, Math.min(h - b.r, b.y));
+    });
+
+    // Draw metaball field to offscreen
+    offCtx.clearRect(0, 0, w, h);
+    blobs.forEach(b => {
+      const rAnim = b.r + Math.sin(t * 0.8 + b.phase) * 15;
+      const grad = offCtx.createRadialGradient(b.x, b.y, 0, b.x, b.y, rAnim * 1.8);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.5, 'rgba(255,255,255,0.5)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      offCtx.fillStyle = grad;
+      offCtx.fillRect(b.x - rAnim * 1.8, b.y - rAnim * 1.8, rAnim * 3.6, rAnim * 3.6);
+    });
+
+    // Read pixels & threshold for glass shape
+    const imageData = offCtx.getImageData(0, 0, w, h);
+    const data = imageData.data;
+    const bgData = ctx.getImageData(0, 0, w, h);
+    const bg = bgData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const alpha = data[i]; // white channel as density
+      if (alpha > 80) {
+        const strength = Math.min(1, (alpha - 80) / 175);
+        // Glass effect: brighten + slight refraction (offset sample)
+        const px = (i / 4) % w;
+        const py = Math.floor((i / 4) / w);
+        // Fake refraction: sample from offset position
+        const offsetX = Math.round(Math.sin(strength * 3 + t) * 8 * strength);
+        const offsetY = Math.round(Math.cos(strength * 2.5 + t * 0.7) * 6 * strength);
+        const srcX = Math.min(w-1, Math.max(0, px + offsetX));
+        const srcY = Math.min(h-1, Math.max(0, py + offsetY));
+        const srcI = (srcY * w + srcX) * 4;
+
+        // Blend refracted bg with glass tint
+        const glassR = Math.min(255, bg[srcI] * 1.15 + 40 * strength);
+        const glassG = Math.min(255, bg[srcI+1] * 1.15 + 45 * strength);
+        const glassB = Math.min(255, bg[srcI+2] * 1.1 + 50 * strength);
+
+        bg[i] = Math.round(bg[i] * (1 - strength * 0.7) + glassR * strength * 0.7);
+        bg[i+1] = Math.round(bg[i+1] * (1 - strength * 0.7) + glassG * strength * 0.7);
+        bg[i+2] = Math.round(bg[i+2] * (1 - strength * 0.7) + glassB * strength * 0.7);
+
+        // Edge highlight (fresnel-like)
+        if (alpha > 75 && alpha < 130) {
+          const edge = 1 - Math.abs(alpha - 100) / 30;
+          bg[i] = Math.min(255, bg[i] + 80 * edge);
+          bg[i+1] = Math.min(255, bg[i+1] + 85 * edge);
+          bg[i+2] = Math.min(255, bg[i+2] + 90 * edge);
+        }
+
+        // Specular highlight near top
+        const normY = (py / h);
+        if (normY < 0.5 && strength > 0.5) {
+          const spec = (0.5 - normY) * strength * 0.4;
+          bg[i] = Math.min(255, bg[i] + 200 * spec);
+          bg[i+1] = Math.min(255, bg[i+1] + 200 * spec);
+          bg[i+2] = Math.min(255, bg[i+2] + 200 * spec);
+        }
+      }
+    }
+    ctx.putImageData(bgData, 0, 0);
+  }
+
+  function loop() {
+    drawGlass(performance.now() * 0.001);
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+
+<!-- ===================== Effect 7: Ferrofluid Magnetic Spikes ===================== -->
+<section class="effect-section" id="ferrofluid">
+  <h2>7. 磁性流体（Ferrofluid）</h2>
+  <p class="desc">Canvas 2D 模拟磁性流体尖刺效果 — 鼠标作为磁源吸引粒子形成金属尖刺</p>
+  <div class="demo" id="ferro-demo" style="background:#080810;cursor:none">
+    <canvas id="ferro-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('ferro-demo');
+  const canvas = document.getElementById('ferro-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize() {
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const mouse = { x: w / 2, y: h / 2 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    mouse.x = e.clientX - r.left;
+    mouse.y = e.clientY - r.top;
+  });
+
+  // Spike base points arranged in a circle
+  const numSpikes = 64;
+  const baseRadius = Math.min(w, h) * 0.28;
+
+  function drawFerrofluid(t) {
+    ctx.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2;
+
+    // Base puddle glow
+    const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, baseRadius * 1.8);
+    glowGrad.addColorStop(0, 'rgba(60,65,80,0.3)');
+    glowGrad.addColorStop(1, 'rgba(60,65,80,0)');
+    ctx.fillStyle = glowGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Calculate spike lengths based on mouse proximity
+    const spikeData = [];
+    for (let i = 0; i < numSpikes; i++) {
+      const angle = (i / numSpikes) * Math.PI * 2;
+      const bx = cx + Math.cos(angle) * baseRadius;
+      const by = cy + Math.sin(angle) * baseRadius;
+
+      // Distance from this spike base to mouse
+      const dx = mouse.x - bx;
+      const dy = mouse.y - by;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Spike grows toward mouse
+      const attraction = Math.max(0, 1 - dist / (baseRadius * 2.5));
+      const waveLen = Math.sin(angle * 5 + t * 2) * 8 + Math.sin(angle * 11 + t * 3.7) * 4;
+      const spikeLen = 10 + attraction * baseRadius * 1.2 + waveLen;
+
+      // Direction: blend between radial outward and toward mouse
+      const radDirX = Math.cos(angle);
+      const radDirY = Math.sin(angle);
+      const toDirX = dist > 0 ? dx / dist : 0;
+      const toDirY = dist > 0 ? dy / dist : 0;
+      const blend = attraction * 0.6;
+      const dirX = radDirX * (1 - blend) + toDirX * blend;
+      const dirY = radDirY * (1 - blend) + toDirY * blend;
+      const dirLen = Math.sqrt(dirX * dirX + dirY * dirY) || 1;
+
+      spikeData.push({
+        bx, by, angle,
+        tx: bx + (dirX / dirLen) * spikeLen,
+        ty: by + (dirY / dirLen) * spikeLen,
+        len: spikeLen, attraction
+      });
+    }
+
+    // Draw base blob shape
+    ctx.beginPath();
+    for (let i = 0; i <= numSpikes; i++) {
+      const s = spikeData[i % numSpikes];
+      const r2 = baseRadius + Math.sin(s.angle * 7 + t * 1.5) * 3;
+      const px = cx + Math.cos(s.angle) * r2;
+      const py = cy + Math.sin(s.angle) * r2;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    const blobGrad = ctx.createRadialGradient(cx - baseRadius * 0.3, cy - baseRadius * 0.3, 0, cx, cy, baseRadius * 1.1);
+    blobGrad.addColorStop(0, '#5a5e6e');
+    blobGrad.addColorStop(0.5, '#2a2d3a');
+    blobGrad.addColorStop(1, '#15161e');
+    ctx.fillStyle = blobGrad;
+    ctx.fill();
+
+    // Specular on blob
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const specGrad = ctx.createRadialGradient(cx - baseRadius * 0.25, cy - baseRadius * 0.3, 0, cx, cy, baseRadius);
+    specGrad.addColorStop(0, 'rgba(200,210,230,0.25)');
+    specGrad.addColorStop(0.4, 'rgba(200,210,230,0.05)');
+    specGrad.addColorStop(1, 'rgba(200,210,230,0)');
+    ctx.fill();
+    ctx.fillStyle = specGrad;
+    ctx.fill();
+    ctx.restore();
+
+    // Draw spikes
+    for (const s of spikeData) {
+      if (s.len < 15) continue;
+      const perpX = -Math.sin(s.angle);
+      const perpY = Math.cos(s.angle);
+      const baseW = 6 + s.attraction * 4;
+
+      ctx.beginPath();
+      ctx.moveTo(s.bx + perpX * baseW, s.by + perpY * baseW);
+      ctx.quadraticCurveTo(
+        (s.bx + s.tx) / 2 + perpX * baseW * 0.3,
+        (s.by + s.ty) / 2 + perpY * baseW * 0.3,
+        s.tx, s.ty
+      );
+      ctx.quadraticCurveTo(
+        (s.bx + s.tx) / 2 - perpX * baseW * 0.3,
+        (s.by + s.ty) / 2 - perpY * baseW * 0.3,
+        s.bx - perpX * baseW, s.by - perpY * baseW
+      );
+      ctx.closePath();
+
+      // Metallic gradient on spike
+      const grad = ctx.createLinearGradient(s.bx, s.by, s.tx, s.ty);
+      grad.addColorStop(0, '#3a3d4a');
+      grad.addColorStop(0.3, '#6a6e7e');
+      grad.addColorStop(0.6, '#9a9eae');
+      grad.addColorStop(0.85, '#ccd0dd');
+      grad.addColorStop(1, '#eef0f5');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    // Mouse cursor glow (magnetic field)
+    const cursorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 60);
+    cursorGrad.addColorStop(0, 'rgba(160,180,255,0.15)');
+    cursorGrad.addColorStop(1, 'rgba(160,180,255,0)');
+    ctx.fillStyle = cursorGrad;
+    ctx.fillRect(mouse.x - 60, mouse.y - 60, 120, 120);
+  }
+
+  function loop() {
+    drawFerrofluid(performance.now() * 0.001);
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+
+<!-- ===================== Effect 8: Raymarching SDF Metaball ===================== -->
+<section class="effect-section" id="sdf-blob">
+  <h2>8. SDF Raymarching Blob</h2>
+  <p class="desc">WebGL GLSL Raymarching — 使用 Signed Distance Field 渲染光滑金属融合球体，实时反射 + 环境光</p>
+  <div class="demo" id="sdf-demo" style="background:#000">
+    <canvas id="sdf-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('sdf-demo');
+  const canvas = document.getElementById('sdf-canvas');
+  let w, h;
+
+  function resize() {
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+    if (gl) gl.viewport(0, 0, w, h);
+  }
+
+  const gl = canvas.getContext('webgl');
+  if (!gl) return;
+  resize();
+  window.addEventListener('resize', resize);
+
+  const mouse = { x: 0.5, y: 0.5 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    mouse.x = (e.clientX - r.left) / r.width;
+    mouse.y = 1.0 - (e.clientY - r.top) / r.height;
+  });
+
+  const vsSource = `
+    attribute vec2 aPosition;
+    void main() { gl_Position = vec4(aPosition, 0.0, 1.0); }
+  `;
+
+  const fsSource = `
+    precision highp float;
+    uniform float uTime;
+    uniform vec2 uResolution;
+    uniform vec2 uMouse;
+
+    float sdSphere(vec3 p, float r) { return length(p) - r; }
+
+    float smin(float a, float b, float k) {
+      float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+      return mix(b, a, h) - k * h * (1.0 - h);
+    }
+
+    float scene(vec3 p) {
+      float t = uTime;
+
+      // Central sphere
+      float d = sdSphere(p, 0.8);
+
+      // Orbiting blobs
+      for (int i = 0; i < 5; i++) {
+        float fi = float(i);
+        float a = t * (0.4 + fi * 0.15) + fi * 1.256;
+        float r = 1.1 + sin(t * 0.3 + fi) * 0.3;
+        vec3 offset = vec3(
+          cos(a) * r,
+          sin(a * 0.7 + fi * 2.0) * 0.6,
+          sin(a) * r
+        );
+        float blobR = 0.3 + sin(t + fi * 1.5) * 0.08;
+        d = smin(d, sdSphere(p - offset, blobR), 0.5);
+      }
+
+      // Mouse-influenced blob
+      vec3 mOff = vec3((uMouse.x - 0.5) * 3.0, (uMouse.y - 0.5) * 3.0, 0.5);
+      d = smin(d, sdSphere(p - mOff, 0.35), 0.6);
+
+      return d;
+    }
+
+    vec3 calcNormal(vec3 p) {
+      vec2 e = vec2(0.001, 0.0);
+      return normalize(vec3(
+        scene(p + e.xyy) - scene(p - e.xyy),
+        scene(p + e.yxy) - scene(p - e.yxy),
+        scene(p + e.yyx) - scene(p - e.yyx)
+      ));
+    }
+
+    vec3 envMap(vec3 dir) {
+      float y = dir.y * 0.5 + 0.5;
+      vec3 sky = mix(vec3(0.15, 0.15, 0.2), vec3(0.5, 0.55, 0.7), y);
+      float sun = pow(max(dot(dir, normalize(vec3(1.0, 0.8, 0.5))), 0.0), 64.0);
+      return sky + vec3(1.0, 0.9, 0.7) * sun;
+    }
+
+    void main() {
+      vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
+
+      // Camera
+      vec3 ro = vec3(0.0, 0.0, 3.5);
+      vec3 rd = normalize(vec3(uv, -1.5));
+
+      // Raymarch
+      float totalDist = 0.0;
+      float minDist = 999.0;
+      bool hit = false;
+      vec3 p;
+      for (int i = 0; i < 80; i++) {
+        p = ro + rd * totalDist;
+        float d = scene(p);
+        minDist = min(minDist, d);
+        if (d < 0.001) { hit = true; break; }
+        if (totalDist > 20.0) break;
+        totalDist += d;
+      }
+
+      vec3 color = vec3(0.03, 0.03, 0.05);
+
+      if (hit) {
+        vec3 n = calcNormal(p);
+        vec3 viewDir = normalize(ro - p);
+
+        // Fresnel
+        float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 4.0);
+
+        // Reflection
+        vec3 refl = reflect(-viewDir, n);
+        vec3 envColor = envMap(refl);
+
+        // Metal base
+        vec3 metalBase = vec3(0.7, 0.72, 0.78);
+
+        // Two specular lights
+        vec3 l1 = normalize(vec3(1.0, 1.0, 1.0));
+        vec3 l2 = normalize(vec3(-0.5, 0.8, 0.3));
+        float spec1 = pow(max(dot(refl, l1), 0.0), 60.0);
+        float spec2 = pow(max(dot(refl, l2), 0.0), 40.0);
+
+        // Diffuse
+        float diff = max(dot(n, l1), 0.0) * 0.3 + 0.15;
+
+        color = metalBase * diff;
+        color += envColor * (0.4 + fresnel * 0.5);
+        color += vec3(1.0, 0.95, 0.9) * spec1 * 0.8;
+        color += vec3(0.7, 0.8, 1.0) * spec2 * 0.3;
+        color = mix(color, envColor, fresnel * 0.5);
+      } else {
+        // Glow for near-misses
+        float glow = exp(-minDist * 5.0) * 0.15;
+        color += vec3(0.4, 0.45, 0.6) * glow;
+      }
+
+      // Tone mapping + gamma
+      color = color / (color + vec3(1.0));
+      color = pow(color, vec3(1.0 / 2.2));
+
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+
+  function compileShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('SDF shader error:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  const vs = compileShader(gl.VERTEX_SHADER, vsSource);
+  const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
+  if (!vs || !fs) return;
+
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('SDF program error:', gl.getProgramInfoLog(program));
+    return;
+  }
+  gl.useProgram(program);
+
+  const verts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(program, 'aPosition');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uTime = gl.getUniformLocation(program, 'uTime');
+  const uRes = gl.getUniformLocation(program, 'uResolution');
+  const uMouse = gl.getUniformLocation(program, 'uMouse');
+
+  const startTime = performance.now();
+  function render() {
+    const t = (performance.now() - startTime) * 0.001;
+    gl.uniform1f(uTime, t);
+    gl.uniform2f(uRes, w, h);
+    gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>粒子效果集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; }
+  .effect-section { position: relative; padding: 0; }
+  .effect-section h2 { font-size: 2rem; font-weight: 800; color: #fff; padding: 30px 30px 0; }
+  .effect-section .desc { color: rgba(255,255,255,.45); font-size: .85rem; padding: 8px 30px 0; }
+  .demo { width: 100%; height: 80vh; position: relative; overflow: hidden; }
+  .demo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .nav { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 6px; }
+  .nav a { color: #555; font-size: .75rem; text-decoration: none; padding: 4px 10px; border-radius: 4px; transition: all .2s; }
+  .nav a:hover { color: #fff; background: #ffffff10; }
+</style>
+</head>
+<body>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#constellation">星座连线</a>
+  <a href="#fireflies">萤火虫</a>
+  <a href="#galaxy">银河旋涡</a>
+  <a href="#smoke">烟雾粒子</a>
+  <a href="#confetti">彩纸庆祝</a>
+</div>
+
+<!-- ===================== Effect 1: Constellation ===================== -->
+<section class="effect-section" id="constellation">
+  <h2>1. 星座连线</h2>
+  <p class="desc">Canvas 2D — 粒子互连网络，距离阈值内自动连线 + 鼠标吸引交互</p>
+  <div class="demo" id="constellation-demo" style="background:radial-gradient(ellipse at center,#0a0a1a,#000)">
+    <canvas id="constellation-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('constellation-demo');
+  const canvas = document.getElementById('constellation-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const mouse = { x: -1000, y: -1000 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+  });
+  demo.addEventListener('mouseleave', () => { mouse.x = -1000; mouse.y = -1000; });
+
+  const NUM = 150;
+  const CONNECT_DIST = 120;
+  const MOUSE_DIST = 180;
+  let particles = [];
+
+  function initParticles(){
+    particles = [];
+    for(let i=0;i<NUM;i++){
+      particles.push({
+        x: Math.random()*w, y: Math.random()*h,
+        vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
+        size: Math.random()*2+0.5
+      });
+    }
+  }
+  initParticles();
+
+  function render(){
+    ctx.clearRect(0,0,w,h);
+
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>w) p.vx*=-1;
+      if(p.y<0||p.y>h) p.vy*=-1;
+
+      // Mouse attraction
+      const dx=mouse.x-p.x, dy=mouse.y-p.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<MOUSE_DIST){
+        p.x+=dx*0.01; p.y+=dy*0.01;
+      }
+    });
+
+    // Draw connections
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x;
+        const dy=particles[i].y-particles[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<CONNECT_DIST){
+          const alpha=1-dist/CONNECT_DIST;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle=`rgba(100,180,255,${alpha*0.4})`;
+          ctx.lineWidth=0.5;
+          ctx.stroke();
+        }
+      }
+      // Mouse connections
+      const mdx=mouse.x-particles[i].x, mdy=mouse.y-particles[i].y;
+      const mDist=Math.sqrt(mdx*mdx+mdy*mdy);
+      if(mDist<MOUSE_DIST){
+        const alpha=1-mDist/MOUSE_DIST;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(mouse.x, mouse.y);
+        ctx.strokeStyle=`rgba(150,220,255,${alpha*0.6})`;
+        ctx.lineWidth=0.8;
+        ctx.stroke();
+      }
+    }
+
+    // Draw particles
+    particles.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fillStyle='rgba(180,220,255,0.8)';
+      ctx.fill();
+    });
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 2: Fireflies ===================== -->
+<section class="effect-section" id="fireflies">
+  <h2>2. 萤火虫</h2>
+  <p class="desc">Canvas 2D — 发光粒子随机漂浮 + 呼吸闪烁 + 柔和拖尾 + 森林剪影背景</p>
+  <div class="demo" id="fireflies-demo" style="background:linear-gradient(180deg,#0a1a10,#051008,#020804)">
+    <canvas id="fireflies-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('fireflies-demo');
+  const canvas = document.getElementById('fireflies-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const NUM = 80;
+  let flies = [];
+
+  function initFlies(){
+    flies = [];
+    for(let i=0;i<NUM;i++){
+      flies.push({
+        x: Math.random()*w, y: Math.random()*h,
+        vx: (Math.random()-0.5)*0.8, vy: (Math.random()-0.5)*0.6,
+        size: Math.random()*3+1.5,
+        phase: Math.random()*Math.PI*2,
+        speed: 0.5+Math.random()*2,
+        hue: 45+Math.random()*30 // warm yellow-green
+      });
+    }
+  }
+  initFlies();
+
+  // Simple tree silhouettes
+  function drawTrees(){
+    ctx.fillStyle='#020804';
+    // Ground
+    ctx.fillRect(0, h*0.85, w, h*0.15);
+    // Trees
+    for(let i=0;i<15;i++){
+      const tx=i*w/14-w*0.02;
+      const th=h*0.15+Math.random()*h*0.2;
+      const tw=20+Math.random()*30;
+      // Trunk
+      ctx.fillRect(tx+tw*0.4, h*0.85-th*0.3, tw*0.2, th*0.3);
+      // Canopy
+      ctx.beginPath();
+      ctx.moveTo(tx, h*0.85-th*0.3);
+      ctx.lineTo(tx+tw/2, h*0.85-th);
+      ctx.lineTo(tx+tw, h*0.85-th*0.3);
+      ctx.fill();
+    }
+  }
+
+  function render(){
+    const t = performance.now()*0.001;
+
+    // Soft fade trail
+    ctx.fillStyle='rgba(5,16,8,0.12)';
+    ctx.fillRect(0,0,w,h);
+
+    // Background gradient refresh (subtle)
+    if(Math.random()<0.01){
+      const bgGrad=ctx.createLinearGradient(0,0,0,h);
+      bgGrad.addColorStop(0,'rgba(10,26,16,0.03)');
+      bgGrad.addColorStop(1,'rgba(2,8,4,0.03)');
+      ctx.fillStyle=bgGrad;
+      ctx.fillRect(0,0,w,h);
+    }
+
+    flies.forEach(f=>{
+      // Wander motion
+      f.vx+=Math.sin(t*f.speed+f.phase)*0.02;
+      f.vy+=Math.cos(t*f.speed*0.7+f.phase)*0.015;
+      f.vx*=0.98; f.vy*=0.98;
+      f.x+=f.vx; f.y+=f.vy;
+
+      // Wrap
+      if(f.x<-20) f.x=w+20;
+      if(f.x>w+20) f.x=-20;
+      if(f.y<-20) f.y=h+20;
+      if(f.y>h+20) f.y=-20;
+
+      // Breathing glow
+      const breath=Math.sin(t*f.speed+f.phase)*0.5+0.5;
+      const alpha=0.3+breath*0.7;
+      const glowSize=f.size*(1+breath*0.8);
+
+      // Outer glow
+      const glow=ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,glowSize*6);
+      glow.addColorStop(0,`hsla(${f.hue},90%,60%,${alpha*0.3})`);
+      glow.addColorStop(1,`hsla(${f.hue},90%,60%,0)`);
+      ctx.fillStyle=glow;
+      ctx.fillRect(f.x-glowSize*6,f.y-glowSize*6,glowSize*12,glowSize*12);
+
+      // Core
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, glowSize, 0, Math.PI*2);
+      ctx.fillStyle=`hsla(${f.hue},80%,70%,${alpha})`;
+      ctx.fill();
+    });
+
+    // Trees foreground
+    drawTrees();
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 3: Galaxy Vortex ===================== -->
+<section class="effect-section" id="galaxy">
+  <h2>3. 银河旋涡</h2>
+  <p class="desc">Canvas 2D — 数千颗星体沿螺旋臂分布 + 自转动画 + 中心发光核心</p>
+  <div class="demo" id="galaxy-demo" style="background:#000005">
+    <canvas id="galaxy-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('galaxy-demo');
+  const canvas = document.getElementById('galaxy-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const NUM = 3000;
+  const stars = [];
+
+  for(let i=0;i<NUM;i++){
+    const arm = Math.floor(Math.random()*4); // 4 spiral arms
+    const dist = Math.random()*Math.random()*0.45; // concentration toward center
+    const armAngle = (arm/4)*Math.PI*2;
+    const spiralAngle = dist*4; // tighter spiral
+    const angle = armAngle + spiralAngle + (Math.random()-0.5)*0.5;
+    const scatter = (Math.random()-0.5)*0.04*(1+dist*2);
+
+    stars.push({
+      dist: dist + scatter,
+      angle: angle,
+      size: Math.random()<0.95 ? Math.random()*1.5+0.3 : Math.random()*3+1.5,
+      hue: Math.random()<0.7 ? 200+Math.random()*60 : (Math.random()<0.5 ? 30+Math.random()*30 : 340+Math.random()*30),
+      brightness: 0.3+Math.random()*0.7
+    });
+  }
+
+  let rotation = 0;
+
+  function render(){
+    const t = performance.now()*0.001;
+    rotation += 0.001;
+
+    ctx.fillStyle='rgba(0,0,5,0.15)';
+    ctx.fillRect(0,0,w,h);
+
+    const cx=w/2, cy=h/2;
+    const radius=Math.min(w,h)*0.45;
+
+    // Core glow
+    const coreGrad=ctx.createRadialGradient(cx,cy,0,cx,cy,radius*0.15);
+    coreGrad.addColorStop(0,'rgba(255,240,220,0.15)');
+    coreGrad.addColorStop(0.5,'rgba(200,180,255,0.05)');
+    coreGrad.addColorStop(1,'rgba(200,180,255,0)');
+    ctx.fillStyle=coreGrad;
+    ctx.fillRect(cx-radius*0.2,cy-radius*0.2,radius*0.4,radius*0.4);
+
+    stars.forEach(s=>{
+      // Differential rotation: inner stars rotate faster
+      const speed = 1/(0.3+s.dist*2);
+      const angle = s.angle + rotation * speed;
+
+      const x = cx + Math.cos(angle)*s.dist*radius;
+      const y = cy + Math.sin(angle)*s.dist*radius*0.6; // elliptical
+
+      // Distance fade
+      const fade = 1-s.dist*1.2;
+      if(fade<=0) return;
+
+      const alpha = s.brightness*fade*(0.7+Math.sin(t*2+s.angle)*0.3);
+      ctx.beginPath();
+      ctx.arc(x, y, s.size*fade, 0, Math.PI*2);
+      ctx.fillStyle=`hsla(${s.hue},60%,70%,${alpha})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 4: Smoke ===================== -->
+<section class="effect-section" id="smoke">
+  <h2>4. 烟雾粒子</h2>
+  <p class="desc">Canvas 2D — 柔和烟雾上升效果，大量半透明圆形粒子叠加 + 噪声漂移 + 渐隐</p>
+  <div class="demo" id="smoke-demo" style="background:linear-gradient(180deg,#1a1a2e,#16213e,#0f3460)">
+    <canvas id="smoke-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('smoke-demo');
+  const canvas = document.getElementById('smoke-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const particles = [];
+  const MAX = 300;
+
+  function emit(){
+    if(particles.length >= MAX) return;
+    particles.push({
+      x: w*0.5 + (Math.random()-0.5)*w*0.1,
+      y: h + 10,
+      vx: (Math.random()-0.5)*0.5,
+      vy: -(1+Math.random()*1.5),
+      size: 20+Math.random()*40,
+      alpha: 0.15+Math.random()*0.1,
+      life: 0,
+      maxLife: 200+Math.random()*150,
+      hue: 220+Math.random()*30,
+      rotation: Math.random()*Math.PI*2,
+      rotSpeed: (Math.random()-0.5)*0.01
+    });
+  }
+
+  function render(){
+    const t = performance.now()*0.001;
+
+    ctx.clearRect(0,0,w,h);
+    // Redraw background
+    const bgGrad=ctx.createLinearGradient(0,0,0,h);
+    bgGrad.addColorStop(0,'#1a1a2e');
+    bgGrad.addColorStop(0.5,'#16213e');
+    bgGrad.addColorStop(1,'#0f3460');
+    ctx.fillStyle=bgGrad;
+    ctx.fillRect(0,0,w,h);
+
+    // Emit new particles
+    for(let i=0;i<3;i++) emit();
+
+    // Update and draw
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.life++;
+      const lifeRatio=p.life/p.maxLife;
+
+      if(lifeRatio>=1){ particles.splice(i,1); continue; }
+
+      // Movement with drift
+      p.vx+=Math.sin(t+p.y*0.01)*0.02;
+      p.vy*=0.998;
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.size+=0.3;
+      p.rotation+=p.rotSpeed;
+
+      // Fade in then out
+      const fadeIn=Math.min(1, p.life/20);
+      const fadeOut=1-Math.pow(lifeRatio,2);
+      const alpha=p.alpha*fadeIn*fadeOut;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.globalAlpha=alpha;
+
+      const grad=ctx.createRadialGradient(0,0,0,0,0,p.size);
+      grad.addColorStop(0,`hsla(${p.hue},20%,70%,0.4)`);
+      grad.addColorStop(0.4,`hsla(${p.hue},15%,60%,0.2)`);
+      grad.addColorStop(1,`hsla(${p.hue},10%,50%,0)`);
+      ctx.fillStyle=grad;
+      ctx.fillRect(-p.size,-p.size,p.size*2,p.size*2);
+
+      ctx.restore();
+    }
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 5: Confetti ===================== -->
+<section class="effect-section" id="confetti">
+  <h2>5. 彩纸庆祝</h2>
+  <p class="desc">Canvas 2D — 点击触发彩纸爆发效果，3D 旋转纸片 + 重力 + 空气阻力 + 多彩配色</p>
+  <div class="demo" id="confetti-demo" style="background:linear-gradient(135deg,#1a1a2e,#16213e);cursor:pointer;display:flex;align-items:center;justify-content:center">
+    <canvas id="confetti-canvas"></canvas>
+    <div style="position:absolute;z-index:2;color:rgba(255,255,255,0.4);font-size:clamp(14px,2.5vw,24px);pointer-events:none;text-align:center">
+      点击任意位置<br>触发彩纸效果 🎉
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('confetti-demo');
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const confetti = [];
+  const colors = ['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd','#01a3a4','#f368e0','#ff9f43','#00d2d3'];
+
+  function burst(x, y, count){
+    for(let i=0;i<count;i++){
+      const angle = Math.random()*Math.PI*2;
+      const speed = 3+Math.random()*8;
+      confetti.push({
+        x, y,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed - 3,
+        size: 6+Math.random()*8,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        rotation: Math.random()*Math.PI*2,
+        rotSpeed: (Math.random()-0.5)*0.3,
+        rotX: Math.random()*Math.PI*2,
+        rotXSpeed: (Math.random()-0.5)*0.15,
+        gravity: 0.12+Math.random()*0.08,
+        drag: 0.97+Math.random()*0.02,
+        life: 0, maxLife: 150+Math.random()*100
+      });
+    }
+  }
+
+  demo.addEventListener('click', e => {
+    const r = demo.getBoundingClientRect();
+    burst(e.clientX - r.left, e.clientY - r.top, 80);
+  });
+
+  // Auto-burst on first load
+  setTimeout(()=> burst(w/2, h/2, 100), 500);
+
+  function render(){
+    ctx.clearRect(0,0,w,h);
+
+    for(let i=confetti.length-1;i>=0;i--){
+      const c=confetti[i];
+      c.life++;
+      if(c.life>=c.maxLife){ confetti.splice(i,1); continue; }
+
+      c.vy+=c.gravity;
+      c.vx*=c.drag; c.vy*=c.drag;
+      // Wind flutter
+      c.vx+=Math.sin(c.life*0.1)*0.1;
+      c.x+=c.vx; c.y+=c.vy;
+      c.rotation+=c.rotSpeed;
+      c.rotX+=c.rotXSpeed;
+
+      const fadeOut=1-Math.pow(c.life/c.maxLife, 3);
+      const scaleY=Math.cos(c.rotX); // 3D flip illusion
+
+      ctx.save();
+      ctx.translate(c.x, c.y);
+      ctx.rotate(c.rotation);
+      ctx.scale(1, scaleY);
+      ctx.globalAlpha=fadeOut;
+      ctx.fillStyle=c.color;
+      ctx.fillRect(-c.size/2, -c.size/4, c.size, c.size/2);
+      ctx.restore();
+    }
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>页面过渡动画效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+  .page-frame{width:360px;height:260px;border-radius:12px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.08);background:#111}
+  .page-frame .page{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:600}
+  .trigger-btn{margin-top:20px;padding:10px 24px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.5);color:#a78bfa;border-radius:8px;cursor:pointer;font-size:.85rem;font-family:inherit;transition:all .2s}
+  .trigger-btn:hover{background:rgba(99,102,241,.3)}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#clip-circle">圆形裁剪</a>
+  <a href="#slide-panels">面板滑动</a>
+  <a href="#pixel-dissolve">像素溶解</a>
+  <a href="#fold-away">折叠翻页</a>
+  <a href="#morph-shapes">形状遮罩</a>
+  <a href="#crossfade-blur">模糊交叉</a>
+</div>
+
+<!-- ===== 1. Circle Clip Reveal ===== -->
+<section class="effect-section" id="clip-circle">
+  <h2>1. 圆形裁剪展开</h2>
+  <p class="desc">CSS clip-path circle() — 从点击位置/中心向外扩展圆形裁剪区域，揭示新页面内容</p>
+  <div class="demo" style="flex-direction:column;gap:20px;background:#0a0a12">
+    <div class="page-frame" id="clip-frame">
+      <div class="page" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#8bb4e7">Page A</div>
+      <div class="page" id="clip-page-b" style="background:linear-gradient(135deg,#2d1b69,#11001c);color:#c084fc;clip-path:circle(0% at 50% 50%);transition:clip-path .8s cubic-bezier(.4,0,.2,1)">Page B</div>
+    </div>
+    <button class="trigger-btn" onclick="(function(){const el=document.getElementById('clip-page-b');const open=el.style.clipPath.includes('100');el.style.clipPath=open?'circle(0% at 50% 50%)':'circle(100% at 50% 50%)'})()">切换页面</button>
+  </div>
+</section>
+
+<!-- ===== 2. Sliding Panels ===== -->
+<section class="effect-section" id="slide-panels">
+  <h2>2. 多面板滑动</h2>
+  <p class="desc">CSS transform + staggered delay — 页面拆分为多个竖条面板，依次滑出显示底层内容</p>
+  <div class="demo" style="flex-direction:column;gap:20px;background:#0a0a12">
+    <div class="page-frame" id="panel-frame" style="overflow:hidden">
+      <div class="page" style="background:linear-gradient(135deg,#0f3443,#34e89e20);color:#34e89e">New Page</div>
+      <div id="panels-overlay" style="position:absolute;inset:0;display:flex">
+        <div class="panel-strip" style="flex:1;background:#1a1a2e;transition:transform .6s cubic-bezier(.4,0,.2,1);transition-delay:0s"></div>
+        <div class="panel-strip" style="flex:1;background:#1e1e3a;transition:transform .6s cubic-bezier(.4,0,.2,1);transition-delay:.08s"></div>
+        <div class="panel-strip" style="flex:1;background:#1a1a2e;transition:transform .6s cubic-bezier(.4,0,.2,1);transition-delay:.16s"></div>
+        <div class="panel-strip" style="flex:1;background:#1e1e3a;transition:transform .6s cubic-bezier(.4,0,.2,1);transition-delay:.24s"></div>
+        <div class="panel-strip" style="flex:1;background:#1a1a2e;transition:transform .6s cubic-bezier(.4,0,.2,1);transition-delay:.32s"></div>
+      </div>
+    </div>
+    <button class="trigger-btn" id="panel-btn">切换页面</button>
+  </div>
+</section>
+<script>
+(function(){
+  let open=false;
+  document.getElementById('panel-btn').addEventListener('click',()=>{
+    open=!open;
+    document.querySelectorAll('.panel-strip').forEach(el=>{
+      el.style.transform=open?'translateY(-100%)':'translateY(0)';
+    });
+  });
+})();
+</script>
+
+<!-- ===== 3. Pixel Dissolve ===== -->
+<section class="effect-section" id="pixel-dissolve">
+  <h2>3. 像素溶解过渡</h2>
+  <p class="desc">Canvas 2D 随机块擦除 — 将页面拆分为像素网格块，随机顺序逐块消失/出现形成溶解效果</p>
+  <div class="demo" style="flex-direction:column;gap:20px;background:#0a0a12">
+    <div class="page-frame" id="dissolve-frame">
+      <div class="page" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#8bb4e7">Page A</div>
+      <canvas id="dissolve-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+    </div>
+    <button class="trigger-btn" id="dissolve-btn">溶解切换</button>
+  </div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('dissolve-canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=360; canvas.height=260;
+  const BLOCK=10;
+  const cols=Math.ceil(360/BLOCK), rows=Math.ceil(260/BLOCK);
+  let blocks=[];
+  let dissolving=false, showA=true;
+  
+  function resetBlocks(){
+    blocks=[];
+    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) blocks.push({x:c*BLOCK,y:r*BLOCK,visible:true});
+    // Shuffle
+    for(let i=blocks.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[blocks[i],blocks[j]]=[blocks[j],blocks[i]];}
+  }
+  resetBlocks();
+  
+  let frame=0, idx=0;
+  function animateDissolve(){
+    if(!dissolving) return;
+    // Remove 8 blocks per frame
+    for(let k=0;k<8&&idx<blocks.length;k++,idx++){
+      blocks[idx].visible=false;
+    }
+    // Redraw
+    ctx.clearRect(0,0,360,260);
+    const grad=ctx.createLinearGradient(0,0,360,260);
+    grad.addColorStop(0,showA?'#1a1a2e':'#2d1b69');
+    grad.addColorStop(1,showA?'#16213e':'#11001c');
+    blocks.forEach(b=>{
+      if(b.visible){
+        ctx.fillStyle=grad;
+        ctx.fillRect(b.x,b.y,BLOCK,BLOCK);
+      }
+    });
+    if(idx>=blocks.length){
+      dissolving=false;
+      showA=!showA;
+      ctx.clearRect(0,0,360,260);
+      return;
+    }
+    requestAnimationFrame(animateDissolve);
+  }
+  
+  document.getElementById('dissolve-btn').addEventListener('click',()=>{
+    if(dissolving) return;
+    resetBlocks(); idx=0; dissolving=true;
+    // Draw full cover first
+    ctx.clearRect(0,0,360,260);
+    const grad=ctx.createLinearGradient(0,0,360,260);
+    grad.addColorStop(0,showA?'#1a1a2e':'#2d1b69');
+    grad.addColorStop(1,showA?'#16213e':'#11001c');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,360,260);
+    ctx.fillStyle='#fff'; ctx.font='600 20px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(showA?'Page A':'Page B',180,135);
+    animateDissolve();
+  });
+})();
+</script>
+
+<!-- ===== 4. Fold Away ===== -->
+<section class="effect-section" id="fold-away">
+  <h2>4. 3D 折叠翻页</h2>
+  <p class="desc">CSS 3D Transform + preserve-3d — 页面如纸张般沿中线折叠翻转，露出下一页内容</p>
+  <div class="demo" style="flex-direction:column;gap:20px;background:#0a0a12;perspective:1000px">
+    <div class="page-frame" id="fold-frame" style="transform-style:preserve-3d">
+      <div class="page" style="background:linear-gradient(135deg,#0c1b33,#1a3a5c);color:#64b5f6;backface-visibility:hidden;transition:transform .8s cubic-bezier(.4,0,.2,1)" id="fold-front">Page A</div>
+      <div class="page" style="background:linear-gradient(135deg,#1b0c33,#3a1a5c);color:#ce93d8;transform:rotateY(180deg);backface-visibility:hidden" id="fold-back">Page B</div>
+    </div>
+    <button class="trigger-btn" id="fold-btn">翻页</button>
+  </div>
+</section>
+<script>
+(function(){
+  let flipped=false;
+  const frame=document.getElementById('fold-frame');
+  frame.style.transition='transform .8s cubic-bezier(.4,0,.2,1)';
+  frame.style.transformStyle='preserve-3d';
+  document.getElementById('fold-btn').addEventListener('click',()=>{
+    flipped=!flipped;
+    frame.style.transform=flipped?'rotateY(180deg)':'rotateY(0)';
+  });
+})();
+</script>
+
+<!-- ===== 5. Shape Morphing Mask ===== -->
+<section class="effect-section" id="morph-shapes">
+  <h2>5. 形状变形遮罩</h2>
+  <p class="desc">CSS clip-path polygon — 使用多边形路径动画从一种形状渐变为另一种，实现创意页面过渡</p>
+  <div class="demo" style="flex-direction:column;gap:20px;background:#0a0a12">
+    <div class="page-frame" id="shape-frame">
+      <div class="page" style="background:linear-gradient(135deg,#1a2a1a,#0a1f0a);color:#4ade80">Page Below</div>
+      <div class="page" id="shape-mask-page" style="background:linear-gradient(135deg,#2a1a1a,#1f0a0a);color:#f87171;clip-path:polygon(0 0,100% 0,100% 100%,0 100%);transition:clip-path 1s cubic-bezier(.4,0,.2,1)">Page Above</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="trigger-btn" onclick="document.getElementById('shape-mask-page').style.clipPath='polygon(50% 0,100% 100%,0 100%)'">三角</button>
+      <button class="trigger-btn" onclick="document.getElementById('shape-mask-page').style.clipPath='polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%)'">五边形</button>
+      <button class="trigger-btn" onclick="document.getElementById('shape-mask-page').style.clipPath='polygon(0 0,100% 0,100% 100%,0 100%)'">还原</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 6. Crossfade Blur ===== -->
+<section class="effect-section" id="crossfade-blur">
+  <h2>6. 模糊交叉淡入</h2>
+  <p class="desc">CSS filter blur + opacity — 当前页模糊淡出的同时新页面从模糊中清晰淡入，实现柔和过渡</p>
+  <div class="demo" style="flex-direction:column;gap:20px;background:#0a0a12">
+    <div class="page-frame" id="blur-frame">
+      <div class="page" id="blur-a" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#93c5fd;transition:all .8s ease">Page A</div>
+      <div class="page" id="blur-b" style="background:linear-gradient(135deg,#2e1a2e,#3e1621);color:#f9a8d4;opacity:0;filter:blur(10px);transition:all .8s ease">Page B</div>
+    </div>
+    <button class="trigger-btn" id="blur-btn">模糊切换</button>
+  </div>
+</section>
+<script>
+(function(){
+  let showA=true;
+  const a=document.getElementById('blur-a'),b=document.getElementById('blur-b');
+  document.getElementById('blur-btn').addEventListener('click',()=>{
+    showA=!showA;
+    if(showA){
+      a.style.opacity='1'; a.style.filter='blur(0)';
+      b.style.opacity='0'; b.style.filter='blur(10px)';
+    }else{
+      a.style.opacity='0'; a.style.filter='blur(10px)';
+      b.style.opacity='1'; b.style.filter='blur(0)';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

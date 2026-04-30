@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>页面过渡效果集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; min-height: 100vh; padding: 60px 40px; overflow-x: hidden; }
+  h1 { text-align: center; font-size: 2.4rem; margin-bottom: 12px; background: linear-gradient(135deg, #667eea, #38f9d7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { text-align: center; color: #666; margin-bottom: 60px; font-size: 1rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 32px; max-width: 1400px; margin: 0 auto; }
+  .card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; overflow: hidden; transition: border-color .3s; }
+  .card:hover { border-color: #667eea44; }
+  .card-info { padding: 20px 24px; }
+  .card-info h3 { font-size: 1rem; color: #ccc; margin-bottom: 6px; }
+  .card-info .tag { font-size: .7rem; color: #667eea; background: #667eea18; padding: 3px 10px; border-radius: 20px; display: inline-block; }
+  .card-info p { color: #666; font-size: .8rem; margin-top: 8px; }
+
+  /* Shared transition stage */
+  .stage { width: 100%; height: 260px; position: relative; overflow: hidden; cursor: pointer; background: #0a0a15; }
+  .stage .page { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700; transition: all .8s cubic-bezier(.4,0,.2,1); }
+  .page-a { background: linear-gradient(135deg, #1a1a2e, #16213e); color: #667eea; z-index: 2; }
+  .page-b { background: linear-gradient(135deg, #2d1b4e, #1a0a3e); color: #f093fb; z-index: 1; }
+
+  /* 1. Circle Expand */
+  .s1 .page-a { clip-path: circle(150% at 50% 50%); }
+  .s1.active .page-a { clip-path: circle(0% at 50% 50%); }
+
+  /* 2. Diagonal Wipe */
+  .s2 .page-a { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  .s2.active .page-a { clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%); }
+
+  /* 3. Split Horizontal */
+  .s3 .page-a { clip-path: inset(0 0 0 0); }
+  .s3.active .page-a { clip-path: inset(0 50% 0 50%); }
+
+  /* 4. Slide Up */
+  .s4 .page-a { transform: translateY(0); }
+  .s4.active .page-a { transform: translateY(-100%); }
+
+  /* 5. Zoom Out */
+  .s5 .page-a { transform: scale(1); opacity: 1; }
+  .s5.active .page-a { transform: scale(.8); opacity: 0; }
+
+  /* 6. Flip */
+  .s6 { perspective: 600px; }
+  .s6 .page-a { backface-visibility: hidden; transform: rotateY(0); }
+  .s6.active .page-a { transform: rotateY(-90deg); }
+  .s6 .page-b { transform: rotateY(90deg); backface-visibility: hidden; }
+  .s6.active .page-b { transform: rotateY(0); transition: all .8s cubic-bezier(.4,0,.2,1) .4s; }
+
+  /* 7. Blinds / Shutters */
+  .s7-blinds { position: absolute; inset: 0; display: flex; z-index: 3; pointer-events: none; }
+  .s7-blind { flex: 1; background: #0a0a0f; transform: scaleY(0); transition: transform .5s ease; transform-origin: top; }
+  .s7.active .s7-blind { transform: scaleY(1); }
+  .s7.active .s7-blind:nth-child(1) { transition-delay: 0s; }
+  .s7.active .s7-blind:nth-child(2) { transition-delay: .05s; }
+  .s7.active .s7-blind:nth-child(3) { transition-delay: .1s; }
+  .s7.active .s7-blind:nth-child(4) { transition-delay: .15s; }
+  .s7.active .s7-blind:nth-child(5) { transition-delay: .2s; }
+  .s7.active .s7-blind:nth-child(6) { transition-delay: .25s; }
+  .s7.active .s7-blind:nth-child(7) { transition-delay: .3s; }
+  .s7.active .s7-blind:nth-child(8) { transition-delay: .35s; }
+
+  /* 8. Diamond */
+  .s8 .page-a { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); transform: scale(3); }
+  .s8.active .page-a { transform: scale(0); }
+
+  /* 9. Morph Blob */
+  .s9 .page-a { clip-path: circle(80% at 50% 50%); }
+  .s9.active .page-a { clip-path: circle(0% at 50% 50%); transition: clip-path 1s cubic-bezier(.77,0,.175,1); }
+
+  /* 10. Pixel Dissolve */
+  .s10-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(5, 1fr); z-index: 3; pointer-events: none; }
+  .s10-cell { background: #0a0a0f; opacity: 0; transition: opacity .4s ease; }
+  .s10.active .s10-cell { opacity: 1; }
+
+  .hint { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: .7rem; color: #444; z-index: 5; }
+
+  /* === EXPANDED === */
+
+  /* 11. Iris Open */
+  .s11 .page-a { clip-path: circle(0% at 50% 50%); opacity:0; }
+  .s11 .page-b { clip-path: circle(150% at 50% 50%); }
+  .s11.active .page-b { clip-path: circle(0% at 50% 50%); }
+
+  /* 12. Slide Left */
+  .s12 .page-a { transform: translateX(0); }
+  .s12.active .page-a { transform: translateX(-100%); }
+  .s12 .page-b { transform: translateX(100%); }
+  .s12.active .page-b { transform: translateX(0); }
+
+  /* 13. Rotate Scale */
+  .s13 .page-a { transform: rotate(0) scale(1); opacity: 1; }
+  .s13.active .page-a { transform: rotate(15deg) scale(.7); opacity: 0; }
+
+  /* 14. Curtain */
+  .s14-curtain { position:absolute; inset:0; z-index:3; pointer-events:none; display:flex; }
+  .s14-left, .s14-right { flex:1; background:#0a0a0f; transition: transform .8s cubic-bezier(.4,0,.2,1); }
+  .s14-left { transform-origin: left; transform: scaleX(0); }
+  .s14-right { transform-origin: right; transform: scaleX(0); }
+  .s14.active .s14-left, .s14.active .s14-right { transform: scaleX(1); }
+
+  /* 15. Fade Through Black */
+  .s15-overlay { position:absolute; inset:0; background:#0a0a0f; z-index:3; pointer-events:none; opacity:0; transition: opacity .5s; }
+  .s15.active .s15-overlay { opacity:1; }
+  .s15.active .page-a { opacity: 0; transition-delay: .3s; }
+
+  /* 16. Vertical Split */
+  .s16 .page-a { clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%); }
+  .s16 .page-a::after { content:''; position:absolute; inset:50% 0 0 0; background: linear-gradient(135deg, #1a1a2e, #16213e); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  .s16.active .page-a { clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); }
+
+  /* 17. Zoom Into */
+  .s17 .page-a { transform: scale(1); }
+  .s17.active .page-a { transform: scale(3); opacity: 0; }
+
+  /* 18. Cross Fade */
+  .s18 .page-a { opacity: 1; }
+  .s18.active .page-a { opacity: 0; }
+
+  /* 19. Door Open */
+  .s19 { perspective: 800px; }
+  .s19 .page-a { transform-origin: left center; transform: rotateY(0); }
+  .s19.active .page-a { transform: rotateY(-110deg); }
+
+  /* 20. Swirl */
+  .s20 .page-a { transform: rotate(0) scale(1); opacity:1; }
+  .s20.active .page-a { transform: rotate(90deg) scale(0); opacity:0; }
+
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+  <h1>页面过渡效果集</h1>
+  <p class="subtitle">点击每个区域触发过渡 · 20 种 Transition</p>
+  <div class="grid">
+    <div class="card">
+      <div class="stage s1" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>圆形展开</h3><span class="tag">clip-path: circle()</span><p>从中心圆形扩展/收缩切换页面</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s2" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>对角擦除</h3><span class="tag">clip-path: polygon()</span><p>多边形裁切实现方向性擦除</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s3" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>中间分裂</h3><span class="tag">clip-path: inset()</span><p>从中间向两侧分裂展开</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s4" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>上滑切换</h3><span class="tag">translateY(-100%)</span><p>页面向上滑出，露出下层</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s5" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>缩小消失</h3><span class="tag">scale(.8) + opacity</span><p>缩小淡出过渡，常见于 App 导航</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s6" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>3D 翻页</h3><span class="tag">rotateY + perspective</span><p>翻书式 3D 翻页过渡</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s7" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="s7-blinds"><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div></div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>百叶窗</h3><span class="tag">scaleY + stagger delay</span><p>多条百叶窗依次关闭覆盖</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s8" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>菱形缩放</h3><span class="tag">polygon diamond + scale</span><p>菱形裁切配合缩放消失</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s9" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>圆形吸入</h3><span class="tag">circle() ease-in-out</span><p>带缓动曲线的圆形吸入消失</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s10" onclick="togglePixel(this)">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="s10-grid" id="pixelGrid"></div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>像素溶解</h3><span class="tag">grid cells + random delay</span><p>随机延迟的网格像素遮罩</p></div>
+    </div>
+  
+    <div class="card">
+      <div class="stage s11" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>虹膜开合</h3><span class="tag">circle() 反向</span><p>圆形从大到小聚焦关闭</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s12" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>左滑切换</h3><span class="tag">translateX 双页联动</span><p>双页同步左右滑动</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s13" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>旋转缩放</h3><span class="tag">rotate + scale + fade</span><p>旋转缩小淡出</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s14" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="s14-curtain"><div class="s14-left"></div><div class="s14-right"></div></div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>幕布拉开</h3><span class="tag">scaleX 双侧</span><p>两侧幕布向中间合拢</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s15" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="s15-overlay"></div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>黑场过渡</h3><span class="tag">opacity overlay</span><p>通过黑色遮罩淡入淡出</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s16" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>上下分裂</h3><span class="tag">polygon 上半裁切</span><p>上下两部分向外分离</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s17" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>极速放大</h3><span class="tag">scale(3) + fade</span><p>页面急速放大消失</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s18" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>交叉淡入</h3><span class="tag">opacity cross-fade</span><p>最经典的渐隐渐显切换</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s19" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>开门效果</h3><span class="tag">rotateY perspective</span><p>像推开门一样打开页面</p></div>
+    </div>
+    <div class="card">
+      <div class="stage s20" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+      <div class="card-info"><h3>旋涡消失</h3><span class="tag">rotate + scale(0)</span><p>旋转缩小至消失</p></div>
+    </div>
+
+  </div>
+
+<script>
+  // Generate pixel dissolve grid
+  const grid = document.getElementById('pixelGrid');
+  for (let i = 0; i < 40; i++) {
+    const cell = document.createElement('div');
+    cell.className = 's10-cell';
+    cell.style.transitionDelay = (Math.random() * .6).toFixed(2) + 's';
+    grid.appendChild(cell);
+  }
+
+  function togglePixel(el) {
+    el.classList.toggle('active');
+    // Re-randomize delays on each click
+    if (el.classList.contains('active')) {
+      el.querySelectorAll('.s10-cell').forEach(c => {
+        c.style.transitionDelay = (Math.random() * .6).toFixed(2) + 's';
+      });
+    }
+  }
+</script>
+<script src="copy-effect.js"></script>
+</body>
+</html>

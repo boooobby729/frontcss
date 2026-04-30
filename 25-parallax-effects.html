@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>视差与滚动效果集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; overflow-x: hidden; }
+  .effect-section { position: relative; padding: 0; }
+  .effect-section h2 { font-size: 2rem; font-weight: 800; color: #fff; padding: 30px 30px 0; position: relative; z-index: 10; }
+  .effect-section .desc { color: rgba(255,255,255,.45); font-size: .85rem; padding: 8px 30px 0; position: relative; z-index: 10; }
+  .demo { width: 100%; height: 80vh; position: relative; overflow: hidden; }
+  .nav { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 6px; }
+  .nav a { color: #555; font-size: .75rem; text-decoration: none; padding: 4px 10px; border-radius: 4px; transition: all .2s; }
+  .nav a:hover { color: #fff; background: #ffffff10; }
+</style>
+</head>
+<body>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#tilt-card">倾斜卡片</a>
+  <a href="#depth-layers">深度分层</a>
+  <a href="#parallax-stars">星空视差</a>
+  <a href="#reveal-scroll">滚动揭示</a>
+  <a href="#perspective-grid">透视网格</a>
+</div>
+
+<!-- ===================== Effect 1: 3D Tilt Card ===================== -->
+<section class="effect-section" id="tilt-card">
+  <h2>1. 3D 倾斜卡片</h2>
+  <p class="desc">CSS perspective + transform — 鼠标追踪产生 3D 透视倾斜 + 动态光影 + 环境反射</p>
+  <div class="demo" id="tilt-demo" style="display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#1a1a2e,#0a0a0f)">
+    <div id="tilt-card-el" style="width:350px;height:450px;border-radius:20px;background:linear-gradient(145deg,#1e293b,#0f172a);position:relative;transform-style:preserve-3d;perspective:1000px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);box-shadow:0 25px 60px rgba(0,0,0,0.5);">
+      <div id="tilt-glare" style="position:absolute;inset:0;border-radius:20px;pointer-events:none;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,0.15),transparent 60%);opacity:0;transition:opacity .3s"></div>
+      <div style="position:absolute;inset:20px;display:flex;flex-direction:column;justify-content:flex-end;transform:translateZ(30px)">
+        <div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);margin-bottom:20px"></div>
+        <h3 style="font-size:1.4rem;color:#fff;margin-bottom:8px">Interactive Card</h3>
+        <p style="color:rgba(255,255,255,.5);font-size:.85rem;line-height:1.6">移动鼠标在卡片上方感受 3D 透视倾斜效果，光影跟随视角变化。</p>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('tilt-demo');
+  const card = document.getElementById('tilt-card-el');
+  const glare = document.getElementById('tilt-glare');
+
+  demo.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    const dx = (e.clientX - cx) / (rect.width/2);
+    const dy = (e.clientY - cy) / (rect.height/2);
+
+    const rotY = dx * 15;
+    const rotX = -dy * 15;
+    card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+
+    // Glare position
+    const gx = 50 + dx*30;
+    const gy = 50 + dy*30;
+    glare.style.background = `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,0.2), transparent 60%)`;
+    glare.style.opacity = '1';
+  });
+
+  demo.addEventListener('mouseleave', () => {
+    card.style.transform = 'rotateX(0) rotateY(0)';
+    card.style.transition = 'transform .5s ease';
+    glare.style.opacity = '0';
+    setTimeout(()=> card.style.transition='', 500);
+  });
+  demo.addEventListener('mouseenter', () => {
+    card.style.transition = '';
+  });
+})();
+</script>
+
+<!-- ===================== Effect 2: Depth Layers ===================== -->
+<section class="effect-section" id="depth-layers">
+  <h2>2. 深度分层视差</h2>
+  <p class="desc">CSS transform + 鼠标追踪 — 多层元素按不同速率响应鼠标移动，制造空间纵深感</p>
+  <div class="demo" id="depth-demo" style="background:radial-gradient(ellipse at 50% 100%,#1a0a2e,#0a0a0f);display:flex;align-items:center;justify-content:center;overflow:hidden">
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('depth-demo');
+
+  // Create layered elements
+  const layers = [];
+  const layerConfig = [
+    { count: 30, size: [2,4], color: 'rgba(200,200,255,0.3)', speed: 0.02 },
+    { count: 20, size: [4,8], color: 'rgba(150,180,255,0.4)', speed: 0.04 },
+    { count: 12, size: [10,20], color: 'rgba(100,150,255,0.3)', speed: 0.07 },
+    { count: 6, size: [30,50], color: 'rgba(80,120,255,0.15)', speed: 0.12 },
+    { count: 3, size: [80,120], color: 'rgba(100,80,200,0.08)', speed: 0.18 }
+  ];
+
+  layerConfig.forEach((cfg, li) => {
+    for(let i=0;i<cfg.count;i++){
+      const el = document.createElement('div');
+      const size = cfg.size[0] + Math.random()*(cfg.size[1]-cfg.size[0]);
+      el.style.cssText = `
+        position:absolute;
+        width:${size}px;height:${size}px;
+        left:${Math.random()*100}%;top:${Math.random()*100}%;
+        border-radius:50%;
+        background:${cfg.color};
+        box-shadow:0 0 ${size}px ${cfg.color};
+        pointer-events:none;
+        transition:transform .1s ease-out;
+      `;
+      demo.appendChild(el);
+      layers.push({ el, speed: cfg.speed });
+    }
+  });
+
+  // Central focal element
+  const focal = document.createElement('div');
+  focal.style.cssText = `
+    position:absolute;width:200px;height:200px;
+    left:calc(50% - 100px);top:calc(50% - 100px);
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(120,80,200,0.2),transparent 70%);
+    box-shadow:0 0 80px rgba(120,80,200,0.3);
+    pointer-events:none;
+  `;
+  demo.appendChild(focal);
+  layers.push({ el: focal, speed: 0.25 });
+
+  demo.addEventListener('mousemove', e => {
+    const rect = demo.getBoundingClientRect();
+    const mx = (e.clientX - rect.left)/rect.width - 0.5;
+    const my = (e.clientY - rect.top)/rect.height - 0.5;
+
+    layers.forEach(l => {
+      const tx = mx * l.speed * 200;
+      const ty = my * l.speed * 200;
+      l.el.style.transform = `translate(${tx}px, ${ty}px)`;
+    });
+  });
+})();
+</script>
+
+<!-- ===================== Effect 3: Parallax Stars ===================== -->
+<section class="effect-section" id="parallax-stars">
+  <h2>3. 星空穿越视差</h2>
+  <p class="desc">Canvas 2D — 模拟星空纵深飞行，星体按 Z 轴分层以不同速度划过，制造超空间跃迁感</p>
+  <div class="demo" id="stars-demo" style="background:#000">
+    <canvas id="stars-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('stars-demo');
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const NUM = 600;
+  const stars = [];
+
+  for(let i=0;i<NUM;i++){
+    stars.push({
+      x: (Math.random()-0.5)*w*2,
+      y: (Math.random()-0.5)*h*2,
+      z: Math.random()*1000
+    });
+  }
+
+  let speed = 5;
+  let mouse = { x: 0, y: 0 };
+
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    mouse.x = (e.clientX - r.left)/r.width - 0.5;
+    mouse.y = (e.clientY - r.top)/r.height - 0.5;
+  });
+
+  function render(){
+    ctx.fillStyle='rgba(0,0,0,0.2)';
+    ctx.fillRect(0,0,w,h);
+
+    const cx = w/2;
+    const cy = h/2;
+
+    stars.forEach(s => {
+      s.z -= speed;
+      if(s.z<=0) {
+        s.z = 1000;
+        s.x = (Math.random()-0.5)*w*2;
+        s.y = (Math.random()-0.5)*h*2;
+      }
+
+      // Perspective projection + mouse offset
+      const k = 300/s.z;
+      const px = (s.x + mouse.x*s.z*0.5)*k + cx;
+      const py = (s.y + mouse.y*s.z*0.5)*k + cy;
+
+      const size = Math.max(0.5, (1-s.z/1000)*3);
+      const alpha = (1-s.z/1000);
+
+      // Streak effect for close stars
+      const streak = speed * k * 0.3;
+      const prevK = 300/(s.z+speed);
+      const ppx = (s.x + mouse.x*(s.z+speed)*0.5)*prevK + cx;
+      const ppy = (s.y + mouse.y*(s.z+speed)*0.5)*prevK + cy;
+
+      ctx.beginPath();
+      ctx.moveTo(ppx, ppy);
+      ctx.lineTo(px, py);
+      ctx.strokeStyle = `rgba(200,220,255,${alpha*0.8})`;
+      ctx.lineWidth = size;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(px, py, size*0.8, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(240,250,255,${alpha})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 4: Scroll Reveal ===================== -->
+<section class="effect-section" id="reveal-scroll">
+  <h2>4. 滚动揭示动画</h2>
+  <p class="desc">IntersectionObserver + CSS transforms — 元素在进入视口时带有淡入/滑入/缩放等动画</p>
+  <div class="demo" id="reveal-demo" style="overflow-y:auto;background:linear-gradient(180deg,#0f0f1a,#1a1a2e,#0f0f1a);padding:60px 30px">
+    <div style="max-width:800px;margin:0 auto">
+      <div class="reveal-item" data-reveal="fadeUp" style="opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.16,1,.3,1);margin-bottom:40px;padding:30px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px">
+        <h3 style="color:#fff;margin-bottom:10px">淡入上移</h3>
+        <p style="color:rgba(255,255,255,.5);line-height:1.7">元素从下方 40px 位置淡入到原始位置。常用于内容区域的入场动画。</p>
+      </div>
+      <div class="reveal-item" data-reveal="fadeLeft" style="opacity:0;transform:translateX(-60px);transition:all .8s cubic-bezier(.16,1,.3,1);margin-bottom:40px;padding:30px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px">
+        <h3 style="color:#fff;margin-bottom:10px">从左滑入</h3>
+        <p style="color:rgba(255,255,255,.5);line-height:1.7">元素从左侧 60px 位置滑入到原始位置。适合时间线或列表项。</p>
+      </div>
+      <div class="reveal-item" data-reveal="fadeRight" style="opacity:0;transform:translateX(60px);transition:all .8s cubic-bezier(.16,1,.3,1);margin-bottom:40px;padding:30px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px">
+        <h3 style="color:#fff;margin-bottom:10px">从右滑入</h3>
+        <p style="color:rgba(255,255,255,.5);line-height:1.7">元素从右侧 60px 位置滑入。常用于交替排列的内容展示。</p>
+      </div>
+      <div class="reveal-item" data-reveal="scaleUp" style="opacity:0;transform:scale(0.8);transition:all .8s cubic-bezier(.16,1,.3,1);margin-bottom:40px;padding:30px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px">
+        <h3 style="color:#fff;margin-bottom:10px">缩放出现</h3>
+        <p style="color:rgba(255,255,255,.5);line-height:1.7">元素从 80% 尺寸放大到 100%，同时淡入。适合卡片和图片。</p>
+      </div>
+      <div class="reveal-item" data-reveal="rotate" style="opacity:0;transform:rotate(-5deg) translateY(20px);transition:all .8s cubic-bezier(.16,1,.3,1);margin-bottom:40px;padding:30px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px">
+        <h3 style="color:#fff;margin-bottom:10px">旋转进入</h3>
+        <p style="color:rgba(255,255,255,.5);line-height:1.7">元素带有轻微旋转和位移，纠正到正常位置。增添趣味性。</p>
+      </div>
+      <div class="reveal-item" data-reveal="fadeUp" style="opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.16,1,.3,1);margin-bottom:40px;padding:30px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px">
+        <h3 style="color:#fff;margin-bottom:10px">延迟序列</h3>
+        <p style="color:rgba(255,255,255,.5);line-height:1.7">滚动此区域查看所有动画效果。在实际项目中可通过 transition-delay 实现错落入场。</p>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demoEl = document.getElementById('reveal-demo');
+  const items = demoEl.querySelectorAll('.reveal-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0) translateX(0) scale(1) rotate(0)';
+      }
+    });
+  }, { root: demoEl, threshold: 0.15 });
+
+  items.forEach(item => observer.observe(item));
+
+  // Reset on scroll to top
+  demoEl.addEventListener('scroll', ()=>{
+    if(demoEl.scrollTop < 10){
+      items.forEach(item=>{
+        const type = item.dataset.reveal;
+        item.style.transition='none';
+        if(type==='fadeUp') { item.style.opacity='0'; item.style.transform='translateY(40px)'; }
+        else if(type==='fadeLeft') { item.style.opacity='0'; item.style.transform='translateX(-60px)'; }
+        else if(type==='fadeRight') { item.style.opacity='0'; item.style.transform='translateX(60px)'; }
+        else if(type==='scaleUp') { item.style.opacity='0'; item.style.transform='scale(0.8)'; }
+        else if(type==='rotate') { item.style.opacity='0'; item.style.transform='rotate(-5deg) translateY(20px)'; }
+        void item.offsetWidth; // force reflow
+        item.style.transition='all .8s cubic-bezier(.16,1,.3,1)';
+      });
+    }
+  });
+})();
+</script>
+
+<!-- ===================== Effect 5: Perspective Grid ===================== -->
+<section class="effect-section" id="perspective-grid">
+  <h2>5. 透视网格地面</h2>
+  <p class="desc">Canvas 2D + 透视投影 — 无限延伸的网格地面 + 发光线条 + 前进动画，赛博朋克风格</p>
+  <div class="demo" id="grid-demo" style="background:#000">
+    <canvas id="grid-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('grid-demo');
+  const canvas = document.getElementById('grid-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let offset = 0;
+
+  function render(){
+    ctx.clearRect(0,0,w,h);
+
+    // Sky gradient
+    const skyGrad = ctx.createLinearGradient(0,0,0,h*0.6);
+    skyGrad.addColorStop(0,'#000010');
+    skyGrad.addColorStop(1,'#0a0020');
+    ctx.fillStyle=skyGrad;
+    ctx.fillRect(0,0,w,h*0.6);
+
+    // Ground gradient
+    const gndGrad = ctx.createLinearGradient(0,h*0.5,0,h);
+    gndGrad.addColorStop(0,'#0a0020');
+    gndGrad.addColorStop(1,'#000008');
+    ctx.fillStyle=gndGrad;
+    ctx.fillRect(0,h*0.5,w,h*0.5);
+
+    const horizon = h * 0.5;
+    const vanishX = w * 0.5;
+    const vanishY = horizon;
+
+    // Grid settings
+    const gridSpacing = 80;
+    const numLinesH = 30;
+    const numLinesV = 30;
+
+    offset += 0.5;
+    if(offset >= gridSpacing) offset -= gridSpacing;
+
+    // Draw horizontal lines (going into distance)
+    ctx.lineWidth = 1;
+    for(let i=0; i<numLinesH; i++){
+      const rawY = i * gridSpacing + offset;
+      // Perspective: map rawY to screen Y
+      const t = rawY / (numLinesH * gridSpacing); // 0..1
+      const screenY = horizon + Math.pow(t, 1.5) * (h - horizon);
+      const spread = t * 2; // lines spread wider as they come closer
+
+      if(screenY > h) continue;
+
+      const alpha = Math.pow(t, 0.5) * 0.6;
+      ctx.beginPath();
+      ctx.moveTo(vanishX - w*spread, screenY);
+      ctx.lineTo(vanishX + w*spread, screenY);
+      ctx.strokeStyle = `rgba(100,0,200,${alpha})`;
+      ctx.stroke();
+    }
+
+    // Draw vertical lines (converging to vanishing point)
+    for(let i=-numLinesV;i<=numLinesV;i++){
+      const bottomX = vanishX + i * gridSpacing * 1.5;
+      const alpha = Math.max(0, 0.4 - Math.abs(i)/numLinesV*0.4);
+
+      ctx.beginPath();
+      ctx.moveTo(vanishX, vanishY);
+      ctx.lineTo(bottomX, h);
+      ctx.strokeStyle = `rgba(100,0,200,${alpha})`;
+      ctx.stroke();
+    }
+
+    // Horizon glow
+    const hGlow = ctx.createRadialGradient(vanishX, vanishY, 0, vanishX, vanishY, w*0.4);
+    hGlow.addColorStop(0,'rgba(200,50,255,0.15)');
+    hGlow.addColorStop(0.5,'rgba(100,0,200,0.05)');
+    hGlow.addColorStop(1,'transparent');
+    ctx.fillStyle=hGlow;
+    ctx.fillRect(0,0,w,h);
+
+    // Sun at vanish point
+    const sunGrad = ctx.createRadialGradient(vanishX,vanishY,0,vanishX,vanishY,100);
+    sunGrad.addColorStop(0,'rgba(255,100,200,0.4)');
+    sunGrad.addColorStop(0.3,'rgba(200,50,150,0.2)');
+    sunGrad.addColorStop(1,'transparent');
+    ctx.fillStyle=sunGrad;
+    ctx.fillRect(vanishX-100,vanishY-100,200,200);
+
+    // Sun bands
+    for(let i=0;i<5;i++){
+      const bandY = vanishY + i*12 + 5;
+      const bandH = 4+i*2;
+      ctx.fillStyle='rgba(0,0,10,0.8)';
+      ctx.fillRect(vanishX-80+i*5, bandY, 160-i*10, bandH);
+    }
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

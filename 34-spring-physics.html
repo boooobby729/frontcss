@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>弹性物理动画效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#spring-ball">弹簧球</a>
+  <a href="#spring-chain">弹簧链</a>
+  <a href="#spring-grid">弹性网格</a>
+  <a href="#spring-text">弹性文字</a>
+  <a href="#spring-menu">弹性菜单</a>
+</div>
+
+<!-- ===== 1. Spring Ball ===== -->
+<section class="effect-section" id="spring-ball">
+  <h2>1. 弹簧阻尼球</h2>
+  <p class="desc">JavaScript 弹簧物理 — 点击/拖拽释放后弹簧振荡，可调节刚度与阻尼系数</p>
+  <div class="demo" id="spring-ball-demo" style="background:radial-gradient(ellipse at center,#0d0d1a,#060608);flex-direction:column;gap:30px">
+    <canvas id="spring-ball-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+    <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:20px;z-index:10">
+      <label style="font-size:.75rem;color:rgba(255,255,255,.5)">刚度: <input type="range" id="stiffness" min="0.01" max="0.3" step="0.01" value="0.08" style="width:80px;vertical-align:middle"></label>
+      <label style="font-size:.75rem;color:rgba(255,255,255,.5)">阻尼: <input type="range" id="damping" min="0.8" max="0.99" step="0.01" value="0.92" style="width:80px;vertical-align:middle"></label>
+    </div>
+    <p style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.15);font-size:1rem;letter-spacing:.2em;pointer-events:none;z-index:5">CLICK TO LAUNCH</p>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('spring-ball-demo');
+  const canvas=document.getElementById('spring-ball-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const ball={x:0,y:0,vx:0,vy:0,targetX:0,targetY:0,r:20};
+  ball.x=w/2;ball.y=h/2;ball.targetX=w/2;ball.targetY=h/2;
+
+  const trail=[];
+
+  demo.addEventListener('click',e=>{
+    const r=demo.getBoundingClientRect();
+    ball.targetX=e.clientX-r.left;
+    ball.targetY=e.clientY-r.top;
+  });
+
+  function render(){
+    const stiffness=parseFloat(document.getElementById('stiffness').value);
+    const damping=parseFloat(document.getElementById('damping').value);
+
+    const dx=ball.targetX-ball.x;
+    const dy=ball.targetY-ball.y;
+    ball.vx+=dx*stiffness;
+    ball.vy+=dy*stiffness;
+    ball.vx*=damping;
+    ball.vy*=damping;
+    ball.x+=ball.vx;
+    ball.y+=ball.vy;
+
+    trail.push({x:ball.x,y:ball.y,life:1});
+    if(trail.length>60) trail.shift();
+
+    ctx.fillStyle='rgba(13,13,26,0.3)';
+    ctx.fillRect(0,0,w,h);
+
+    // Trail
+    trail.forEach((p,i)=>{
+      p.life-=0.02;
+      if(p.life<=0) return;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,ball.r*p.life*0.6,0,Math.PI*2);
+      ctx.fillStyle=`hsla(260,80%,70%,${p.life*0.3})`;
+      ctx.fill();
+    });
+
+    // Spring line
+    ctx.beginPath();
+    ctx.moveTo(ball.targetX,ball.targetY);
+    ctx.lineTo(ball.x,ball.y);
+    ctx.strokeStyle='rgba(99,102,241,0.3)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+
+    // Target
+    ctx.beginPath();
+    ctx.arc(ball.targetX,ball.targetY,6,0,Math.PI*2);
+    ctx.fillStyle='rgba(99,102,241,0.5)';
+    ctx.fill();
+
+    // Ball
+    const speed=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
+    const hue=260+speed*3;
+    ctx.beginPath();
+    ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);
+    const g=ctx.createRadialGradient(ball.x-5,ball.y-5,0,ball.x,ball.y,ball.r);
+    g.addColorStop(0,`hsla(${hue},80%,75%,1)`);
+    g.addColorStop(1,`hsla(${hue},70%,50%,0.8)`);
+    ctx.fillStyle=g;
+    ctx.shadowColor=`hsla(${hue},90%,60%,0.6)`;
+    ctx.shadowBlur=20;
+    ctx.fill();
+    ctx.shadowBlur=0;
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 2. Spring Chain ===== -->
+<section class="effect-section" id="spring-chain">
+  <h2>2. 弹簧链连接</h2>
+  <p class="desc">JavaScript 多节点弹簧 — 头节点跟随鼠标，后续节点依次弹簧连接，形成蛇形跟随</p>
+  <div class="demo" id="chain-demo" style="background:#000">
+    <canvas id="chain-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+    <p style="position:relative;z-index:5;color:rgba(255,255,255,.15);font-size:1rem;letter-spacing:.2em;pointer-events:none">MOVE YOUR MOUSE</p>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('chain-demo');
+  const canvas=document.getElementById('chain-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const N=20;
+  const nodes=[];
+  for(let i=0;i<N;i++) nodes.push({x:w/2,y:h/2,vx:0,vy:0});
+
+  const mouse={x:w/2,y:h/2};
+  demo.addEventListener('mousemove',e=>{
+    const r=demo.getBoundingClientRect();
+    mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;
+  });
+
+  function render(){
+    ctx.fillStyle='rgba(0,0,0,0.25)';
+    ctx.fillRect(0,0,w,h);
+
+    // First node follows mouse
+    nodes[0].x+=(mouse.x-nodes[0].x)*0.15;
+    nodes[0].y+=(mouse.y-nodes[0].y)*0.15;
+
+    // Chain springs
+    for(let i=1;i<N;i++){
+      const prev=nodes[i-1];
+      const cur=nodes[i];
+      const dx=prev.x-cur.x;
+      const dy=prev.y-cur.y;
+      cur.vx+=dx*0.08;
+      cur.vy+=dy*0.08;
+      cur.vx*=0.85;
+      cur.vy*=0.85;
+      cur.x+=cur.vx;
+      cur.y+=cur.vy;
+    }
+
+    // Draw connections
+    ctx.beginPath();
+    ctx.moveTo(nodes[0].x,nodes[0].y);
+    for(let i=1;i<N;i++){
+      ctx.lineTo(nodes[i].x,nodes[i].y);
+    }
+    ctx.strokeStyle='rgba(99,102,241,0.4)';
+    ctx.lineWidth=2;
+    ctx.stroke();
+
+    // Draw nodes
+    nodes.forEach((n,i)=>{
+      const size=12-i*0.4;
+      const hue=260+i*8;
+      const alpha=1-i/N*0.5;
+      ctx.beginPath();
+      ctx.arc(n.x,n.y,Math.max(2,size),0,Math.PI*2);
+      ctx.fillStyle=`hsla(${hue},80%,65%,${alpha})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 3. Spring Grid ===== -->
+<section class="effect-section" id="spring-grid">
+  <h2>3. 弹性网格</h2>
+  <p class="desc">Canvas 2D — 网格节点各自用弹簧连接，鼠标推动节点后网格弹性恢复</p>
+  <div class="demo" id="grid-demo" style="background:#050510">
+    <canvas id="grid-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('grid-demo');
+  const canvas=document.getElementById('grid-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;initGrid();}
+
+  const cols=24,rows=16;
+  let grid=[];
+  function initGrid(){
+    grid=[];
+    const sx=w/(cols+1),sy=h/(rows+1);
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const x=(c+1)*sx,y=(r+1)*sy;
+        grid.push({x,y,ox:x,oy:y,vx:0,vy:0});
+      }
+    }
+  }
+  resize();window.addEventListener('resize',resize);
+
+  const mouse={x:-999,y:-999};
+  demo.addEventListener('mousemove',e=>{
+    const r=demo.getBoundingClientRect();
+    mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;
+  });
+  demo.addEventListener('mouseleave',()=>{mouse.x=-999;mouse.y=-999;});
+
+  function render(){
+    ctx.clearRect(0,0,w,h);
+
+    // Physics
+    grid.forEach(p=>{
+      // Mouse force
+      const dx=p.x-mouse.x,dy=p.y-mouse.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<100){
+        const force=(100-dist)*0.3;
+        p.vx+=dx/dist*force*0.05;
+        p.vy+=dy/dist*force*0.05;
+      }
+      // Spring to origin
+      p.vx+=(p.ox-p.x)*0.04;
+      p.vy+=(p.oy-p.y)*0.04;
+      p.vx*=0.9;p.vy*=0.9;
+      p.x+=p.vx;p.y+=p.vy;
+    });
+
+    // Draw lines
+    ctx.strokeStyle='rgba(99,102,241,0.2)';
+    ctx.lineWidth=0.5;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const i=r*cols+c;
+        const p=grid[i];
+        if(c<cols-1){
+          const q=grid[i+1];
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
+        }
+        if(r<rows-1){
+          const q=grid[i+cols];
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
+        }
+      }
+    }
+
+    // Draw nodes
+    grid.forEach(p=>{
+      const speed=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+      const alpha=Math.min(1,0.2+speed*0.3);
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,1.5+speed*0.5,0,Math.PI*2);
+      ctx.fillStyle=`rgba(99,102,241,${alpha})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 4. Spring Text ===== -->
+<section class="effect-section" id="spring-text">
+  <h2>4. 弹性文字</h2>
+  <p class="desc">CSS + JS spring physics — 每个字符用弹簧连接到目标位置，悬停时弹开并弹回</p>
+  <div class="demo" style="background:radial-gradient(ellipse at center,#0a0a1a,#060608);flex-direction:column;gap:20px">
+    <div id="spring-text-container" style="display:flex;gap:6px;cursor:default"></div>
+    <p style="color:rgba(255,255,255,.2);font-size:.8rem">Hover over letters</p>
+  </div>
+</section>
+<script>
+(function(){
+  const text='ELASTIC';
+  const container=document.getElementById('spring-text-container');
+  const chars=[];
+
+  text.split('').forEach((ch,i)=>{
+    const span=document.createElement('span');
+    span.textContent=ch;
+    span.style.cssText='display:inline-block;font-size:clamp(3rem,8vw,6rem);font-weight:900;color:#fff;transition:none;user-select:none;position:relative';
+    container.appendChild(span);
+    chars.push({el:span,y:0,vy:0,targetY:0});
+  });
+
+  chars.forEach((c,i)=>{
+    c.el.addEventListener('mouseenter',()=>{c.vy=-18;});
+  });
+
+  function animate(){
+    chars.forEach(c=>{
+      c.vy+=(c.targetY-c.y)*0.12;
+      c.vy*=0.82;
+      c.y+=c.vy;
+      c.el.style.transform=`translateY(${c.y}px)`;
+      // Color based on displacement
+      const d=Math.abs(c.y);
+      const hue=260+d*2;
+      const sat=Math.min(100,50+d*2);
+      c.el.style.color=d>1?`hsl(${hue},${sat}%,70%)`:'#fff';
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+<!-- ===== 5. Spring Menu ===== -->
+<section class="effect-section" id="spring-menu">
+  <h2>5. 弹性展开菜单</h2>
+  <p class="desc">JavaScript spring physics — 菜单项用弹簧动画依次弹出，每项独立弹跳延迟</p>
+  <div class="demo" style="background:#0a0a0f;flex-direction:column;gap:24px">
+    <button id="spring-menu-trigger" style="padding:14px 36px;background:rgba(99,102,241,.15);border:1.5px solid rgba(99,102,241,.5);color:#a78bfa;border-radius:12px;cursor:pointer;font-size:1rem;font-weight:600;font-family:inherit;letter-spacing:.05em;transition:background .2s">Toggle Menu</button>
+    <div id="spring-menu-items" style="display:flex;flex-direction:column;gap:10px;min-width:200px"></div>
+  </div>
+</section>
+<script>
+(function(){
+  const trigger=document.getElementById('spring-menu-trigger');
+  const container=document.getElementById('spring-menu-items');
+  const labels=['Dashboard','Projects','Analytics','Settings','Profile'];
+  const items=[];
+  let open=false;
+
+  labels.forEach((label,i)=>{
+    const div=document.createElement('div');
+    div.textContent=label;
+    div.style.cssText='padding:14px 24px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#fff;font-weight:500;font-size:.9rem;transform:translateY(30px) scale(0.9);opacity:0;cursor:pointer;transition:background .2s';
+    div.addEventListener('mouseenter',()=>{div.style.background='rgba(99,102,241,.1)';});
+    div.addEventListener('mouseleave',()=>{div.style.background='rgba(255,255,255,.03)';});
+    container.appendChild(div);
+    items.push({el:div,y:30,vy:0,targetY:30,scale:0.9,opacity:0});
+  });
+
+  trigger.addEventListener('click',()=>{
+    open=!open;
+    items.forEach((item,i)=>{
+      item.targetY=open?0:30;
+      // Stagger by resetting velocity
+      setTimeout(()=>{item.vy=open?-8:5;},i*60);
+    });
+  });
+
+  function animate(){
+    items.forEach(item=>{
+      item.vy+=(item.targetY-item.y)*0.1;
+      item.vy*=0.75;
+      item.y+=item.vy;
+      item.opacity=open?Math.min(1,1-item.y/30):Math.max(0,1-item.y/30);
+      item.el.style.transform=`translateY(${item.y}px) scale(${0.9+item.opacity*0.1})`;
+      item.el.style.opacity=item.opacity;
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Auto demo
+  setTimeout(()=>trigger.click(),800);
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

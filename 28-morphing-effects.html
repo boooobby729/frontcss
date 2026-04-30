@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>形变 Morphing 效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden}
+  .demo canvas{position:absolute;inset:0;width:100%;height:100%}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#svg-morph">SVG 路径形变</a>
+  <a href="#blob-morph">Blob 有机形变</a>
+  <a href="#text-morph">文字形变</a>
+  <a href="#liquid-morph">液态形变按钮</a>
+  <a href="#particle-morph">粒子形变</a>
+</div>
+
+<!-- ===== 1. SVG Path Morph ===== -->
+<section class="effect-section" id="svg-morph">
+  <h2>1. SVG 路径形变</h2>
+  <p class="desc">SVG SMIL + CSS — 多个几何形状之间平滑插值变形，点击切换目标形状</p>
+  <div class="demo" style="background:radial-gradient(ellipse at center,#0d0d1a,#060608);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:40px">
+    <svg id="morph-svg" width="220" height="220" viewBox="-110 -110 220 220">
+      <path id="morph-path" fill="none" stroke="url(#mg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <defs>
+        <linearGradient id="mg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#6366f1"/>
+          <stop offset="50%" stop-color="#a78bfa"/>
+          <stop offset="100%" stop-color="#38bdf8"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div style="display:flex;gap:16px;z-index:10">
+      <button class="morph-btn active" data-shape="circle" style="padding:8px 20px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.5);color:#a78bfa;border-radius:8px;cursor:pointer;font-size:.8rem;font-family:inherit">圆形</button>
+      <button class="morph-btn" data-shape="triangle" style="padding:8px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:8px;cursor:pointer;font-size:.8rem;font-family:inherit">三角</button>
+      <button class="morph-btn" data-shape="star" style="padding:8px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:8px;cursor:pointer;font-size:.8rem;font-family:inherit">星形</button>
+      <button class="morph-btn" data-shape="heart" style="padding:8px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:8px;cursor:pointer;font-size:.8rem;font-family:inherit">心形</button>
+      <button class="morph-btn" data-shape="blob" style="padding:8px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:8px;cursor:pointer;font-size:.8rem;font-family:inherit">Blob</button>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  // Generate N-point polygon path
+  function polygon(n, r){
+    const pts = [];
+    for(let i=0;i<n;i++){
+      const a = (i/n)*Math.PI*2 - Math.PI/2;
+      pts.push([Math.cos(a)*r, Math.sin(a)*r]);
+    }
+    return pts;
+  }
+  function star(n, r1, r2){
+    const pts = [];
+    for(let i=0;i<n*2;i++){
+      const a = (i/(n*2))*Math.PI*2 - Math.PI/2;
+      const r = i%2===0 ? r1 : r2;
+      pts.push([Math.cos(a)*r, Math.sin(a)*r]);
+    }
+    return pts;
+  }
+  // All shapes use same point count (40) for smooth interpolation
+  const N = 40;
+  function resample(pts, n){
+    const out = [];
+    for(let i=0;i<n;i++){
+      const t = i/n * pts.length;
+      const i0 = Math.floor(t) % pts.length;
+      const i1 = (i0+1) % pts.length;
+      const f = t - Math.floor(t);
+      out.push([pts[i0][0]*(1-f)+pts[i1][0]*f, pts[i0][1]*(1-f)+pts[i1][1]*f]);
+    }
+    return out;
+  }
+
+  const shapes = {
+    circle: resample(polygon(64, 90), N),
+    triangle: resample(polygon(3, 90), N),
+    star: resample(star(5, 90, 38), N),
+    heart: resample((()=>{
+      const pts=[];
+      for(let i=0;i<64;i++){
+        const t=i/64*Math.PI*2;
+        const x=16*Math.pow(Math.sin(t),3);
+        const y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
+        pts.push([x*5.5, y*5.5]);
+      }
+      return pts;
+    })(), N),
+    blob: resample((()=>{
+      const pts=[];
+      for(let i=0;i<64;i++){
+        const a=i/64*Math.PI*2;
+        const r=80+20*Math.sin(3*a)+15*Math.cos(5*a)+10*Math.sin(7*a);
+        pts.push([Math.cos(a)*r, Math.sin(a)*r]);
+      }
+      return pts;
+    })(), N)
+  };
+
+  let current = shapes.circle.map(p=>[...p]);
+  let target  = shapes.circle.map(p=>[...p]);
+  let progress = 1;
+
+  const path = document.getElementById('morph-path');
+
+  function ptsToD(pts){
+    return 'M'+pts.map(p=>p[0].toFixed(2)+','+p[1].toFixed(2)).join('L')+'Z';
+  }
+
+  function lerp(a,b,t){ return a+(b-a)*t; }
+  function easeInOut(t){ return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2; }
+
+  let from = shapes.circle.map(p=>[...p]);
+
+  function animate(){
+    if(progress < 1){
+      progress = Math.min(1, progress + 0.025);
+      const e = easeInOut(progress);
+      current = from.map((p,i)=>[lerp(p[0],target[i][0],e), lerp(p[1],target[i][1],e)]);
+    }
+    path.setAttribute('d', ptsToD(current));
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  document.querySelectorAll('.morph-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.morph-btn').forEach(b=>{
+        b.style.background='rgba(255,255,255,.05)';
+        b.style.borderColor='rgba(255,255,255,.1)';
+        b.style.color='rgba(255,255,255,.5)';
+      });
+      btn.style.background='rgba(99,102,241,.2)';
+      btn.style.borderColor='rgba(99,102,241,.5)';
+      btn.style.color='#a78bfa';
+      from = current.map(p=>[...p]);
+      target = shapes[btn.dataset.shape].map(p=>[...p]);
+      progress = 0;
+    });
+  });
+
+  // Auto cycle
+  const order = ['circle','triangle','star','heart','blob'];
+  let idx = 0;
+  setInterval(()=>{
+    idx = (idx+1)%order.length;
+    document.querySelector(`[data-shape="${order[idx]}"]`).click();
+  }, 2500);
+})();
+</script>
+
+<!-- ===== 2. Blob Organic Morph ===== -->
+<section class="effect-section" id="blob-morph">
+  <h2>2. Blob 有机形变</h2>
+  <p class="desc">Canvas 2D + Simplex Noise — 多个 Blob 随噪声独立演化，鼠标靠近时相互吸引融合</p>
+  <div class="demo" id="blob-demo" style="background:#050510">
+    <canvas id="blob-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('blob-demo');
+  const canvas=document.getElementById('blob-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  // Tiny simplex-like noise
+  function hash(n){return Math.sin(n)*43758.5453%1;}
+  function snoise(x,y){
+    const ix=Math.floor(x),iy=Math.floor(y);
+    const fx=x-ix,fy=y-iy;
+    const ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);
+    const a=hash(ix+iy*57),b=hash(ix+1+iy*57),c=hash(ix+(iy+1)*57),d=hash(ix+1+(iy+1)*57);
+    return a+(b-a)*ux+(c-a)*uy+(a-b-c+d)*ux*uy;
+  }
+
+  const mouse={x:-999,y:-999};
+  demo.addEventListener('mousemove',e=>{const r=demo.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;});
+  demo.addEventListener('mouseleave',()=>{mouse.x=-999;mouse.y=-999;});
+
+  const blobs=[
+    {cx:.25,cy:.4,r:0.13,hue:260,speed:0.4,phase:0},
+    {cx:.55,cy:.55,r:0.11,hue:200,speed:0.5,phase:2},
+    {cx:.72,cy:.35,r:0.10,hue:300,speed:0.35,phase:4},
+    {cx:.4, cy:.65,r:0.09,hue:180,speed:0.6,phase:1},
+    {cx:.8, cy:.65,r:0.08,hue:240,speed:0.45,phase:3},
+  ];
+
+  function drawBlob(b,t){
+    const cx=b.cx*w, cy=b.cy*h;
+    const baseR=b.r*Math.min(w,h);
+    const N=64;
+    ctx.beginPath();
+    for(let i=0;i<=N;i++){
+      const angle=i/N*Math.PI*2;
+      const nx=Math.cos(angle)*2+b.phase;
+      const ny=Math.sin(angle)*2+t*b.speed;
+      const noise=snoise(nx,ny)*0.35+0.65;
+      // Mouse attraction
+      const dx=mouse.x-cx, dy=mouse.y-cy;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const attract=Math.max(0,1-dist/(baseR*3))*0.3;
+      const mx=Math.cos(Math.atan2(dy,dx))*attract*baseR;
+      const my=Math.sin(Math.atan2(dy,dx))*attract*baseR;
+      const r=baseR*noise;
+      const x=cx+Math.cos(angle)*r+mx;
+      const y=cy+Math.sin(angle)*r+my;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,baseR*1.3);
+    g.addColorStop(0,`hsla(${b.hue},80%,70%,0.7)`);
+    g.addColorStop(0.5,`hsla(${b.hue},70%,55%,0.4)`);
+    g.addColorStop(1,`hsla(${b.hue},60%,40%,0)`);
+    ctx.fillStyle=g;
+    ctx.fill();
+  }
+
+  function render(){
+    const t=performance.now()*0.001;
+    ctx.fillStyle='rgba(5,5,16,0.25)';
+    ctx.fillRect(0,0,w,h);
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    blobs.forEach(b=>drawBlob(b,t));
+    ctx.restore();
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 3. Text Morph ===== -->
+<section class="effect-section" id="text-morph">
+  <h2>3. 文字形变</h2>
+  <p class="desc">Canvas 2D 像素采样 — 将文字渲染为粒子点阵，粒子在不同文字之间流动变形</p>
+  <div class="demo" id="textmorph-demo" style="background:#000">
+    <canvas id="textmorph-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('textmorph-demo');
+  const canvas=document.getElementById('textmorph-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const words=['MORPH','FLOW','SHAPE','DRIFT','FORM'];
+  let wordIdx=0;
+  const PARTICLE_COUNT=2000;
+  const particles=[];
+
+  // Sample text into point cloud
+  function sampleText(text){
+    const offscreen=document.createElement('canvas');
+    const fs=Math.min(w*0.55,280);
+    offscreen.width=w;offscreen.height=h;
+    const oc=offscreen.getContext('2d');
+    oc.fillStyle='#fff';
+    oc.font=`900 ${fs}px "SF Pro Display",-apple-system,sans-serif`;
+    oc.textAlign='center';oc.textBaseline='middle';
+    oc.fillText(text,w/2,h/2);
+    const data=oc.getImageData(0,0,w,h).data;
+    const pts=[];
+    const step=Math.max(3,Math.floor(w/120));
+    for(let y=0;y<h;y+=step){
+      for(let x=0;x<w;x+=step){
+        if(data[(y*w+x)*4+3]>128) pts.push({x,y});
+      }
+    }
+    return pts;
+  }
+
+  function getTargets(text){
+    const pts=sampleText(text);
+    const targets=[];
+    for(let i=0;i<PARTICLE_COUNT;i++){
+      const p=pts[Math.floor(Math.random()*pts.length)]||{x:w/2,y:h/2};
+      targets.push({x:p.x,y:p.y});
+    }
+    return targets;
+  }
+
+  // Init particles scattered
+  for(let i=0;i<PARTICLE_COUNT;i++){
+    particles.push({
+      x:Math.random()*w, y:Math.random()*h,
+      tx:w/2, ty:h/2,
+      vx:0, vy:0,
+      hue:200+Math.random()*120,
+      size:Math.random()*2+0.5
+    });
+  }
+
+  let targets=getTargets(words[0]);
+  targets.forEach((t,i)=>{particles[i].tx=t.x;particles[i].ty=t.y;});
+
+  function nextWord(){
+    wordIdx=(wordIdx+1)%words.length;
+    targets=getTargets(words[wordIdx]);
+    targets.forEach((t,i)=>{particles[i].tx=t.x;particles[i].ty=t.y;});
+  }
+  setInterval(nextWord,2800);
+
+  function render(){
+    ctx.fillStyle='rgba(0,0,0,0.2)';
+    ctx.fillRect(0,0,w,h);
+    particles.forEach(p=>{
+      const dx=p.tx-p.x, dy=p.ty-p.y;
+      p.vx+=dx*0.06; p.vy+=dy*0.06;
+      p.vx*=0.72; p.vy*=0.72;
+      p.x+=p.vx; p.y+=p.vy;
+      const speed=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+      const alpha=Math.min(1,0.4+speed*0.08);
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue},80%,70%,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 4. Liquid Morph Button ===== -->
+<section class="effect-section" id="liquid-morph">
+  <h2>4. 液态形变按钮</h2>
+  <p class="desc">SVG feTurbulence + feDisplacementMap — 悬停时按钮边缘产生液态蠕动变形，CSS 过渡驱动</p>
+  <div class="demo" style="background:radial-gradient(ellipse at center,#0f0a1e,#060608);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:clamp(20px,4vw,50px)">
+
+    <svg style="position:absolute;width:0;height:0">
+      <defs>
+        <filter id="liquid-filter" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence id="liq-turb" type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="2" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" id="liq-disp"/>
+        </filter>
+      </defs>
+    </svg>
+
+    <button class="liq-btn" style="--c:#6366f1;--cg:#8b5cf6">EXPLORE</button>
+    <button class="liq-btn" style="--c:#ec4899;--cg:#f43f5e">CREATE</button>
+    <button class="liq-btn" style="--c:#06b6d4;--cg:#3b82f6">DISCOVER</button>
+    <button class="liq-btn" style="--c:#10b981;--cg:#14b8a6">CONNECT</button>
+  </div>
+</section>
+<style>
+.liq-btn{
+  position:relative;padding:18px 44px;
+  background:transparent;
+  border:2px solid var(--c);
+  color:#fff;font-size:1rem;font-weight:700;
+  letter-spacing:.12em;cursor:pointer;
+  border-radius:60px;font-family:inherit;
+  filter:url(#liquid-filter);
+  transition:color .3s,background .3s;
+  overflow:visible;
+}
+.liq-btn::before{
+  content:'';position:absolute;inset:0;border-radius:60px;
+  background:linear-gradient(135deg,var(--c),var(--cg));
+  opacity:0;transition:opacity .4s;z-index:-1;
+}
+.liq-btn:hover{color:#fff;}
+.liq-btn:hover::before{opacity:1;}
+</style>
+<script>
+(function(){
+  const disp=document.getElementById('liq-disp');
+  const turb=document.getElementById('liq-turb');
+  let animId=null, scale=0, targetScale=0, seed=2;
+
+  document.querySelectorAll('.liq-btn').forEach(btn=>{
+    btn.addEventListener('mouseenter',()=>{
+      targetScale=18;
+      seed=Math.floor(Math.random()*100);
+      turb.setAttribute('seed',seed);
+    });
+    btn.addEventListener('mouseleave',()=>{ targetScale=0; });
+  });
+
+  function animate(){
+    scale+=(targetScale-scale)*0.12;
+    disp.setAttribute('scale',scale.toFixed(2));
+    // Animate turbulence baseFrequency for living feel
+    const bf=0.015+Math.sin(Date.now()*0.002)*0.005;
+    turb.setAttribute('baseFrequency',bf.toFixed(4));
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+<!-- ===== 5. Particle Morph ===== -->
+<section class="effect-section" id="particle-morph">
+  <h2>5. 粒子形变 — 图标变换</h2>
+  <p class="desc">Canvas 2D — 粒子群在多个图标形状之间流动变形，每个粒子独立弹簧物理</p>
+  <div class="demo" id="pmorph-demo" style="background:#050508;display:flex;align-items:center;justify-content:center">
+    <canvas id="pmorph-canvas"></canvas>
+    <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:10">
+      <button class="pm-btn active" data-idx="0" style="padding:6px 16px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:6px;cursor:pointer;font-size:.75rem;font-family:inherit">☁ Cloud</button>
+      <button class="pm-btn" data-idx="1" style="padding:6px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:6px;cursor:pointer;font-size:.75rem;font-family:inherit">⬡ Hex</button>
+      <button class="pm-btn" data-idx="2" style="padding:6px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:6px;cursor:pointer;font-size:.75rem;font-family:inherit">∞ Infinity</button>
+      <button class="pm-btn" data-idx="3" style="padding:6px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:6px;cursor:pointer;font-size:.75rem;font-family:inherit">◎ Ring</button>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('pmorph-demo');
+  const canvas=document.getElementById('pmorph-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const R=Math.min(window.innerWidth,window.innerHeight)*0.18;
+  const N=800;
+
+  function makeCloud(cx,cy,r){
+    const pts=[];
+    for(let i=0;i<N;i++){
+      const a=Math.random()*Math.PI*2;
+      const bumpA=Math.floor(a/(Math.PI*2/5))*Math.PI*2/5;
+      const bump=0.7+0.3*Math.cos(a*5);
+      const rad=(r*bump)*(0.5+Math.random()*0.5);
+      pts.push({x:cx+Math.cos(a)*rad,y:cy+Math.sin(a)*rad*0.6});
+    }
+    return pts;
+  }
+  function makeHex(cx,cy,r){
+    const pts=[];
+    for(let i=0;i<N;i++){
+      const a=Math.random()*Math.PI*2;
+      // Hexagonal distance
+      const hexR=r/(Math.max(Math.abs(Math.cos(a-Math.PI/6)),Math.abs(Math.sin(a)))*1.15+0.01)*0.9;
+      const rad=hexR*(0.3+Math.random()*0.7);
+      pts.push({x:cx+Math.cos(a)*rad,y:cy+Math.sin(a)*rad});
+    }
+    return pts;
+  }
+  function makeInfinity(cx,cy,r){
+    const pts=[];
+    for(let i=0;i<N;i++){
+      const t=Math.random()*Math.PI*2;
+      const scale=r*0.55/(1+Math.sin(t)*Math.sin(t));
+      const x=cx+scale*Math.cos(t)+(Math.random()-0.5)*8;
+      const y=cy+scale*Math.sin(t)*Math.cos(t)+(Math.random()-0.5)*8;
+      pts.push({x,y});
+    }
+    return pts;
+  }
+  function makeRing(cx,cy,r){
+    const pts=[];
+    for(let i=0;i<N;i++){
+      const a=Math.random()*Math.PI*2;
+      const rad=r*(0.7+Math.random()*0.3);
+      pts.push({x:cx+Math.cos(a)*rad,y:cy+Math.sin(a)*rad});
+    }
+    return pts;
+  }
+
+  function getShapes(){
+    const cx=w/2,cy=h/2,r=Math.min(w,h)*0.22;
+    return [makeCloud(cx,cy,r),makeHex(cx,cy,r),makeInfinity(cx,cy,r),makeRing(cx,cy,r)];
+  }
+
+  let shapes=getShapes();
+  let shapeIdx=0;
+
+  const particles=[];
+  for(let i=0;i<N;i++){
+    const s=shapes[0][i];
+    particles.push({x:s.x+(Math.random()-0.5)*200,y:s.y+(Math.random()-0.5)*200,vx:0,vy:0,hue:180+i/N*160});
+  }
+
+  function setTarget(idx){
+    shapeIdx=idx;
+    shapes=getShapes();
+  }
+
+  document.querySelectorAll('.pm-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.pm-btn').forEach(b=>{
+        b.style.background='rgba(255,255,255,.05)';
+        b.style.borderColor='rgba(255,255,255,.1)';
+        b.style.color='rgba(255,255,255,.5)';
+      });
+      btn.style.background='rgba(255,255,255,.1)';
+      btn.style.borderColor='rgba(255,255,255,.2)';
+      btn.style.color='#fff';
+      setTarget(parseInt(btn.dataset.idx));
+    });
+  });
+
+  // Auto cycle
+  let autoIdx=0;
+  setInterval(()=>{
+    autoIdx=(autoIdx+1)%4;
+    document.querySelector(`[data-idx="${autoIdx}"]`).click();
+  },2500);
+
+  function render(){
+    ctx.fillStyle='rgba(5,5,8,0.3)';
+    ctx.fillRect(0,0,w,h);
+    const targets=shapes[shapeIdx];
+    particles.forEach((p,i)=>{
+      const t=targets[i];
+      const dx=t.x-p.x, dy=t.y-p.y;
+      p.vx+=dx*0.08; p.vy+=dy*0.08;
+      p.vx*=0.75; p.vy*=0.75;
+      p.x+=p.vx; p.y+=p.vy;
+      const speed=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+      const alpha=Math.min(0.9,0.3+speed*0.05);
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,1.2,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue},80%,70%,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

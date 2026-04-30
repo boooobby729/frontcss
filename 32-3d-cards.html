@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 卡片与翻转效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#tilt-card">倾斜跟随</a>
+  <a href="#flip-card">翻转卡片</a>
+  <a href="#stack-card">堆叠卡片</a>
+  <a href="#fold-card">折叠展开</a>
+  <a href="#hologram-card">全息卡片</a>
+  <a href="#glass-card">毛玻璃卡片</a>
+</div>
+
+<!-- ===== 1. Tilt Card ===== -->
+<section class="effect-section" id="tilt-card">
+  <h2>1. 3D 倾斜跟随卡片</h2>
+  <p class="desc">CSS transform + JS mousemove — 鼠标在卡片上移动时产生 3D 倾斜，配合动态光泽与阴影</p>
+  <div class="demo" style="background:radial-gradient(ellipse at center,#0d0d1a,#060608);gap:40px;flex-wrap:wrap;padding:40px">
+    <div class="tilt-card" style="--accent:#6366f1">
+      <div class="tilt-shine"></div>
+      <h3>DESIGN</h3>
+      <p>Creative Vision</p>
+    </div>
+    <div class="tilt-card" style="--accent:#ec4899">
+      <div class="tilt-shine"></div>
+      <h3>DEVELOP</h3>
+      <p>Clean Code</p>
+    </div>
+    <div class="tilt-card" style="--accent:#06b6d4">
+      <div class="tilt-shine"></div>
+      <h3>DEPLOY</h3>
+      <p>Ship Fast</p>
+    </div>
+  </div>
+</section>
+<style>
+.tilt-card{
+  width:200px;height:280px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  padding:30px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;overflow:hidden;
+  transition:transform .1s ease-out,box-shadow .3s;
+  transform-style:preserve-3d;
+  cursor:pointer;
+}
+.tilt-card h3{font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:-.02em;position:relative;z-index:2}
+.tilt-card p{font-size:.8rem;color:rgba(255,255,255,.4);margin-top:4px;position:relative;z-index:2}
+.tilt-card::before{
+  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:conic-gradient(from 0deg,transparent,var(--accent),transparent 30%);
+  opacity:0;transition:opacity .3s;animation:tiltSpin 4s linear infinite;
+}
+.tilt-card:hover::before{opacity:.15}
+@keyframes tiltSpin{to{transform:rotate(360deg)}}
+.tilt-shine{
+  position:absolute;inset:0;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.1) 0%,transparent 60%);
+  pointer-events:none;z-index:1;
+  opacity:0;transition:opacity .3s;
+}
+.tilt-card:hover .tilt-shine{opacity:1}
+</style>
+<script>
+document.querySelectorAll('.tilt-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width;
+    const y=(e.clientY-r.top)/r.height;
+    const rotY=(x-0.5)*25;
+    const rotX=(0.5-y)*25;
+    card.style.transform=`perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.05)`;
+    card.style.boxShadow=`${-rotY}px ${rotX}px 30px rgba(0,0,0,.3)`;
+    card.style.setProperty('--mx',(x*100)+'%');
+    card.style.setProperty('--my',(y*100)+'%');
+  });
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform='perspective(800px) rotateX(0) rotateY(0) scale(1)';
+    card.style.boxShadow='none';
+  });
+});
+</script>
+
+<!-- ===== 2. Flip Card ===== -->
+<section class="effect-section" id="flip-card">
+  <h2>2. 翻转卡片</h2>
+  <p class="desc">CSS transform rotateY — 悬停或点击触发 180° 翻转，正反面不同内容，支持多种翻转轴</p>
+  <div class="demo" style="background:#0a0a0f;gap:40px;flex-wrap:wrap;padding:40px;perspective:1200px">
+    <div class="flip-wrap" style="--c:#6366f1">
+      <div class="flip-inner">
+        <div class="flip-front"><span>01</span><h3>FRONT</h3></div>
+        <div class="flip-back"><p>This is the back face with detailed information about the card.</p></div>
+      </div>
+    </div>
+    <div class="flip-wrap flip-y" style="--c:#ec4899">
+      <div class="flip-inner">
+        <div class="flip-front"><span>02</span><h3>VERTICAL</h3></div>
+        <div class="flip-back"><p>Flips along X axis for a vertical reveal effect.</p></div>
+      </div>
+    </div>
+    <div class="flip-wrap flip-diagonal" style="--c:#10b981">
+      <div class="flip-inner">
+        <div class="flip-front"><span>03</span><h3>DIAGONAL</h3></div>
+        <div class="flip-back"><p>Diagonal flip creates a unique 3D rotation effect.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+.flip-wrap{width:200px;height:260px;perspective:1000px;cursor:pointer}
+.flip-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1)}
+.flip-wrap:hover .flip-inner{transform:rotateY(180deg)}
+.flip-wrap.flip-y:hover .flip-inner{transform:rotateX(180deg)}
+.flip-wrap.flip-diagonal:hover .flip-inner{transform:rotate3d(1,1,0,180deg)}
+.flip-front,.flip-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.flip-front{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+.flip-front span{font-size:3rem;font-weight:900;color:var(--c);opacity:.3;margin-bottom:8px}
+.flip-front h3{font-size:1rem;font-weight:700;color:#fff;letter-spacing:.1em}
+.flip-back{background:var(--c);transform:rotateY(180deg);color:#fff}
+.flip-wrap.flip-y .flip-back{transform:rotateX(180deg)}
+.flip-wrap.flip-diagonal .flip-back{transform:rotate3d(1,1,0,180deg)}
+.flip-back p{font-size:.85rem;line-height:1.6;text-align:center;font-weight:500}
+</style>
+
+<!-- ===== 3. Stack Cards ===== -->
+<section class="effect-section" id="stack-card">
+  <h2>3. 堆叠卡片展开</h2>
+  <p class="desc">CSS transform + transition — 多张卡片堆叠，悬停时扇形展开，每张有独立延迟与倾斜角</p>
+  <div class="demo" style="background:radial-gradient(ellipse at center,#0a0a1a,#060608)">
+    <div class="stack-container">
+      <div class="stack-card" style="--i:0;--c:#6366f1"><div class="sc-inner">A</div></div>
+      <div class="stack-card" style="--i:1;--c:#a78bfa"><div class="sc-inner">B</div></div>
+      <div class="stack-card" style="--i:2;--c:#38bdf8"><div class="sc-inner">C</div></div>
+      <div class="stack-card" style="--i:3;--c:#06b6d4"><div class="sc-inner">D</div></div>
+      <div class="stack-card" style="--i:4;--c:#10b981"><div class="sc-inner">E</div></div>
+    </div>
+  </div>
+</section>
+<style>
+.stack-container{position:relative;width:180px;height:240px}
+.stack-card{
+  position:absolute;inset:0;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  transition:transform .5s cubic-bezier(.34,1.56,.64,1);
+  transform:translateX(calc(var(--i)*4px)) translateY(calc(var(--i)*-4px)) rotate(calc(var(--i)*-1deg));
+}
+.stack-container:hover .stack-card{
+  transform:translateX(calc((var(--i) - 2)*110px)) rotate(calc((var(--i) - 2)*5deg));
+}
+.sc-inner{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:3rem;font-weight:900;color:var(--c);opacity:.5;
+}
+</style>
+
+<!-- ===== 4. Fold Card ===== -->
+<section class="effect-section" id="fold-card">
+  <h2>4. 折叠展开卡片</h2>
+  <p class="desc">CSS transform-origin + rotateX — 卡片分段折叠，展开时逐段旋转打开，形成纸质折叠感</p>
+  <div class="demo" style="background:#000;flex-direction:column;gap:20px">
+    <div class="fold-card">
+      <div class="fold-section fold-top">
+        <h3 style="color:#fff;font-size:1.2rem;font-weight:700">UNFOLD ME</h3>
+        <p style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Hover to reveal</p>
+      </div>
+      <div class="fold-section fold-mid">
+        <p style="color:rgba(255,255,255,.7);font-size:.85rem;line-height:1.6;padding:16px">The content gradually reveals as each fold opens, creating a satisfying paper-like unfolding animation.</p>
+      </div>
+      <div class="fold-section fold-bot">
+        <div style="display:flex;gap:12px">
+          <span style="padding:6px 16px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.4);border-radius:6px;color:#a78bfa;font-size:.75rem">Detail</span>
+          <span style="padding:6px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:rgba(255,255,255,.5);font-size:.75rem">Action</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+.fold-card{width:280px;perspective:1000px;cursor:pointer}
+.fold-section{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+  padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transform-origin:top;transition:transform .5s cubic-bezier(.4,0,.2,1);
+}
+.fold-top{border-radius:16px 16px 0 0;min-height:80px}
+.fold-mid{min-height:100px;transform:rotateX(-90deg);opacity:0;transition:transform .5s .1s,opacity .3s .1s}
+.fold-bot{border-radius:0 0 16px 16px;min-height:60px;transform:rotateX(-90deg);opacity:0;transition:transform .5s .2s,opacity .3s .2s}
+.fold-card:hover .fold-mid{transform:rotateX(0);opacity:1}
+.fold-card:hover .fold-bot{transform:rotateX(0);opacity:1}
+</style>
+
+<!-- ===== 5. Hologram Card ===== -->
+<section class="effect-section" id="hologram-card">
+  <h2>5. 全息卡片</h2>
+  <p class="desc">CSS background-blend-mode + 渐变 — 模拟全息彩虹光泽，鼠标移动改变光泽角度</p>
+  <div class="demo" style="background:#000;gap:40px;flex-wrap:wrap;padding:40px">
+    <div class="holo-card" id="holo1">
+      <div class="holo-shine"></div>
+      <div class="holo-content">
+        <div style="font-size:2.5rem;font-weight:900;color:#fff;opacity:.9">✦</div>
+        <h3 style="font-size:1.1rem;font-weight:700;color:#fff;margin-top:12px">HOLOGRAPHIC</h3>
+        <p style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:6px">Rainbow Foil Effect</p>
+      </div>
+    </div>
+    <div class="holo-card" id="holo2">
+      <div class="holo-shine"></div>
+      <div class="holo-content">
+        <div style="font-size:2.5rem;font-weight:900;color:#fff;opacity:.9">◈</div>
+        <h3 style="font-size:1.1rem;font-weight:700;color:#fff;margin-top:12px">PRISMATIC</h3>
+        <p style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:6px">Light Refraction</p>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+.holo-card{
+  width:220px;height:300px;
+  border-radius:18px;position:relative;overflow:hidden;
+  background:#1a1a2e;
+  border:1px solid rgba(255,255,255,.1);
+  cursor:pointer;
+  transition:transform .3s,box-shadow .3s;
+}
+.holo-card:hover{transform:scale(1.03);box-shadow:0 20px 60px rgba(100,100,255,.15)}
+.holo-shine{
+  position:absolute;inset:0;
+  background:linear-gradient(
+    var(--holo-angle,135deg),
+    rgba(255,0,0,.1),rgba(255,127,0,.1),rgba(255,255,0,.1),
+    rgba(0,255,0,.1),rgba(0,127,255,.1),rgba(127,0,255,.1)
+  );
+  mix-blend-mode:overlay;
+  opacity:0;transition:opacity .3s;
+  pointer-events:none;
+}
+.holo-card:hover .holo-shine{opacity:1}
+.holo-content{position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+</style>
+<script>
+document.querySelectorAll('.holo-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width;
+    const y=(e.clientY-r.top)/r.height;
+    const angle=Math.atan2(y-0.5,x-0.5)*180/Math.PI+180;
+    card.style.setProperty('--holo-angle',angle+'deg');
+  });
+});
+</script>
+
+<!-- ===== 6. Glassmorphism Card ===== -->
+<section class="effect-section" id="glass-card">
+  <h2>6. 毛玻璃动态卡片</h2>
+  <p class="desc">CSS backdrop-filter + 动态渐变背景 — 毛玻璃效果配合流动渐变球，鼠标跟随倾斜</p>
+  <div class="demo" style="background:#0a0a12;position:relative;overflow:hidden">
+    <!-- Floating gradient orbs -->
+    <div class="glass-orb" style="--x:25%;--y:30%;--c1:#6366f1;--c2:#a78bfa;--s:300px;animation-delay:0s"></div>
+    <div class="glass-orb" style="--x:70%;--y:60%;--c1:#ec4899;--c2:#f43f5e;--s:250px;animation-delay:-3s"></div>
+    <div class="glass-orb" style="--x:50%;--y:80%;--c1:#06b6d4;--c2:#38bdf8;--s:200px;animation-delay:-6s"></div>
+
+    <div class="glass-card" id="glassCard">
+      <h3 style="font-size:1.3rem;font-weight:700;color:#fff">Glassmorphism</h3>
+      <p style="font-size:.85rem;color:rgba(255,255,255,.6);line-height:1.6;margin-top:12px">A frosted glass card floating above flowing gradient orbs. The backdrop-filter creates a beautiful blur effect.</p>
+      <div style="margin-top:20px;display:flex;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)"></div>
+        <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)"></div>
+        <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)"></div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+.glass-orb{
+  position:absolute;
+  left:var(--x);top:var(--y);
+  width:var(--s);height:var(--s);
+  border-radius:50%;
+  background:radial-gradient(circle,var(--c1),var(--c2));
+  filter:blur(60px);opacity:.4;
+  animation:glassFloat 10s ease-in-out infinite;
+  transform:translate(-50%,-50%);
+}
+@keyframes glassFloat{
+  0%,100%{transform:translate(-50%,-50%) scale(1)}
+  33%{transform:translate(-30%,-60%) scale(1.1)}
+  66%{transform:translate(-70%,-40%) scale(0.9)}
+}
+.glass-card{
+  position:relative;z-index:10;
+  width:320px;padding:32px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+  transition:transform .2s;
+}
+</style>
+<script>
+(function(){
+  const card=document.getElementById('glassCard');
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-0.5;
+    const y=(e.clientY-r.top)/r.height-0.5;
+    card.style.transform=`perspective(600px) rotateX(${-y*10}deg) rotateY(${x*10}deg)`;
+  });
+  card.addEventListener('mouseleave',()=>{card.style.transform='perspective(600px) rotateX(0) rotateY(0)';});
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

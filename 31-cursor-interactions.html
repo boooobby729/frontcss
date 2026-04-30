@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鼠标交互效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .demo{cursor:none}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+
+  /* Global custom cursor */
+  #custom-cursor{
+    position:fixed;width:12px;height:12px;
+    background:#fff;border-radius:50%;
+    pointer-events:none;z-index:9999;
+    transform:translate(-50%,-50%);
+    transition:width .2s,height .2s,background .2s;
+    mix-blend-mode:difference;
+  }
+  #cursor-ring{
+    position:fixed;width:36px;height:36px;
+    border:1.5px solid rgba(255,255,255,.5);
+    border-radius:50%;pointer-events:none;z-index:9998;
+    transform:translate(-50%,-50%);
+    transition:width .3s,height .3s,border-color .3s;
+  }
+</style>
+</head>
+<body>
+<div id="custom-cursor"></div>
+<div id="cursor-ring"></div>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#trail-cursor">拖尾光标</a>
+  <a href="#magnetic-btn">磁性按钮</a>
+  <a href="#ripple-click">点击涟漪</a>
+  <a href="#spotlight">聚光灯</a>
+  <a href="#gravity-field">重力场</a>
+</div>
+
+<!-- Global cursor tracking -->
+<script>
+const cursor=document.getElementById('custom-cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+function updateCursor(){
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(updateCursor);
+}
+updateCursor();
+</script>
+
+<!-- ===== 1. Trail Cursor ===== -->
+<section class="effect-section" id="trail-cursor">
+  <h2>1. 拖尾光标</h2>
+  <p class="desc">Canvas 2D — 鼠标移动时留下彩色粒子拖尾，粒子随时间衰减消散</p>
+  <div class="demo" id="trail-demo" style="background:radial-gradient(ellipse at center,#0d0d1a,#060608)">
+    <canvas id="trail-canvas"></canvas>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+      <p style="color:rgba(255,255,255,.2);font-size:1.2rem;letter-spacing:.2em">MOVE YOUR CURSOR</p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('trail-demo');
+  const canvas=document.getElementById('trail-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const particles=[];
+  let lx=0,ly=0,hue=0;
+
+  demo.addEventListener('mousemove',e=>{
+    const r=demo.getBoundingClientRect();
+    const x=e.clientX-r.left, y=e.clientY-r.top;
+    const dx=x-lx,dy=y-ly;
+    const speed=Math.sqrt(dx*dx+dy*dy);
+    const count=Math.min(8,Math.floor(speed*0.3)+1);
+    for(let i=0;i<count;i++){
+      particles.push({
+        x:x+(Math.random()-0.5)*speed*0.3,
+        y:y+(Math.random()-0.5)*speed*0.3,
+        vx:(Math.random()-0.5)*2,
+        vy:(Math.random()-0.5)*2-1,
+        life:1,
+        size:Math.random()*6+2,
+        hue:hue+Math.random()*40-20
+      });
+    }
+    hue=(hue+speed*0.5)%360;
+    lx=x;ly=y;
+  });
+
+  function render(){
+    ctx.fillStyle='rgba(13,13,26,0.25)';
+    ctx.fillRect(0,0,w,h);
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.x+=p.vx;p.y+=p.vy;
+      p.vy+=0.05;
+      p.life-=0.025;
+      p.size*=0.97;
+      if(p.life<=0){particles.splice(i,1);continue;}
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue},90%,65%,${p.life*0.8})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 2. Magnetic Button ===== -->
+<section class="effect-section" id="magnetic-btn">
+  <h2>2. 磁性按钮</h2>
+  <p class="desc">JavaScript getBoundingClientRect — 鼠标靠近时按钮被磁力吸引，离开时弹回，配合文字跟随</p>
+  <div class="demo" style="background:radial-gradient(ellipse at center,#0a0a1a,#060608);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:clamp(30px,5vw,80px)">
+    <button class="mag-btn" style="--c:#6366f1">
+      <span class="mag-text">ATTRACT</span>
+    </button>
+    <button class="mag-btn" style="--c:#ec4899">
+      <span class="mag-text">MAGNETIC</span>
+    </button>
+    <button class="mag-btn" style="--c:#06b6d4">
+      <span class="mag-text">HOVER ME</span>
+    </button>
+    <button class="mag-btn" style="--c:#10b981">
+      <span class="mag-text">PULL</span>
+    </button>
+  </div>
+</section>
+<style>
+.mag-btn{
+  position:relative;padding:20px 48px;
+  background:transparent;
+  border:1.5px solid var(--c);
+  color:#fff;font-size:1rem;font-weight:700;
+  letter-spacing:.12em;cursor:pointer;
+  border-radius:60px;font-family:inherit;
+  transition:background .3s,box-shadow .3s;
+  overflow:visible;
+}
+.mag-btn::before{
+  content:'';position:absolute;inset:0;border-radius:60px;
+  background:var(--c);opacity:0;
+  transition:opacity .3s;
+}
+.mag-btn:hover::before{opacity:0.15;}
+.mag-btn:hover{box-shadow:0 0 30px var(--c),0 0 60px color-mix(in srgb,var(--c) 30%,transparent);}
+.mag-text{position:relative;z-index:1;display:inline-block;transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+</style>
+<script>
+(function(){
+  document.querySelectorAll('.mag-btn').forEach(btn=>{
+    const text=btn.querySelector('.mag-text');
+    const strength=0.4;
+    const textStrength=0.2;
+
+    btn.addEventListener('mousemove',e=>{
+      const r=btn.getBoundingClientRect();
+      const cx=r.left+r.width/2, cy=r.top+r.height/2;
+      const dx=e.clientX-cx, dy=e.clientY-cy;
+      btn.style.transform=`translate(${dx*strength}px,${dy*strength}px)`;
+      text.style.transform=`translate(${dx*textStrength}px,${dy*textStrength}px)`;
+    });
+    btn.addEventListener('mouseleave',()=>{
+      btn.style.transform='translate(0,0)';
+      text.style.transform='translate(0,0)';
+      btn.style.transition='transform .6s cubic-bezier(.34,1.56,.64,1),background .3s,box-shadow .3s';
+      setTimeout(()=>{btn.style.transition='background .3s,box-shadow .3s';},600);
+    });
+    btn.addEventListener('mouseenter',()=>{
+      btn.style.transition='background .3s,box-shadow .3s';
+    });
+  });
+})();
+</script>
+
+<!-- ===== 3. Click Ripple ===== -->
+<section class="effect-section" id="ripple-click">
+  <h2>3. 点击涟漪效果</h2>
+  <p class="desc">Canvas 2D — 点击任意位置产生多层涟漪扩散，颜色随位置变化，支持多点同时</p>
+  <div class="demo" id="ripple-demo" style="background:#000">
+    <canvas id="ripple-canvas"></canvas>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+      <p style="color:rgba(255,255,255,.15);font-size:1.2rem;letter-spacing:.2em">CLICK ANYWHERE</p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('ripple-demo');
+  const canvas=document.getElementById('ripple-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const ripples=[];
+
+  demo.addEventListener('click',e=>{
+    const r=demo.getBoundingClientRect();
+    const x=e.clientX-r.left, y=e.clientY-r.top;
+    const hue=x/w*360;
+    for(let i=0;i<3;i++){
+      ripples.push({x,y,r:0,maxR:Math.min(w,h)*0.5,life:1,hue:hue+i*30,delay:i*80,born:Date.now()});
+    }
+  });
+
+  // Auto demo clicks
+  setInterval(()=>{
+    const x=Math.random()*w, y=Math.random()*h;
+    const hue=x/w*360;
+    for(let i=0;i<3;i++){
+      ripples.push({x,y,r:0,maxR:Math.min(w,h)*0.4,life:1,hue:hue+i*30,delay:i*80,born:Date.now()});
+    }
+  },1200);
+
+  function render(){
+    ctx.fillStyle='rgba(0,0,0,0.2)';
+    ctx.fillRect(0,0,w,h);
+    const now=Date.now();
+    for(let i=ripples.length-1;i>=0;i--){
+      const rp=ripples[i];
+      const age=now-rp.born-rp.delay;
+      if(age<0) continue;
+      const progress=age/1200;
+      if(progress>=1){ripples.splice(i,1);continue;}
+      rp.r=rp.maxR*progress;
+      rp.life=1-progress;
+      ctx.beginPath();
+      ctx.arc(rp.x,rp.y,rp.r,0,Math.PI*2);
+      ctx.strokeStyle=`hsla(${rp.hue},90%,65%,${rp.life*0.7})`;
+      ctx.lineWidth=2*(1-progress*0.5);
+      ctx.stroke();
+      // Inner glow
+      if(progress<0.3){
+        ctx.beginPath();
+        ctx.arc(rp.x,rp.y,rp.r*0.3,0,Math.PI*2);
+        ctx.fillStyle=`hsla(${rp.hue},90%,70%,${(0.3-progress)*2})`;
+        ctx.fill();
+      }
+    }
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 4. Spotlight ===== -->
+<section class="effect-section" id="spotlight">
+  <h2>4. 聚光灯跟随</h2>
+  <p class="desc">CSS radial-gradient mask — 鼠标位置驱动聚光灯，暗处隐藏内容，光圈内显现</p>
+  <div class="demo" id="spotlight-demo" style="background:#000;position:relative">
+    <div id="spotlight-content" style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);gap:20px;padding:40px">
+    </div>
+    <div id="spotlight-mask" style="position:absolute;inset:0;background:#000;pointer-events:none;transition:none"></div>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5">
+      <p style="color:rgba(255,255,255,.15);font-size:1rem;letter-spacing:.2em">MOVE TO REVEAL</p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('spotlight-demo');
+  const mask=document.getElementById('spotlight-mask');
+  const content=document.getElementById('spotlight-content');
+
+  // Fill grid with cards
+  const items=['DESIGN','CODE','CREATE','BUILD','MOTION','VISUAL','CRAFT','PIXEL','FLOW','SHAPE','DREAM','MAKE'];
+  items.forEach(item=>{
+    const card=document.createElement('div');
+    card.style.cssText='background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:clamp(.8rem,2vw,1.2rem);font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.7)';
+    card.textContent=item;
+    content.appendChild(card);
+  });
+
+  demo.addEventListener('mousemove',e=>{
+    const r=demo.getBoundingClientRect();
+    const x=e.clientX-r.left, y=e.clientY-r.top;
+    const px=x/r.width*100, py=y/r.height*100;
+    mask.style.background=`radial-gradient(circle 180px at ${px}% ${py}%, transparent 0%, rgba(0,0,0,0.95) 100%)`;
+  });
+  demo.addEventListener('mouseleave',()=>{
+    mask.style.background='rgba(0,0,0,0.95)';
+  });
+  // Init
+  mask.style.background='rgba(0,0,0,0.95)';
+})();
+</script>
+
+<!-- ===== 5. Gravity Field ===== -->
+<section class="effect-section" id="gravity-field">
+  <h2>5. 重力场交互</h2>
+  <p class="desc">Canvas 2D 物理模拟 — 鼠标产生引力/斥力场，粒子受力运动，点击切换引力/斥力</p>
+  <div class="demo" id="grav-demo" style="background:#000">
+    <canvas id="grav-canvas"></canvas>
+    <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:10">
+      <button id="grav-attract" style="padding:8px 20px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.5);color:#a78bfa;border-radius:6px;cursor:none;font-size:.8rem;font-family:inherit">引力模式</button>
+      <button id="grav-repel" style="padding:8px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:6px;cursor:none;font-size:.8rem;font-family:inherit">斥力模式</button>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('grav-demo');
+  const canvas=document.getElementById('grav-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  let mode=1; // 1=attract, -1=repel
+  const mouse={x:-999,y:-999,active:false};
+
+  demo.addEventListener('mousemove',e=>{
+    const r=demo.getBoundingClientRect();
+    mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;mouse.active=true;
+  });
+  demo.addEventListener('mouseleave',()=>{mouse.active=false;});
+
+  document.getElementById('grav-attract').addEventListener('click',()=>{
+    mode=1;
+    document.getElementById('grav-attract').style.background='rgba(99,102,241,.2)';
+    document.getElementById('grav-attract').style.borderColor='rgba(99,102,241,.5)';
+    document.getElementById('grav-attract').style.color='#a78bfa';
+    document.getElementById('grav-repel').style.background='rgba(255,255,255,.05)';
+    document.getElementById('grav-repel').style.borderColor='rgba(255,255,255,.1)';
+    document.getElementById('grav-repel').style.color='rgba(255,255,255,.5)';
+  });
+  document.getElementById('grav-repel').addEventListener('click',()=>{
+    mode=-1;
+    document.getElementById('grav-repel').style.background='rgba(236,72,153,.2)';
+    document.getElementById('grav-repel').style.borderColor='rgba(236,72,153,.5)';
+    document.getElementById('grav-repel').style.color='#f472b6';
+    document.getElementById('grav-attract').style.background='rgba(255,255,255,.05)';
+    document.getElementById('grav-attract').style.borderColor='rgba(255,255,255,.1)';
+    document.getElementById('grav-attract').style.color='rgba(255,255,255,.5)';
+  });
+
+  const N=300;
+  const particles=[];
+  for(let i=0;i<N;i++){
+    particles.push({
+      x:Math.random()*800,y:Math.random()*600,
+      vx:(Math.random()-0.5)*1,vy:(Math.random()-0.5)*1,
+      hue:180+Math.random()*180,
+      size:Math.random()*2+0.5
+    });
+  }
+
+  function render(){
+    ctx.fillStyle='rgba(0,0,0,0.3)';
+    ctx.fillRect(0,0,w,h);
+
+    particles.forEach(p=>{
+      if(mouse.active){
+        const dx=mouse.x-p.x, dy=mouse.y-p.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        const force=Math.min(200,5000/(dist*dist+1))*mode;
+        p.vx+=dx/dist*force*0.01;
+        p.vy+=dy/dist*force*0.01;
+      }
+      // Damping
+      p.vx*=0.97;p.vy*=0.97;
+      // Boundary bounce
+      if(p.x<0||p.x>w) p.vx*=-0.8;
+      if(p.y<0||p.y>h) p.vy*=-0.8;
+      p.x=Math.max(0,Math.min(w,p.x+p.vx));
+      p.y=Math.max(0,Math.min(h,p.y+p.vy));
+
+      const speed=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+      const alpha=Math.min(0.9,0.3+speed*0.1);
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue+speed*5},80%,65%,${alpha})`;
+      ctx.fill();
+    });
+
+    // Mouse indicator
+    if(mouse.active){
+      ctx.beginPath();
+      ctx.arc(mouse.x,mouse.y,30,0,Math.PI*2);
+      ctx.strokeStyle=mode===1?'rgba(99,102,241,0.4)':'rgba(236,72,153,0.4)';
+      ctx.lineWidth=1;ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(mouse.x,mouse.y,8,0,Math.PI*2);
+      ctx.fillStyle=mode===1?'rgba(99,102,241,0.6)':'rgba(236,72,153,0.6)';
+      ctx.fill();
+    }
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

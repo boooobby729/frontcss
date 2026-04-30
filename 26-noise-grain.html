@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>噪声与纹理效果集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; }
+  .effect-section { position: relative; padding: 0; }
+  .effect-section h2 { font-size: 2rem; font-weight: 800; color: #fff; padding: 30px 30px 0; position: relative; z-index: 10; }
+  .effect-section .desc { color: rgba(255,255,255,.45); font-size: .85rem; padding: 8px 30px 0; position: relative; z-index: 10; }
+  .demo { width: 100%; height: 80vh; position: relative; overflow: hidden; }
+  .demo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .nav { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 6px; }
+  .nav a { color: #555; font-size: .75rem; text-decoration: none; padding: 4px 10px; border-radius: 4px; transition: all .2s; }
+  .nav a:hover { color: #fff; background: #ffffff10; }
+</style>
+</head>
+<body>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#perlin-flow">柏林噪声流场</a>
+  <a href="#film-grain">电影胶片颗粒</a>
+  <a href="#topographic">地形等高线</a>
+  <a href="#plasma">等离子体</a>
+  <a href="#voronoi">Voronoi 细胞</a>
+</div>
+
+<!-- ===================== Effect 1: Perlin Flow Field ===================== -->
+<section class="effect-section" id="perlin-flow">
+  <h2>1. 柏林噪声流场</h2>
+  <p class="desc">Canvas 2D — Simplex Noise 驱动的粒子流场，粒子沿噪声梯度运动形成丝绸般的轨迹</p>
+  <div class="demo" id="flow-demo" style="background:#050510">
+    <canvas id="flow-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  // Minimal 2D Simplex noise
+  const F2 = 0.5*(Math.sqrt(3)-1), G2 = (3-Math.sqrt(3))/6;
+  const perm = new Uint8Array(512);
+  const grad = [[1,1],[-1,1],[1,-1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]];
+  for(let i=0;i<256;i++) perm[i]=i;
+  for(let i=255;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [perm[i],perm[j]]=[perm[j],perm[i]]; }
+  for(let i=0;i<256;i++) perm[i+256]=perm[i];
+
+  function noise2(x,y){
+    const s=(x+y)*F2; const i=Math.floor(x+s), j=Math.floor(y+s);
+    const t=(i+j)*G2; const x0=x-(i-t), y0=y-(j-t);
+    const i1=x0>y0?1:0, j1=x0>y0?0:1;
+    const x1=x0-i1+G2, y1=y0-j1+G2;
+    const x2=x0-1+2*G2, y2=y0-1+2*G2;
+    const ii=i&255, jj=j&255;
+    const gi0=perm[ii+perm[jj]]%8, gi1=perm[ii+i1+perm[jj+j1]]%8, gi2=perm[ii+1+perm[jj+1]]%8;
+    let n0=0,n1=0,n2=0;
+    let t0=0.5-x0*x0-y0*y0; if(t0>0){t0*=t0;n0=t0*t0*(grad[gi0][0]*x0+grad[gi0][1]*y0);}
+    let t1=0.5-x1*x1-y1*y1; if(t1>0){t1*=t1;n1=t1*t1*(grad[gi1][0]*x1+grad[gi1][1]*y1);}
+    let t2=0.5-x2*x2-y2*y2; if(t2>0){t2*=t2;n2=t2*t2*(grad[gi2][0]*x2+grad[gi2][1]*y2);}
+    return 70*(n0+n1+n2);
+  }
+
+  const demo = document.getElementById('flow-demo');
+  const canvas = document.getElementById('flow-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; initParticles(); }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const NUM = 2000;
+  let particles = [];
+  let zOff = 0;
+
+  function initParticles(){
+    particles = [];
+    for(let i=0;i<NUM;i++){
+      particles.push({ x:Math.random()*w, y:Math.random()*h, prevX:0, prevY:0 });
+    }
+  }
+  initParticles();
+
+  const SCALE = 0.003;
+
+  function render(){
+    // Fade trail
+    ctx.fillStyle = 'rgba(5,5,16,0.03)';
+    ctx.fillRect(0,0,w,h);
+
+    zOff += 0.002;
+
+    particles.forEach(p=>{
+      p.prevX = p.x;
+      p.prevY = p.y;
+
+      const angle = noise2(p.x*SCALE, p.y*SCALE + zOff) * Math.PI * 4;
+      p.x += Math.cos(angle) * 1.5;
+      p.y += Math.sin(angle) * 1.5;
+
+      // Wrap
+      if(p.x<0||p.x>w||p.y<0||p.y>h){
+        p.x=Math.random()*w; p.y=Math.random()*h;
+        p.prevX=p.x; p.prevY=p.y;
+      }
+
+      // Color based on angle
+      const hue = (angle/Math.PI/4*360 + 200) % 360;
+      ctx.beginPath();
+      ctx.moveTo(p.prevX, p.prevY);
+      ctx.lineTo(p.x, p.y);
+      ctx.strokeStyle=`hsla(${hue},70%,60%,0.3)`;
+      ctx.lineWidth=0.8;
+      ctx.stroke();
+    });
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 2: Film Grain ===================== -->
+<section class="effect-section" id="film-grain">
+  <h2>2. 电影胶片颗粒</h2>
+  <p class="desc">Canvas 2D + CSS overlay — 动态噪点覆盖层 + 暗角效果，模拟真实胶片质感</p>
+  <div class="demo" id="grain-demo" style="background:linear-gradient(135deg,#2d1b69,#11001c,#1a0a3e);display:flex;align-items:center;justify-content:center">
+    <canvas id="grain-canvas" style="mix-blend-mode:overlay;opacity:0.6"></canvas>
+    <!-- Content under the grain -->
+    <div style="position:absolute;z-index:1;text-align:center;pointer-events:none">
+      <h3 style="font-size:clamp(2rem,5vw,4rem);font-weight:900;color:#fff;text-shadow:0 0 40px rgba(200,100,255,0.3)">CINEMATIC</h3>
+      <p style="color:rgba(255,255,255,.5);font-size:clamp(.8rem,2vw,1.2rem);margin-top:10px;letter-spacing:0.2em">FILM GRAIN OVERLAY</p>
+    </div>
+    <!-- Vignette -->
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7));pointer-events:none;z-index:2"></div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('grain-demo');
+  const canvas = document.getElementById('grain-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function renderGrain(){
+    const imageData = ctx.createImageData(w, h);
+    const data = imageData.data;
+
+    for(let i=0; i<data.length; i+=4){
+      const v = Math.random() * 255;
+      data[i] = v;
+      data[i+1] = v;
+      data[i+2] = v;
+      data[i+3] = 80 + Math.random()*40; // varying opacity
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    requestAnimationFrame(renderGrain);
+  }
+  renderGrain();
+})();
+</script>
+
+<!-- ===================== Effect 3: Topographic Map ===================== -->
+<section class="effect-section" id="topographic">
+  <h2>3. 地形等高线</h2>
+  <p class="desc">Canvas 2D + Noise — 基于噪声的等高线图动画，模拟地形图渲染 + 缓慢演化</p>
+  <div class="demo" id="topo-demo" style="background:#0a0a14">
+    <canvas id="topo-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  // Reuse noise from above (global perm is available)
+  const F2 = 0.5*(Math.sqrt(3)-1), G2 = (3-Math.sqrt(3))/6;
+  const perm2 = new Uint8Array(512);
+  const grad2 = [[1,1],[-1,1],[1,-1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]];
+  for(let i=0;i<256;i++) perm2[i]=i;
+  for(let i=255;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [perm2[i],perm2[j]]=[perm2[j],perm2[i]]; }
+  for(let i=0;i<256;i++) perm2[i+256]=perm2[i];
+
+  function noise2b(x,y){
+    const s=(x+y)*F2; const i=Math.floor(x+s), j=Math.floor(y+s);
+    const t=(i+j)*G2; const x0=x-(i-t), y0=y-(j-t);
+    const i1=x0>y0?1:0, j1=x0>y0?0:1;
+    const x1=x0-i1+G2, y1=y0-j1+G2;
+    const x2=x0-1+2*G2, y2=y0-1+2*G2;
+    const ii=i&255, jj=j&255;
+    const gi0=perm2[ii+perm2[jj]]%8, gi1=perm2[ii+i1+perm2[jj+j1]]%8, gi2=perm2[ii+1+perm2[jj+1]]%8;
+    let n0=0,n1=0,n2=0;
+    let t0=0.5-x0*x0-y0*y0; if(t0>0){t0*=t0;n0=t0*t0*(grad2[gi0][0]*x0+grad2[gi0][1]*y0);}
+    let t1=0.5-x1*x1-y1*y1; if(t1>0){t1*=t1;n1=t1*t1*(grad2[gi1][0]*x1+grad2[gi1][1]*y1);}
+    let t2=0.5-x2*x2-y2*y2; if(t2>0){t2*=t2;n2=t2*t2*(grad2[gi2][0]*x2+grad2[gi2][1]*y2);}
+    return 70*(n0+n1+n2);
+  }
+
+  const demo = document.getElementById('topo-demo');
+  const canvas = document.getElementById('topo-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  const SCALE = 3; // render at lower res for performance
+
+  function resize(){
+    w = Math.ceil(demo.clientWidth / SCALE);
+    h = Math.ceil(demo.clientHeight / SCALE);
+    canvas.width = w; canvas.height = h;
+    canvas.style.width = demo.clientWidth+'px';
+    canvas.style.height = demo.clientHeight+'px';
+    canvas.style.imageRendering = 'auto';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let time = 0;
+
+  function render(){
+    time += 0.003;
+    const imageData = ctx.createImageData(w, h);
+    const data = imageData.data;
+    const NOISE_SCALE = 0.015;
+    const LEVELS = 12;
+
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const nx = x * NOISE_SCALE;
+        const ny = y * NOISE_SCALE;
+        let val = noise2b(nx+time, ny+time*0.5) * 0.5 + 0.5;
+        val += noise2b(nx*2+time*0.3, ny*2) * 0.25;
+        val = val * 0.67; // normalize roughly
+
+        // Quantize to contour lines
+        const level = Math.floor(val * LEVELS);
+        const frac = (val * LEVELS) - level;
+
+        // Draw contour line where frac is near 0 or 1
+        const lineThreshold = 0.06;
+        const isLine = frac < lineThreshold || frac > (1-lineThreshold);
+
+        const idx = (y*w+x)*4;
+        if(isLine){
+          // Bright contour line
+          const hue = level * 30;
+          const r = 80 + level*12;
+          const g = 150 + Math.sin(level*0.5)*50;
+          const b = 200 - level*8;
+          data[idx] = Math.min(255, r);
+          data[idx+1] = Math.min(255, g);
+          data[idx+2] = Math.min(255, b);
+          data[idx+3] = 200;
+        } else {
+          // Dark fill between lines
+          data[idx] = 10 + level*3;
+          data[idx+1] = 10 + level*5;
+          data[idx+2] = 20 + level*8;
+          data[idx+3] = 255;
+        }
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 4: Plasma ===================== -->
+<section class="effect-section" id="plasma">
+  <h2>4. 等离子体</h2>
+  <p class="desc">Canvas 2D — 经典 Plasma 效果，多个正弦函数叠加产生流动的彩色波纹</p>
+  <div class="demo" id="plasma-demo" style="background:#000">
+    <canvas id="plasma-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('plasma-demo');
+  const canvas = document.getElementById('plasma-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  const SCALE = 3;
+
+  function resize(){
+    w = Math.ceil(demo.clientWidth / SCALE);
+    h = Math.ceil(demo.clientHeight / SCALE);
+    canvas.width = w; canvas.height = h;
+    canvas.style.width = demo.clientWidth+'px';
+    canvas.style.height = demo.clientHeight+'px';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let time = 0;
+
+  function render(){
+    time += 0.02;
+    const imageData = ctx.createImageData(w, h);
+    const data = imageData.data;
+
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        // Classic plasma formula
+        let v = Math.sin(x*0.05 + time);
+        v += Math.sin(y*0.05 + time*0.7);
+        v += Math.sin((x+y)*0.03 + time*0.5);
+        v += Math.sin(Math.sqrt(x*x + y*y)*0.04 + time*0.8);
+        v = v * 0.25 + 0.5; // normalize to 0..1
+
+        const idx = (y*w+x)*4;
+        // HSL-like color mapping
+        const hue = v * 360 + time*20;
+        const h2 = (hue%360)/60;
+        const sector = Math.floor(h2);
+        const f = h2 - sector;
+        let r=0,g=0,b=0;
+        switch(sector%6){
+          case 0: r=255;g=f*255;b=0;break;
+          case 1: r=(1-f)*255;g=255;b=0;break;
+          case 2: r=0;g=255;b=f*255;break;
+          case 3: r=0;g=(1-f)*255;b=255;break;
+          case 4: r=f*255;g=0;b=255;break;
+          case 5: r=255;g=0;b=(1-f)*255;break;
+        }
+        data[idx] = r;
+        data[idx+1] = g;
+        data[idx+2] = b;
+        data[idx+3] = 255;
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 5: Voronoi ===================== -->
+<section class="effect-section" id="voronoi">
+  <h2>5. Voronoi 细胞</h2>
+  <p class="desc">Canvas 2D — 动态 Voronoi 图，种子点随时间漂移 + 距离场着色 + 细胞边缘发光</p>
+  <div class="demo" id="voronoi-demo" style="background:#000">
+    <canvas id="voronoi-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('voronoi-demo');
+  const canvas = document.getElementById('voronoi-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  const SCALE = 4; // lower res for performance
+
+  function resize(){
+    w = Math.ceil(demo.clientWidth / SCALE);
+    h = Math.ceil(demo.clientHeight / SCALE);
+    canvas.width = w; canvas.height = h;
+    canvas.style.width = demo.clientWidth+'px';
+    canvas.style.height = demo.clientHeight+'px';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const NUM_SEEDS = 30;
+  const seeds = [];
+  for(let i=0;i<NUM_SEEDS;i++){
+    seeds.push({
+      x: Math.random(), y: Math.random(),
+      vx: (Math.random()-0.5)*0.002,
+      vy: (Math.random()-0.5)*0.002,
+      hue: Math.random()*360
+    });
+  }
+
+  function render(){
+    // Move seeds
+    seeds.forEach(s=>{
+      s.x+=s.vx; s.y+=s.vy;
+      if(s.x<0||s.x>1) s.vx*=-1;
+      if(s.y<0||s.y>1) s.vy*=-1;
+      s.x = Math.max(0, Math.min(1, s.x));
+      s.y = Math.max(0, Math.min(1, s.y));
+    });
+
+    const imageData = ctx.createImageData(w, h);
+    const data = imageData.data;
+
+    for(let py=0;py<h;py++){
+      for(let px=0;px<w;px++){
+        const nx = px/w, ny = py/h;
+        let minDist = Infinity, minDist2 = Infinity;
+        let closestIdx = 0;
+
+        for(let i=0;i<NUM_SEEDS;i++){
+          const dx = nx-seeds[i].x, dy = ny-seeds[i].y;
+          const dist = dx*dx+dy*dy;
+          if(dist < minDist){
+            minDist2 = minDist;
+            minDist = dist;
+            closestIdx = i;
+          } else if(dist < minDist2){
+            minDist2 = dist;
+          }
+        }
+
+        const d1 = Math.sqrt(minDist);
+        const d2 = Math.sqrt(minDist2);
+        const edge = d2 - d1; // thin at cell borders
+
+        const idx = (py*w+px)*4;
+        const hue = seeds[closestIdx].hue;
+
+        if(edge < 0.015){
+          // Edge glow
+          const edgeAlpha = 1-edge/0.015;
+          data[idx] = 180+edgeAlpha*75;
+          data[idx+1] = 200+edgeAlpha*55;
+          data[idx+2] = 255;
+          data[idx+3] = 255;
+        } else {
+          // Cell interior with distance gradient
+          const brightness = 0.1 + d1*3;
+          const h2 = (hue%360)/60;
+          const sector = Math.floor(h2);
+          const f = h2 - sector;
+          let r=0,g=0,b=0;
+          switch(sector%6){
+            case 0: r=1;g=f;b=0;break;
+            case 1: r=1-f;g=1;b=0;break;
+            case 2: r=0;g=1;b=f;break;
+            case 3: r=0;g=1-f;b=1;break;
+            case 4: r=f;g=0;b=1;break;
+            case 5: r=1;g=0;b=1-f;break;
+          }
+          data[idx] = r*brightness*255;
+          data[idx+1] = g*brightness*255;
+          data[idx+2] = b*brightness*255;
+          data[idx+3] = 255;
+        }
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

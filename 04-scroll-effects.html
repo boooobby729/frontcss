@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>滚动交互效果集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; }
+
+  /* Progress Bar */
+  .scroll-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #f093fb, #f5576c); width: 0%; z-index: 999; transition: width .1s; }
+
+  /* Hero */
+  .hero { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .hero h1 { font-size: 3.5rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { color: #666; margin-top: 16px; font-size: 1.1rem; }
+  .scroll-hint { position: absolute; bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #555; font-size: .85rem; }
+  .scroll-arrow { width: 24px; height: 24px; border-right: 2px solid #555; border-bottom: 2px solid #555; transform: rotate(45deg); animation: scrollArrow 2s ease infinite; }
+  @keyframes scrollArrow { 0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: .3; } 50% { transform: rotate(45deg) translate(5px, 5px); opacity: 1; } }
+
+  /* Section Common */
+  .section { min-height: 100vh; padding: 100px 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+  .section-title { font-size: 2rem; font-weight: 700; margin-bottom: 40px; text-align: center; }
+
+  /* 1. Fade In Up on Scroll */
+  .fade-in-up { opacity: 0; transform: translateY(40px); transition: opacity .8s ease, transform .8s ease; }
+  .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+  .fade-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 900px; }
+  .fade-item { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; text-align: center; }
+  .fade-item .icon { font-size: 2.5rem; margin-bottom: 16px; }
+  .fade-item h4 { color: #ccc; margin-bottom: 8px; }
+  .fade-item p { color: #666; font-size: .85rem; line-height: 1.5; }
+
+  /* 2. Parallax */
+  .parallax-section { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .parallax-bg { position: absolute; inset: -100px; background: linear-gradient(135deg, #0a0a2e 0%, #1a0a3e 50%, #0a1a2e 100%); z-index: 0; }
+  .parallax-content { position: relative; z-index: 1; text-align: center; }
+  .parallax-content h2 { font-size: 3rem; font-weight: 800; color: #fff; }
+  .parallax-content p { color: #888; margin-top: 16px; font-size: 1.1rem; }
+  .float-shape { position: absolute; border-radius: 50%; z-index: 0; opacity: .3; }
+  .float-shape:nth-child(1) { width: 200px; height: 200px; background: #667eea; top: 10%; left: 10%; }
+  .float-shape:nth-child(2) { width: 150px; height: 150px; background: #f093fb; top: 60%; right: 15%; }
+  .float-shape:nth-child(3) { width: 100px; height: 100px; background: #43e97b; bottom: 20%; left: 30%; }
+
+  /* 3. Horizontal Scroll */
+  .h-scroll-wrap { height: 100vh; position: relative; overflow: hidden; }
+  .h-scroll-track { display: flex; gap: 32px; height: 100%; align-items: center; padding: 0 60px; transition: transform .1s; }
+  .h-card { min-width: 300px; height: 400px; background: linear-gradient(145deg, #13131a, #1a1a2e); border: 1px solid #1e1e2e; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; flex-shrink: 0; }
+  .h-card .num { font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .h-card p { color: #666; padding: 0 32px; text-align: center; font-size: .9rem; }
+
+  /* 4. Reveal on Scroll */
+  .reveal-section { perspective: 1000px; }
+  .reveal-card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 20px; padding: 60px; max-width: 700px; text-align: center; opacity: 0; transform: rotateX(20deg) translateY(60px); transition: all 1s ease; }
+  .reveal-card.visible { opacity: 1; transform: rotateX(0) translateY(0); }
+  .reveal-card h2 { font-size: 2rem; color: #fff; margin-bottom: 16px; }
+  .reveal-card p { color: #888; line-height: 1.8; }
+
+  /* 5. Counter */
+  .counter-row { display: flex; gap: 60px; flex-wrap: wrap; justify-content: center; }
+  .counter-item { text-align: center; }
+  .counter-num { font-size: 3.5rem; font-weight: 900; background: linear-gradient(135deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .counter-label { color: #666; margin-top: 8px; font-size: .9rem; }
+
+  /* 6. Sticky Scroll */
+  .sticky-wrap { display: flex; min-height: 300vh; position: relative; }
+  .sticky-left { position: sticky; top: 0; height: 100vh; width: 50%; display: flex; align-items: center; justify-content: center; }
+  .sticky-left h2 { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #43e97b, #38f9d7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sticky-right { width: 50%; padding: 20vh 40px; display: flex; flex-direction: column; gap: 30vh; }
+  .sticky-right .s-card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; opacity: 0; transform: translateX(30px); transition: all .6s ease; }
+  .sticky-right .s-card.visible { opacity: 1; transform: translateX(0); }
+  .sticky-right .s-card h3 { color: #fff; margin-bottom: 12px; }
+  .sticky-right .s-card p { color: #888; line-height: 1.6; font-size: .9rem; }
+
+  /* 7. Horizontal Scroll Progress */
+  .h-progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #f093fb); width: 0; z-index: 100; transition: width .1s; }
+
+  /* 8. Zoom In Scroll */
+  .zoom-in-demo { width: 120px; height: 80px; background: linear-gradient(135deg, #764ba2, #667eea); border-radius: 12px; transition: transform .6s, opacity .6s; opacity: .3; transform: scale(.8); }
+  .zoom-in-demo.vis { opacity: 1; transform: scale(1); }
+
+  /* 9. Rotate In */
+  .rotate-in-demo { width: 80px; height: 80px; background: linear-gradient(135deg, #f5576c, #ffa500); border-radius: 16px; transition: transform .8s cubic-bezier(.34,1.56,.64,1), opacity .8s; opacity: .3; transform: rotate(-90deg) scale(.5); }
+  .rotate-in-demo.vis { opacity: 1; transform: rotate(0) scale(1); }
+
+  /* 10. Slide From Left */
+  .slide-left-demo { width: 160px; height: 50px; background: linear-gradient(90deg, #43e97b, #38f9d7); border-radius: 8px; transition: transform .6s, opacity .6s; opacity: 0; transform: translateX(-80px); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 600; font-size: .85rem; }
+  .slide-left-demo.vis { opacity: 1; transform: translateX(0); }
+
+  /* 11. Stagger Cards */
+  .stagger-cards { display: flex; gap: 8px; }
+  .stagger-card { width: 50px; height: 70px; background: #1a1a2e; border-radius: 8px; border: 1px solid #ffffff10; transition: transform .5s, opacity .5s; opacity: 0; transform: translateY(30px); }
+  .stagger-card.vis { opacity: 1; transform: translateY(0); }
+
+  /* 12. Blur Fade In */
+  .blur-fade { font-size: 1.4rem; font-weight: 700; color: #667eea; transition: filter .8s, opacity .8s; filter: blur(10px); opacity: 0; }
+  .blur-fade.vis { filter: blur(0); opacity: 1; }
+
+  /* 13. Scale Rotate */
+  .scale-rotate-demo { width: 60px; height: 60px; background: linear-gradient(135deg, #f093fb, #f5576c); transition: transform 1s cubic-bezier(.34,1.56,.64,1), opacity .8s; opacity: 0; transform: scale(0) rotate(-180deg); }
+  .scale-rotate-demo.vis { opacity: 1; transform: scale(1) rotate(0); border-radius: 12px; }
+
+  /* 14. Clip Reveal Scroll */
+  .clip-scroll { font-size: 1.6rem; font-weight: 700; color: #fff; transition: clip-path .8s ease; clip-path: inset(0 100% 0 0); }
+  .clip-scroll.vis { clip-path: inset(0 0 0 0); }
+
+  /* 15. Flip In X */
+  .flip-in-x { width: 120px; height: 80px; background: linear-gradient(135deg, #ffa500, #ff6b6b); border-radius: 12px; transition: transform .8s, opacity .6s; opacity: 0; transform: perspective(400px) rotateX(90deg); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; }
+  .flip-in-x.vis { opacity: 1; transform: perspective(400px) rotateX(0); }
+
+  /* 16. Typewriter Scroll */
+  .typewriter-box { max-width: 600px; text-align: center; }
+  .tw-line { font-size: 1.4rem; font-weight: 700; color: #fff; overflow: hidden; white-space: nowrap; border-right: 2px solid #667eea; width: 0; transition: none; }
+  .tw-line.vis { animation: twType 2s steps(30,end) forwards, twBlink .6s step-end infinite; }
+  @keyframes twType { to { width: 100%; } }
+  @keyframes twBlink { 50% { border-color: transparent; } }
+
+  /* 17. Scroll Snap Sections */
+  .snap-container { width: 100%; max-width: 700px; height: 300px; overflow-y: auto; scroll-snap-type: y mandatory; border-radius: 16px; border: 1px solid #1e1e2e; }
+  .snap-panel { height: 300px; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 700; }
+
+  /* 18. Morphing Shape Scroll */
+  .morph-shape { width: 120px; height: 120px; background: linear-gradient(135deg, #667eea, #43e97b); transition: border-radius 1s ease, transform 1s ease; border-radius: 50%; }
+  .morph-shape.stage1 { border-radius: 50%; transform: rotate(0); }
+  .morph-shape.stage2 { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; transform: rotate(45deg); }
+  .morph-shape.stage3 { border-radius: 12px; transform: rotate(90deg); }
+
+  /* 19. Scroll-Triggered Drawing */
+  .draw-svg { width: 200px; height: 200px; }
+  .draw-svg path { stroke: #667eea; stroke-width: 2; fill: none; stroke-dasharray: 800; stroke-dashoffset: 800; transition: stroke-dashoffset 2s ease; }
+  .draw-svg.vis path { stroke-dashoffset: 0; }
+
+  /* 20. Scroll Curtain Reveal */
+  .curtain-wrap { position: relative; width: 100%; max-width: 600px; height: 200px; overflow: hidden; border-radius: 16px; }
+  .curtain-content { position: absolute; inset: 0; background: linear-gradient(135deg, #13131a, #1a1a2e); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: #fff; }
+  .curtain-left, .curtain-right { position: absolute; top: 0; width: 50%; height: 100%; background: #0a0a0f; z-index: 2; transition: transform 1s cubic-bezier(.77,0,.18,1); }
+  .curtain-left { left: 0; }
+  .curtain-right { right: 0; }
+  .curtain-wrap.vis .curtain-left { transform: translateX(-100%); }
+  .curtain-wrap.vis .curtain-right { transform: translateX(100%); }
+
+</style>
+</head>
+<body>
+  <a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+  <div class="scroll-progress" id="progressBar"></div>
+
+  <div class="hero">
+    <h1>滚动交互效果集</h1>
+    <p>向下滚动查看 20 种滚动驱动效果</p>
+    <div class="scroll-hint"><span>Scroll Down</span><div class="scroll-arrow"></div></div>
+  </div>
+
+  <!-- 1. Fade In Up -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Fade In Up 渐显上浮</h2>
+    <div class="fade-grid">
+      <div class="fade-item fade-in-up" style="transition-delay:.1s"><div class="icon">&#9878;</div><h4>Design</h4><p>滚动进入视口后渐现上浮，带延迟编排</p></div>
+      <div class="fade-item fade-in-up" style="transition-delay:.2s"><div class="icon">&#9881;</div><h4>Develop</h4><p>IntersectionObserver 实现高性能检测</p></div>
+      <div class="fade-item fade-in-up" style="transition-delay:.3s"><div class="icon">&#9889;</div><h4>Deploy</h4><p>无需滚动事件监听，零性能损耗</p></div>
+    </div>
+  </div>
+
+  <!-- 2. Parallax -->
+  <div class="parallax-section" id="parallaxSection">
+    <div class="parallax-bg" id="parallaxBg"></div>
+    <div class="float-shape" id="shape1"></div>
+    <div class="float-shape" id="shape2"></div>
+    <div class="float-shape" id="shape3"></div>
+    <div class="parallax-content">
+      <h2>视差滚动</h2>
+      <p>多层元素以不同速度移动，营造深度感</p>
+    </div>
+  </div>
+
+  <!-- 3. Horizontal Scroll -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">横向滚动卡片</h2>
+    <div style="width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:20px 0;">
+      <div style="display:flex;gap:24px;padding:0 20px;width:max-content;">
+        <div class="h-card"><div class="num">01</div><p>第一张卡片 - 横向滚动是一种打破常规布局的方式</p></div>
+        <div class="h-card"><div class="num">02</div><p>第二张卡片 - 常用于作品展示和案例集</p></div>
+        <div class="h-card"><div class="num">03</div><p>第三张卡片 - 自然的触控板交互体验</p></div>
+        <div class="h-card"><div class="num">04</div><p>第四张卡片 - 配合 scroll-snap 实现吸附效果</p></div>
+        <div class="h-card"><div class="num">05</div><p>第五张卡片 - 适合画廊、Portfolio 场景</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 3D Reveal -->
+  <div class="section reveal-section">
+    <h2 class="section-title fade-in-up">3D 旋转进入</h2>
+    <div class="reveal-card">
+      <h2>透视翻转卡片</h2>
+      <p>元素从 rotateX(20deg) 翻转进入视口，配合 opacity 和 translateY 过渡，创造立体感。基于 IntersectionObserver 触发，性能友好。</p>
+    </div>
+  </div>
+
+  <!-- 5. Counter -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">数字递增动画</h2>
+    <div class="counter-row">
+      <div class="counter-item fade-in-up"><div class="counter-num" data-target="1280">0</div><div class="counter-label">效果收录</div></div>
+      <div class="counter-item fade-in-up" style="transition-delay:.1s"><div class="counter-num" data-target="96">0</div><div class="counter-label">分类标签</div></div>
+      <div class="counter-item fade-in-up" style="transition-delay:.2s"><div class="counter-num" data-target="45000">0</div><div class="counter-label">开发者使用</div></div>
+    </div>
+  </div>
+
+  <!-- 6. Sticky Scroll -->
+  <div class="sticky-wrap">
+    <div class="sticky-left">
+      <h2>粘性滚动叙事</h2>
+    </div>
+    <div class="sticky-right">
+      <div class="s-card"><h3>Chapter 1</h3><p>左侧标题固定，右侧内容随滚动依次浮现。这是现代叙事型网页的经典交互模式。</p></div>
+      <div class="s-card"><h3>Chapter 2</h3><p>利用 CSS position: sticky 实现固定效果，配合 IntersectionObserver 控制右侧内容的出场动画。</p></div>
+      <div class="s-card"><h3>Chapter 3</h3><p>适用于产品介绍、功能演示、故事讲述等长页面场景，提升用户阅读体验。</p></div>
+    </div>
+  </div>
+
+
+  <!-- 7. Zoom In Scroll -->
+  <div class="section" style="gap:24px">
+    <h2 class="section-title fade-in-up">Zoom In 缩放进入</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:700px;">
+      <div class="fade-in-up" style="transition-delay:.1s;background:#13131a;border:1px solid #1e1e2e;border-radius:16px;height:120px;display:flex;align-items:center;justify-content:center;color:#667eea;font-weight:700;">A</div>
+      <div class="fade-in-up" style="transition-delay:.2s;background:#13131a;border:1px solid #1e1e2e;border-radius:16px;height:120px;display:flex;align-items:center;justify-content:center;color:#f093fb;font-weight:700;">B</div>
+      <div class="fade-in-up" style="transition-delay:.3s;background:#13131a;border:1px solid #1e1e2e;border-radius:16px;height:120px;display:flex;align-items:center;justify-content:center;color:#43e97b;font-weight:700;">C</div>
+    </div>
+  </div>
+
+  <!-- 8. Blur Reveal -->
+  <div class="section">
+    <h2 class="section-title fade-in-up" style="filter:blur(0);transition:filter .8s,opacity .8s,transform .8s;">Blur Reveal 模糊揭示</h2>
+    <div class="fade-in-up" style="max-width:600px;text-align:center;">
+      <p style="color:#888;font-size:1.1rem;line-height:1.8;">元素从模糊状态逐渐变清晰，配合透明度和位移，创造梦幻的进入效果。常用于标题和重要信息的首次展示。</p>
+    </div>
+  </div>
+
+  <!-- 9. Stagger List -->
+  <div class="section" style="gap:16px">
+    <h2 class="section-title fade-in-up">Stagger List 交错列表</h2>
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:500px;width:100%;">
+      <div class="fade-in-up" style="transition-delay:.05s;background:#13131a;border:1px solid #1e1e2e;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;"><span style="color:#ccc;">Item 01</span><span style="color:#667eea;">→</span></div>
+      <div class="fade-in-up" style="transition-delay:.1s;background:#13131a;border:1px solid #1e1e2e;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;"><span style="color:#ccc;">Item 02</span><span style="color:#667eea;">→</span></div>
+      <div class="fade-in-up" style="transition-delay:.15s;background:#13131a;border:1px solid #1e1e2e;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;"><span style="color:#ccc;">Item 03</span><span style="color:#667eea;">→</span></div>
+      <div class="fade-in-up" style="transition-delay:.2s;background:#13131a;border:1px solid #1e1e2e;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;"><span style="color:#ccc;">Item 04</span><span style="color:#667eea;">→</span></div>
+      <div class="fade-in-up" style="transition-delay:.25s;background:#13131a;border:1px solid #1e1e2e;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;"><span style="color:#ccc;">Item 05</span><span style="color:#667eea;">→</span></div>
+    </div>
+  </div>
+
+  <!-- 10. Scale On Scroll -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Scale On Scroll 滚动缩放</h2>
+    <div class="fade-in-up" style="width:300px;height:200px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#fff;">Scale</div>
+  </div>
+
+  <!-- 11. Rotate In Scroll -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Rotate In 旋转进入</h2>
+    <div style="display:flex;gap:24px;">
+      <div class="fade-in-up" style="transition-delay:.1s;width:80px;height:80px;background:linear-gradient(135deg,#f5576c,#ffa500);border-radius:16px;"></div>
+      <div class="fade-in-up" style="transition-delay:.2s;width:80px;height:80px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px;"></div>
+      <div class="fade-in-up" style="transition-delay:.3s;width:80px;height:80px;background:linear-gradient(135deg,#43e97b,#38f9d7);border-radius:16px;"></div>
+    </div>
+  </div>
+
+  <!-- 12. Clip Path Reveal -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Clip Path Reveal 裁切揭示</h2>
+    <div class="fade-in-up" style="max-width:600px;text-align:center;">
+      <p style="color:#888;font-size:1.1rem;line-height:1.8;">通过 clip-path 动画从任意方向裁切展示内容，支持圆形、多边形、inset 等多种裁切路径。</p>
+    </div>
+  </div>
+
+  <!-- 13. Slide From Sides -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Slide From Sides 两侧滑入</h2>
+    <div style="display:flex;gap:40px;">
+      <div class="fade-in-up" style="width:200px;height:120px;background:#13131a;border:1px solid #1e1e2e;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#667eea;">Left</div>
+      <div class="fade-in-up" style="transition-delay:.2s;width:200px;height:120px;background:#13131a;border:1px solid #1e1e2e;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#f093fb;">Right</div>
+    </div>
+  </div>
+
+  <!-- 14. Progress Bar Scroll -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Scroll Triggered Counter 滚动计数</h2>
+    <div class="counter-row">
+      <div class="counter-item fade-in-up"><div class="counter-num" data-target="500">0</div><div class="counter-label">Animations</div></div>
+      <div class="counter-item fade-in-up" style="transition-delay:.1s"><div class="counter-num" data-target="20">0</div><div class="counter-label">Categories</div></div>
+      <div class="counter-item fade-in-up" style="transition-delay:.2s"><div class="counter-num" data-target="100">0</div><div class="counter-label">Percent Pure CSS</div></div>
+    </div>
+  </div>
+
+  <!-- 15. Flip In Y Scroll -->
+  <div class="section" style="perspective:1000px">
+    <h2 class="section-title fade-in-up">Flip Card Scroll Y轴翻转</h2>
+    <div class="reveal-card" style="max-width:500px;">
+      <h2>Perspective Flip</h2>
+      <p>卡片从 rotateY 翻转进入视口，配合透视效果产生 3D 深度感。适合用于产品介绍和功能卡片的滚动进入动画。</p>
+    </div>
+  </div>
+
+  <!-- 16. Typewriter Scroll -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Typewriter 打字机滚动</h2>
+    <div class="typewriter-box">
+      <div class="tw-line">const magic = scroll.observe('typewriter');</div>
+    </div>
+    <p class="fade-in-up" style="color:#666;margin-top:24px;max-width:500px;text-align:center;font-size:.9rem;">滚动触发逐字打印动画，配合光标闪烁。适用于代码展示、slogan 揭示等场景。</p>
+  </div>
+
+  <!-- 17. Scroll Snap Sections -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Scroll Snap 吸附滚动</h2>
+    <div class="snap-container">
+      <div class="snap-panel" style="background:linear-gradient(135deg,#1a1a2e,#2a1a3e);">Section 1 — Intro</div>
+      <div class="snap-panel" style="background:linear-gradient(135deg,#1a2a1e,#1a3a2e);">Section 2 — Features</div>
+      <div class="snap-panel" style="background:linear-gradient(135deg,#2a1a1e,#3a1a1e);">Section 3 — Pricing</div>
+      <div class="snap-panel" style="background:linear-gradient(135deg,#1a1a3e,#1a2a4e);">Section 4 — Contact</div>
+    </div>
+    <p class="fade-in-up" style="color:#666;margin-top:24px;font-size:.9rem;">CSS scroll-snap-type: y mandatory 实现面板级吸附，无需 JS。</p>
+  </div>
+
+  <!-- 18. Morphing Shape Scroll -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Morph Shape 形变滚动</h2>
+    <div class="morph-shape" id="morphShape"></div>
+    <p class="fade-in-up" style="color:#666;margin-top:24px;max-width:500px;text-align:center;font-size:.9rem;">滚动进度驱动 border-radius 变化，圆形 → 有机形状 → 圆角矩形，展示 CSS 形变能力。</p>
+  </div>
+
+  <!-- 19. SVG Draw -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">SVG Line Draw 描线动画</h2>
+    <svg class="draw-svg" viewBox="0 0 200 200">
+      <path d="M 20 100 C 20 20, 180 20, 180 100 C 180 180, 20 180, 20 100 Z" />
+      <path d="M 60 60 L 140 60 L 140 140 L 60 140 Z" style="stroke:#f093fb;stroke-dasharray:320;stroke-dashoffset:320;" />
+    </svg>
+    <p class="fade-in-up" style="color:#666;margin-top:24px;font-size:.9rem;">stroke-dashoffset 从满值归零，产生手绘描线效果。</p>
+  </div>
+
+  <!-- 20. Curtain Reveal -->
+  <div class="section">
+    <h2 class="section-title fade-in-up">Curtain Reveal 幕布揭示</h2>
+    <div class="curtain-wrap">
+      <div class="curtain-content">✨ Hidden Content Revealed ✨</div>
+      <div class="curtain-left"></div>
+      <div class="curtain-right"></div>
+    </div>
+    <p class="fade-in-up" style="color:#666;margin-top:24px;max-width:500px;text-align:center;font-size:.9rem;">左右两块遮罩在滚动进入视口时向两侧滑开，露出隐藏内容。纯 CSS transition 实现。</p>
+  </div>
+
+  <div class="section" style="min-height:50vh">
+    <p style="color:#555">&#8593; Scroll back up to replay animations</p></div>
+
+<script>
+  // Scroll progress
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    document.getElementById('progressBar').style.width = (window.scrollY / h * 100) + '%';
+  });
+
+  // IntersectionObserver for fade-in-up
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-in-up, .reveal-card, .s-card').forEach(el => observer.observe(el));
+
+  // Parallax
+  window.addEventListener('scroll', () => {
+    const section = document.getElementById('parallaxSection');
+    const rect = section.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      const progress = -rect.top / window.innerHeight;
+      document.getElementById('parallaxBg').style.transform = `translateY(${progress * 50}px)`;
+      document.getElementById('shape1').style.transform = `translate(${progress * 30}px, ${progress * -60}px)`;
+      document.getElementById('shape2').style.transform = `translate(${progress * -40}px, ${progress * 40}px)`;
+      document.getElementById('shape3').style.transform = `translate(${progress * 50}px, ${progress * 20}px)`;
+    }
+  });
+
+  // Counter animation
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !e.target.dataset.counted) {
+        e.target.dataset.counted = 'true';
+        const target = +e.target.dataset.target;
+        let current = 0;
+        const step = target / 60;
+        const timer = setInterval(() => {
+          current += step;
+          if (current >= target) { current = target; clearInterval(timer); }
+          e.target.textContent = Math.floor(current).toLocaleString();
+        }, 16);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.counter-num').forEach(el => counterObserver.observe(el));
+
+  // Typewriter observer
+  const twObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.tw-line').forEach(el => twObs.observe(el));
+
+  // Morph shape scroll progress
+  const morphEl = document.getElementById('morphShape');
+  if (morphEl) {
+    const morphObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const r = e.intersectionRatio;
+          morphEl.className = 'morph-shape ' + (r > .6 ? 'stage3' : r > .3 ? 'stage2' : 'stage1');
+        }
+      });
+    }, { threshold: [0, .3, .6, 1] });
+    morphObs.observe(morphEl);
+  }
+
+  // SVG draw observer
+  const drawObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.draw-svg').forEach(el => drawObs.observe(el));
+
+  // Curtain observer
+  const curtainObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('.curtain-wrap').forEach(el => curtainObs.observe(el));
+</script>
+<script src="copy-effect.js"></script>
+</body>
+</html>

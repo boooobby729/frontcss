@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>故障效果集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; }
+  .effect-section { position: relative; padding: 0; }
+  .effect-section h2 { font-size: 2rem; font-weight: 800; color: #fff; padding: 30px 30px 0; }
+  .effect-section .desc { color: rgba(255,255,255,.45); font-size: .85rem; padding: 8px 30px 0; }
+  .demo { width: 100%; height: 80vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .demo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .nav { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 6px; }
+  .nav a { color: #555; font-size: .75rem; text-decoration: none; padding: 4px 10px; border-radius: 4px; transition: all .2s; }
+  .nav a:hover { color: #fff; background: #ffffff10; }
+</style>
+</head>
+<body>
+
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#glitch-text">文字故障</a>
+  <a href="#rgb-split">RGB 分离</a>
+  <a href="#scan-lines">扫描线</a>
+  <a href="#digital-rain">数字雨</a>
+  <a href="#vhs-noise">VHS 噪声</a>
+</div>
+
+<!-- ===================== Effect 1: Glitch Text ===================== -->
+<section class="effect-section" id="glitch-text">
+  <h2>1. 文字故障</h2>
+  <p class="desc">CSS clip-path + 伪元素 RGB 偏移 — 赛博朋克风格文字抖动故障效果</p>
+  <div class="demo" id="glitch-text-demo" style="background:#0a0a0a">
+    <div class="glitch-wrapper">
+      <div class="glitch-text" data-text="GLITCH">GLITCH</div>
+      <div class="glitch-subtitle">SYSTEM ERROR 0x4F7A</div>
+    </div>
+  </div>
+</section>
+<style>
+  .glitch-wrapper { position: relative; z-index: 2; text-align: center; }
+  .glitch-text {
+    font-size: clamp(60px, 14vw, 180px);
+    font-weight: 900;
+    font-family: 'Arial Black', Impact, sans-serif;
+    color: #fff;
+    position: relative;
+    letter-spacing: 0.05em;
+  }
+  .glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  }
+  .glitch-text::before {
+    color: #0ff;
+    animation: glitchTop 3s infinite linear alternate-reverse;
+    clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+    -webkit-clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+  }
+  .glitch-text::after {
+    color: #f0f;
+    animation: glitchBottom 2.5s infinite linear alternate-reverse;
+    clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+    -webkit-clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+  }
+  @keyframes glitchTop {
+    0% { transform: translate(0); }
+    2% { transform: translate(5px, -2px); }
+    4% { transform: translate(-3px, 0); }
+    6% { transform: translate(0); }
+    20% { transform: translate(0); }
+    22% { transform: translate(-8px, 1px); }
+    24% { transform: translate(4px, -1px); }
+    26% { transform: translate(0); }
+    50% { transform: translate(0); }
+    52% { transform: translate(3px, 2px); }
+    54% { transform: translate(-2px, -1px); }
+    56% { transform: translate(0); }
+    100% { transform: translate(0); }
+  }
+  @keyframes glitchBottom {
+    0% { transform: translate(0); }
+    3% { transform: translate(-4px, 2px); }
+    6% { transform: translate(6px, 0); }
+    9% { transform: translate(0); }
+    30% { transform: translate(0); }
+    33% { transform: translate(5px, -2px); }
+    36% { transform: translate(-7px, 1px); }
+    39% { transform: translate(0); }
+    60% { transform: translate(0); }
+    63% { transform: translate(-3px, 1px); }
+    66% { transform: translate(4px, -2px); }
+    69% { transform: translate(0); }
+    100% { transform: translate(0); }
+  }
+  .glitch-subtitle {
+    font-size: clamp(12px, 2vw, 20px);
+    color: #0ff;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.3em;
+    margin-top: 20px;
+    animation: subtitleFlicker 4s infinite;
+  }
+  @keyframes subtitleFlicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0; }
+    97% { opacity: 1; }
+    98% { opacity: 0.3; }
+  }
+</style>
+
+<!-- ===================== Effect 2: RGB Split ===================== -->
+<section class="effect-section" id="rgb-split">
+  <h2>2. RGB 色彩分离</h2>
+  <p class="desc">Canvas 2D 像素操作 — 实时 RGB 通道位移 + 鼠标距离控制分离强度</p>
+  <div class="demo" id="rgb-split-demo" style="background:#0a0a0a">
+    <canvas id="rgb-canvas"></canvas>
+    <div id="rgb-text" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(40px,10vw,120px);font-weight:900;font-family:'Arial Black',sans-serif;color:white;z-index:2;pointer-events:none;letter-spacing:0.05em">CYBERPUNK</div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('rgb-split-demo');
+  const canvas = document.getElementById('rgb-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize(){
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const mouse = { x: w/2, y: h/2 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    mouse.x = e.clientX - r.left;
+    mouse.y = e.clientY - r.top;
+  });
+
+  // Draw base image (text) to offscreen
+  const offscreen = document.createElement('canvas');
+  const offCtx = offscreen.getContext('2d');
+
+  function renderFrame() {
+    offscreen.width = w;
+    offscreen.height = h;
+
+    // Draw text on offscreen
+    offCtx.clearRect(0, 0, w, h);
+    offCtx.fillStyle = '#fff';
+    offCtx.font = `900 ${Math.min(w * 0.1, 120)}px "Arial Black", sans-serif`;
+    offCtx.textAlign = 'center';
+    offCtx.textBaseline = 'middle';
+    offCtx.fillText('CYBERPUNK', w/2, h/2);
+
+    // Additional decorative elements
+    offCtx.font = `300 ${Math.min(w * 0.02, 18)}px "Courier New", monospace`;
+    offCtx.fillStyle = 'rgba(255,255,255,0.5)';
+    offCtx.fillText('2 0 7 7', w/2, h/2 + 80);
+
+    // Horizontal scan lines as grid
+    offCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+    offCtx.lineWidth = 0.5;
+    for (let y = 0; y < h; y += 40) {
+      offCtx.beginPath();
+      offCtx.moveTo(0, y);
+      offCtx.lineTo(w, y);
+      offCtx.stroke();
+    }
+
+    // Get pixel data
+    const imageData = offCtx.getImageData(0, 0, w, h);
+    const src = imageData.data;
+
+    // Calculate split amount based on mouse position
+    const cx = w / 2, cy = h / 2;
+    const dx = mouse.x - cx, dy = mouse.y - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const maxSplit = 15;
+    const splitAmount = Math.min(maxSplit, dist * 0.03);
+    const angle = Math.atan2(dy, dx);
+
+    const rOff = { x: Math.round(Math.cos(angle) * splitAmount), y: Math.round(Math.sin(angle) * splitAmount * 0.3) };
+    const bOff = { x: Math.round(-Math.cos(angle) * splitAmount), y: Math.round(-Math.sin(angle) * splitAmount * 0.3) };
+
+    // Build RGB-split output
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, w, h);
+
+    const output = ctx.createImageData(w, h);
+    const out = output.data;
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4;
+
+        // Red channel (offset)
+        const rx = Math.min(w - 1, Math.max(0, x + rOff.x));
+        const ry = Math.min(h - 1, Math.max(0, y + rOff.y));
+        const ri = (ry * w + rx) * 4;
+
+        // Blue channel (offset)
+        const bx = Math.min(w - 1, Math.max(0, x + bOff.x));
+        const by = Math.min(h - 1, Math.max(0, y + bOff.y));
+        const bi = (by * w + bx) * 4;
+
+        out[i] = src[ri];       // R from offset position
+        out[i + 1] = src[i + 1]; // G from center
+        out[i + 2] = src[bi + 2]; // B from opposite offset
+        out[i + 3] = Math.max(src[ri + 3], src[i + 3], src[bi + 3]);
+      }
+    }
+
+    ctx.putImageData(output, 0, 0);
+
+    // Random glitch slices
+    if (Math.random() < 0.05) {
+      const sliceY = Math.random() * h;
+      const sliceH = 5 + Math.random() * 30;
+      const sliceShift = (Math.random() - 0.5) * 40;
+      const slice = ctx.getImageData(0, sliceY, w, sliceH);
+      ctx.putImageData(slice, sliceShift, sliceY);
+    }
+
+    requestAnimationFrame(renderFrame);
+  }
+  renderFrame();
+})();
+</script>
+
+<!-- ===================== Effect 3: Scan Lines ===================== -->
+<section class="effect-section" id="scan-lines">
+  <h2>3. CRT 扫描线</h2>
+  <p class="desc">CSS + Canvas — 复古 CRT 显示器效果：扫描线 + 曲面变形 + 色差 + 闪烁</p>
+  <div class="demo" id="scan-demo" style="background:#000;display:flex;align-items:center;justify-content:center">
+    <div class="crt-monitor">
+      <div class="crt-screen">
+        <div class="crt-content">
+          <div class="crt-line">> SYSTEM BOOT SEQUENCE v2.077</div>
+          <div class="crt-line">> LOADING NEURAL INTERFACE...</div>
+          <div class="crt-line">> MEMORY: 2048 TB QUANTUM RAM</div>
+          <div class="crt-line">> CPU: NEUROMORPHIC CLUSTER x64</div>
+          <div class="crt-line">> NETWORK: QUANTUM ENTANGLED</div>
+          <div class="crt-line crt-success">> STATUS: ALL SYSTEMS ONLINE</div>
+          <div class="crt-line crt-cursor">> _</div>
+        </div>
+        <div class="crt-scanlines"></div>
+        <div class="crt-glow"></div>
+      </div>
+      <div class="crt-bezel"></div>
+    </div>
+  </div>
+</section>
+<style>
+  .crt-monitor {
+    width: min(90%, 700px); aspect-ratio: 4/3; position: relative; z-index: 2;
+    border-radius: 20px; padding: 30px;
+    background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.05);
+  }
+  .crt-screen {
+    width: 100%; height: 100%; position: relative; overflow: hidden;
+    border-radius: 10px;
+    background: #001a00;
+    box-shadow: inset 0 0 80px rgba(0,255,65,0.05);
+  }
+  .crt-content {
+    padding: 30px; font-family: 'Courier New', monospace; font-size: clamp(10px, 1.8vw, 16px);
+    color: #00ff41; line-height: 2;
+    text-shadow: 0 0 5px rgba(0,255,65,0.5);
+    animation: crtFlicker 0.1s infinite alternate;
+  }
+  .crt-line { opacity: 0; animation: typeIn 0.5s forwards; }
+  .crt-line:nth-child(1) { animation-delay: 0.3s; }
+  .crt-line:nth-child(2) { animation-delay: 0.8s; }
+  .crt-line:nth-child(3) { animation-delay: 1.3s; }
+  .crt-line:nth-child(4) { animation-delay: 1.8s; }
+  .crt-line:nth-child(5) { animation-delay: 2.3s; }
+  .crt-line:nth-child(6) { animation-delay: 2.8s; }
+  .crt-line:nth-child(7) { animation-delay: 3.3s; }
+  .crt-success { color: #00ffaa; }
+  .crt-cursor { animation: blink 1s step-end infinite, typeIn 0.5s 3.3s forwards; }
+  @keyframes typeIn { to { opacity: 1; } }
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes crtFlicker { 0% { opacity: 0.97; } 100% { opacity: 1; } }
+  .crt-scanlines {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+    z-index: 10;
+  }
+  .crt-scanlines::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(transparent 50%, rgba(0,0,0,0.1) 50%);
+    background-size: 100% 4px;
+    animation: scanDown 6s linear infinite;
+  }
+  @keyframes scanDown {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+  .crt-glow {
+    position: absolute; inset: -2px; border-radius: 12px;
+    box-shadow: inset 0 0 50px rgba(0,255,65,0.03), 0 0 15px rgba(0,255,65,0.1);
+    pointer-events: none;
+  }
+</style>
+
+<!-- ===================== Effect 4: Digital Rain (Matrix) ===================== -->
+<section class="effect-section" id="digital-rain">
+  <h2>4. 数字雨（Matrix）</h2>
+  <p class="desc">Canvas 2D — 经典黑客帝国字符瀑布，渐变尾迹 + 随机亮度闪烁</p>
+  <div class="demo" id="rain-demo" style="background:#000">
+    <canvas id="rain-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('rain-demo');
+  const canvas = document.getElementById('rain-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, columns, drops;
+
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  function resize(){
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+    const fontSize = 14;
+    columns = Math.floor(w / fontSize);
+    drops = Array(columns).fill(0).map(() => Math.random() * -100);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function render(){
+    // Fade effect
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(0, 0, w, h);
+
+    const fontSize = 14;
+    ctx.font = `${fontSize}px "Courier New", monospace`;
+
+    for (let i = 0; i < columns; i++) {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      const x = i * fontSize;
+      const y = drops[i] * fontSize;
+
+      // Lead character (bright white-green)
+      ctx.fillStyle = '#fff';
+      ctx.fillText(char, x, y);
+
+      // Trail characters
+      if (Math.random() < 0.3) {
+        const trailChar = chars[Math.floor(Math.random() * chars.length)];
+        const brightness = Math.random() * 0.5 + 0.3;
+        ctx.fillStyle = `rgba(0,255,65,${brightness})`;
+        ctx.fillText(trailChar, x, y - fontSize * (1 + Math.floor(Math.random() * 3)));
+      }
+
+      // Reset or advance
+      if (y > h && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i] += 0.5 + Math.random() * 0.5;
+    }
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===================== Effect 5: VHS Noise ===================== -->
+<section class="effect-section" id="vhs-noise">
+  <h2>5. VHS 噪声干扰</h2>
+  <p class="desc">Canvas 2D — 模拟 VHS 录像带噪声：静电雪花 + 水平撕裂 + 色彩滚动条 + 时间戳</p>
+  <div class="demo" id="vhs-demo" style="background:#111">
+    <canvas id="vhs-canvas"></canvas>
+    <div style="position:absolute;bottom:30px;right:30px;color:#fff;font-family:'Courier New',monospace;font-size:clamp(12px,2vw,20px);z-index:2;text-shadow:2px 0 #f00,-2px 0 #0ff;opacity:0.8" id="vhs-timestamp">
+      REC ● 00:00:00
+    </div>
+    <div style="position:absolute;top:30px;left:30px;color:rgba(255,255,255,0.6);font-family:'Courier New',monospace;font-size:clamp(10px,1.5vw,14px);z-index:2">
+      SP ▶ PLAY
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo = document.getElementById('vhs-demo');
+  const canvas = document.getElementById('vhs-canvas');
+  const ctx = canvas.getContext('2d');
+  const timestamp = document.getElementById('vhs-timestamp');
+  let w, h;
+
+  function resize(){
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let frame = 0;
+  const startTime = performance.now();
+
+  function render(){
+    frame++;
+    const t = performance.now() * 0.001;
+
+    // Base dark blue-ish background (like VHS playback)
+    ctx.fillStyle = '#0a0a12';
+    ctx.fillRect(0, 0, w, h);
+
+    // Static noise layer
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      if (Math.random() < 0.15) {
+        const noise = Math.random() * 40;
+        data[i] = noise;
+        data[i + 1] = noise;
+        data[i + 2] = noise + Math.random() * 10;
+        data[i + 3] = 255;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    // Horizontal tear/displacement
+    if (Math.random() < 0.08) {
+      const tearY = Math.random() * h;
+      const tearH = 2 + Math.random() * 8;
+      const tearShift = (Math.random() - 0.5) * 60;
+      const tearData = ctx.getImageData(0, tearY, w, tearH);
+      ctx.putImageData(tearData, tearShift, tearY);
+    }
+
+    // Color rolling bar (VHS tracking error)
+    const barY = (t * 80) % (h + 200) - 100;
+    const barH = 30 + Math.sin(t * 3) * 15;
+    const barGrad = ctx.createLinearGradient(0, barY, 0, barY + barH);
+    barGrad.addColorStop(0, 'rgba(255,255,255,0)');
+    barGrad.addColorStop(0.3, 'rgba(200,200,255,0.08)');
+    barGrad.addColorStop(0.5, 'rgba(200,200,255,0.12)');
+    barGrad.addColorStop(0.7, 'rgba(200,200,255,0.08)');
+    barGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = barGrad;
+    ctx.fillRect(0, barY, w, barH);
+
+    // Scanlines
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    for (let y = 0; y < h; y += 3) {
+      ctx.fillRect(0, y, w, 1);
+    }
+
+    // Occasional full-width white flash
+    if (Math.random() < 0.01) {
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // Large glitch block (random)
+    if (Math.random() < 0.02) {
+      const gx = Math.random() * w * 0.7;
+      const gy = Math.random() * h;
+      const gw = 50 + Math.random() * 200;
+      const gh = 3 + Math.random() * 15;
+      ctx.fillStyle = `rgba(${Math.random()*100+100},${Math.random()*50},${Math.random()*100+100},0.3)`;
+      ctx.fillRect(gx, gy, gw, gh);
+    }
+
+    // RGB chromatic aberration on edges
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle = 'rgba(255,0,0,0.015)';
+    ctx.fillRect(2, 0, w, h);
+    ctx.fillStyle = 'rgba(0,0,255,0.015)';
+    ctx.fillRect(-2, 0, w, h);
+    ctx.restore();
+
+    // Vignette
+    const vGrad = ctx.createRadialGradient(w/2, h/2, h*0.3, w/2, h/2, h*0.8);
+    vGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    vGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
+    ctx.fillStyle = vGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Update timestamp
+    const elapsed = (performance.now() - startTime) / 1000;
+    const hrs = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+    const secs = String(Math.floor(elapsed % 60)).padStart(2, '0');
+    timestamp.textContent = `REC ● ${hrs}:${mins}:${secs}`;
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

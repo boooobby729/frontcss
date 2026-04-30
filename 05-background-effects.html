@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>背景特效集</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'SF Pro Display', -apple-system, sans-serif; }
+  .section { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .section h2 { font-size: 2.5rem; font-weight: 800; color: #fff; position: relative; z-index: 2; }
+  .section p { color: rgba(255,255,255,.5); margin-top: 12px; position: relative; z-index: 2; }
+  .tag { font-size: .75rem; color: #667eea; background: rgba(102,126,234,.15); padding: 4px 14px; border-radius: 20px; position: relative; z-index: 2; margin-top: 16px; }
+
+  /* 1. Animated Gradient */
+  .gradient-bg { background: linear-gradient(-45deg, #0a0a2e, #1a0a4e, #2d0a5e, #0a2a4e, #0a4a3e); background-size: 400% 400%; animation: gradientShift 15s ease infinite; }
+  @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+  /* 2. Stars (CSS only) */
+  .stars-bg { background: #000; }
+  .stars-layer { position: absolute; inset: 0; }
+  .star { position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; animation: twinkle 3s ease-in-out infinite; }
+  @keyframes twinkle { 0%, 100% { opacity: .3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
+
+  /* 3. Aurora */
+  .aurora-bg { background: #0a0a1a; }
+  .aurora-layer { position: absolute; inset: 0; overflow: hidden; }
+  .aurora-band { position: absolute; width: 200%; height: 50%; filter: blur(80px); opacity: .3; }
+  .aurora-band:nth-child(1) { background: linear-gradient(90deg, transparent, #43e97b, #38f9d7, transparent); top: 10%; left: -50%; animation: auroraMove 8s ease-in-out infinite; }
+  .aurora-band:nth-child(2) { background: linear-gradient(90deg, transparent, #667eea, #764ba2, transparent); top: 25%; left: -30%; animation: auroraMove 12s ease-in-out infinite reverse; }
+  .aurora-band:nth-child(3) { background: linear-gradient(90deg, transparent, #f093fb, #f5576c, transparent); top: 5%; left: -40%; animation: auroraMove 10s ease-in-out infinite; animation-delay: -3s; }
+  @keyframes auroraMove { 0%, 100% { transform: translateX(-20%) skewY(-5deg); } 50% { transform: translateX(20%) skewY(5deg); } }
+
+  /* 4. Mesh Gradient */
+  .mesh-bg { background: #0a0a0f; }
+  .mesh-blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: .4; }
+  .mesh-blob:nth-child(1) { width: 500px; height: 500px; background: #667eea; top: -10%; left: -10%; animation: meshFloat1 12s ease-in-out infinite; }
+  .mesh-blob:nth-child(2) { width: 400px; height: 400px; background: #f093fb; bottom: -10%; right: -10%; animation: meshFloat2 10s ease-in-out infinite; }
+  .mesh-blob:nth-child(3) { width: 350px; height: 350px; background: #43e97b; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: meshFloat3 14s ease-in-out infinite; }
+  @keyframes meshFloat1 { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(100px, 50px); } 66% { transform: translate(-50px, 100px); } }
+  @keyframes meshFloat2 { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(-80px, -60px); } 66% { transform: translate(60px, -80px); } }
+  @keyframes meshFloat3 { 0%, 100% { transform: translate(-50%, -50%); } 33% { transform: translate(-30%, -70%); } 66% { transform: translate(-70%, -30%); } }
+
+  /* 5. Noise texture overlay */
+  .noise-bg { background: #1a1a2e; }
+  .noise-overlay { position: absolute; inset: 0; opacity: .08; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat: repeat; background-size: 256px 256px; }
+  .noise-gradient { position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 40%, #667eea33 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, #f093fb22 0%, transparent 50%); }
+
+  /* 6. Animated Grid */
+  .grid-bg { background: #0a0a0f; }
+  .grid-lines { position: absolute; inset: 0; background-image:
+    linear-gradient(rgba(102,126,234,.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(102,126,234,.08) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPulse 4s ease-in-out infinite;
+  }
+  .grid-glow { position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, #667eea44, transparent 60%); border-radius: 50%; animation: gridGlowMove 6s ease-in-out infinite; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  @keyframes gridPulse { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+  @keyframes gridGlowMove { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-30%, -60%) scale(1.5); } }
+
+  /* 7. Bokeh */
+  .bokeh-bg { background: #0a0a1a; }
+  .bokeh { position: absolute; border-radius: 50%; filter: blur(1px); }
+  .bokeh:nth-child(1) { width: 80px; height: 80px; background: radial-gradient(circle, rgba(102,126,234,.3), transparent); top: 20%; left: 15%; animation: bokehFloat 8s ease-in-out infinite; }
+  .bokeh:nth-child(2) { width: 120px; height: 120px; background: radial-gradient(circle, rgba(240,147,251,.2), transparent); top: 40%; right: 20%; animation: bokehFloat 10s ease-in-out infinite reverse; }
+  .bokeh:nth-child(3) { width: 60px; height: 60px; background: radial-gradient(circle, rgba(67,233,123,.25), transparent); bottom: 25%; left: 40%; animation: bokehFloat 7s ease-in-out infinite; animation-delay: -2s; }
+  .bokeh:nth-child(4) { width: 100px; height: 100px; background: radial-gradient(circle, rgba(245,87,108,.2), transparent); top: 60%; left: 65%; animation: bokehFloat 9s ease-in-out infinite; animation-delay: -4s; }
+  .bokeh:nth-child(5) { width: 70px; height: 70px; background: radial-gradient(circle, rgba(102,126,234,.2), transparent); top: 10%; right: 30%; animation: bokehFloat 11s ease-in-out infinite; }
+  @keyframes bokehFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 25% { transform: translate(30px, -20px) scale(1.2); } 50% { transform: translate(-20px, 30px) scale(.8); } 75% { transform: translate(20px, 10px) scale(1.1); } }
+
+  /* 8. Wave gradient */
+  .wave-bg { background: #0a0a2e; }
+  .wave-svg { position: absolute; bottom: 0; left: 0; width: 100%; }
+
+  /* 9. Spotlight Follow */
+  .spotlight-section { background: #050510; cursor: crosshair; }
+
+  /* 10. Conic Gradient */
+  .conic-section { background: #0a0a0f; }
+  .conic-orb { position: absolute; width: 300px; height: 300px; background: conic-gradient(from 0deg, #667eea, #f093fb, #f5576c, #43e97b, #667eea); border-radius: 50%; filter: blur(60px); opacity: .3; animation: conicSpin 8s linear infinite; }
+  @keyframes conicSpin { to { transform: rotate(360deg); } }
+
+  /* 11. Dot Matrix */
+  .dot-matrix { background-image: radial-gradient(circle, rgba(102,126,234,.15) 1px, transparent 1px); background-size: 20px 20px; background-color: #0a0a0f; }
+
+  /* 12. Stripe Gradient */
+  .stripe-section { background: repeating-linear-gradient(45deg, #0a0a0f, #0a0a0f 20px, #0f0f1a 20px, #0f0f1a 40px); }
+
+  /* 13. Plasma */
+  .plasma-section { background: linear-gradient(45deg, #667eea22, #f093fb22, #43e97b22, #f5576c22); background-size: 400% 400%; animation: plasmaShift 12s ease infinite; }
+  @keyframes plasmaShift { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+
+  /* 14. Glow Orbs */
+  .glow-section { background: #030310; }
+  .glow-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .5; }
+  .go1 { width: 300px; height: 300px; background: #667eea; top: 20%; left: 10%; animation: goFloat 8s ease-in-out infinite; }
+  .go2 { width: 250px; height: 250px; background: #f093fb; bottom: 10%; right: 15%; animation: goFloat 10s ease-in-out infinite reverse; }
+  .go3 { width: 200px; height: 200px; background: #43e97b; top: 40%; left: 55%; animation: goFloat 12s ease-in-out infinite; }
+  @keyframes goFloat { 0%,100% { transform: translate(0,0); } 50% { transform: translate(40px,-30px); } }
+
+  /* 15. Grain Film */
+  .grain-section { background: #1a1a2e; }
+  .grain-overlay { position: absolute; inset: 0; opacity: .1; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  /* 16. Diagonal Split */
+  .diagonal-section { background: linear-gradient(135deg, #0a0a2e 50%, #1a0a3e 50%); position: relative; }
+  .diagonal-section::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 48%, #667eea22 49%, #667eea22 51%, transparent 52%); }
+
+  /* 17. Retro Sun Rays */
+  .sunrays-section { background: #0a0a1a; }
+  .sunrays { position: absolute; width: 600px; height: 600px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .sunray { position: absolute; width: 4px; height: 300px; bottom: 50%; left: 50%; transform-origin: bottom center; background: linear-gradient(to top, #667eea33, transparent); }
+
+  /* 18. Circuit Board */
+  .circuit-section { background: #060612; }
+  .circuit-lines { position: absolute; inset: 0; background-image:
+    linear-gradient(0deg, rgba(102,126,234,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(102,126,234,.06) 1px, transparent 1px);
+    background-size: 40px 40px; }
+  .circuit-node { position: absolute; width: 6px; height: 6px; background: #667eea; border-radius: 50%; box-shadow: 0 0 8px #667eea88; animation: circuitPulse 2s ease-in-out infinite; }
+  @keyframes circuitPulse { 0%,100% { opacity:.3; box-shadow: 0 0 4px #667eea44; } 50% { opacity:1; box-shadow: 0 0 12px #667eea; } }
+
+  /* 19. Liquid Bubble */
+  .liquid-section { background: #050515; }
+  .bubble { position: absolute; border-radius: 50%; border: 1px solid rgba(102,126,234,.2); animation: bubbleRise linear infinite; }
+  @keyframes bubbleRise { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: .6; } 90% { opacity: .6; } 100% { transform: translateY(-100px) scale(1); opacity: 0; } }
+
+  /* 20. Gradient Mosaic */
+  .mosaic-bg { display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(6, 1fr); position: absolute; inset: 0; }
+  .mosaic-cell { animation: mosaicPulse 4s ease-in-out infinite; }
+  @keyframes mosaicPulse { 0%,100% { opacity:.15; } 50% { opacity:.5; } }
+
+</style>
+</head>
+<body>
+  <a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+
+  <!-- 1. Animated Gradient -->
+  <div class="section gradient-bg">
+    <h2>流动渐变</h2>
+    <p>多色渐变缓慢流动，营造氛围感</p>
+    <span class="tag">background-size 400% + animation</span>
+  </div>
+
+  <!-- 2. Stars -->
+  <div class="section stars-bg" id="starsSection">
+    <div class="stars-layer" id="starsLayer"></div>
+    <h2>星空背景</h2>
+    <p>CSS 随机星点 + 闪烁动画</p>
+    <span class="tag">random position + twinkle</span>
+  </div>
+
+  <!-- 3. Aurora -->
+  <div class="section aurora-bg">
+    <div class="aurora-layer">
+      <div class="aurora-band"></div>
+      <div class="aurora-band"></div>
+      <div class="aurora-band"></div>
+    </div>
+    <h2>极光效果</h2>
+    <p>多层渐变带 + blur + 缓动位移</p>
+    <span class="tag">filter: blur + translateX</span>
+  </div>
+
+  <!-- 4. Mesh Gradient -->
+  <div class="section mesh-bg">
+    <div class="mesh-blob"></div>
+    <div class="mesh-blob"></div>
+    <div class="mesh-blob"></div>
+    <h2>Mesh 流体渐变</h2>
+    <p>多个模糊圆形色块自由飘动</p>
+    <span class="tag">blur(100px) + float animation</span>
+  </div>
+
+  <!-- 5. Noise Texture -->
+  <div class="section noise-bg">
+    <div class="noise-overlay"></div>
+    <div class="noise-gradient"></div>
+    <h2>噪声纹理</h2>
+    <p>SVG feTurbulence 噪声 + 渐变叠加</p>
+    <span class="tag">SVG noise filter + radial-gradient</span>
+  </div>
+
+  <!-- 6. Animated Grid -->
+  <div class="section grid-bg">
+    <div class="grid-lines"></div>
+    <div class="grid-glow"></div>
+    <h2>动态网格</h2>
+    <p>CSS Grid 线条 + 发光漫游点</p>
+    <span class="tag">linear-gradient grid + glow</span>
+  </div>
+
+  <!-- 7. Bokeh -->
+  <div class="section bokeh-bg">
+    <div class="bokeh"></div>
+    <div class="bokeh"></div>
+    <div class="bokeh"></div>
+    <div class="bokeh"></div>
+    <div class="bokeh"></div>
+    <h2>散景光斑</h2>
+    <p>柔焦光斑漂浮，摄影级氛围</p>
+    <span class="tag">radial-gradient + float</span>
+  </div>
+
+  <!-- 8. Wave -->
+  <div class="section wave-bg">
+    <h2 style="margin-bottom:100px">波浪渐变</h2>
+    <p style="margin-bottom:80px">SVG 波形 + 缓慢移动</p>
+    <span class="tag">SVG wave + animation</span>
+    <svg class="wave-svg" viewBox="0 0 1440 320" preserveAspectRatio="none" style="height:40%">
+      <path fill="rgba(102,126,234,.15)">
+        <animate attributeName="d" dur="8s" repeatCount="indefinite"
+          values="M0,160 C360,260 720,60 1080,160 C1260,210 1380,190 1440,180 L1440,320 L0,320 Z;
+                  M0,200 C360,100 720,280 1080,140 C1260,100 1380,200 1440,160 L1440,320 L0,320 Z;
+                  M0,160 C360,260 720,60 1080,160 C1260,210 1380,190 1440,180 L1440,320 L0,320 Z"/>
+      </path>
+      <path fill="rgba(240,147,251,.1)">
+        <animate attributeName="d" dur="10s" repeatCount="indefinite"
+          values="M0,200 C360,100 720,260 1080,180 C1260,160 1380,220 1440,200 L1440,320 L0,320 Z;
+                  M0,140 C360,240 720,120 1080,220 C1260,240 1380,160 1440,180 L1440,320 L0,320 Z;
+                  M0,200 C360,100 720,260 1080,180 C1260,160 1380,220 1440,200 L1440,320 L0,320 Z"/>
+      </path>
+      <path fill="rgba(67,233,123,.08)">
+        <animate attributeName="d" dur="12s" repeatCount="indefinite"
+          values="M0,240 C360,180 720,280 1080,200 C1260,180 1380,260 1440,240 L1440,320 L0,320 Z;
+                  M0,180 C360,260 720,160 1080,260 C1260,280 1380,200 1440,220 L1440,320 L0,320 Z;
+                  M0,240 C360,180 720,280 1080,200 C1260,180 1380,260 1440,240 L1440,320 L0,320 Z"/>
+      </path>
+    </svg>
+</div>
+
+  <!-- 9. Spotlight Follow -->
+  <div class="section spotlight-section" id="spotlightBg">
+    <h2>聚光灯追踪</h2>
+    <p>鼠标移动控制聚光灯位置</p>
+    <span class="tag">radial-gradient + mousemove</span>
+  </div>
+
+  <!-- 10. Conic Gradient -->
+  <div class="section conic-section">
+    <div class="conic-orb" style="top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+    <h2>锥形渐变旋转</h2>
+    <p>conic-gradient 圆形旋转光晕</p>
+    <span class="tag">conic-gradient + blur + rotate</span>
+  </div>
+
+  <!-- 11. Dot Matrix -->
+  <div class="section dot-matrix">
+    <h2>点阵矩阵</h2>
+    <p>重复 radial-gradient 创建点阵</p>
+    <span class="tag">background-size: 20px 20px</span>
+  </div>
+
+  <!-- 12. Stripe Gradient -->
+  <div class="section stripe-section">
+    <h2>斜纹条纹</h2>
+    <p>repeating-linear-gradient 无限循环条纹</p>
+    <span class="tag">repeating-linear-gradient 45deg</span>
+  </div>
+
+  <!-- 13. Plasma -->
+  <div class="section plasma-section">
+    <h2>等离子渐变</h2>
+    <p>多色渐变慢速流动</p>
+    <span class="tag">background-size 400% + animation</span>
+  </div>
+
+  <!-- 14. Glow Orbs -->
+  <div class="section glow-section">
+    <div class="glow-orb go1"></div>
+    <div class="glow-orb go2"></div>
+    <div class="glow-orb go3"></div>
+    <h2>发光球体</h2>
+    <p>大型模糊球体自由飘动</p>
+    <span class="tag">filter:blur(80px) + float</span>
+  </div>
+
+  <!-- 15. Film Grain -->
+  <div class="section grain-section">
+    <div class="grain-overlay"></div>
+    <h2>胶片颗粒</h2>
+    <p>SVG 噪声纹理覆盖，模拟胶片质感</p>
+    <span class="tag">feTurbulence + overlay</span>
+  </div>
+
+  <!-- 16. Diagonal Split -->
+  <div class="section diagonal-section">
+    <h2>对角分割</h2>
+    <p>线性渐变 50% 硬分割，配合发光分割线</p>
+    <span class="tag">linear-gradient 50% + ::after</span>
+  </div>
+
+  <!-- 17. Retro Sun Rays -->
+  <div class="section sunrays-section" id="sunraysSection">
+    <div class="sunrays" id="sunrays"></div>
+    <h2>复古光芒</h2>
+    <p>从中心发散的光线条纹，纽怀风格</p>
+    <span class="tag">transform-origin + rotate</span>
+  </div>
+
+  <!-- 18. Circuit Board -->
+  <div class="section circuit-section" id="circuitSection">
+    <div class="circuit-lines"></div>
+    <h2>电路板</h2>
+    <p>网格线 + 发光节点，科技电路板美学</p>
+    <span class="tag">grid lines + glowing nodes</span>
+  </div>
+
+  <!-- 19. Liquid Bubble -->
+  <div class="section liquid-section" id="bubbleSection">
+    <h2>气泡上升</h2>
+    <p>透明气泡从底部上升，沉浸感背景</p>
+    <span class="tag">translateY animation + border</span>
+  </div>
+
+  <!-- 20. Gradient Mosaic -->
+  <div class="section" style="background:#0a0a0f;">
+    <div class="mosaic-bg" id="mosaicBg"></div>
+    <h2>渐变马赛克</h2>
+    <p>微小色块网格脉冲变化，数字感背景</p>
+    <span class="tag">grid cells + opacity pulse</span>
+  </div>
+
+<script>
+  // Generate stars
+  const starsLayer = document.getElementById('starsLayer');
+  for (let i = 0; i < 150; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.animationDuration = (2 + Math.random() * 3) + 's';
+    const size = (.5 + Math.random() * 2) + 'px';
+    star.style.width = size;
+    star.style.height = size;
+    starsLayer.appendChild(star);
+  }
+
+  // Spotlight follow
+  const spotBg = document.getElementById('spotlightBg');
+  if (spotBg) {
+    spotBg.addEventListener('mousemove', e => {
+      const rect = spotBg.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      spotBg.style.background = `radial-gradient(circle 200px at ${x}px ${y}px, rgba(102,126,234,.15), #050510 70%)`;
+    });
+    spotBg.addEventListener('mouseleave', () => { spotBg.style.background = '#050510'; });
+  }
+
+  // Sun rays
+  const sunraysEl = document.getElementById('sunrays');
+  if (sunraysEl) {
+    for (let i = 0; i < 24; i++) {
+      const ray = document.createElement('div');
+      ray.className = 'sunray';
+      ray.style.transform = `rotate(${i * 15}deg)`;
+      ray.style.opacity = (.2 + Math.random() * .3).toFixed(2);
+      sunraysEl.appendChild(ray);
+    }
+  }
+
+  // Circuit nodes
+  const circuitEl = document.getElementById('circuitSection');
+  if (circuitEl) {
+    for (let i = 0; i < 20; i++) {
+      const node = document.createElement('div');
+      node.className = 'circuit-node';
+      node.style.left = (Math.round(Math.random() * 24) * 40 + 20) + 'px';
+      node.style.top = (Math.round(Math.random() * 14) * 40 + 20) + 'px';
+      node.style.animationDelay = (Math.random() * 2).toFixed(1) + 's';
+      circuitEl.appendChild(node);
+    }
+  }
+
+  // Bubbles
+  const bubbleEl = document.getElementById('bubbleSection');
+  if (bubbleEl) {
+    for (let i = 0; i < 15; i++) {
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      const size = 10 + Math.random() * 40;
+      b.style.width = size + 'px';
+      b.style.height = size + 'px';
+      b.style.left = Math.random() * 100 + '%';
+      b.style.animationDuration = (4 + Math.random() * 6) + 's';
+      b.style.animationDelay = (Math.random() * 5) + 's';
+      bubbleEl.appendChild(b);
+    }
+  }
+
+  // Mosaic cells
+  const mosaicBg = document.getElementById('mosaicBg');
+  if (mosaicBg) {
+    const colors = ['#667eea','#f093fb','#43e97b','#f5576c','#764ba2','#ffa500'];
+    for (let i = 0; i < 48; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'mosaic-cell';
+      cell.style.background = colors[Math.floor(Math.random() * colors.length)];
+      cell.style.animationDelay = (Math.random() * 4).toFixed(1) + 's';
+      mosaicBg.appendChild(cell);
+    }
+  }
+</script>
+<script src="copy-effect.js"></script>
+</body>
+</html>

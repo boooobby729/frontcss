@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据可视化动画效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .demo canvas{position:absolute;inset:0;width:100%;height:100%}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#animated-bar">动态柱状图</a>
+  <a href="#donut">环形图</a>
+  <a href="#line-chart">折线图</a>
+  <a href="#radar">雷达图</a>
+  <a href="#bubble">气泡图</a>
+  <a href="#network">网络拓扑</a>
+</div>
+
+<!-- ===== 1. Animated Bar Chart ===== -->
+<section class="effect-section" id="animated-bar">
+  <h2>1. 动态柱状图竞赛</h2>
+  <p class="desc">Canvas 2D — 数据驱动的柱状图排名动画，柱子实时增长并重新排序，带平滑过渡</p>
+  <div class="demo" style="background:#0a0a12"><canvas id="bar-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('bar-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  const categories=['JavaScript','Python','TypeScript','Rust','Go','Java','C++','Swift'];
+  const colors=['#f7df1e','#3776ab','#3178c6','#ce412b','#00add8','#ed8b00','#00599c','#fa7343'];
+  let values=categories.map(()=>Math.random()*60+20);
+  let displayValues=[...values];
+  let targetValues=[...values];
+  let positions=categories.map((_,i)=>i);
+  let displayPositions=[...positions];
+  
+  function updateData(){
+    targetValues=targetValues.map(v=>Math.max(10,v+((Math.random()-.3)*15)));
+    // Sort by value for ranking
+    const indexed=targetValues.map((v,i)=>({v,i}));
+    indexed.sort((a,b)=>b.v-a.v);
+    positions=new Array(categories.length);
+    indexed.forEach((item,rank)=>positions[item.i]=rank);
+  }
+  
+  setInterval(updateData,2000);
+  
+  function animate(){
+    ctx.fillStyle='#0a0a12';ctx.fillRect(0,0,W,H);
+    
+    const barH=Math.min(40,H/(categories.length+2));
+    const gap=8;
+    const startY=(H-(barH+gap)*categories.length)/2;
+    const maxBarW=W*0.6;
+    const maxVal=Math.max(...targetValues)*1.2;
+    
+    for(let i=0;i<categories.length;i++){
+      // Lerp values and positions
+      displayValues[i]+=(targetValues[i]-displayValues[i])*0.05;
+      displayPositions[i]+=(positions[i]-displayPositions[i])*0.08;
+      
+      const y=startY+displayPositions[i]*(barH+gap);
+      const barW=(displayValues[i]/maxVal)*maxBarW;
+      
+      // Bar
+      ctx.fillStyle=colors[i];
+      ctx.beginPath();
+      ctx.roundRect(W*0.2,y,barW,barH,4);
+      ctx.fill();
+      
+      // Label
+      ctx.fillStyle='#fff';
+      ctx.font=`600 ${Math.min(14,barH*0.4)}px sans-serif`;
+      ctx.textAlign='right';
+      ctx.fillText(categories[i],W*0.18,y+barH/2+5);
+      
+      // Value
+      ctx.textAlign='left';
+      ctx.fillStyle='rgba(255,255,255,.6)';
+      ctx.fillText(Math.round(displayValues[i]),W*0.2+barW+10,y+barH/2+5);
+    }
+    
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+<!-- ===== 2. Animated Donut Chart ===== -->
+<section class="effect-section" id="donut">
+  <h2>2. 动态环形图</h2>
+  <p class="desc">Canvas 2D arc — 环形扇区动态展开动画，带数据标签飞入与中心数字滚动</p>
+  <div class="demo" style="background:#0a0a12"><canvas id="donut-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('donut-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  const data=[{label:'React',value:35,color:'#61dafb'},{label:'Vue',value:25,color:'#42b883'},{label:'Angular',value:15,color:'#dd0031'},{label:'Svelte',value:12,color:'#ff3e00'},{label:'Other',value:13,color:'#888'}];
+  const total=data.reduce((s,d)=>s+d.value,0);
+  let progress=0;
+  
+  function draw(){
+    ctx.fillStyle='#0a0a12';ctx.fillRect(0,0,W,H);
+    const cx=W/2, cy=H/2;
+    const r=Math.min(W,H)*0.3;
+    const inner=r*0.6;
+    
+    progress=Math.min(progress+0.015,1);
+    const eased=1-Math.pow(1-progress,3);
+    const sweep=Math.PI*2*eased;
+    
+    let startAngle=-Math.PI/2;
+    data.forEach(d=>{
+      const angle=(d.value/total)*sweep;
+      ctx.beginPath();
+      ctx.arc(cx,cy,r,startAngle,startAngle+angle);
+      ctx.arc(cx,cy,inner,startAngle+angle,startAngle,true);
+      ctx.closePath();
+      ctx.fillStyle=d.color;
+      ctx.fill();
+      
+      // Label
+      if(eased>0.5){
+        const mid=startAngle+angle/2;
+        const lx=cx+Math.cos(mid)*(r+30);
+        const ly=cy+Math.sin(mid)*(r+30);
+        ctx.fillStyle='#fff';
+        ctx.font='600 12px sans-serif';
+        ctx.textAlign='center';
+        ctx.fillText(d.label,lx,ly);
+        ctx.fillStyle='rgba(255,255,255,.5)';
+        ctx.font='11px sans-serif';
+        ctx.fillText(Math.round(d.value/total*100*eased)+'%',lx,ly+16);
+      }
+      startAngle+=angle;
+    });
+    
+    // Center text
+    ctx.fillStyle='#fff';
+    ctx.font='bold 28px sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(Math.round(total*eased),cx,cy+4);
+    ctx.fillStyle='rgba(255,255,255,.4)';
+    ctx.font='12px sans-serif';
+    ctx.fillText('TOTAL',cx,cy+22);
+    
+    if(progress>=1){
+      // Loop after pause
+      setTimeout(()=>{progress=0;},3000);
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+<!-- ===== 3. Animated Line Chart ===== -->
+<section class="effect-section" id="line-chart">
+  <h2>3. 实时折线图</h2>
+  <p class="desc">Canvas 2D — 模拟实时数据流的折线图，线条平滑绘制入场并持续更新，带渐变填充</p>
+  <div class="demo" style="background:#0a0a12"><canvas id="line-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('line-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  const maxPoints=80;
+  const lines=[
+    {data:[],color:'#6366f1',label:'Series A'},
+    {data:[],color:'#22c55e',label:'Series B'},
+    {data:[],color:'#f59e0b',label:'Series C'}
+  ];
+  
+  function addPoint(){
+    lines.forEach((l,i)=>{
+      const last=l.data.length?l.data[l.data.length-1]:50;
+      l.data.push(Math.max(10,Math.min(90,last+(Math.random()-.5)*10+Math.sin(Date.now()/1000+i)*2)));
+      if(l.data.length>maxPoints) l.data.shift();
+    });
+  }
+  
+  // Initialize with some data
+  for(let i=0;i<40;i++) addPoint();
+  setInterval(addPoint,200);
+  
+  function draw(){
+    ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,W,H);
+    
+    const padL=60, padR=30, padT=40, padB=50;
+    const chartW=W-padL-padR, chartH=H-padT-padB;
+    
+    // Grid
+    ctx.strokeStyle='rgba(255,255,255,.05)';
+    ctx.lineWidth=1;
+    for(let i=0;i<=5;i++){
+      const y=padT+chartH*i/5;
+      ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+chartW,y); ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,.3)';
+      ctx.font='11px sans-serif';ctx.textAlign='right';
+      ctx.fillText((100-i*20)+'',padL-10,y+4);
+    }
+    
+    // Lines
+    lines.forEach(l=>{
+      if(l.data.length<2) return;
+      ctx.beginPath();
+      l.data.forEach((v,i)=>{
+        const x=padL+(i/(maxPoints-1))*chartW;
+        const y=padT+(1-v/100)*chartH;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      });
+      ctx.strokeStyle=l.color;
+      ctx.lineWidth=2;
+      ctx.stroke();
+      
+      // Fill gradient
+      const lastX=padL+((l.data.length-1)/(maxPoints-1))*chartW;
+      ctx.lineTo(lastX,padT+chartH);
+      ctx.lineTo(padL,padT+chartH);
+      ctx.closePath();
+      const grad=ctx.createLinearGradient(0,padT,0,padT+chartH);
+      grad.addColorStop(0,l.color+'40');
+      grad.addColorStop(1,l.color+'00');
+      ctx.fillStyle=grad;
+      ctx.fill();
+    });
+    
+    // Legend
+    lines.forEach((l,i)=>{
+      const lx=padL+i*120, ly=H-20;
+      ctx.fillStyle=l.color;
+      ctx.fillRect(lx,ly-5,12,3);
+      ctx.fillStyle='rgba(255,255,255,.6)';
+      ctx.font='11px sans-serif'; ctx.textAlign='left';
+      ctx.fillText(l.label,lx+18,ly);
+    });
+    
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+<!-- ===== 4. Radar Chart ===== -->
+<section class="effect-section" id="radar">
+  <h2>4. 雷达图动画</h2>
+  <p class="desc">Canvas 2D — 多维能力雷达图绘制动画，数据区域从中心展开并旋转入场，带脉动效果</p>
+  <div class="demo" style="background:#0a0a12"><canvas id="radar-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('radar-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  const labels=['性能','安全','可用性','可维护性','创新','团队'];
+  const datasets=[
+    {values:[85,70,90,60,80,75],color:'#6366f1'},
+    {values:[60,90,65,85,55,80],color:'#22c55e'}
+  ];
+  let progress=0;
+  let pulse=0;
+  
+  function draw(){
+    ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,W,H);
+    const cx=W/2, cy=H/2;
+    const r=Math.min(W,H)*0.32;
+    const n=labels.length;
+    
+    progress=Math.min(progress+0.012,1);
+    pulse+=0.03;
+    const eased=1-Math.pow(1-progress,3);
+    
+    // Grid rings
+    for(let ring=1;ring<=5;ring++){
+      ctx.beginPath();
+      for(let i=0;i<=n;i++){
+        const angle=(i/n)*Math.PI*2-Math.PI/2;
+        const rr=r*ring/5;
+        const x=cx+Math.cos(angle)*rr, y=cy+Math.sin(angle)*rr;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle='rgba(255,255,255,.06)';
+      ctx.stroke();
+    }
+    
+    // Axes
+    for(let i=0;i<n;i++){
+      const angle=(i/n)*Math.PI*2-Math.PI/2;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.lineTo(cx+Math.cos(angle)*r,cy+Math.sin(angle)*r);
+      ctx.strokeStyle='rgba(255,255,255,.08)';
+      ctx.stroke();
+      
+      // Labels
+      const lx=cx+Math.cos(angle)*(r+25);
+      const ly=cy+Math.sin(angle)*(r+25);
+      ctx.fillStyle='rgba(255,255,255,.6)';
+      ctx.font='12px sans-serif'; ctx.textAlign='center';
+      ctx.fillText(labels[i],lx,ly+4);
+    }
+    
+    // Data areas
+    datasets.forEach(ds=>{
+      ctx.beginPath();
+      ds.values.forEach((v,i)=>{
+        const angle=(i/n)*Math.PI*2-Math.PI/2;
+        const val=(v/100)*r*eased*(1+Math.sin(pulse+i)*0.02);
+        const x=cx+Math.cos(angle)*val, y=cy+Math.sin(angle)*val;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      });
+      ctx.closePath();
+      ctx.fillStyle=ds.color+'30';
+      ctx.fill();
+      ctx.strokeStyle=ds.color;
+      ctx.lineWidth=2;
+      ctx.stroke();
+      
+      // Dots
+      ds.values.forEach((v,i)=>{
+        const angle=(i/n)*Math.PI*2-Math.PI/2;
+        const val=(v/100)*r*eased;
+        ctx.beginPath();
+        ctx.arc(cx+Math.cos(angle)*val,cy+Math.sin(angle)*val,4,0,Math.PI*2);
+        ctx.fillStyle=ds.color;
+        ctx.fill();
+      });
+    });
+    
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+<!-- ===== 5. Bubble Chart ===== -->
+<section class="effect-section" id="bubble">
+  <h2>5. 气泡力导向图</h2>
+  <p class="desc">Canvas 2D 物理模拟 — 带碰撞检测的气泡图，气泡大小映射数值，相互推挤至稳定布局</p>
+  <div class="demo" style="background:#0a0a12"><canvas id="bubble-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('bubble-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  const items=[
+    {label:'React',value:40,color:'#61dafb'},{label:'Vue',value:30,color:'#42b883'},
+    {label:'Angular',value:22,color:'#dd0031'},{label:'Svelte',value:15,color:'#ff3e00'},
+    {label:'Next.js',value:28,color:'#fff'},{label:'Nuxt',value:14,color:'#00dc82'},
+    {label:'Solid',value:10,color:'#4f88c6'},{label:'Astro',value:16,color:'#bc52ee'},
+    {label:'Remix',value:12,color:'#121212'},{label:'Qwik',value:8,color:'#18b6f6'}
+  ];
+  
+  const bubbles=items.map(d=>({
+    ...d,
+    r:d.value*1.8+15,
+    x:W/2+(Math.random()-.5)*200,
+    y:H/2+(Math.random()-.5)*200,
+    vx:0,vy:0
+  }));
+  
+  function simulate(){
+    // Attract to center
+    bubbles.forEach(b=>{
+      b.vx+=(W/2-b.x)*0.001;
+      b.vy+=(H/2-b.y)*0.001;
+    });
+    // Collision
+    for(let i=0;i<bubbles.length;i++){
+      for(let j=i+1;j<bubbles.length;j++){
+        const a=bubbles[i], b=bubbles[j];
+        const dx=b.x-a.x, dy=b.y-a.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        const minDist=a.r+b.r+4;
+        if(dist<minDist&&dist>0){
+          const force=(minDist-dist)*0.003;
+          const nx=dx/dist, ny=dy/dist;
+          a.vx-=nx*force; a.vy-=ny*force;
+          b.vx+=nx*force; b.vy+=ny*force;
+        }
+      }
+    }
+    // Update positions
+    bubbles.forEach(b=>{
+      b.vx*=0.92; b.vy*=0.92;
+      b.x+=b.vx; b.y+=b.vy;
+    });
+  }
+  
+  let t=0;
+  function draw(){
+    t+=0.02;
+    ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,W,H);
+    simulate();
+    
+    bubbles.forEach(b=>{
+      const pulse=1+Math.sin(t*2+b.value)*0.03;
+      ctx.beginPath();
+      ctx.arc(b.x,b.y,b.r*pulse,0,Math.PI*2);
+      ctx.fillStyle=b.color+'25';
+      ctx.fill();
+      ctx.strokeStyle=b.color+'80';
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+      
+      ctx.fillStyle='#fff';
+      ctx.font=`600 ${Math.max(10,b.r*0.35)}px sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText(b.label,b.x,b.y+2);
+      ctx.fillStyle='rgba(255,255,255,.4)';
+      ctx.font=`${Math.max(9,b.r*0.25)}px sans-serif`;
+      ctx.fillText(b.value+'k',b.x,b.y+b.r*0.35+4);
+    });
+    
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+<!-- ===== 6. Network Topology ===== -->
+<section class="effect-section" id="network">
+  <h2>6. 网络拓扑力导向</h2>
+  <p class="desc">Canvas 2D 力导向算法 — 节点间弹簧力+斥力实时模拟，带连线动画与高亮交互</p>
+  <div class="demo" style="background:#0a0a12"><canvas id="network-canvas"></canvas></div>
+</section>
+<script>
+(function(){
+  const canvas=document.getElementById('network-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  
+  // Generate random graph
+  const nodeCount=20;
+  const nodes=[];
+  for(let i=0;i<nodeCount;i++){
+    nodes.push({
+      x:W/2+(Math.random()-.5)*300,
+      y:H/2+(Math.random()-.5)*300,
+      vx:0,vy:0,
+      r:6+Math.random()*8,
+      color:`hsl(${Math.random()*360},70%,60%)`
+    });
+  }
+  const edges=[];
+  for(let i=0;i<nodeCount;i++){
+    const connections=1+Math.floor(Math.random()*3);
+    for(let c=0;c<connections;c++){
+      const j=Math.floor(Math.random()*nodeCount);
+      if(j!==i && !edges.find(e=>(e.a===i&&e.b===j)||(e.a===j&&e.b===i))){
+        edges.push({a:i,b:j});
+      }
+    }
+  }
+  
+  let t=0;
+  function simulate(){
+    // Repulsion between nodes
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const dx=nodes[j].x-nodes[i].x, dy=nodes[j].y-nodes[i].y;
+        const dist=Math.sqrt(dx*dx+dy*dy)+0.01;
+        const force=200/(dist*dist);
+        const fx=dx/dist*force, fy=dy/dist*force;
+        nodes[i].vx-=fx; nodes[i].vy-=fy;
+        nodes[j].vx+=fx; nodes[j].vy+=fy;
+      }
+    }
+    // Spring force along edges
+    edges.forEach(e=>{
+      const a=nodes[e.a], b=nodes[e.b];
+      const dx=b.x-a.x, dy=b.y-a.y;
+      const dist=Math.sqrt(dx*dx+dy*dy)+0.01;
+      const force=(dist-100)*0.003;
+      const fx=dx/dist*force, fy=dy/dist*force;
+      a.vx+=fx; a.vy+=fy;
+      b.vx-=fx; b.vy-=fy;
+    });
+    // Center gravity
+    nodes.forEach(n=>{
+      n.vx+=(W/2-n.x)*0.0005;
+      n.vy+=(H/2-n.y)*0.0005;
+      n.vx*=0.9; n.vy*=0.9;
+      n.x+=n.vx; n.y+=n.vy;
+    });
+  }
+  
+  function draw(){
+    t+=0.02;
+    ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,W,H);
+    simulate();
+    
+    // Edges
+    edges.forEach(e=>{
+      const a=nodes[e.a], b=nodes[e.b];
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle='rgba(255,255,255,.1)';
+      ctx.lineWidth=1;
+      ctx.stroke();
+      
+      // Animated particle along edge
+      const progress=(t*0.5+e.a*0.3)%1;
+      const px=a.x+(b.x-a.x)*progress;
+      const py=a.y+(b.y-a.y)*progress;
+      ctx.beginPath();
+      ctx.arc(px,py,2,0,Math.PI*2);
+      ctx.fillStyle='rgba(99,102,241,.6)';
+      ctx.fill();
+    });
+    
+    // Nodes
+    nodes.forEach(n=>{
+      ctx.beginPath();
+      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle=n.color+'40';
+      ctx.fill();
+      ctx.strokeStyle=n.color;
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+    });
+    
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+</body>
+</html>

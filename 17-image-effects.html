@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片特效集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0f;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif;min-height:100vh;padding:60px 40px}
+  h1{text-align:center;font-size:2.4rem;margin-bottom:12px;background:linear-gradient(135deg,#764ba2,#f093fb);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .subtitle{text-align:center;color:#666;margin-bottom:60px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:32px;max-width:1400px;margin:0 auto}
+  .card{background:#13131a;border:1px solid #1e1e2e;border-radius:16px;overflow:hidden;transition:border-color .3s}
+  .card:hover{border-color:#764ba233}
+  .stage{width:100%;min-height:240px;display:flex;align-items:center;justify-content:center;padding:24px;position:relative}
+  .card-info{padding:16px 24px;border-top:1px solid #1e1e2e}
+  .card-info h3{font-size:.95rem;color:#ccc;margin-bottom:4px}
+  .card-info .tag{font-size:.7rem;color:#764ba2;background:#764ba218;padding:3px 10px;border-radius:20px;display:inline-block}
+  .card-info p{color:#555;font-size:.78rem;margin-top:6px}
+
+  /* Placeholder image boxes */
+  .img-box{width:280px;height:180px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer}
+  .img-box img,.img-placeholder{width:100%;height:100%;object-fit:cover;display:block}
+  .img-placeholder{background:linear-gradient(135deg,#1a1a2e,#2d1b4e);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#555}
+
+  /* 1. Overlay Reveal */
+  .fx-overlay .overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(102,126,234,.9),rgba(118,75,162,.9));display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity .4s;color:#fff;gap:8px}
+  .fx-overlay:hover .overlay{opacity:1}
+  .fx-overlay .overlay h4{font-size:1rem;transform:translateY(10px);transition:transform .4s}
+  .fx-overlay:hover .overlay h4{transform:translateY(0)}
+  .fx-overlay .overlay p{font-size:.75rem;opacity:.7;transform:translateY(10px);transition:transform .4s .1s}
+  .fx-overlay:hover .overlay p{transform:translateY(0)}
+
+  /* 2. Zoom Hover */
+  .fx-zoom .inner-img{transition:transform .5s}
+  .fx-zoom:hover .inner-img{transform:scale(1.15)}
+
+  /* 3. Grayscale to Color */
+  .fx-gray .inner-img{filter:grayscale(100%);transition:filter .5s}
+  .fx-gray:hover .inner-img{filter:grayscale(0%)}
+
+  /* 4. Tilt 3D */
+  .fx-tilt{transition:transform .3s;perspective:600px}
+
+  /* 5. Diagonal Reveal */
+  .fx-diagonal{position:relative}
+  .fx-diagonal .diag-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(243,89,135,.85),rgba(240,147,251,.85));clip-path:polygon(0 0,0 0,0 100%,0 100%);transition:clip-path .5s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem}
+  .fx-diagonal:hover .diag-overlay{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+
+  /* 6. Split Hover */
+  .fx-split{display:flex;width:280px;height:180px;border-radius:12px;overflow:hidden;cursor:pointer}
+  .fx-split-half{flex:1;overflow:hidden;transition:flex .4s}
+  .fx-split:hover .fx-split-half:nth-child(1){flex:1.5}
+  .fx-split:hover .fx-split-half:nth-child(2){flex:.5}
+  .fx-split-half .inner-img{width:280px;height:180px;object-fit:cover;display:block}
+  .fx-split-half:nth-child(2) .inner-img{margin-left:-140px}
+
+  /* 7. CSS Filter Blend */
+  .fx-blend{position:relative}
+  .fx-blend::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#667eea66,#f093fb66);mix-blend-mode:color;transition:opacity .4s;border-radius:12px}
+  .fx-blend:hover::after{opacity:0}
+
+  /* 8. Border Expand */
+  .fx-border{border:0 solid #667eea;transition:border-width .3s,border-radius .3s}
+  .fx-border:hover{border-width:6px;border-radius:20px}
+
+  /* 9. Glitch Image */
+  .fx-glitch{position:relative}
+  .fx-glitch:hover{animation:imgGlitch .3s infinite}
+  @keyframes imgGlitch{
+    0%{clip-path:inset(20% 0 60% 0);transform:translate(-2px,0)}
+    20%{clip-path:inset(60% 0 10% 0);transform:translate(2px,0)}
+    40%{clip-path:inset(40% 0 30% 0);transform:translate(-1px,0)}
+    60%{clip-path:inset(10% 0 70% 0);transform:translate(1px,0)}
+    80%{clip-path:inset(50% 0 20% 0);transform:translate(-2px,0)}
+    100%{clip-path:inset(0);transform:translate(0)}
+  }
+
+  /* 10. Shine Sweep */
+  .fx-shine{position:relative}
+  .fx-shine::after{content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transition:left .6s}
+  .fx-shine:hover::after{left:150%}
+
+  /* === EXPANDED === */
+
+  /* 11. Sepia Vintage */
+  .img-sepia { width: 180px; height: 120px; background: linear-gradient(135deg,#667eea,#764ba2); border-radius: 12px; filter: sepia(.8) contrast(1.1); transition: filter .5s; }
+  .img-sepia:hover { filter: sepia(0); }
+
+  /* 12. Zoom on Hover */
+  .img-zoom-wrap { width: 180px; height: 120px; overflow: hidden; border-radius: 12px; }
+  .img-zoom-inner { width: 100%; height: 100%; background: linear-gradient(135deg,#43e97b,#38f9d7); transition: transform .5s; }
+  .img-zoom-wrap:hover .img-zoom-inner { transform: scale(1.3); }
+
+  /* 13. Duotone */
+  .img-duotone { width: 180px; height: 120px; background: linear-gradient(135deg,#667eea,#f093fb); border-radius: 12px; position: relative; }
+  .img-duotone::after { content: ''; position: absolute; inset: 0; background: #f5576c; mix-blend-mode: multiply; border-radius: 12px; transition: opacity .5s; }
+  .img-duotone:hover::after { opacity: 0; }
+
+  /* 14. Tilt 3D */
+  .img-tilt { width: 180px; height: 120px; background: linear-gradient(135deg,#ffa500,#f5576c); border-radius: 12px; transition: transform .3s; }
+
+  /* 15. Reveal Mask */
+  .img-mask { width: 180px; height: 120px; background: linear-gradient(135deg,#667eea,#764ba2); border-radius: 12px; clip-path: circle(0% at 50% 50%); transition: clip-path .8s ease; }
+  .img-mask:hover { clip-path: circle(100% at 50% 50%); }
+
+  /* 16. Skew Hover */
+  .img-skew { width: 180px; height: 120px; background: linear-gradient(135deg,#f093fb,#f5576c); border-radius: 12px; transition: transform .4s; }
+  .img-skew:hover { transform: perspective(500px) rotateY(-10deg) skewY(2deg); }
+
+  /* 17. Border Animate */
+  .img-border-anim { width: 180px; height: 120px; background: linear-gradient(135deg,#43e97b,#667eea); border-radius: 12px; position: relative; }
+  .img-border-anim::before { content: ''; position: absolute; inset: -3px; border-radius: 14px; background: conic-gradient(from 0deg, #667eea, #f093fb, #f5576c, #43e97b, #667eea); z-index: -1; animation: borderSpin 3s linear infinite; }
+  @keyframes borderSpin { to { transform: rotate(360deg); } }
+
+  /* 18. Glitch Image */
+  .img-glitch { width: 180px; height: 120px; background: linear-gradient(135deg,#764ba2,#667eea); border-radius: 12px; position: relative; }
+  .img-glitch:hover { animation: imgGlitch .3s infinite; }
+  @keyframes imgGlitch { 0% { clip-path: inset(20% 0 60% 0); transform: translate(-2px); } 20% { clip-path: inset(60% 0 10% 0); transform: translate(2px); } 40% { clip-path: inset(40% 0 30% 0); transform: translate(-1px); } 60% { clip-path: inset(10% 0 70% 0); transform: translate(1px); } 80% { clip-path: inset(50% 0 20% 0); transform: translate(-2px); } 100% { clip-path: inset(0); transform: translate(0); } }
+
+  /* 19. Ken Burns */
+  .img-kenburns { width: 180px; height: 120px; overflow: hidden; border-radius: 12px; }
+  .img-kenburns-inner { width: 100%; height: 100%; background: linear-gradient(135deg,#ffa500,#f093fb); animation: kenBurns 8s ease-in-out infinite; }
+  @keyframes kenBurns { 0% { transform: scale(1) translate(0); } 50% { transform: scale(1.2) translate(-5%,-5%); } 100% { transform: scale(1) translate(0); } }
+
+  /* 20. Frosted Overlay */
+  .img-frost { width: 180px; height: 120px; background: linear-gradient(135deg,#667eea,#f093fb); border-radius: 12px; position: relative; overflow: hidden; }
+  .img-frost-overlay { position: absolute; inset: 0; backdrop-filter: blur(0); -webkit-backdrop-filter: blur(0); transition: backdrop-filter .5s; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; opacity: 0; transition: all .5s; }
+  .img-frost:hover .img-frost-overlay { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(0,0,0,.3); opacity: 1; }
+
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px);">&larr; 返回资源库</a>
+  <h1>图片特效集</h1>
+  <p class="subtitle">20 种图片悬浮/交互效果 · Image Effects</p>
+  <div class="grid">
+
+    <!-- 1. Overlay Reveal -->
+    <div class="card">
+      <div class="stage">
+        <div class="img-box fx-overlay">
+          <div class="img-placeholder" style="background:linear-gradient(135deg,#1a1a3e,#2d1b4e,#16213e);">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </div>
+          <div class="overlay"><h4>View Project</h4><p>Click to explore</p></div>
+        </div>
+      </div>
+      <div class="card-info"><h3>遮罩层揭示</h3><span class="tag">overlay opacity + translateY</span><p>悬浮显示渐变遮罩，标题文字依次飞入</p></div>
+    </div>
+
+    <!-- 2. Zoom -->
+    <div class="card">
+      <div class="stage">
+        <div class="img-box fx-zoom">
+          <div class="inner-img img-placeholder" style="background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-info"><h3>平滑缩放</h3><span class="tag">transform: scale(1.15)</span><p>容器 overflow:hidden + 内部图片放大</p></div>
+    </div>
+
+    <!-- 3. Grayscale to Color -->
+    <div class="card">
+      <div class="stage">
+        <div class="img-box fx-gray">
+          <div class="inner-img img-placeholder" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb,#84fab0);">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#fff4" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-info"><h3>灰度变彩色</h3><span class="tag">filter: grayscale()</span><p>悬停前黑白，悬停后恢复彩色</p></div>
+    </div>
+
+    <!-- 4. 3D Tilt -->
+    <div class="card">
+      <div class="stage">
+        <div class="img-box fx-tilt" onmousemove="tiltImg(event,this)" onmouseleave="this.style.transform=''">
+          <div class="img-placeholder" style="background:linear-gradient(135deg,#0c3547,#1a5276,#2e86c1);">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-info"><h3>3D 倾斜跟随</h3><span class="tag">perspective + rotateXY</span><p>鼠标位置驱动 3D 倾斜角度</p></div>
+    </div>
+
+    <!-- 5. Diagonal Reveal -->
+    <div class="card">
+      <div class="stage">
+        <div class="img-box fx-diagonal">
+          <div class="img-placeholder" style="background:linear-gradient(135deg,#1a1a2e,#2d1b4e);">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/></svg>
+          </div>
+          <div class="diag-overlay">EXPLORE</div>
+        </div>
+      </div>
+      <div class="card-info"><h3>对角遮罩揭示</h3><span class="tag">clip-path polygon expand</span><p>对角线方向展开彩色遮罩层</p></div>
+    </div>
+
+    <!-- 6. Split Hover -->
+    <div class="card">
+      <div class="stage">
+        <div class="fx-split">
+          <div class="fx-split-half"><div class="inner-img" style="background:linear-gradient(135deg,#667eea,#764ba2);width:280px;height:180px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;">LEFT</div></div>
+          <div class="fx-split-half"><div class="inner-img" style="background:linear-gradient(135deg,#f093fb,#f5576c);width:280px;height:180px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;margin-left:-140px;">RIGHT</div></div>
+        </div>
+      </div>
+      <div class="card-info"><h3>分裂悬浮</h3><span class="tag">flex grow/shrink</span><p>悬停时左侧扩展右侧收缩</p></div>
+    </div>
+
+    <!-- 7. Color Blend -->
+    <div class="card">
+      <div class="stage">
+        <div class="img-box fx-blend">
+          <div class="img-placeholder" style="background:linear-gradient(135deg,#2c3e50,#4ca1af,#c4e0e5);">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#fff3" stroke-width="1"><circle cx="9" cy="9" r="7"/><circle cx="15" cy="15" r="7"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-info"><h3>混合模式叠色</h3><span class="tag">mix-blend-mode: color</span><p>悬停前渐变叠色，悬停后还原原图</p></div>
+    </div>
+
+    <!-- 8. Border Expand -->
+    <div class="card">
+      <div class="stage">
+        <div class="img-box fx-border">
+          <div class="img-placeholder" style="background:linear-gradient(135deg,#141e30,#243b55);">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-info"><h3>边框扩展</h3><span class="tag">border-width transition</span><p>悬停时四边彩色边框渐长</p></div>
+    </div>
+
+    <!-- 9. Glitch -->
+    <div class="card">
+      <div class="stage">
+        <div class="img-box fx-glitch">
+          <div class="img-placeholder" style="background:linear-gradient(135deg,#1a1a2e,#e94560,#16213e);">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#e9456088" stroke-width="1"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-info"><h3>故障风抖动</h3><span class="tag">clip-path + translate jitter</span><p>悬停时图片产生随机位移裁切抖动</p></div>
+    </div>
+
+    <!-- 10. Shine Sweep -->
+    <div class="card">
+      <div class="stage">
+        <div class="img-box fx-shine">
+          <div class="img-placeholder" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#fff2" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-info"><h3>光泽扫过</h3><span class="tag">::after gradient sweep</span><p>悬停时高光条从左向右扫过</p></div>
+    </div>
+
+  
+    <div class="card"><h3>复古棕褐</h3><span class="tag">filter: sepia</span><div class="stage"><div class="img-sepia" style="cursor:pointer"></div></div><p class="hint">悬停还原</p></div>
+    <div class="card"><h3>悬浮放大</h3><span class="tag">overflow hidden + scale</span><div class="stage"><div class="img-zoom-wrap"><div class="img-zoom-inner"></div></div></div><p class="hint">悬停放大</p></div>
+    <div class="card"><h3>双色调滤镜</h3><span class="tag">mix-blend-mode multiply</span><div class="stage"><div class="img-duotone" style="cursor:pointer"></div></div><p class="hint">悬停还原</p></div>
+    <div class="card"><h3>3D 倾斜</h3><span class="tag">perspective + rotateY</span><div class="stage"><div class="img-tilt" onmousemove="let r=this.getBoundingClientRect(),x=(event.clientX-r.left)/r.width-.5,y=(event.clientY-r.top)/r.height-.5;this.style.transform='perspective(500px) rotateY('+(x*20)+'deg) rotateX('+(-y*20)+'deg)'" onmouseleave="this.style.transform=''"></div></div></div>
+    <div class="card"><h3>圆形揭示</h3><span class="tag">clip-path circle hover</span><div class="stage"><div class="img-mask" style="cursor:pointer"></div></div><p class="hint">悬停揭示</p></div>
+    <div class="card"><h3>倾斜扭曲</h3><span class="tag">skewY + rotateY</span><div class="stage"><div class="img-skew" style="cursor:pointer"></div></div></div>
+    <div class="card"><h3>旋转边框</h3><span class="tag">conic-gradient rotate</span><div class="stage"><div class="img-border-anim"></div></div></div>
+    <div class="card"><h3>故障图片</h3><span class="tag">clip-path glitch</span><div class="stage"><div class="img-glitch" style="cursor:pointer"></div></div><p class="hint">悬停故障</p></div>
+    <div class="card"><h3>Ken Burns 效果</h3><span class="tag">scale + translate loop</span><div class="stage"><div class="img-kenburns"><div class="img-kenburns-inner"></div></div></div></div>
+    <div class="card"><h3>磨砂覆盖</h3><span class="tag">backdrop-filter blur</span><div class="stage"><div class="img-frost"><div class="img-frost-overlay">View</div></div></div><p class="hint">悬停模糊</p></div>
+
+  </div>
+<script>
+  function tiltImg(e,el){
+    const r=el.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5;
+    const y=(e.clientY-r.top)/r.height-.5;
+    el.style.transform=`perspective(600px) rotateY(${x*20}deg) rotateX(${-y*20}deg)`;
+  }
+</script>
+<script src="copy-effect.js"></script>
+</body>
+</html>

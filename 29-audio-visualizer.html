@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音频可视化效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .demo{width:100%;height:80vh;position:relative;overflow:hidden}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#bar-viz">频谱柱状</a>
+  <a href="#circle-viz">圆形频谱</a>
+  <a href="#wave-viz">波形线</a>
+  <a href="#particle-viz">粒子频谱</a>
+  <a href="#scope-viz">示波器</a>
+</div>
+
+<!-- NOTE: All visualizers use simulated audio data (no mic required) -->
+
+<!-- ===== 1. Bar Spectrum ===== -->
+<section class="effect-section" id="bar-viz">
+  <h2>1. 频谱柱状可视化</h2>
+  <p class="desc">Canvas 2D — 模拟 FFT 频谱数据，渐变色柱状图 + 顶部残影粒子，点击切换音乐风格</p>
+  <div class="demo" id="bar-demo" style="background:#000">
+    <canvas id="bar-canvas"></canvas>
+    <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:10">
+      <button class="genre-btn active" data-genre="edm" style="padding:6px 18px;background:rgba(99,102,241,.25);border:1px solid rgba(99,102,241,.5);color:#a78bfa;border-radius:6px;cursor:pointer;font-size:.75rem;font-family:inherit">EDM</button>
+      <button class="genre-btn" data-genre="jazz" style="padding:6px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:6px;cursor:pointer;font-size:.75rem;font-family:inherit">Jazz</button>
+      <button class="genre-btn" data-genre="classical" style="padding:6px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:6px;cursor:pointer;font-size:.75rem;font-family:inherit">Classical</button>
+      <button class="genre-btn" data-genre="bass" style="padding:6px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:6px;cursor:pointer;font-size:.75rem;font-family:inherit">Bass</button>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('bar-demo');
+  const canvas=document.getElementById('bar-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const BARS=80;
+  const freqData=new Float32Array(BARS);
+  const peaks=new Float32Array(BARS);
+  const peakVel=new Float32Array(BARS);
+
+  // Genre profiles: [bassBoost, midBoost, highBoost, speed, chaos]
+  const genres={
+    edm:   {bass:1.4,mid:0.9,high:1.1,speed:1.4,chaos:0.3},
+    jazz:  {bass:0.7,mid:1.2,high:0.8,speed:0.7,chaos:0.5},
+    classical:{bass:0.6,mid:1.0,high:1.3,speed:0.5,chaos:0.2},
+    bass:  {bass:2.0,mid:0.5,high:0.4,speed:1.1,chaos:0.4},
+  };
+  let genre=genres.edm;
+
+  document.querySelectorAll('.genre-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.genre-btn').forEach(b=>{
+        b.style.background='rgba(255,255,255,.05)';
+        b.style.borderColor='rgba(255,255,255,.1)';
+        b.style.color='rgba(255,255,255,.5)';
+      });
+      btn.style.background='rgba(99,102,241,.25)';
+      btn.style.borderColor='rgba(99,102,241,.5)';
+      btn.style.color='#a78bfa';
+      genre=genres[btn.dataset.genre];
+    });
+  });
+
+  function simulateFreq(t){
+    for(let i=0;i<BARS;i++){
+      const norm=i/BARS;
+      let boost=1;
+      if(norm<0.15) boost=genre.bass;
+      else if(norm<0.6) boost=genre.mid;
+      else boost=genre.high;
+      const base=Math.pow(1-norm,1.5)*0.8;
+      const wave=Math.sin(t*genre.speed*2+i*0.3)*0.3+Math.sin(t*genre.speed*3.7+i*0.15)*0.2;
+      const kick=Math.max(0,Math.sin(t*genre.speed*1.5))*0.4*(norm<0.1?1:0);
+      const noise=(Math.random()-0.5)*genre.chaos;
+      const target=(base+wave+kick+noise)*boost;
+      freqData[i]+=(Math.max(0,target)-freqData[i])*0.25;
+    }
+  }
+
+  function render(){
+    const t=performance.now()*0.001;
+    simulateFreq(t);
+    ctx.fillStyle='rgba(0,0,0,0.4)';
+    ctx.fillRect(0,0,w,h);
+
+    const barW=w/BARS*0.7;
+    const gap=w/BARS*0.3;
+
+    for(let i=0;i<BARS;i++){
+      const x=i*(barW+gap)+gap/2;
+      const barH=freqData[i]*h*0.75;
+      const y=h-barH;
+
+      // Gradient per bar
+      const hue=200+i/BARS*160;
+      const g=ctx.createLinearGradient(0,y,0,h);
+      g.addColorStop(0,`hsla(${hue},90%,70%,1)`);
+      g.addColorStop(0.5,`hsla(${hue},80%,55%,0.8)`);
+      g.addColorStop(1,`hsla(${hue},70%,40%,0.3)`);
+      ctx.fillStyle=g;
+      ctx.beginPath();
+      ctx.roundRect(x,y,barW,barH,2);
+      ctx.fill();
+
+      // Peak dot
+      if(freqData[i]>peaks[i]){peaks[i]=freqData[i];peakVel[i]=0;}
+      else{peakVel[i]+=0.002;peaks[i]-=peakVel[i];}
+      peaks[i]=Math.max(0,peaks[i]);
+      const py=h-peaks[i]*h*0.75-3;
+      ctx.beginPath();
+      ctx.arc(x+barW/2,py,2,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${hue},100%,80%,0.9)`;
+      ctx.fill();
+    }
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 2. Circular Spectrum ===== -->
+<section class="effect-section" id="circle-viz">
+  <h2>2. 圆形频谱可视化</h2>
+  <p class="desc">Canvas 2D — 360° 环形频谱，内外双环镜像，中心脉冲光晕随低频跳动</p>
+  <div class="demo" id="circ-demo" style="background:#000">
+    <canvas id="circ-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('circ-demo');
+  const canvas=document.getElementById('circ-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const BARS=128;
+  const freq=new Float32Array(BARS);
+
+  function simulate(t){
+    for(let i=0;i<BARS;i++){
+      const norm=i/BARS;
+      const base=Math.pow(Math.max(0,1-norm*1.5),2)*0.9;
+      const w1=Math.sin(t*2.1+i*0.25)*0.25;
+      const w2=Math.sin(t*3.3+i*0.1)*0.15;
+      const kick=Math.max(0,Math.sin(t*1.8))*0.5*(norm<0.08?1:0);
+      const target=Math.max(0,base+w1+w2+kick+(Math.random()-0.5)*0.1);
+      freq[i]+=(target-freq[i])*0.2;
+    }
+  }
+
+  function render(){
+    const t=performance.now()*0.001;
+    simulate(t);
+    ctx.fillStyle='rgba(0,0,0,0.35)';
+    ctx.fillRect(0,0,w,h);
+
+    const cx=w/2,cy=h/2;
+    const baseR=Math.min(w,h)*0.22;
+
+    // Center glow (bass)
+    const bass=freq[0]*0.7+freq[1]*0.2+freq[2]*0.1;
+    const glowR=baseR*0.6*(1+bass*0.8);
+    const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,glowR);
+    glow.addColorStop(0,`rgba(120,80,255,${bass*0.6})`);
+    glow.addColorStop(0.5,`rgba(60,40,180,${bass*0.3})`);
+    glow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(cx,cy,glowR,0,Math.PI*2);
+    ctx.fillStyle=glow;ctx.fill();
+
+    // Bars
+    for(let i=0;i<BARS;i++){
+      const angle=i/BARS*Math.PI*2-Math.PI/2;
+      const barH=freq[i]*baseR*1.2;
+      const x1=cx+Math.cos(angle)*baseR;
+      const y1=cy+Math.sin(angle)*baseR;
+      const x2=cx+Math.cos(angle)*(baseR+barH);
+      const y2=cy+Math.sin(angle)*(baseR+barH);
+      // Mirror inner
+      const x3=cx+Math.cos(angle)*(baseR*0.85);
+      const y3=cy+Math.sin(angle)*(baseR*0.85);
+      const x4=cx+Math.cos(angle)*(baseR*0.85-barH*0.5);
+      const y4=cy+Math.sin(angle)*(baseR*0.85-barH*0.5);
+
+      const hue=200+i/BARS*200;
+      const alpha=0.5+freq[i]*0.5;
+      ctx.strokeStyle=`hsla(${hue},90%,65%,${alpha})`;
+      ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+      ctx.strokeStyle=`hsla(${hue},70%,55%,${alpha*0.5})`;
+      ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(x3,y3);ctx.lineTo(x4,y4);ctx.stroke();
+    }
+
+    // Center circle
+    ctx.beginPath();ctx.arc(cx,cy,baseR*0.82,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.stroke();
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 3. Waveform ===== -->
+<section class="effect-section" id="wave-viz">
+  <h2>3. 波形线可视化</h2>
+  <p class="desc">Canvas 2D — 多层叠加波形，每层独立频率与相位，颜色随振幅动态变化</p>
+  <div class="demo" id="wave-demo" style="background:#000">
+    <canvas id="wave-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('wave-demo');
+  const canvas=document.getElementById('wave-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const layers=[
+    {freq:1.2,amp:0.18,phase:0,hue:260,speed:0.8},
+    {freq:2.3,amp:0.12,phase:1.2,hue:200,speed:1.1},
+    {freq:3.7,amp:0.08,phase:2.4,hue:300,speed:1.5},
+    {freq:5.1,amp:0.05,phase:0.7,hue:180,speed:2.0},
+    {freq:0.7,amp:0.22,phase:3.1,hue:240,speed:0.5},
+  ];
+
+  function render(){
+    const t=performance.now()*0.001;
+    ctx.fillStyle='rgba(0,0,0,0.25)';
+    ctx.fillRect(0,0,w,h);
+
+    layers.forEach((layer,li)=>{
+      const pts=[];
+      const N=w;
+      for(let x=0;x<=N;x++){
+        const nx=x/N;
+        let y=0;
+        y+=Math.sin(nx*Math.PI*2*layer.freq+t*layer.speed+layer.phase)*layer.amp;
+        y+=Math.sin(nx*Math.PI*2*layer.freq*2.1+t*layer.speed*1.3)*layer.amp*0.4;
+        y+=Math.sin(nx*Math.PI*2*layer.freq*0.5+t*layer.speed*0.7)*layer.amp*0.3;
+        // Beat pulse
+        y+=Math.max(0,Math.sin(t*1.8))*0.06*(li===0?1:0);
+        pts.push({x,y:h/2+y*h});
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x,pts[0].y);
+      for(let i=1;i<pts.length-2;i++){
+        const mx=(pts[i].x+pts[i+1].x)/2;
+        const my=(pts[i].y+pts[i+1].y)/2;
+        ctx.quadraticCurveTo(pts[i].x,pts[i].y,mx,my);
+      }
+      const maxAmp=Math.max(...pts.map(p=>Math.abs(p.y-h/2)));
+      const intensity=Math.min(1,maxAmp/(h*0.15));
+      ctx.strokeStyle=`hsla(${layer.hue+t*10},80%,${55+intensity*20}%,${0.4+intensity*0.4})`;
+      ctx.lineWidth=1.5+intensity*2;
+      ctx.shadowColor=`hsla(${layer.hue},90%,70%,0.5)`;
+      ctx.shadowBlur=8+intensity*12;
+      ctx.stroke();
+      ctx.shadowBlur=0;
+    });
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 4. Particle Spectrum ===== -->
+<section class="effect-section" id="particle-viz">
+  <h2>4. 粒子频谱可视化</h2>
+  <p class="desc">Canvas 2D — 频谱数据驱动粒子喷射，粒子受重力与衰减影响，形成音乐喷泉效果</p>
+  <div class="demo" id="pspec-demo" style="background:#000">
+    <canvas id="pspec-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('pspec-demo');
+  const canvas=document.getElementById('pspec-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const BARS=48;
+  const freq=new Float32Array(BARS);
+  const particles=[];
+  const MAX_P=2000;
+
+  function simulate(t){
+    for(let i=0;i<BARS;i++){
+      const norm=i/BARS;
+      const base=Math.pow(1-norm,1.8)*0.85;
+      const w1=Math.sin(t*2+i*0.4)*0.3;
+      const kick=Math.max(0,Math.sin(t*1.6))*0.6*(norm<0.1?1:0);
+      const target=Math.max(0,base+w1+kick+(Math.random()-0.5)*0.15);
+      freq[i]+=(target-freq[i])*0.3;
+    }
+  }
+
+  function spawnParticles(t){
+    for(let i=0;i<BARS;i++){
+      if(freq[i]>0.1 && particles.length<MAX_P && Math.random()<freq[i]*0.4){
+        const barW=w/BARS;
+        const x=i*barW+barW/2+(Math.random()-0.5)*barW*0.5;
+        const speed=freq[i]*8+Math.random()*4;
+        const angle=-Math.PI/2+(Math.random()-0.5)*0.6;
+        const hue=200+i/BARS*160;
+        particles.push({
+          x,y:h,
+          vx:Math.cos(angle)*speed,
+          vy:Math.sin(angle)*speed,
+          life:1,decay:0.012+Math.random()*0.01,
+          hue,size:1+freq[i]*3
+        });
+      }
+    }
+  }
+
+  function render(){
+    const t=performance.now()*0.001;
+    simulate(t);
+    spawnParticles(t);
+    ctx.fillStyle='rgba(0,0,0,0.3)';
+    ctx.fillRect(0,0,w,h);
+
+    // Draw base bars (subtle)
+    for(let i=0;i<BARS;i++){
+      const barW=w/BARS*0.6;
+      const x=i*(w/BARS)+(w/BARS)*0.2;
+      const barH=freq[i]*h*0.3;
+      const hue=200+i/BARS*160;
+      ctx.fillStyle=`hsla(${hue},80%,50%,0.15)`;
+      ctx.fillRect(x,h-barH,barW,barH);
+    }
+
+    // Update & draw particles
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.vy+=0.15; // gravity
+      p.vx*=0.99;
+      p.x+=p.vx; p.y+=p.vy;
+      p.life-=p.decay;
+      if(p.life<=0||p.y>h+10){particles.splice(i,1);continue;}
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue},90%,70%,${p.life*0.8})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== 5. Oscilloscope ===== -->
+<section class="effect-section" id="scope-viz">
+  <h2>5. 示波器风格可视化</h2>
+  <p class="desc">Canvas 2D — 模拟 CRT 示波器，绿色磷光余辉，Lissajous 图形 + 扫描线</p>
+  <div class="demo" id="scope-demo" style="background:#000">
+    <canvas id="scope-canvas"></canvas>
+  </div>
+</section>
+<script>
+(function(){
+  const demo=document.getElementById('scope-demo');
+  const canvas=document.getElementById('scope-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  // Lissajous params
+  let freqA=3,freqB=2,delta=0;
+  const modes=[
+    {a:3,b:2},{a:5,b:4},{a:2,b:1},{a:4,b:3},{a:5,b:3}
+  ];
+  let modeIdx=0;
+  setInterval(()=>{
+    modeIdx=(modeIdx+1)%modes.length;
+    freqA=modes[modeIdx].a;freqB=modes[modeIdx].b;
+  },3000);
+
+  function render(){
+    const t=performance.now()*0.001;
+    delta=t*0.3;
+
+    // CRT fade
+    ctx.fillStyle='rgba(0,8,0,0.15)';
+    ctx.fillRect(0,0,w,h);
+
+    const cx=w/2,cy=h/2;
+    const R=Math.min(w,h)*0.38;
+
+    // Grid
+    ctx.strokeStyle='rgba(0,80,0,0.15)';
+    ctx.lineWidth=1;
+    for(let x=0;x<=w;x+=w/10){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+    for(let y=0;y<=h;y+=h/8){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+
+    // Lissajous
+    const N=800;
+    ctx.beginPath();
+    for(let i=0;i<=N;i++){
+      const tt=i/N*Math.PI*2;
+      const x=cx+Math.sin(freqA*tt+delta)*R;
+      const y=cy+Math.sin(freqB*tt)*R;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle='rgba(0,255,80,0.7)';
+    ctx.lineWidth=1.5;
+    ctx.shadowColor='rgba(0,255,80,0.8)';
+    ctx.shadowBlur=6;
+    ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // Bright dot at current position
+    const dotT=t*0.8;
+    const dx=cx+Math.sin(freqA*dotT+delta)*R;
+    const dy=cy+Math.sin(freqB*dotT)*R;
+    ctx.beginPath();ctx.arc(dx,dy,4,0,Math.PI*2);
+    ctx.fillStyle='rgba(180,255,180,0.95)';
+    ctx.shadowColor='rgba(0,255,80,1)';ctx.shadowBlur=20;
+    ctx.fill();ctx.shadowBlur=0;
+
+    // Scanline overlay
+    for(let y=0;y<h;y+=4){
+      ctx.fillStyle='rgba(0,0,0,0.06)';
+      ctx.fillRect(0,y,w,2);
+    }
+
+    // Vignette
+    const vg=ctx.createRadialGradient(cx,cy,R*0.5,cx,cy,R*1.5);
+    vg.addColorStop(0,'rgba(0,0,0,0)');
+    vg.addColorStop(1,'rgba(0,0,0,0.7)');
+    ctx.fillStyle=vg;ctx.fillRect(0,0,w,h);
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<script src="copy-effect.js"></script>
+</body>
+</html>

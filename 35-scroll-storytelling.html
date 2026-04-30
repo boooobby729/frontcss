@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>滚动驱动叙事效果集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#060608;color:#e0e0e0;font-family:'SF Pro Display',-apple-system,sans-serif;overflow-x:hidden}
+  .effect-section{position:relative}
+  .effect-section h2{font-size:2rem;font-weight:800;color:#fff;padding:30px 30px 0;position:relative;z-index:10}
+  .effect-section .desc{color:rgba(255,255,255,.45);font-size:.85rem;padding:8px 30px 16px;position:relative;z-index:10}
+  .nav{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+  .nav a{color:#555;font-size:.75rem;text-decoration:none;padding:4px 10px;border-radius:4px;transition:all .2s}
+  .nav a:hover{color:#fff;background:#ffffff10}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:20px;left:20px;color:#888;text-decoration:none;font-size:.85rem;z-index:999;background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(10px)">&larr; 返回资源库</a>
+<div class="nav">
+  <a href="#hero-scroll">Hero 渐隐</a>
+  <a href="#counter-scroll">数字递增</a>
+  <a href="#reveal-scroll">分段揭示</a>
+  <a href="#horizontal-scroll">横向滚动</a>
+  <a href="#progress-scroll">进度指示</a>
+</div>
+
+<!-- ===== 1. Hero Fade on Scroll ===== -->
+<section class="effect-section" id="hero-scroll">
+  <h2>1. Hero 滚动渐隐</h2>
+  <p class="desc">IntersectionObserver + scroll — Hero 区域随滚动淡出缩小，产生深度消失感</p>
+</section>
+<div style="height:200vh;position:relative">
+  <div id="hero-sticky" style="position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at center,#0d0d1a,#060608)">
+    <div id="hero-content" style="text-align:center;transition:none">
+      <h3 style="font-size:clamp(3rem,8vw,6rem);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1">SCROLL<br>DOWN</h3>
+      <p style="color:rgba(255,255,255,.4);font-size:1.1rem;margin-top:16px;letter-spacing:.1em">Watch me disappear</p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const hero=document.getElementById('hero-content');
+  const section=document.getElementById('hero-sticky').parentElement;
+  function onScroll(){
+    const rect=section.getBoundingClientRect();
+    const progress=Math.max(0,Math.min(1,-rect.top/section.clientHeight));
+    hero.style.transform=`scale(${1-progress*0.3}) translateY(${progress*-30}px)`;
+    hero.style.opacity=1-progress;
+    hero.style.filter=`blur(${progress*8}px)`;
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+})();
+</script>
+
+<!-- ===== 2. Counter Scroll ===== -->
+<section class="effect-section" id="counter-scroll">
+  <h2>2. 滚动触发数字递增</h2>
+  <p class="desc">IntersectionObserver — 数字进入视口时从 0 平滑递增到目标值，支持千分符与后缀</p>
+</section>
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;background:#000;padding:60px 20px">
+  <div id="counter-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:40px;max-width:900px;width:100%">
+    <div class="counter-item" data-target="12580" data-suffix="+">
+      <div class="counter-num">0</div>
+      <div class="counter-label">Active Users</div>
+    </div>
+    <div class="counter-item" data-target="98.7" data-suffix="%" data-decimal="1">
+      <div class="counter-num">0</div>
+      <div class="counter-label">Uptime</div>
+    </div>
+    <div class="counter-item" data-target="3420" data-suffix="">
+      <div class="counter-num">0</div>
+      <div class="counter-label">Projects</div>
+    </div>
+    <div class="counter-item" data-target="47" data-suffix="ms">
+      <div class="counter-num">0</div>
+      <div class="counter-label">Avg Response</div>
+    </div>
+  </div>
+</div>
+<style>
+.counter-item{text-align:center}
+.counter-num{font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:#fff;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.counter-label{font-size:.85rem;color:rgba(255,255,255,.4);margin-top:8px;letter-spacing:.05em}
+</style>
+<script>
+(function(){
+  const items=document.querySelectorAll('.counter-item');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      const el=e.target.querySelector('.counter-num');
+      const target=parseFloat(e.target.dataset.target);
+      const suffix=e.target.dataset.suffix||'';
+      const decimal=parseInt(e.target.dataset.decimal)||0;
+      const start=performance.now();
+      const dur=1500;
+      function tick(now){
+        const p=Math.min(1,(now-start)/dur);
+        const eased=1-Math.pow(1-p,3);
+        const val=eased*target;
+        if(decimal>0) el.textContent=val.toFixed(decimal)+suffix;
+        else el.textContent=Math.round(val).toLocaleString()+suffix;
+        if(p<1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      obs.unobserve(e.target);
+    });
+  },{threshold:0.5});
+  items.forEach(i=>obs.observe(i));
+})();
+</script>
+
+<!-- ===== 3. Section Reveal ===== -->
+<section class="effect-section" id="reveal-scroll">
+  <h2>3. 分段渐显揭示</h2>
+  <p class="desc">IntersectionObserver — 内容块依次从不同方向渐显入场，stagger 延迟错开</p>
+</section>
+<div style="min-height:100vh;padding:80px 20px;background:radial-gradient(ellipse at center,#0a0a14,#060608)">
+  <div style="max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px">
+    <div class="reveal-card" data-dir="left" style="--d:0s"><h4>Strategy</h4><p>Define the vision and roadmap for exceptional digital experiences.</p></div>
+    <div class="reveal-card" data-dir="up" style="--d:.1s"><h4>Design</h4><p>Craft beautiful, intuitive interfaces that delight users.</p></div>
+    <div class="reveal-card" data-dir="right" style="--d:.2s"><h4>Develop</h4><p>Build performant, accessible applications with modern tools.</p></div>
+    <div class="reveal-card" data-dir="left" style="--d:.3s"><h4>Test</h4><p>Ensure quality through comprehensive automated testing.</p></div>
+    <div class="reveal-card" data-dir="up" style="--d:.4s"><h4>Deploy</h4><p>Ship confidently with CI/CD and monitoring.</p></div>
+    <div class="reveal-card" data-dir="right" style="--d:.5s"><h4>Iterate</h4><p>Continuously improve based on data and feedback.</p></div>
+  </div>
+</div>
+<style>
+.reveal-card{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;padding:28px;
+  opacity:0;transition:opacity .6s ease,transform .6s ease;
+  transition-delay:var(--d);
+}
+.reveal-card[data-dir="left"]{transform:translateX(-40px)}
+.reveal-card[data-dir="right"]{transform:translateX(40px)}
+.reveal-card[data-dir="up"]{transform:translateY(40px)}
+.reveal-card.visible{opacity:1;transform:translate(0)}
+.reveal-card h4{font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:8px}
+.reveal-card p{font-size:.82rem;color:rgba(255,255,255,.45);line-height:1.6}
+</style>
+<script>
+(function(){
+  const cards=document.querySelectorAll('.reveal-card');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}
+    });
+  },{threshold:0.2,rootMargin:'0px 0px 50px 0px'});
+  cards.forEach(c=>obs.observe(c));
+})();
+</script>
+
+<!-- ===== 4. Horizontal Scroll ===== -->
+<section class="effect-section" id="horizontal-scroll">
+  <h2>4. 横向滚动画廊</h2>
+  <p class="desc">CSS scroll-snap + 垂直滚动映射横向位移 — 垂直滚动驱动水平内容移动</p>
+</section>
+<div id="h-scroll-wrapper" style="height:300vh;position:relative">
+  <div id="h-scroll-sticky" style="position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center">
+    <div id="h-scroll-track" style="display:flex;gap:24px;padding:0 5vw;transition:none">
+      <div class="h-card" style="--c:#6366f1"><span>01</span>Design Systems</div>
+      <div class="h-card" style="--c:#ec4899"><span>02</span>Motion Design</div>
+      <div class="h-card" style="--c:#06b6d4"><span>03</span>3D Interfaces</div>
+      <div class="h-card" style="--c:#10b981"><span>04</span>Data Viz</div>
+      <div class="h-card" style="--c:#f59e0b"><span>05</span>Creative Code</div>
+      <div class="h-card" style="--c:#8b5cf6"><span>06</span>WebGL Art</div>
+    </div>
+  </div>
+</div>
+<style>
+.h-card{
+  flex:0 0 300px;height:400px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;padding:30px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  font-size:1.2rem;font-weight:700;color:#fff;
+  position:relative;overflow:hidden;
+}
+.h-card span{
+  font-size:5rem;font-weight:900;color:var(--c);opacity:.15;
+  position:absolute;top:20px;right:20px;line-height:1;
+}
+.h-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c) 10%,transparent),transparent 60%);
+}
+</style>
+<script>
+(function(){
+  const wrapper=document.getElementById('h-scroll-wrapper');
+  const track=document.getElementById('h-scroll-track');
+  function onScroll(){
+    const rect=wrapper.getBoundingClientRect();
+    const wrapperH=wrapper.clientHeight-window.innerHeight;
+    const progress=Math.max(0,Math.min(1,-rect.top/wrapperH));
+    const maxScroll=track.scrollWidth-window.innerWidth;
+    track.style.transform=`translateX(${-progress*maxScroll}px)`;
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+})();
+</script>
+
+<!-- ===== 5. Progress Indicator ===== -->
+<section class="effect-section" id="progress-scroll">
+  <h2>5. 滚动进度指示器</h2>
+  <p class="desc">CSS + JS scroll event — 多种进度指示样式：顶部进度条、侧边圆形、章节进度点</p>
+</section>
+<div style="min-height:150vh;padding:40px 20px;position:relative;background:#000">
+  <!-- Top bar -->
+  <div id="prog-bar" style="position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#6366f1,#38bdf8);z-index:1001;width:0%;transition:width .1s"></div>
+
+  <!-- Side circle -->
+  <div id="prog-circle" style="position:fixed;bottom:30px;right:30px;z-index:1001">
+    <svg width="50" height="50" viewBox="0 0 50 50">
+      <circle cx="25" cy="25" r="20" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="3"/>
+      <circle id="prog-ring" cx="25" cy="25" r="20" fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round"
+        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 25 25)"/>
+    </svg>
+    <div id="prog-pct" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:rgba(255,255,255,.6);font-weight:600"></div>
+  </div>
+
+  <!-- Chapter dots -->
+  <div id="prog-dots" style="position:fixed;left:30px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:1001">
+    <div class="prog-dot active" style="width:8px;height:8px;border-radius:50%;background:#6366f1;transition:all .3s"></div>
+    <div class="prog-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s"></div>
+    <div class="prog-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s"></div>
+    <div class="prog-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s"></div>
+    <div class="prog-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s"></div>
+  </div>
+
+  <div style="max-width:600px;margin:0 auto;padding-top:60px">
+    <p style="color:rgba(255,255,255,.5);font-size:.95rem;line-height:2;margin-bottom:40px">The progress indicators on this page respond to your scroll position. The top bar shows overall page progress, the circle at bottom-right shows a percentage, and the dots on the left highlight which section is active.</p>
+    <p style="color:rgba(255,255,255,.35);font-size:.9rem;line-height:2;margin-bottom:40px">Keep scrolling to see all indicators update in real-time. Each style serves different UX needs — linear progress for articles, circular for dashboards, and dots for multi-section pages.</p>
+    <p style="color:rgba(255,255,255,.25);font-size:.9rem;line-height:2">This is the final section. All progress indicators should now show near-complete status as you reach the bottom of the page content.</p>
+  </div>
+</div>
+<script>
+(function(){
+  const bar=document.getElementById('prog-bar');
+  const ring=document.getElementById('prog-ring');
+  const pct=document.getElementById('prog-pct');
+  const dots=document.querySelectorAll('.prog-dot');
+  const circumference=2*Math.PI*20;
+
+  function update(){
+    const scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
+    const scrollHeight=document.documentElement.scrollHeight-window.innerHeight;
+    const progress=scrollTop/scrollHeight;
+
+    bar.style.width=(progress*100)+'%';
+    const offset=circumference*(1-progress);
+    ring.style.strokeDashoffset=offset;
+    pct.textContent=Math.round(progress*100)+'%';
+
+    // Dots
+    const dotIdx=Math.min(dots.length-1,Math.floor(progress*dots.length));
+    dots.forEach((d,i)=>{
+      if(i===dotIdx){d.style.background='#6366f1';d.style.width='8px';d.style.height='8px';}
+      else{d.style.background='rgba(255,255,255,.2)';d.style.width='6px';d.style.height='6px';}
+    });
+  }
+  window.addEventListener('scroll',update,{passive:true});
+  update();
+})();
+</script>
+
+<div style="height:60px"></div>
+<script src="copy-effect.js"></script>
+</body>
+</html>

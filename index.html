@@ -238,6 +238,20 @@
 <section class="grid-section">
   <div class="card-grid">
 
+    <!-- collect (置顶) -->
+    <a class="card" data-cat="collect" href="46-collect.html">
+      <div class="card-visual" style="background:#000;overflow:hidden;position:relative"><div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,transparent 40%,rgb(255,172,227) 55%,rgba(255,241,172,.5) 60%,rgb(121,201,255) 70%,rgb(74,96,209) 85%,transparent 100%);filter:blur(8px);opacity:.8"></div></div>
+      <div class="card-content"><h3>Collect 灵感收集</h3><p>Dia 风格彩虹渐变弹性拉伸效果。滚动到底部，彩虹光晕从底部弹性浮现，停止后柔和消散。</p></div>
+      <div class="card-footer"><span class="tag">radial-gradient</span><span class="tag">elastic</span><span class="count">1 种效果</span></div>
+    </a>
+
+    <!-- collect-text (置顶) -->
+    <a class="card" data-cat="collect" href="47-collect-text.html">
+      <div class="card-visual" style="background:#000;overflow:hidden;position:relative"><div id="cardTextPreview" style="font-family:Inter,-apple-system,sans-serif;font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.03em;display:flex;gap:1px"></div></div>
+      <div class="card-content"><h3>Collect 文本变化</h3><p>Dia 风格文本动画效果集。可变字体字重波浪、文字轮播切换、逐字模糊揭示、打字机效果。</p></div>
+      <div class="card-footer"><span class="tag">variable-font</span><span class="tag">text-swap</span><span class="count">4 种效果</span></div>
+    </a>
+
     <!-- 1 -->
     <a class="card" data-cat="anim" href="01-css-animations.html">
       <div class="card-visual"><div class="p-bounce"></div></div>
@@ -613,13 +627,6 @@
       <div class="card-footer"><span class="tag">clip-path</span><span class="tag">polygon</span><span class="count">6 种效果</span></div>
     </a>
 
-    <!-- 46 -->
-    <a class="card" data-cat="collect" href="46-collect.html">
-      <div class="card-visual" style="background:#f8f8f8;overflow:hidden;position:relative"><div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,transparent 40%,rgb(255,172,227) 55%,rgba(255,241,172,.5) 60%,rgb(121,201,255) 70%,rgb(74,96,209) 85%,transparent 100%);filter:blur(8px);opacity:.8"></div></div>
-      <div class="card-content"><h3>Collect 灵感收集</h3><p>彩虹径向光晕、彩虹扫光文字、竖向彩虹渐变条。来自 Dia Browser 的精美彩虹色效果。</p></div>
-      <div class="card-footer"><span class="tag">radial-gradient</span><span class="tag">background-clip</span><span class="count">3 种效果</span></div>
-    </a>
-
   </div>
 </section>
 
@@ -734,6 +741,30 @@
   const style=document.createElement('style');
   style.textContent='@keyframes pTPulse{0%,100%{transform:scale(.9);opacity:.6}50%{transform:scale(1.1);opacity:1}}@keyframes pScroll{0%{width:0}50%{width:100%}100%{width:0}}';
   document.head.appendChild(style);
+
+  // Card text preview (collect-text)
+  (function(){
+    const c=document.getElementById('cardTextPreview');if(!c)return;
+    const text='Aa';
+    for(let i=0;i<text.length;i++){
+      const s=document.createElement('span');
+      s.textContent=text[i];
+      s.style.display='inline-block';
+      s.style.transition='font-weight .3s';
+      c.appendChild(s);
+    }
+    const spans=[...c.children];
+    let phase=0;
+    function tick(){
+      phase+=0.08;
+      spans.forEach((s,i)=>{
+        const v=Math.sin(phase+i*1.2);
+        s.style.fontWeight=Math.round(500+v*400);
+      });
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
 </script>
 </body>
 </html>

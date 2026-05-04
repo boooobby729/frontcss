@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keyboard Shortcut Visualizer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: rgba(255,255,255,0.08);
+    --text: #e8e8f0;
+    --muted: #666680;
+    --accent: #ff6363;
+    --accent2: #7c6af7;
+    --accent3: #3ecf8e;
+    --key-bg: #1c1c28;
+    --key-top: #252535;
+    --key-border: rgba(255,255,255,0.12);
+    --key-shadow: rgba(0,0,0,0.6);
+    --key-glow: rgba(255,255,255,0.04);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 60px 40px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.5) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 64px;
+  }
+
+  /* ─── Section ─── */
+  .section {
+    max-width: 900px;
+    margin: 0 auto 72px;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── KEY BASE ─── */
+  .key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 48px;
+    height: 48px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--key-top);
+    border: 1px solid var(--key-border);
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.08) inset,
+      0 -1px 0 0 rgba(0,0,0,0.4) inset,
+      0 4px 0 0 var(--key-bg),
+      0 5px 0 0 rgba(0,0,0,0.5),
+      0 6px 12px rgba(0,0,0,0.4);
+    cursor: default;
+    user-select: none;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  .key:active,
+  .key.pressed {
+    transform: translateY(3px);
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.05) inset,
+      0 -1px 0 0 rgba(0,0,0,0.4) inset,
+      0 1px 0 0 var(--key-bg),
+      0 2px 0 0 rgba(0,0,0,0.5),
+      0 3px 6px rgba(0,0,0,0.3);
+  }
+
+  .key .key-icon {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  /* Modifier key variants */
+  .key.mod {
+    background: #1e1e2e;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.75rem;
+  }
+
+  .key.wide { min-width: 80px; }
+  .key.xl   { min-width: 120px; }
+
+  /* Plus separator */
+  .plus {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+    padding: 0 4px;
+    user-select: none;
+  }
+
+  /* ─── VARIANT 1: Simple showcase row ─── */
+  .shortcut-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* ─── VARIANT 2: Shortcut card grid ─── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .shortcut-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+
+  .shortcut-card:hover {
+    border-color: rgba(255,255,255,0.16);
+    background: #14141e;
+  }
+
+  .shortcut-card:hover .key {
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .card-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ─── VARIANT 3: Spotlight / Command palette style ─── */
+  .palette {
+    background: #13131d;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    max-width: 580px;
+    margin: 0 auto;
+  }
+
+  .palette-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .palette-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--accent), #ff9a63);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .palette-input {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: none;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    caret-color: var(--accent);
+  }
+
+  .palette-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .palette-list {
+    padding: 8px 0;
+  }
+
+  .palette-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+
+  .palette-item:hover,
+  .palette-item.active {
+    background: rgba(255,255,255,0.05);
+  }
+
+  .palette-item.active {
+    background: rgba(124,106,247,0.15);
+  }
+
+  .palette-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .palette-item-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .palette-item-name {
+    font-size: 0.88rem;
+    color: var(--text);
+  }
+
+  .palette-item-cat {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .palette-footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 18px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .palette-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  /* Small key variant for palette hints */
+  .key-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 5px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    background: #1e1e2e;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.06) inset,
+      0 2px 0 rgba(0,0,0,0.4),
+      0 3px 6px rgba(0,0,0,0.3);
+  }
+
+  /* ─── VARIANT 4: Hotkey badge inline text ─── */
+  .prose-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px;
+    line-height: 2;
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.75);
+  }
+
+  .prose-block strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .key-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    vertical-align: middle;
+    margin: 0 3px;
+  }
+
+  .key-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 7px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text);
+    background: #1e1e2e;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.07) inset,
+      0 2px 0 rgba(0,0,0,0.5),
+      0 3px 8px rgba(0,0,0,0.35);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  /* ─── VARIANT 5: Full keyboard mini-map ─── */
+  .keyboard-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  .keyboard {
+    background: #111118;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 18px 20px 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: fit-content;
+  }
+
+  .kb-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .kb-key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    min-width: 38px;
+    padding: 0 8px;
+    border-radius: 7px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    background: #1c1c28;
+    border: 1px solid rgba(255,255,255,0.09);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.07) inset,
+      0 3px 0 #0d0d18,
+      0 4px 8px rgba(0,0,0,0.4);
+    cursor: pointer;
+    transition: all 0.08s ease;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .kb-key:hover {
+    background: #252535;
+    color: rgba(255,255,255,0.8);
+    border-color: rgba(255,255,255,0.18);
+  }
+
+  .kb-key.highlight {
+    background: linear-gradient(135deg, #2a1f5e, #1e1a4a);
+    color: #a89cf7;
+    border-color: rgba(124,106,247,0.4);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.1) inset,
+      0 3px 0 #0d0d18,
+      0 4px 12px rgba(124,106,247,0.25);
+  }
+
+  .kb-key.highlight-red {
+    background: linear-gradient(135deg, #3a1515, #2a1010);
+    color: #ff8080;
+    border-color: rgba(255,99,99,0.4);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.08) inset,
+      0 3px 0 #0d0d18,
+      0 4px 12px rgba(255,99,99,0.2);
+  }
+
+  .kb-key.w-1-5 { min-width: 56px; }
+  .kb-key.w-2   { min-width: 80px; }
+  .kb-key.w-2-5 { min-width: 100px; }
+  .kb-key.w-3   { min-width: 120px; }
+  .kb-key.w-6   { min-width: 240px; }
+
+  .kb-label {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .kb-label span {
+    color: #a89cf7;
+    font-weight: 600;
+  }
+
+  /* ─── Animated press demo ─── */
+  .demo-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .demo-combo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .demo-hint {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .demo-result {
+    background: rgba(124,106,247,0.1);
+    border: 1px solid rgba(124,106,247,0.25);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 0.85rem;
+    color: #a89cf7;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    min-width: 200px;
+  }
+
+  .demo-result.flash {
+    background: rgba(124,106,247,0.25);
+    border-color: rgba(124,106,247,0.5);
+  }
+
+  /* ─── Animations ─── */
+  @keyframes pressKey {
+    0%   { transform: translateY(0); box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 -1px 0 rgba(0,0,0,0.4) inset, 0 4px 0 var(--key-bg), 0 5px 0 rgba(0,0,0,0.5), 0 6px 12px rgba(0,0,0,0.4); }
+    40%  { transform: translateY(3px); box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 -1px 0 rgba(0,0,0,0.4) inset, 0 1px 0 var(--key-bg), 0 2px 0 rgba(0,0,0,0.5), 0 3px 6px rgba(0,0,0,0.3); }
+    100% { transform: translateY(0); box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 -1px 0 rgba(0,0,0,0.4) inset, 0 4px 0 var(--key-bg), 0 5px 0 rgba(0,0,0,0.5), 0 6px 12px rgba(0,0,0,0.4); }
+  }
+
+  .key.animate { animation: pressKey 0.35s ease; }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 64px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>
+</head>
+<body>
+
+<h1>Keyboard Shortcut Visualizer</h1>
+<p class="subtitle">CSS-crafted keycaps with depth, press animations &amp; multiple display styles</p>
+
+<!-- ─── VARIANT 1: Hero showcase ─── -->
+<div class="section">
+  <div class="section-label">01 — Hero Combos</div>
+  <div style="display:flex; flex-direction:column; gap:28px;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div style="font-size:0.95rem; font-weight:600; margin-bottom:6px;">Command Palette</div>
+        <div style="font-size:0.8rem; color:var(--muted);">Open Raycast anywhere</div>
+      </div>
+      <div class="shortcut-row">
+        <div class="key mod wide"><span class="key-icon">⌥</span> option</div>
+        <span class="plus">+</span>
+        <div class="key mod wide"><span class="key-icon">⌘</span> command</div>
+        <span class="plus">+</span>
+        <div class="key" style="font-size:1rem; font-weight:700;">L</div>
+      </div>
+    </div>
+
+    <div style="height:1px; background:var(--border);"></div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div style="font-size:0.95rem; font-weight:600; margin-bottom:6px;">Toggle Full Screen</div>
+        <div style="font-size:0.8rem; color:var(--muted);">Window Management</div>
+      </div>
+      <div class="shortcut-row">
+        <div class="key mod wide"><span class="key-icon">⌃</span> control</div>
+        <span class="plus">+</span>
+        <div class="key mod wide"><span class="key-icon">⌘</span> command</div>
+        <span class="plus">+</span>
+        <div class="key" style="font-size:0.85rem;">F</div>
+      </div>
+    </div>
+
+    <div style="height:1px; background:var(--border);"></div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div style="font-size:0.95rem; font-weight:600; margin-bottom:6px;">Screenshot</div>
+        <div style="font-size:0.8rem; color:var(--muted);">Capture selected area</div>
+      </div>
+      <div class="shortcut-row">
+        <div class="key mod wide"><span class="key-icon">⇧</span> shift</div>
+        <span class="plus">+</span>
+        <div class="key mod wide"><span class="key-icon">⌘</span> command</div>
+        <span class="plus">+</span>
+        <div class="key" style="font-size:0.85rem;">4</div>
+      </div>
+    </div>
+
+    <div style="height:1px; background:var(--border);"></div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div style="font-size:0.95rem; font-weight:600; margin-bottom:6px;">Force Quit</div>
+        <div style="font-size:0.8rem; color:var(--muted);">Kill unresponsive apps</div>
+      </div>
+      <div class="shortcut-row">
+        <div class="key mod wide"><span class="key-icon">⌥</span> option</div>
+        <span class="plus">+</span>
+        <div class="key mod wide"><span class="key-icon">⌘</span> command</div>
+        <span class="plus">+</span>
+        <div class="key wide" style="font-size:0.75rem; color:rgba(255,100,100,0.9);">esc</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── VARIANT 2: Card grid ─── -->
+<div class="section">
+  <div class="section-label">02 — Shortcut Cards</div>
+  <div class="card-grid">
+
+    <div class="shortcut-card">
+      <div class="shortcut-row">
+        <div class="key mod"><span class="key-icon">⌘</span></div>
+        <span class="plus">+</span>
+        <div class="key">K</div>
+      </div>
+      <div>
+        <div class="card-title">Command Menu</div>
+        <div class="card-desc">Open the command palette to search actions, files, and more.</div>
+      </div>
+    </div>
+
+    <div class="shortcut-card">
+      <div class="shortcut-row">
+        <div class="key mod"><span class="key-icon">⌘</span></div>
+        <span class="plus">+</span>
+        <div class="key mod"><span class="key-icon">⇧</span></div>
+        <span class="plus">+</span>
+        <div class="key">P</div>
+      </div>
+      <div>
+        <div class="card-title">Quick Open</div>
+        <div class="card-desc">Jump to any file in your project instantly.</div>
+      </div>
+    </div>
+
+    <div class="shortcut-card">
+      <div class="shortcut-row">
+        <div class="key mod"><span class="key-icon">⌃</span></div>
+        <span class="plus">+</span>
+        <div class="key wide" style="font-size:0.75rem;">Space</div>
+      </div>
+      <div>
+        <div class="card-title">Autocomplete</div>
+        <div class="card-desc">Trigger IntelliSense suggestions at cursor position.</div>
+      </div>
+    </div>
+
+    <div class="shortcut-card">
+      <div class="shortcut-row">
+        <div class="key mod"><span class="key-icon">⌘</span></div>
+        <span class="plus">+</span>
+        <div class="key mod"><span class="key-icon">⌥</span></div>
+        <span class="plus">+</span>
+        <div class="key">↑</div>
+        <span class="plus">/</span>
+        <div class="key">↓</div>
+      </div>
+      <div>
+        <div class="card-title">Multi-cursor</div>
+        <div class="card-desc">Add cursors above or below the current line.</div>
+      </div>
+    </div>
+
+    <div class="shortcut-card">
+      <div class="shortcut-row">
+        <div class="key mod"><span class="key-icon">⌘</span></div>
+        <span class="plus">+</span>
+        <div class="key">Z</div>
+        <span class="plus">/</span>
+        <div class="key mod"><span class="key-icon">⇧</span></div>
+        <span class="plus">+</span>
+        <div class="key mod"><span class="key-icon">⌘</span></div>
+        <span class="plus">+</span>
+        <div class="key">Z</div>
+      </div>
+      <div>
+        <div class="card-title">Undo / Redo</div>
+        <div class="card-desc">Step backward or forward through your edit history.</div>
+      </div>
+    </div>
+
+    <div class="shortcut-card">
+      <div class="shortcut-row">
+        <div class="key mod"><span class="key-icon">⌘</span></div>
+        <span class="plus">+</span>
+        <div class="key mod"><span class="key-icon">⇧</span></div>
+        <span class="plus">+</span>
+        <div class="key">5</div>
+      </div>
+      <div>
+        <div class="card-title">Screen Recorder</div>
+        <div class="card-desc">Open macOS screen recording controls.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── VARIANT 3: Command palette UI ─── -->
+<div class="section">
+  <div class="section-label">03 — Command Palette UI</div>
+  <div class="palette">
+    <div class="palette-header">
+      <div class="palette-icon">⚡</div>
+      <input class="palette-input" value="window" readonly>
+      <div class="palette-shortcut">
+        <span class="key-sm">⌘</span>
+        <span class="key-sm">K</span>
+      </div>
+    </div>
+    <div class="palette-list">
+      <div class="palette-item active">
+        <div class="palette-item-left">
+          <div class="palette-item-icon" style="background:linear-gradient(135deg,#1c85e8,#0d5fb3);">🪟</div>
+          <div>
+            <div class="palette-item-name">Toggle Full Screen</div>
+            <div class="palette-item-cat">Window Management</div>
+          </div>
+        </div>
+        <div class="shortcut-row" style="gap:4px;">
+          <span class="key-sm">⌃</span>
+          <span class="key-sm">⌘</span>
+          <span class="key-sm">F</span>
+        </div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-item-left">
+          <div class="palette-item-icon" style="background:linear-gradient(135deg,#1c85e8,#0d5fb3);">◧</div>
+          <div>
+            <div class="palette-item-name">Left Half</div>
+            <div class="palette-item-cat">Window Management</div>
+          </div>
+        </div>
+        <div class="shortcut-row" style="gap:4px;">
+          <span class="key-sm">⌃</span>
+          <span class="key-sm">⌥</span>
+          <span class="key-sm">←</span>
+        </div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-item-left">
+          <div class="palette-item-icon" style="background:linear-gradient(135deg,#1c85e8,#0d5fb3);">◨</div>
+          <div>
+            <div class="palette-item-name">Right Half</div>
+            <div class="palette-item-cat">Window Management</div>
+          </div>
+        </div>
+        <div class="shortcut-row" style="gap:4px;">
+          <span class="key-sm">⌃</span>
+          <span class="key-sm">⌥</span>
+          <span class="key-sm">→</span>
+        </div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-item-left">
+          <div class="palette-item-icon" style="background:linear-gradient(135deg,#3ecf8e,#1a9e65);">⊞</div>
+          <div>
+            <div class="palette-item-name">Almost Maximize</div>
+            <div class="palette-item-cat">Window Management</div>
+          </div>
+        </div>
+        <div class="shortcut-row" style="gap:4px;">
+          <span class="key-sm">⌃</span>
+          <span class="key-sm">⌥</span>
+          <span class="key-sm">⇧</span>
+          <span class="key-sm">↑</span>
+        </div>
+      </div>
+    </div>
+    <div class="palette-footer">
+      <div class="palette-hint"><span class="key-sm">↑</span><span class="key-sm">↓</span> Navigate</div>
+      <div class="palette-hint"><span class="key-sm">↵</span> Open</div>
+      <div class="palette-hint"><span class="key-sm">⌘</span><span class="key-sm">K</span> Actions</div>
+      <div class="palette-hint" style="margin-left:auto;"><span class="key-sm">esc</span> Close</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── VARIANT 4: Inline prose badges ─── -->
+<div class="section">
+  <div class="section-label">04 — Inline Shortcut Badges</div>
+  <div class="prose-block">
+    <p>To <strong>open a new tab</strong>, press
+      <span class="key-inline"><span class="key-badge">⌘</span><span class="key-badge">T</span></span>.
+      Switch between tabs with
+      <span class="key-inline"><span class="key-badge">⌃</span><span class="key-badge">Tab</span></span>
+      or jump directly using
+      <span class="key-inline"><span class="key-badge">⌘</span><span class="key-badge">1</span></span>
+      through
+      <span class="key-inline"><span class="key-badge">⌘</span><span class="key-badge">9</span></span>.
+    </p>
+    <br>
+    <p>Use <span class="key-inline"><span class="key-badge">⌘</span><span class="key-badge">F</span></span>
+      to <strong>find on page</strong>, then
+      <span class="key-inline"><span class="key-badge">↵</span></span> to jump to the next match,
+      or <span class="key-inline"><span class="key-badge">⇧</span><span class="key-badge">↵</span></span>
+      to go backwards. Press
+      <span class="key-inline"><span class="key-badge">esc</span></span>
+      to dismiss the search bar.
+    </p>
+    <br>
+    <p>To <strong>force-quit</strong> a frozen app, hold
+      <span class="key-inline"><span class="key-badge">⌥</span><span class="key-badge">⌘</span><span class="key-badge">esc</span></span>
+      and select the app from the list.
+    </p>
+  </div>
+</div>
+
+<!-- ─── VARIANT 5: Mini keyboard with highlights ─── -->
+<div class="section">
+  <div class="section-label">05 — Mini Keyboard Highlight Map</div>
+  <div class="demo-area">
+    <div class="keyboard-wrap">
+      <div>
+        <div class="keyboard" id="miniKeyboard">
+          <!-- Row 1: function row -->
+          <div class="kb-row">
+            <div class="kb-key w-1-5" style="font-size:0.55rem;">esc</div>
+            <div class="kb-key" style="font-size:0.55rem;">F1</div>
+            <div class="kb-key" style="font-size:0.55rem;">F2</div>
+            <div class="kb-key" style="font-size:0.55rem;">F3</div>
+            <div class="kb-key" style="font-size:0.55rem;">F4</div>
+            <div class="kb-key" style="font-size:0.55rem;">F5</div>
+            <div class="kb-key" style="font-size:0.55rem;">F6</div>
+            <div class="kb-key" style="font-size:0.55rem;">F7</div>
+            <div class="kb-key" style="font-size:0.55rem;">F8</div>
+            <div class="kb-key" style="font-size:0.55rem;">F9</div>
+            <div class="kb-key" style="font-size:0.55rem;">F10</div>
+            <div class="kb-key" style="font-size:0.55rem;">F11</div>
+            <div class="kb-key" style="font-size:0.55rem;">F12</div>
+          </div>
+          <!-- Row 2: numbers -->
+          <div class="kb-row">
+            <div class="kb-key">`</div>
+            <div class="kb-key">1</div>
+            <div class="kb-key">2</div>
+            <div class="kb-key">3</div>
+            <div class="kb-key">4</div>
+            <div class="kb-key" id="k5">5</div>
+            <div class="kb-key">6</div>
+            <div class="kb-key">7</div>
+            <div class="kb-key">8</div>
+            <div class="kb-key">9</div>
+            <div class="kb-key">0</div>
+            <div class="kb-key">-</div>
+            <div class="kb-key">=</div>
+            <div class="kb-key w-1-5" style="font-size:0.6rem;">del</div>
+          </div>
+          <!-- Row 3: QWERTY -->
+          <div class="kb-row">
+            <div class="kb-key w-1-5" style="font-size:0.6rem;">tab</div>
+            <div class="kb-key">Q</div>
+            <div class="kb-key">W</div>
+            <div class="kb-key" id="kE">E</div>
+            <div class="kb-key">R</div>
+            <div class="kb-key">T</div>
+            <div class="kb-key">Y</div>
+            <div class="kb-key">U</div>
+            <div class="kb-key">I</div>
+            <div class="kb-key">O</div>
+            <div class="kb-key" id="kP">P</div>
+            <div class="kb-key">[</div>
+            <div class="kb-key">]</div>
+            <div class="kb-key w-1-5">\</div>
+          </div>
+          <!-- Row 4: ASDF -->
+          <div class="kb-row">
+            <div class="kb-key w-2" style="font-size:0.6rem;">caps</div>
+            <div class="kb-key">A</div>
+            <div class="kb-key">S</div>
+            <div class="kb-key">D</div>
+            <div class="kb-key" id="kF">F</div>
+            <div class="kb-key">G</div>
+            <div class="kb-key">H</div>
+            <div class="kb-key">J</div>
+            <div class="kb-key">K</div>
+            <div class="kb-key" id="kL">L</div>
+            <div class="kb-key">;</div>
+            <div class="kb-key">'</div>
+            <div class="kb-key w-2" style="font-size:0.6rem;">return</div>
+          </div>
+          <!-- Row 5: ZXCV -->
+          <div class="kb-row">
+            <div class="kb-key w-2-5" id="kShift" style="font-size:0.6rem;">⇧ shift</div>
+            <div class="kb-key">Z</div>
+            <div class="kb-key">X</div>
+            <div class="kb-key">C</div>
+            <div class="kb-key">V</div>
+            <div class="kb-key">B</div>
+            <div class="kb-key">N</div>
+            <div class="kb-key">M</div>
+            <div class="kb-key">,</div>
+            <div class="kb-key">.</div>
+            <div class="kb-key">/</div>
+            <div class="kb-key w-2-5" style="font-size:0.6rem;">⇧ shift</div>
+          </div>
+          <!-- Row 6: modifiers -->
+          <div class="kb-row">
+            <div class="kb-key w-1-5" style="font-size:0.6rem;">fn</div>
+            <div class="kb-key w-1-5" id="kCtrl" style="font-size:0.6rem;">⌃ ctrl</div>
+            <div class="kb-key w-1-5" id="kOpt" style="font-size:0.6rem;">⌥ opt</div>
+            <div class="kb-key w-2-5" id="kCmd" style="font-size:0.6rem;">⌘ cmd</div>
+            <div class="kb-key w-6" id="kSpace" style="font-size:0.6rem;">space</div>
+            <div class="kb-key w-2-5" id="kCmdR" style="font-size:0.6rem;">⌘ cmd</div>
+            <div class="kb-key w-1-5" style="font-size:0.6rem;">⌥ opt</div>
+            <div class="kb-key" style="font-size:0.7rem;">←</div>
+            <div class="kb-key" style="display:flex; flex-direction:column; gap:1px; height:38px; font-size:0.55rem; padding:4px 8px;">
+              <span>↑</span><span>↓</span>
+            </div>
+            <div class="kb-key" style="font-size:0.7rem;">→</div>
+          </div>
+        </div>
+        <div class="kb-label" id="kbLabel">Hover a shortcut below to highlight keys</div>
+      </div>
+    </div>
+
+    <!-- Shortcut selector buttons -->
+    <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+      <button class="shortcut-btn" data-keys="kCmd,kShift,kP" data-label="⌘ + ⇧ + P — Quick Open"
+        style="background:#1e1e2e; border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 16px; color:rgba(255,255,255,0.7); font-size:0.8rem; cursor:pointer; transition:all 0.15s; font-family:inherit;">
+        ⌘⇧P Quick Open
+      </button>
+      <button class="shortcut-btn" data-keys="kCtrl,kCmd,kF" data-label="⌃ + ⌘ + F — Full Screen"
+        style="background:#1e1e2e; border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 16px; color:rgba(255,255,255,0.7); font-size:0.8rem; cursor:pointer; transition:all 0.15s; font-family:inherit;">
+        ⌃⌘F Full Screen
+      </button>
+      <button class="shortcut-btn" data-keys="kOpt,kCmd,kL" data-label="⌥ + ⌘ + L — Raycast"
+        style="background:#1e1e2e; border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 16px; color:rgba(255,255,255,0.7); font-size:0.8rem; cursor:pointer; transition:all 0.15s; font-family:inherit;">
+        ⌥⌘L Raycast
+      </button>
+      <button class="shortcut-btn" data-keys="kCmd,kSpace" data-label="⌘ + Space — Spotlight"
+        style="background:#1e1e2e; border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 16px; color:rgba(255,255,255,0.7); font-size:0.8rem; cursor:pointer; transition:all 0.15s; font-family:inherit;">
+        ⌘Space Spotlight
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── Variant 1: Click to animate keys ───
+  document.querySelectorAll('.key').forEach(key => {
+    key.addEventListener('mousedown', () => {
+      key.classList.remove('animate');
+      void key.offsetWidth;
+      key.classList.add('animate');
+    });
+    key.addEventListener('animationend', () => key.classList.remove('animate'));
+  });
+
+  // ─── Variant 5: Keyboard highlight map ───
+  const btns = document.querySelectorAll('.shortcut-btn');
+  let activeKeys = [];
+
+  function clearHighlights() {
+    activeKeys.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('highlight', 'highlight-red');
+    });
+    activeKeys = [];
+  }
+
+  btns.forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+      clearHighlights();
+      const keys = btn.dataset.keys.split(',');
+      const label = btn.dataset.label;
+      keys.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.add('highlight');
+          activeKeys.push(id);
+        }
+      });
+      document.getElementById('kbLabel').innerHTML =
+        '<span>' + label + '</span>';
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      clearHighlights();
+      document.getElementById('kbLabel').textContent = 'Hover a shortcut below to highlight keys';
+    });
+
+    // Style hover
+    btn.addEventListener('mouseenter', () => {
+      btn.style.background = 'rgba(124,106,247,0.15)';
+      btn.style.borderColor = 'rgba(124,106,247,0.4)';
+      btn.style.color = '#a89cf7';
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.background = '#1e1e2e';
+      btn.style.borderColor = 'rgba(255,255,255,0.1)';
+      btn.style.color = 'rgba(255,255,255,0.7)';
+    });
+  });
+
+  // ─── Palette item click ───
+  document.querySelectorAll('.palette-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

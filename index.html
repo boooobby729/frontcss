@@ -96,6 +96,7 @@
   [data-cat="clippath"]{--accent:#4ade80}
   [data-cat="collect"]{--accent:#f472b6}
   [data-cat="quote"]{--accent:#e4f222}
+  [data-cat="kbd"]{--accent:#a78bfa}
 
   /* Preview Animations */
   .p-bounce{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2997ff,#5e5ce6);animation:pBounce 1.4s cubic-bezier(.36,0,.66,1) infinite}
@@ -181,9 +182,9 @@
 <section class="hero">
   <p class="hero-overline">Frontend Effects Library</p>
   <h1>Build something<br><em>extraordinary.</em></h1>
-  <p class="hero-sub">630+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+  <p class="hero-sub">635+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="hero-stat-num" data-target="630" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" data-target="635" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
@@ -233,12 +234,26 @@
     <button class="filter-btn" data-cat="clippath">裁剪路径</button>
     <button class="filter-btn" data-cat="collect">灵感收集</button>
     <button class="filter-btn" data-cat="quote">引用卡片</button>
+    <button class="filter-btn" data-cat="kbd">键盘快捷键</button>
   </div>
 </div>
 
 <!-- Cards Grid -->
 <section class="grid-section">
   <div class="card-grid">
+
+    <!-- keyboard-shortcuts (置顶) -->
+    <a class="card" data-cat="kbd" href="49-keyboard-shortcuts.html">
+      <div class="card-visual" style="background:#0a0a0f;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:5px;padding:16px">
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;height:36px;border-radius:8px;background:#252535;border:1px solid rgba(255,255,255,0.12);box-shadow:0 1px 0 rgba(255,255,255,0.08) inset,0 3px 0 #0d0d18,0 4px 8px rgba(0,0,0,0.5);font-size:0.85rem;color:rgba(255,255,255,0.7);">⌘</div>
+        <div style="color:rgba(255,255,255,0.3);font-size:0.75rem;">+</div>
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;height:36px;border-radius:8px;background:#252535;border:1px solid rgba(255,255,255,0.12);box-shadow:0 1px 0 rgba(255,255,255,0.08) inset,0 3px 0 #0d0d18,0 4px 8px rgba(0,0,0,0.5);font-size:0.85rem;color:rgba(255,255,255,0.7);">⇧</div>
+        <div style="color:rgba(255,255,255,0.3);font-size:0.75rem;">+</div>
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;height:36px;border-radius:8px;background:#1e1a4a;border:1px solid rgba(124,106,247,0.4);box-shadow:0 1px 0 rgba(255,255,255,0.1) inset,0 3px 0 #0d0d18,0 4px 12px rgba(124,106,247,0.25);font-size:0.85rem;color:#a89cf7;font-weight:700;">P</div>
+      </div>
+      <div class="card-content"><h3>键盘快捷键可视化</h3><p>灵感来自 Raycast 的键帽展示。CSS 模拟真实键帽立体感，支持按下动画，5 种展示形式：Hero 组合键、卡片网格、命令面板 UI、行内徽章、迷你键盘高亮地图。</p></div>
+      <div class="card-footer"><span class="tag">keycap</span><span class="tag">box-shadow</span><span class="count">5 种效果</span></div>
+    </a>
 
     <!-- colorful-quote-cards (置顶) -->
     <a class="card" data-cat="quote" href="48-colorful-quote-cards.html">

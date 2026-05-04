@@ -17,3 +17,9 @@
 - 效果描述：从画面中心向四周放射出数百条细线/粒子轨迹，形成爆炸式光芒效果。深蓝色背景，白色/蓝色粒子带有发光光晕，粒子沿射线方向运动并逐渐消散，整体呈现宇宙星爆或神经网络激活的视觉感。
 - 实现原理：Canvas 2D API，每帧绘制大量粒子（200-500个），每个粒子有随机角度、速度、长度、透明度，用 globalCompositeOperation: 'lighter' 实现叠加发光效果，requestAnimationFrame 驱动动画循环
 - 状态：已实现 → 50-particle-ray-burst.html
+
+## 2026-05-05 codrops (tympanus.net)
+- 效果名称：终端字符解密悬停动画 (Terminal Text Scramble Hover)
+- 效果描述：等宽字体排列的终端风格数据表格，鼠标悬停某行时，该行每一列的文字逐字符按延迟顺序快速替换成随机乱码符号，然后还原回原字母，同时每个字符上方出现闪烁方块光标，模拟黑客终端解码过程。整体深色背景，带扫描线纹理。
+- 实现原理：纯 JS（无依赖）将文字拆分成单字符 span，mouseenter 时用 setTimeout 按 position*delay 依次触发每个字符：快速随机替换乱码 3-4 次后还原原字符，CSS 伪元素 ::after 模拟光标方块，CSS 变量 --opa 控制光标闪烁，repeating-linear-gradient 制造扫描线背景。
+- 状态：已实现 → 51-terminal-text-scramble.html

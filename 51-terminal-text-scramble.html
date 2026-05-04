@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal Text Scramble Hover | 终端字符解密动画</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --font: 'JetBrains Mono', 'Courier New', monospace;
+    --scan-line: repeating-linear-gradient(
+      transparent, transparent 2px,
+      rgba(0,0,0,0.25) 3px
+    );
+  }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: var(--font);
+    min-height: 100vh;
+    padding: 40px 24px;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+  .page-header h1 {
+    font-size: clamp(18px, 3vw, 26px);
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    font-size: 12px;
+    color: #444;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── Demo sections ── */
+  .demos {
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .demo-block {
+    position: relative;
+  }
+
+  .demo-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 16px;
+    padding-left: 2px;
+  }
+  .demo-label span {
+    color: #555;
+  }
+
+  /* ══════════════════════════════════════════════
+     DEMO 1 — Classic Terminal Table (deep green)
+     ══════════════════════════════════════════════ */
+  .demo-1 {
+    --c-bg: #050e08;
+    --c-text: #00e676;
+    --c-dim: #1b4d2a;
+    --c-cursor: #00e676;
+    --c-head: #006b2d;
+    --c-border: #0d2e17;
+    --c-number: #006b2d;
+    --c-accent: #69f0ae;
+  }
+
+  /* ══════════════════════════════════════════════
+     DEMO 2 — Amber Terminal (warm orange)
+     ══════════════════════════════════════════════ */
+  .demo-2 {
+    --c-bg: #0e0800;
+    --c-text: #ffab00;
+    --c-dim: #3d2800;
+    --c-cursor: #ffab00;
+    --c-head: #5c3d00;
+    --c-border: #2e1c00;
+    --c-number: #5c3d00;
+    --c-accent: #ffd740;
+  }
+
+  /* ══════════════════════════════════════════════
+     DEMO 3 — Cyberpunk Blue (neon)
+     ══════════════════════════════════════════════ */
+  .demo-3 {
+    --c-bg: #020a12;
+    --c-text: #00e5ff;
+    --c-dim: #002a3d;
+    --c-cursor: #00e5ff;
+    --c-head: #004d66;
+    --c-border: #001e2e;
+    --c-number: #004d66;
+    --c-accent: #80d8ff;
+  }
+
+  /* ══════════════════════════════════════════════
+     DEMO 4 — White / Paper Terminal
+     ══════════════════════════════════════════════ */
+  .demo-4 {
+    --c-bg: #0a0a0a;
+    --c-text: #e0e0e0;
+    --c-dim: #2a2a2a;
+    --c-cursor: #ffffff;
+    --c-head: #3a3a3a;
+    --c-border: #1e1e1e;
+    --c-number: #444;
+    --c-accent: #ffffff;
+  }
+
+  /* ══════════════════════════════════════════════
+     DEMO 5 — Mixed column widths (music setlist)
+     ══════════════════════════════════════════════ */
+  .demo-5 {
+    --c-bg: #080510;
+    --c-text: #c9b8ff;
+    --c-dim: #1e1430;
+    --c-cursor: #b388ff;
+    --c-head: #3d2b70;
+    --c-border: #180f2e;
+    --c-number: #3d2b70;
+    --c-accent: #ea80fc;
+  }
+
+  /* ── Terminal container ── */
+  .terminal {
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* scanline overlay */
+  .terminal::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--scan-line);
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.4;
+  }
+
+  /* title bar */
+  .terminal__titlebar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: color-mix(in srgb, var(--c-bg) 60%, #000);
+    border-bottom: 1px solid var(--c-border);
+  }
+  .terminal__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--c-dim);
+  }
+  .terminal__title {
+    font-size: 11px;
+    color: var(--c-head);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+
+  .terminal__body {
+    padding: 20px 24px 24px;
+    font-size: clamp(12px, 1.4vw, 15px);
+    line-height: 1;
+  }
+
+  /* ── Table header ── */
+  .t-header {
+    display: grid;
+    gap: 0 2ch;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--c-border);
+    margin-bottom: 4px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--c-head);
+    text-transform: uppercase;
+  }
+
+  /* ── Table rows ── */
+  .t-row {
+    display: grid;
+    gap: 0 2ch;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--c-border);
+    cursor: default;
+    align-items: baseline;
+    user-select: none;
+    position: relative;
+    transition: background 0.1s;
+  }
+
+  .t-row::before {
+    /* row highlight on hover */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--c-text) 5%, transparent);
+    opacity: 0;
+    transition: opacity 0.15s;
+    pointer-events: none;
+  }
+  .t-row:hover::before { opacity: 1; }
+
+  /* ── Cell ── */
+  .t-cell {
+    color: var(--c-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.05em;
+  }
+
+  .t-cell--dim { color: var(--c-dim); }
+  .t-cell--num {
+    color: var(--c-number);
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+  }
+  .t-cell--accent { color: var(--c-accent); }
+
+  /* ── Char spans (split by JS) ── */
+  .t-cell .char {
+    display: inline-block;
+    position: relative;
+  }
+
+  /* cursor block via ::after */
+  .t-cell .char::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 1ch; height: 100%;
+    background: var(--c-cursor);
+    mix-blend-mode: screen;
+    opacity: var(--opa, 0);
+    pointer-events: none;
+  }
+
+  /* ── Row number badge ── */
+  .t-row-num {
+    font-size: 10px;
+    color: var(--c-number);
+    letter-spacing: 0.05em;
+    align-self: center;
+  }
+
+  /* ── Grid column presets ── */
+  /* Demo 1,2,3,4: 5-col */
+  .grid-5 { grid-template-columns: 2ch 1fr 1fr 10ch 3ch; }
+
+  /* Demo 5: 4-col music */
+  .grid-music { grid-template-columns: 2ch 1fr 1fr 8ch; }
+
+  /* ── Blinking cursor animation ── */
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+  .cursor-blink { animation: blink 0.8s step-end infinite; }
+
+  /* ── Bottom prompt line ── */
+  .terminal__prompt {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--c-head);
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .terminal__prompt .caret {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--c-text);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .grid-5 { grid-template-columns: 2ch 1fr 1fr; }
+    .grid-5 .hide-sm { display: none; }
+    .grid-music { grid-template-columns: 2ch 1fr 1fr; }
+    .grid-music .hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>Terminal Text Scramble</h1>
+  <p>Hover over rows · 终端字符解密悬停动画</p>
+</header>
+
+<div class="demos">
+
+  <!-- ══ DEMO 1: Classic Green Terminal — Volcanic Eruptions ══ -->
+  <div class="demo-block demo-1">
+    <div class="demo-label">01 · <span>Classic Green Terminal — Volcanic Eruptions Database</span></div>
+    <div class="terminal">
+      <div class="terminal__titlebar">
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <span class="terminal__title">eruptions.db — read-only</span>
+      </div>
+      <div class="terminal__body">
+        <div class="t-header grid-5">
+          <span>#</span>
+          <span>Volcano</span>
+          <span>Location</span>
+          <span class="hide-sm">Date</span>
+          <span class="hide-sm">VEI</span>
+        </div>
+        <div class="t-rows" id="demo1-rows">
+          <!-- JS generated -->
+        </div>
+        <div class="terminal__prompt">
+          <span>$</span>
+          <span>SELECT * FROM eruptions ORDER BY vei DESC LIMIT 8;</span>
+          <span class="caret"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DEMO 2: Amber Terminal — Exoplanet Catalog ══ -->
+  <div class="demo-block demo-2">
+    <div class="demo-label">02 · <span>Amber Terminal — Exoplanet Catalog</span></div>
+    <div class="terminal">
+      <div class="terminal__titlebar">
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <span class="terminal__title">exoplanet_catalog.csv</span>
+      </div>
+      <div class="terminal__body">
+        <div class="t-header grid-5">
+          <span>#</span>
+          <span>Planet ID</span>
+          <span>Host Star</span>
+          <span class="hide-sm">Distance</span>
+          <span class="hide-sm">Type</span>
+        </div>
+        <div class="t-rows" id="demo2-rows"></div>
+        <div class="terminal__prompt">
+          <span>></span>
+          <span>scan --range=500ly --type=rocky</span>
+          <span class="caret"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DEMO 3: Cyberpunk Blue — Network Intrusion Log ══ -->
+  <div class="demo-block demo-3">
+    <div class="demo-label">03 · <span>Cyberpunk Blue — Network Intrusion Log</span></div>
+    <div class="terminal">
+      <div class="terminal__titlebar">
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <span class="terminal__title">syslog — /var/log/auth.log</span>
+      </div>
+      <div class="terminal__body">
+        <div class="t-header grid-5">
+          <span>#</span>
+          <span>Source IP</span>
+          <span>Target</span>
+          <span class="hide-sm">Timestamp</span>
+          <span class="hide-sm">Lvl</span>
+        </div>
+        <div class="t-rows" id="demo3-rows"></div>
+        <div class="terminal__prompt">
+          <span>root@nexus:~#</span>
+          <span>tail -f /var/log/auth.log</span>
+          <span class="caret"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DEMO 4: White Terminal — Mission Control ══ -->
+  <div class="demo-block demo-4">
+    <div class="demo-label">04 · <span>Minimal White — Mission Control Status</span></div>
+    <div class="terminal">
+      <div class="terminal__titlebar">
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <span class="terminal__title">mission_status.sys</span>
+      </div>
+      <div class="terminal__body">
+        <div class="t-header grid-5">
+          <span>#</span>
+          <span>Callsign</span>
+          <span>Mission</span>
+          <span class="hide-sm">Launch</span>
+          <span class="hide-sm">Sta</span>
+        </div>
+        <div class="t-rows" id="demo4-rows"></div>
+        <div class="terminal__prompt">
+          <span>MCC></span>
+          <span>GET /api/missions/active</span>
+          <span class="caret"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DEMO 5: Purple — Music Concert Setlist ══ -->
+  <div class="demo-block demo-5">
+    <div class="demo-label">05 · <span>Purple Terminal — Setlist Archive</span></div>
+    <div class="terminal">
+      <div class="terminal__titlebar">
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <div class="terminal__dot"></div>
+        <span class="terminal__title">setlist_archive.json</span>
+      </div>
+      <div class="terminal__body">
+        <div class="t-header grid-music">
+          <span>#</span>
+          <span>Track</span>
+          <span>Artist</span>
+          <span class="hide-sm">Duration</span>
+        </div>
+        <div class="t-rows" id="demo5-rows"></div>
+        <div class="terminal__prompt">
+          <span>♫</span>
+          <span>now_playing --shuffle --repeat</span>
+          <span class="caret"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /demos -->
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  DATA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const DATA = {
+  demo1: [
+    ['Mount Vespera',  'Planet Thalassa', '2157-03-14', '6'],
+    ['Kraxion',        'Exo-Planet Zyra', '2243-11-09', '7'],
+    ['Helion Peak',    'Planet Elara',    '2180-05-18', '5'],
+    ['Pyrosphere',     'Moon Xanthe',     '2291-06-15', '6'],
+    ['Vulcanus',       'Asteroid B-612',  '2312-08-22', '5'],
+    ["Tarkon's Fury",  'Planet Drakonis', '2455-12-01', '8'],
+    ['Aether Plume',   'Planet Ganymede', '2379-04-10', '4'],
+    ['Inferno Crest',  'Moon Rhea',       '2410-03-08', '5'],
+  ],
+  demo2: [
+    ['GRPX-4471a',  'Tau Ceti',     '11.9 ly',  'Rock'],
+    ['KOI-3284.01', 'HIP 57274',    '62.4 ly',  'Gas'],
+    ['Proxb-Delta', 'Proxima Cen',  '4.2 ly',   'Rock'],
+    ['TRPST-2c',    'TRAPPIST-1',   '39.5 ly',  'Rock'],
+    ['K2-18 b',     'K2-18',        '124 ly',   'Hycean'],
+    ['GJ 1132 b',   'Gliese 1132',  '41 ly',    'Rock'],
+    ['HD 40307 g',  'HD 40307',     '42 ly',    'Super'],
+    ['LHS 1140 b',  'LHS 1140',     '40 ly',    'Rock'],
+  ],
+  demo3: [
+    ['192.168.0.41',   'srv-prod-01',   '04:22:01', 'WRN'],
+    ['10.0.2.99',      'db-cluster-3',  '04:22:17', 'ERR'],
+    ['172.16.5.200',   'api-gateway',   '04:23:05', 'INF'],
+    ['203.0.113.42',   'auth-svc',      '04:23:51', 'ERR'],
+    ['198.51.100.7',   'redis-cache',   '04:24:13', 'WRN'],
+    ['10.10.0.15',     'load-balancer', '04:24:44', 'INF'],
+    ['192.168.1.101',  'srv-prod-02',   '04:25:09', 'ERR'],
+    ['172.20.0.55',    'k8s-node-7',    '04:25:33', 'WRN'],
+  ],
+  demo4: [
+    ['ARTEMIS-7',   'Lunar Survey',     '2031-04-12', 'ACT'],
+    ['HERALD-2',    'Mars Relay',        '2029-09-03', 'SBY'],
+    ['PHOENIX-4',   'Deep Space Probe', '2028-06-21', 'ACT'],
+    ['VOYAGER-X',   'Outer Belt',       '2032-01-15', 'TRN'],
+    ['ATLAS-9',     'ISS Resupply',     '2030-11-07', 'ACT'],
+    ['GENESIS-1',   'Bio Experiment',   '2031-08-30', 'ACT'],
+    ['NOMAD-3',     'Titan Landing',    '2033-02-18', 'PRE'],
+    ['ECHO-6',      'Venus Orbiter',    '2029-12-01', 'TRM'],
+  ],
+  demo5: [
+    ['Neon Midnight',    'The Voidwalkers', '4:32'],
+    ['Satellite Eyes',   'Lunar Signal',    '3:58'],
+    ['Phase Collapse',   'Zero Gravity',    '5:14'],
+    ["Cosmonaut's Dream",'Astral Drift',    '4:07'],
+    ['Subzero Pulse',    'Cryostasis',      '3:45'],
+    ['Event Horizon',    'Dark Matter',     '6:22'],
+    ['Binary Star',      'System Error',    '4:51'],
+    ['Static Bloom',     'Frequency Lost',  '3:37'],
+  ],
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SCRAMBLE ENGINE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const GLYPHS = 'abcdefghijklmnopqrstuvwxyz!@#$%^&*-_+=;:<>,0123456789';
+
+function randomGlyph(original) {
+  // Keep spaces and dots as-is
+  if (original === ' ' || original === '.') return original;
+  return GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+}
+
+/**
+ * Scramble a single cell element.
+ * Each char gets an individual staggered scramble sequence.
+ * @param {HTMLElement} cellEl - the .t-cell element
+ * @param {number} cellIndex   - column index (for wave stagger)
+ * @param {number} speed       - ms per scramble step (default 45)
+ */
+function scrambleCell(cellEl, cellIndex = 0, speed = 45) {
+  const chars = cellEl.querySelectorAll('.char');
+  if (!chars.length) return;
+
+  chars.forEach((charEl, i) => {
+    const original = charEl.dataset.original;
+    const delay = cellIndex * 60 + i * 55; // wave: cells left→right, chars left→right
+    const scrambles = 4; // how many random replacements before restore
+
+    // Cancel any running timers
+    if (charEl._timers) charEl._timers.forEach(t => clearTimeout(t));
+    charEl._timers = [];
+
+    // Step 0: show cursor block
+    const t0 = setTimeout(() => {
+      charEl.style.setProperty('--opa', '1');
+    }, delay);
+    charEl._timers.push(t0);
+
+    // Steps 1..scrambles: random chars
+    for (let s = 1; s <= scrambles; s++) {
+      const ts = setTimeout(() => {
+        if (original !== ' ') charEl.textContent = randomGlyph(original);
+      }, delay + s * speed);
+      charEl._timers.push(ts);
+    }
+
+    // Final step: restore + hide cursor
+    const tFinal = setTimeout(() => {
+      charEl.textContent = original;
+      charEl.style.setProperty('--opa', '0');
+    }, delay + (scrambles + 1) * speed);
+    charEl._timers.push(tFinal);
+  });
+}
+
+/**
+ * Cancel scramble and instantly restore a cell.
+ */
+function restoreCell(cellEl) {
+  const chars = cellEl.querySelectorAll('.char');
+  chars.forEach(charEl => {
+    if (charEl._timers) charEl._timers.forEach(t => clearTimeout(t));
+    charEl.textContent = charEl.dataset.original;
+    charEl.style.setProperty('--opa', '0');
+  });
+}
+
+/**
+ * Split text in an element into .char spans and store originals.
+ */
+function splitChars(el) {
+  const text = el.textContent;
+  el.innerHTML = '';
+  for (const ch of text) {
+    const span = document.createElement('span');
+    span.className = 'char';
+    span.dataset.original = ch;
+    span.textContent = ch;
+    el.appendChild(span);
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ROW BUILDER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function buildRows(containerId, data, gridClass, colClasses) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  data.forEach((row, ri) => {
+    const rowEl = document.createElement('div');
+    rowEl.className = `t-row ${gridClass}`;
+
+    // row number
+    const numEl = document.createElement('span');
+    numEl.className = 't-row-num';
+    numEl.textContent = String(ri + 1).padStart(2, '0');
+    rowEl.appendChild(numEl);
+
+    const cellEls = [];
+
+    row.forEach((text, ci) => {
+      const cell = document.createElement('span');
+      const extra = colClasses && colClasses[ci] ? colClasses[ci] : '';
+      cell.className = `t-cell ${extra}`.trim();
+      cell.textContent = text;
+      splitChars(cell);
+      rowEl.appendChild(cell);
+      cellEls.push(cell);
+    });
+
+    // Hover: scramble all cells in the row with wave offset
+    rowEl.addEventListener('mouseenter', () => {
+      cellEls.forEach((cell, ci) => scrambleCell(cell, ci, 42));
+    });
+    rowEl.addEventListener('mouseleave', () => {
+      // Don't interrupt mid-scramble — let it finish
+    });
+
+    container.appendChild(rowEl);
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INIT ALL DEMOS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+buildRows('demo1-rows', DATA.demo1, 'grid-5', [
+  '', '', 'hide-sm', 'hide-sm t-cell--dim'
+]);
+
+buildRows('demo2-rows', DATA.demo2, 'grid-5', [
+  't-cell--accent', '', 'hide-sm t-cell--dim', 'hide-sm'
+]);
+
+buildRows('demo3-rows', DATA.demo3, 'grid-5', [
+  't-cell--accent', 't-cell--dim', 'hide-sm', 'hide-sm t-cell--dim'
+]);
+
+buildRows('demo4-rows', DATA.demo4, 'grid-5', [
+  't-cell--accent', 't-cell--dim', 'hide-sm', 'hide-sm'
+]);
+
+buildRows('demo5-rows', DATA.demo5, 'grid-music', [
+  't-cell--accent', 't-cell--dim', 'hide-sm'
+]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  Auto-demo: cycle through rows on first demo to show effect
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+(function autoDemo() {
+  const rows = document.querySelectorAll('#demo1-rows .t-row');
+  if (!rows.length) return;
+  let idx = 0;
+  function triggerNext() {
+    const row = rows[idx % rows.length];
+    const cells = row.querySelectorAll('.t-cell');
+    cells.forEach((cell, ci) => scrambleCell(cell, ci, 42));
+    idx++;
+    setTimeout(triggerNext, 900);
+  }
+  setTimeout(triggerNext, 600);
+})();
+</script>
+</body>
+</html>

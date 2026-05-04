@@ -98,6 +98,7 @@
   [data-cat="quote"]{--accent:#e4f222}
   [data-cat="kbd"]{--accent:#a78bfa}
   [data-cat="particle"]{--accent:#60a5fa}
+  [data-cat="terminal"]{--accent:#00e676}
 
   /* Preview Animations */
   .p-bounce{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2997ff,#5e5ce6);animation:pBounce 1.4s cubic-bezier(.36,0,.66,1) infinite}
@@ -183,9 +184,9 @@
 <section class="hero">
   <p class="hero-overline">Frontend Effects Library</p>
   <h1>Build something<br><em>extraordinary.</em></h1>
-  <p class="hero-sub">640+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+  <p class="hero-sub">645+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="hero-stat-num" data-target="640" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" data-target="645" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
@@ -237,12 +238,22 @@
     <button class="filter-btn" data-cat="quote">引用卡片</button>
     <button class="filter-btn" data-cat="kbd">键盘快捷键</button>
     <button class="filter-btn" data-cat="particle">粒子特效</button>
+    <button class="filter-btn" data-cat="terminal">终端特效</button>
   </div>
 </div>
 
 <!-- Cards Grid -->
 <section class="grid-section">
   <div class="card-grid">
+
+    <!-- terminal-text-scramble (置顶) -->
+    <a class="card" data-cat="terminal" href="51-terminal-text-scramble.html">
+      <div class="card-visual" style="background:#050e08;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;padding:14px 10px;font-family:'Courier New',monospace">
+        <div id="termPreview" style="width:100%;font-size:9px;letter-spacing:.04em;line-height:1.6;color:#00e676;text-transform:uppercase"></div>
+      </div>
+      <div class="card-content"><h3>终端字符解密</h3><p>灵感来自 Codrops。悬停时每列文字逐字符按波浪延迟随机替换成乱码符号后还原，搭配方块光标闪烁。5 种主题变体：经典绿色、琥珀、赛博蓝、极简白、紫色音乐列表。</p></div>
+      <div class="card-footer"><span class="tag">terminal</span><span class="tag">scramble</span><span class="count">5 种变体</span></div>
+    </a>
 
     <!-- particle-ray-burst (置顶) -->
     <a class="card" data-cat="particle" href="50-particle-ray-burst.html">
@@ -780,6 +791,41 @@
   const style=document.createElement('style');
   style.textContent='@keyframes pTPulse{0%,100%{transform:scale(.9);opacity:.6}50%{transform:scale(1.1);opacity:1}}@keyframes pScroll{0%{width:0}50%{width:100%}100%{width:0}}';
   document.head.appendChild(style);
+
+  // Terminal Scramble preview
+  (function(){
+    const el=document.getElementById('termPreview');if(!el)return;
+    const rows=[
+      ['MOUNT VESPERA','PLANET THALASSA','2157-03-14'],
+      ['KRAXION','EXO-PLANET ZYRA','2243-11-09'],
+      ['HELION PEAK','PLANET ELARA','2180-05-18'],
+    ];
+    const GLYPHS='abcdefghijklmnopqrstuvwxyz!@#$%^&*-_+=;:<>,';
+    function rndGlyph(c){return c===' '?c:GLYPHS[Math.floor(Math.random()*GLYPHS.length)];}
+    let rowIdx=0;
+    function scrambleRow(){
+      const data=rows[rowIdx%rows.length];
+      rowIdx++;
+      const text=data.join('  ');
+      let chars=text.split('');
+      let step=0;
+      const total=chars.length;
+      const interval=setInterval(()=>{
+        step++;
+        const line=chars.map((c,i)=>{
+          if(i<=step*1.5)return c;
+          return rndGlyph(c);
+        }).join('');
+        el.textContent=line;
+        if(step>=total){clearInterval(interval);}
+      },28);
+    }
+    function loop(){
+      scrambleRow();
+      setTimeout(loop,1200);
+    }
+    setTimeout(loop,400);
+  })();
 
   // Mini Ray Burst preview
   (function(){

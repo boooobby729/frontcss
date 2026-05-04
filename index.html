@@ -97,6 +97,7 @@
   [data-cat="collect"]{--accent:#f472b6}
   [data-cat="quote"]{--accent:#e4f222}
   [data-cat="kbd"]{--accent:#a78bfa}
+  [data-cat="particle"]{--accent:#60a5fa}
 
   /* Preview Animations */
   .p-bounce{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2997ff,#5e5ce6);animation:pBounce 1.4s cubic-bezier(.36,0,.66,1) infinite}
@@ -182,9 +183,9 @@
 <section class="hero">
   <p class="hero-overline">Frontend Effects Library</p>
   <h1>Build something<br><em>extraordinary.</em></h1>
-  <p class="hero-sub">635+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+  <p class="hero-sub">640+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="hero-stat-num" data-target="635" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" data-target="640" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
@@ -235,12 +236,22 @@
     <button class="filter-btn" data-cat="collect">灵感收集</button>
     <button class="filter-btn" data-cat="quote">引用卡片</button>
     <button class="filter-btn" data-cat="kbd">键盘快捷键</button>
+    <button class="filter-btn" data-cat="particle">粒子特效</button>
   </div>
 </div>
 
 <!-- Cards Grid -->
 <section class="grid-section">
   <div class="card-grid">
+
+    <!-- particle-ray-burst (置顶) -->
+    <a class="card" data-cat="particle" href="50-particle-ray-burst.html">
+      <div class="card-visual" style="background:#020510;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <canvas id="miniRayBurst" width="200" height="100" style="width:200px;height:100px"></canvas>
+      </div>
+      <div class="card-content"><h3>粒子光线放射</h3><p>灵感来自 Stripe 的星爆动画。Canvas 粒子从中心向四周放射，叠加发光效果，5 种变体：经典蓝色放射、极光多色、光纤束、脉冲环、可交互超新星（点击爆发）。</p></div>
+      <div class="card-footer"><span class="tag">canvas</span><span class="tag">particles</span><span class="count">5 种效果</span></div>
+    </a>
 
     <!-- keyboard-shortcuts (置顶) -->
     <a class="card" data-cat="kbd" href="49-keyboard-shortcuts.html">
@@ -769,6 +780,52 @@
   const style=document.createElement('style');
   style.textContent='@keyframes pTPulse{0%,100%{transform:scale(.9);opacity:.6}50%{transform:scale(1.1);opacity:1}}@keyframes pScroll{0%{width:0}50%{width:100%}100%{width:0}}';
   document.head.appendChild(style);
+
+  // Mini Ray Burst preview
+  (function(){
+    const canvas=document.getElementById('miniRayBurst');if(!canvas)return;
+    const dpr=window.devicePixelRatio||1;
+    const W=200,H=100;
+    canvas.width=W*dpr;canvas.height=H*dpr;
+    canvas.style.width=W+'px';canvas.style.height=H+'px';
+    const ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+    const cx=W/2,cy=H*0.65;
+    const NUM=120;
+    const ps=[];
+    function rnd(a,b){return a+Math.random()*(b-a);}
+    for(let i=0;i<NUM;i++){
+      const angle=rnd(0,Math.PI*2);
+      const speed=rnd(0.4,2.5);
+      const life=rnd(0,1);
+      ps.push({x:cx+Math.cos(angle)*speed*life*30,y:cy+Math.sin(angle)*speed*life*30,
+        vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-rnd(0.1,0.4),
+        life:life,maxLife:rnd(0.5,1),len:rnd(10,50),w:rnd(0.3,1)});
+    }
+    function frame(){
+      const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H));
+      bg.addColorStop(0,'#1a1f6e');bg.addColorStop(0.4,'#0d1147');bg.addColorStop(1,'#020510');
+      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+      ctx.globalCompositeOperation='lighter';
+      const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,50);
+      glow.addColorStop(0,'rgba(80,120,255,0.4)');glow.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+      ps.forEach(p=>{
+        p.x+=p.vx;p.y+=p.vy;p.life-=0.015;
+        if(p.life<=0){p.x=cx;p.y=cy;const a=rnd(0,Math.PI*2);const s=rnd(0.4,2.5);p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-rnd(0.1,0.4);p.life=rnd(0.5,1);p.maxLife=p.life;}
+        const alpha=p.life/p.maxLife;
+        const tx=p.x-p.vx*(p.len/Math.max(Math.sqrt(p.vx*p.vx+p.vy*p.vy),0.01));
+        const ty=p.y-p.vy*(p.len/Math.max(Math.sqrt(p.vx*p.vx+p.vy*p.vy),0.01));
+        const g=ctx.createLinearGradient(tx,ty,p.x,p.y);
+        g.addColorStop(0,'rgba(180,210,255,0)');g.addColorStop(1,`rgba(200,220,255,${alpha*0.9})`);
+        ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(p.x,p.y);
+        ctx.strokeStyle=g;ctx.lineWidth=p.w;ctx.stroke();
+      });
+      ctx.globalCompositeOperation='source-over';
+      requestAnimationFrame(frame);
+    }
+    frame();
+  })();
 
   // Card text preview (collect-text)
   (function(){

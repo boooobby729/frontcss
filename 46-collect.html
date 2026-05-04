@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collect 灵感收集</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+  html,body{
+    overscroll-behavior:none;
+  }
+
+  body{
+    background:#000;
+    color:#e0e0e0;
+    font-family:'SF Pro Display',-apple-system,sans-serif;
+    overflow-x:hidden;
+    min-height:300vh;
+  }
+
+  .back{
+    position:fixed;top:20px;left:20px;
+    color:rgba(255,255,255,.4);text-decoration:none;font-size:.85rem;
+    z-index:999;background:rgba(255,255,255,.06);
+    padding:6px 14px;border-radius:8px;
+    backdrop-filter:blur(10px);
+    transition:color .2s;
+  }
+  .back:hover{color:#fff}
+
+  .hint{
+    position:fixed;
+    bottom:40px;left:50%;
+    transform:translateX(-50%);
+    color:rgba(255,255,255,.15);
+    font-size:.8rem;
+    letter-spacing:.05em;
+    z-index:10;
+    transition:opacity .6s;
+    pointer-events:none;
+  }
+  .hint.hidden{opacity:0}
+
+  /* ===== 彩虹渐变容器 ===== */
+  .chroma-layer{
+    position:fixed;
+    left:-120px;right:-120px;
+    bottom:-200px;            /* 下半部分藏在屏幕外 */
+    height:700px;
+    z-index:5;
+    pointer-events:none;
+    transform:translateY(100%);
+    will-change:transform;
+
+    /* 椭圆形遮罩：从中心实 → 四周渐变透明，形成椭圆光晕 */
+    -webkit-mask-image:radial-gradient(ellipse 55% 50% at 50% 60%, black 0%, rgba(0,0,0,.7) 40%, rgba(0,0,0,.3) 65%, transparent 100%);
+    mask-image:radial-gradient(ellipse 55% 50% at 50% 60%, black 0%, rgba(0,0,0,.7) 40%, rgba(0,0,0,.3) 65%, transparent 100%);
+  }
+
+  /*
+    Dia 颜色（productivity 配色）
+    三层叠加，不同 blur 级别
+  */
+
+  /* 底层：大面积柔和光晕 */
+  .chroma-l1{
+    position:absolute;
+    left:0;right:0;
+    bottom:0;
+    height:100%;
+    background:linear-gradient(to top,
+      rgba(255,172,227,.85) 0%,
+      rgba(255,200,200,.65) 10%,
+      rgba(255,241,172,.55) 20%,
+      rgba(190,235,195,.5) 30%,
+      rgba(121,201,255,.6) 40%,
+      rgba(90,140,230,.5) 50%,
+      rgba(74,96,209,.45) 60%,
+      rgba(60,106,255,.35) 70%,
+      rgba(60,106,255,.18) 80%,
+      rgba(40,60,150,.06) 90%,
+      transparent 100%
+    );
+    filter:blur(50px);
+  }
+
+  /* 中层：色彩丰富度 */
+  .chroma-l2{
+    position:absolute;
+    left:0;right:0;
+    bottom:0;
+    height:100%;
+    background:linear-gradient(to top,
+      rgba(255,172,227,.7) 0%,
+      rgba(255,190,210,.55) 8%,
+      rgba(255,220,180,.45) 16%,
+      rgba(255,241,172,.4) 24%,
+      rgba(200,240,190,.38) 32%,
+      rgba(121,201,255,.5) 40%,
+      rgba(80,146,199,.42) 50%,
+      rgba(74,96,209,.38) 58%,
+      rgba(60,106,255,.3) 66%,
+      rgba(60,106,255,.12) 78%,
+      transparent 100%
+    );
+    filter:blur(28px);
+  }
+
+  /* 顶层：保留层次感 */
+  .chroma-l3{
+    position:absolute;
+    left:0;right:0;
+    bottom:0;
+    height:100%;
+    background:linear-gradient(to top,
+      rgba(255,172,227,.5) 0%,
+      rgba(255,200,210,.38) 7%,
+      rgba(255,230,180,.3) 14%,
+      rgba(255,241,172,.25) 21%,
+      rgba(180,238,200,.25) 28%,
+      rgba(159,234,185,.25) 35%,
+      rgba(121,201,255,.3) 42%,
+      rgba(80,146,199,.25) 50%,
+      rgba(74,96,209,.22) 58%,
+      rgba(60,106,255,.14) 68%,
+      rgba(60,106,255,.05) 80%,
+      transparent 100%
+    );
+    filter:blur(12px);
+  }
+
+  /* 内容区域 */
+  .content{
+    position:relative;
+    z-index:1;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:80px 40px;
+  }
+  .content h1{
+    font-size:clamp(2.5rem,6vw,5rem);
+    font-weight:700;
+    color:#fff;
+    letter-spacing:-.04em;
+    line-height:1.05;
+    text-align:center;
+    margin-bottom:16px;
+  }
+  .content p{
+    color:rgba(255,255,255,.3);
+    font-size:1rem;
+    text-align:center;
+    max-width:500px;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<a href="index.html" class="back">&larr; 返回资源库</a>
+
+<div class="content">
+  <h1>Scroll to<br>the edge</h1>
+  <p>滚动到页面底部，继续向下滚动，<br>彩虹渐变会从底部弹性拉伸出现。<br>停止滚动后自动弹回消失。</p>
+</div>
+
+<p class="hint" id="hint">↓ 继续向下滚动</p>
+
+<!-- 彩虹渐变层 -->
+<div class="chroma-layer" id="chromaLayer">
+  <div class="chroma-l1"></div>
+  <div class="chroma-l2"></div>
+  <div class="chroma-l3"></div>
+</div>
+
+<script>
+(function(){
+  const layer = document.getElementById('chromaLayer');
+  const hint = document.getElementById('hint');
+
+  const MAX_STRETCH = 500;
+  const DAMPING = 0.4;
+  const DECAY = 0.96;          // 更慢的衰减，收回更柔和
+  const SNAP_THRESHOLD = 0.5;
+
+  let stretch = 0;
+  let animId = null;
+  let lastInputTime = 0;
+
+  function checkBottom() {
+    return window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+  }
+
+  function applyStretch(delta) {
+    const resistance = 1 - (stretch / MAX_STRETCH);
+    stretch += delta * DAMPING * Math.max(resistance, 0.05);
+    stretch = Math.max(0, Math.min(MAX_STRETCH, stretch));
+    renderStretch();
+    lastInputTime = Date.now();
+    startDecay();
+  }
+
+  function renderStretch() {
+    const progress = stretch / MAX_STRETCH;
+    const ty = 100 * (1 - progress);
+    layer.style.transform = 'translateY(' + ty + '%)';
+
+    // 收回到最后 30% 时同步淡出 opacity，避免突然消失
+    if (progress < 0.3) {
+      layer.style.opacity = progress / 0.3;
+    } else {
+      layer.style.opacity = 1;
+    }
+  }
+
+  function startDecay() {
+    if (animId) return;
+    animId = requestAnimationFrame(decayLoop);
+  }
+
+  function decayLoop() {
+    if (Date.now() - lastInputTime < 80) {
+      animId = requestAnimationFrame(decayLoop);
+      return;
+    }
+    stretch *= DECAY;
+    if (stretch < SNAP_THRESHOLD) {
+      stretch = 0;
+      renderStretch();
+      animId = null;
+      return;
+    }
+    renderStretch();
+    animId = requestAnimationFrame(decayLoop);
+  }
+
+  window.addEventListener('wheel', (e) => {
+    if (e.deltaY > 0 && checkBottom()) {
+      e.preventDefault();
+      applyStretch(e.deltaY);
+    }
+    if (e.deltaY < 0 && stretch > 0) {
+      e.preventDefault();
+      stretch = Math.max(0, stretch + e.deltaY * 0.5);
+      renderStretch();
+    }
+  }, { passive: false });
+
+  let touchLastY = 0;
+  window.addEventListener('touchstart', (e) => {
+    touchLastY = e.touches[0].clientY;
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    const y = e.touches[0].clientY;
+    const delta = touchLastY - y;
+    touchLastY = y;
+    if (delta > 0 && checkBottom()) {
+      e.preventDefault();
+      applyStretch(delta);
+    }
+    if (delta < 0 && stretch > 0) {
+      e.preventDefault();
+      stretch = Math.max(0, stretch + delta * 0.3);
+      renderStretch();
+    }
+  }, { passive: false });
+
+  window.addEventListener('touchend', () => {
+    lastInputTime = Date.now();
+    startDecay();
+  });
+
+  window.addEventListener('scroll', () => {
+    hint.classList.toggle('hidden', window.scrollY > 200);
+  }, { passive: true });
+
+})();
+</script>
+
+</body>
+</html>

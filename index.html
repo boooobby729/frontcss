@@ -95,6 +95,7 @@
   [data-cat="marquee"]{--accent:#fb923c}
   [data-cat="clippath"]{--accent:#4ade80}
   [data-cat="collect"]{--accent:#f472b6}
+  [data-cat="quote"]{--accent:#e4f222}
 
   /* Preview Animations */
   .p-bounce{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2997ff,#5e5ce6);animation:pBounce 1.4s cubic-bezier(.36,0,.66,1) infinite}
@@ -180,9 +181,9 @@
 <section class="hero">
   <p class="hero-overline">Frontend Effects Library</p>
   <h1>Build something<br><em>extraordinary.</em></h1>
-  <p class="hero-sub">625+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+  <p class="hero-sub">630+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="hero-stat-num" data-target="625" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" data-target="630" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
@@ -231,12 +232,24 @@
     <button class="filter-btn" data-cat="marquee">无限滚动</button>
     <button class="filter-btn" data-cat="clippath">裁剪路径</button>
     <button class="filter-btn" data-cat="collect">灵感收集</button>
+    <button class="filter-btn" data-cat="quote">引用卡片</button>
   </div>
 </div>
 
 <!-- Cards Grid -->
 <section class="grid-section">
   <div class="card-grid">
+
+    <!-- colorful-quote-cards (置顶) -->
+    <a class="card" data-cat="quote" href="48-colorful-quote-cards.html">
+      <div class="card-visual" style="background:#080910;overflow:hidden;display:flex;gap:6px;align-items:center;justify-content:center;padding:12px">
+        <div style="width:52px;height:64px;border-radius:6px;background:#e4f222;flex-shrink:0"></div>
+        <div style="width:52px;height:64px;border-radius:6px;background:#1c85e8;flex-shrink:0"></div>
+        <div style="width:52px;height:64px;border-radius:6px;background:#e8e8f5;flex-shrink:0"></div>
+      </div>
+      <div class="card-content"><h3>彩色引用卡片</h3><p>灵感来自 linear.app 的彩色 Testimonial 卡片。荧光黄、蓝、淡紫等纯色背景，5 种布局变体：三列网格、横向滚动、扇形叠放、瀑布流、大卡片。</p></div>
+      <div class="card-footer"><span class="tag">quote-cards</span><span class="tag">fan-stack</span><span class="count">5 种效果</span></div>
+    </a>
 
     <!-- collect (置顶) -->
     <a class="card" data-cat="collect" href="46-collect.html">

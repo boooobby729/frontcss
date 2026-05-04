@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>48 · Colorful Quote Cards</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080910;
+    --text-primary: #f7f8f8;
+    --text-secondary: rgba(247,248,248,0.55);
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding: 60px 40px 80px;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+  .page-header h1 {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    padding-left: 4px;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 72px 0;
+  }
+
+  /* ════════════════════════════════════════
+     VARIANT 1 — Linear-style 3-column grid
+  ════════════════════════════════════════ */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  .quote-card {
+    --card-bg: #e8e8f5;
+    --card-text: #08090a;
+    --card-meta: rgba(8,9,10,0.55);
+    background: var(--card-bg);
+    color: var(--card-text);
+    border-radius: 8px;
+    padding: 28px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 320px;
+    cursor: pointer;
+    transition: transform 0.22s cubic-bezier(.22,.68,0,1.2),
+                box-shadow 0.22s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .quote-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.12);
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    border-radius: inherit;
+  }
+  .quote-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .quote-card:hover::before { opacity: 1; }
+
+  /* Color variants */
+  .quote-card.yellow  { --card-bg: #e4f222; }
+  .quote-card.blue    { --card-bg: #1c85e8; --card-text: #fff; --card-meta: rgba(255,255,255,0.65); }
+  .quote-card.lavender{ --card-bg: #e8e8f5; }
+  .quote-card.green   { --card-bg: #1db954; --card-text: #fff; --card-meta: rgba(255,255,255,0.65); }
+  .quote-card.orange  { --card-bg: #ff6b35; --card-text: #fff; --card-meta: rgba(255,255,255,0.65); }
+  .quote-card.pink    { --card-bg: #f5c6d0; }
+  .quote-card.purple  { --card-bg: #7c3aed; --card-text: #fff; --card-meta: rgba(255,255,255,0.65); }
+  .quote-card.teal    { --card-bg: #0d9488; --card-text: #fff; --card-meta: rgba(255,255,255,0.65); }
+  .quote-card.cream   { --card-bg: #fef3c7; }
+
+  .quote-mark {
+    font-size: 48px;
+    line-height: 1;
+    font-family: Georgia, serif;
+    color: var(--card-text);
+    opacity: 0.25;
+    margin-bottom: -8px;
+    display: block;
+  }
+
+  .quote-text {
+    font-size: 17px;
+    line-height: 1.55;
+    font-weight: 450;
+    color: var(--card-text);
+    flex: 1;
+    margin-bottom: 28px;
+  }
+
+  .quote-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .quote-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--card-text);
+    opacity: 0.15;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--card-bg);
+    opacity: 1;
+    background: rgba(0,0,0,0.12);
+  }
+  .quote-card.blue .quote-avatar,
+  .quote-card.green .quote-avatar,
+  .quote-card.orange .quote-avatar,
+  .quote-card.purple .quote-avatar,
+  .quote-card.teal .quote-avatar {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
+
+  .quote-author-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--card-text);
+    line-height: 1.3;
+  }
+  .quote-author-role {
+    font-size: 12px;
+    color: var(--card-meta);
+    line-height: 1.3;
+  }
+
+  /* ════════════════════════════════════════
+     VARIANT 2 — Horizontal scroll carousel
+  ════════════════════════════════════════ */
+  .carousel-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 12px 4px 24px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+  }
+  .carousel-wrapper::-webkit-scrollbar { display: none; }
+  .carousel-wrapper.grabbing { cursor: grabbing; }
+
+  .carousel-track {
+    display: flex;
+    gap: 12px;
+    width: max-content;
+  }
+
+  .carousel-track .quote-card {
+    width: 300px;
+    min-height: 280px;
+    flex-shrink: 0;
+  }
+
+  /* ════════════════════════════════════════
+     VARIANT 3 — Stacked / fan layout
+  ════════════════════════════════════════ */
+  .fan-container {
+    position: relative;
+    height: 380px;
+    max-width: 360px;
+    margin: 0 auto;
+    perspective: 1000px;
+  }
+
+  .fan-card {
+    position: absolute;
+    width: 300px;
+    height: 320px;
+    border-radius: 12px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(.22,.68,0,1.15),
+                box-shadow 0.4s ease,
+                z-index 0s;
+    transform-origin: bottom center;
+    left: 50%;
+    top: 0;
+  }
+
+  .fan-card:nth-child(1) {
+    background: #e4f222;
+    color: #08090a;
+    transform: translateX(-50%) rotate(-8deg) translateY(20px);
+    z-index: 1;
+  }
+  .fan-card:nth-child(2) {
+    background: #1c85e8;
+    color: #fff;
+    transform: translateX(-50%) rotate(-2deg) translateY(10px);
+    z-index: 2;
+  }
+  .fan-card:nth-child(3) {
+    background: #e8e8f5;
+    color: #08090a;
+    transform: translateX(-50%) rotate(5deg) translateY(5px);
+    z-index: 3;
+  }
+
+  .fan-container:hover .fan-card:nth-child(1) {
+    transform: translateX(calc(-50% - 180px)) rotate(-18deg) translateY(0px);
+    z-index: 1;
+    box-shadow: -20px 20px 60px rgba(0,0,0,0.4);
+  }
+  .fan-container:hover .fan-card:nth-child(2) {
+    transform: translateX(-50%) rotate(0deg) translateY(-20px);
+    z-index: 3;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  }
+  .fan-container:hover .fan-card:nth-child(3) {
+    transform: translateX(calc(-50% + 180px)) rotate(18deg) translateY(0px);
+    z-index: 1;
+    box-shadow: 20px 20px 60px rgba(0,0,0,0.4);
+  }
+
+  .fan-card .quote-text {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .fan-card.blue .quote-author-name,
+  .fan-card.blue .quote-mark { color: #fff; }
+  .fan-card.blue .quote-author-role { color: rgba(255,255,255,0.65); }
+
+  /* ════════════════════════════════════════
+     VARIANT 4 — Masonry / mixed sizes
+  ════════════════════════════════════════ */
+  .masonry {
+    columns: 3;
+    column-gap: 12px;
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  .masonry .quote-card {
+    break-inside: avoid;
+    margin-bottom: 12px;
+    min-height: auto;
+  }
+  .masonry .quote-card.tall { min-height: 360px; }
+  .masonry .quote-card.short { min-height: 200px; }
+
+  /* ════════════════════════════════════════
+     VARIANT 5 — Single featured card
+  ════════════════════════════════════════ */
+  .featured-card {
+    max-width: 680px;
+    margin: 0 auto;
+    background: #e4f222;
+    color: #08090a;
+    border-radius: 16px;
+    padding: 48px 52px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(.22,.68,0,1.2),
+                box-shadow 0.3s ease;
+  }
+  .featured-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 40px 100px rgba(228,242,34,0.2);
+  }
+  .featured-card .quote-text {
+    font-size: 26px;
+    line-height: 1.45;
+    font-weight: 450;
+    color: #08090a;
+    margin-bottom: 36px;
+  }
+  .featured-card .quote-footer {
+    gap: 16px;
+  }
+  .featured-card .quote-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+    background: rgba(0,0,0,0.12);
+    color: #08090a;
+  }
+  .featured-card .quote-author-name {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .featured-card .quote-author-role {
+    font-size: 13px;
+    color: rgba(8,9,10,0.55);
+  }
+  /* Decorative circle */
+  .featured-card::after {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    right: -80px;
+    top: -80px;
+    pointer-events: none;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .masonry { columns: 2; }
+  }
+  @media (max-width: 600px) {
+    .grid-3 { grid-template-columns: 1fr; }
+    .masonry { columns: 1; }
+    body { padding: 40px 20px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>48 · Colorful Quote Cards</h1>
+  <p>Inspired by linear.app · 5 variants · Pure CSS</p>
+</div>
+
+<!-- ── VARIANT 1: 3-column grid ── -->
+<p class="section-label">01 · Three-column grid</p>
+<div class="grid-3">
+
+  <div class="quote-card lavender">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">You just have to use it and you will see, you will just feel it.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">G</div>
+      <div>
+        <div class="quote-author-name">Gabriel Peal</div>
+        <div class="quote-author-role">OpenAI</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card yellow">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">Our speed is intense and Linear helps us be action biased.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">N</div>
+      <div>
+        <div class="quote-author-name">Nik Koblov</div>
+        <div class="quote-author-role">Ramp</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card blue">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">Linear is excellent, just excellent. It has the right opinions for fast moving teams.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">K</div>
+      <div>
+        <div class="quote-author-name">Kaz Nejatian</div>
+        <div class="quote-author-role">Opendoor</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card green">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">The best project management tool I've ever used. Period.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">S</div>
+      <div>
+        <div class="quote-author-name">Sarah Chen</div>
+        <div class="quote-author-role">Stripe</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card orange">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">We shipped 3x faster after switching. The keyboard shortcuts alone are worth it.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">M</div>
+      <div>
+        <div class="quote-author-name">Marcus Webb</div>
+        <div class="quote-author-role">Vercel</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card purple">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">Finally, a tool that respects engineers' time and doesn't get in the way.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">A</div>
+      <div>
+        <div class="quote-author-name">Aiko Tanaka</div>
+        <div class="quote-author-role">Figma</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider">
+
+<!-- ── VARIANT 2: Horizontal scroll carousel ── -->
+<p class="section-label">02 · Horizontal scroll carousel</p>
+<div class="carousel-wrapper" id="carousel">
+  <div class="carousel-track">
+
+    <div class="quote-card yellow">
+      <div>
+        <span class="quote-mark">"</span>
+        <p class="quote-text">Speed is a feature. Linear gets it.</p>
+      </div>
+      <div class="quote-footer">
+        <div class="quote-avatar">J</div>
+        <div>
+          <div class="quote-author-name">James Liu</div>
+          <div class="quote-author-role">Notion</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-card teal">
+      <div>
+        <span class="quote-mark">"</span>
+        <p class="quote-text">Our entire engineering org switched in one week. Zero complaints.</p>
+      </div>
+      <div class="quote-footer">
+        <div class="quote-avatar">R</div>
+        <div>
+          <div class="quote-author-name">Rachel Kim</div>
+          <div class="quote-author-role">Loom</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-card pink">
+      <div>
+        <span class="quote-mark">"</span>
+        <p class="quote-text">The design is so good it makes me want to open it every morning.</p>
+      </div>
+      <div class="quote-footer">
+        <div class="quote-avatar">L</div>
+        <div>
+          <div class="quote-author-name">Lena Park</div>
+          <div class="quote-author-role">Framer</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-card blue">
+      <div>
+        <span class="quote-mark">"</span>
+        <p class="quote-text">Reduced our planning overhead by 60%. More time building, less time managing.</p>
+      </div>
+      <div class="quote-footer">
+        <div class="quote-avatar">D</div>
+        <div>
+          <div class="quote-author-name">David Osei</div>
+          <div class="quote-author-role">Arc</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-card cream">
+      <div>
+        <span class="quote-mark">"</span>
+        <p class="quote-text">It's the only tool where I actually enjoy doing sprint planning.</p>
+      </div>
+      <div class="quote-footer">
+        <div class="quote-avatar">T</div>
+        <div>
+          <div class="quote-author-name">Tomas Herrera</div>
+          <div class="quote-author-role">Raycast</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-card orange">
+      <div>
+        <span class="quote-mark">"</span>
+        <p class="quote-text">Linear made our remote team feel like we're in the same room.</p>
+      </div>
+      <div class="quote-footer">
+        <div class="quote-avatar">P</div>
+        <div>
+          <div class="quote-author-name">Priya Nair</div>
+          <div class="quote-author-role">Pitch</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ── VARIANT 3: Fan / stacked layout ── -->
+<p class="section-label">03 · Fan stack (hover to spread)</p>
+<div class="fan-container">
+
+  <div class="fan-card">
+    <div>
+      <span class="quote-mark" style="color:#08090a;opacity:.2">"</span>
+      <p class="quote-text" style="color:#08090a;font-size:15px;line-height:1.5">Speed is a feature. Linear gets it.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar" style="background:rgba(0,0,0,.12);color:#08090a">J</div>
+      <div>
+        <div class="quote-author-name" style="color:#08090a">James Liu</div>
+        <div class="quote-author-role" style="color:rgba(8,9,10,.55)">Notion</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fan-card" style="background:#1c85e8;color:#fff">
+    <div>
+      <span class="quote-mark" style="color:#fff;opacity:.2">"</span>
+      <p class="quote-text" style="color:#fff;font-size:15px;line-height:1.5">Our speed is intense and Linear helps us be action biased.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar" style="background:rgba(255,255,255,.2);color:#fff">N</div>
+      <div>
+        <div class="quote-author-name" style="color:#fff">Nik Koblov</div>
+        <div class="quote-author-role" style="color:rgba(255,255,255,.65)">Ramp</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fan-card" style="background:#e8e8f5;color:#08090a">
+    <div>
+      <span class="quote-mark" style="color:#08090a;opacity:.2">"</span>
+      <p class="quote-text" style="color:#08090a;font-size:15px;line-height:1.5">You just have to use it and you will see, you will just feel it.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar" style="background:rgba(0,0,0,.12);color:#08090a">G</div>
+      <div>
+        <div class="quote-author-name" style="color:#08090a">Gabriel Peal</div>
+        <div class="quote-author-role" style="color:rgba(8,9,10,.55)">OpenAI</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider">
+
+<!-- ── VARIANT 4: Masonry ── -->
+<p class="section-label">04 · Masonry layout</p>
+<div class="masonry">
+
+  <div class="quote-card yellow tall">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">Linear changed how we think about product development. It's not just a tool — it's a philosophy. Ship fast, iterate faster, and never lose sight of what matters.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">E</div>
+      <div>
+        <div class="quote-author-name">Elena Vasquez</div>
+        <div class="quote-author-role">Head of Product · Figma</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card blue short">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">Best onboarding experience of any dev tool. Ever.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">C</div>
+      <div>
+        <div class="quote-author-name">Chris Park</div>
+        <div class="quote-author-role">Vercel</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card teal">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">We went from weekly planning chaos to daily clarity. Linear is the reason.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">W</div>
+      <div>
+        <div class="quote-author-name">Wei Zhang</div>
+        <div class="quote-author-role">Loom</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card pink short">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">The keyboard shortcuts are genuinely life-changing.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">O</div>
+      <div>
+        <div class="quote-author-name">Olivia Stone</div>
+        <div class="quote-author-role">Pitch</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card purple tall">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">I've tried every project management tool out there. Linear is the first one that actually gets out of your way and lets you focus on building. The speed is unreal.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">B</div>
+      <div>
+        <div class="quote-author-name">Ben Horowitz</div>
+        <div class="quote-author-role">CTO · Raycast</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card cream">
+    <div>
+      <span class="quote-mark">"</span>
+      <p class="quote-text">Our team's velocity doubled in the first month. No joke.</p>
+    </div>
+    <div class="quote-footer">
+      <div class="quote-avatar">F</div>
+      <div>
+        <div class="quote-author-name">Fatima Al-Hassan</div>
+        <div class="quote-author-role">Arc</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider">
+
+<!-- ── VARIANT 5: Featured single card ── -->
+<p class="section-label">05 · Featured card</p>
+<div class="featured-card">
+  <p class="quote-text">"Linear is the product I wish I had built. It's opinionated in all the right ways, and it makes our entire team move faster without sacrificing quality."</p>
+  <div class="quote-footer">
+    <div class="quote-avatar">A</div>
+    <div>
+      <div class="quote-author-name">Alex MacCaw</div>
+      <div class="quote-author-role">CEO · Reflect</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Drag-to-scroll for carousel
+  const carousel = document.getElementById('carousel');
+  let isDown = false, startX, scrollLeft;
+
+  carousel.addEventListener('mousedown', e => {
+    isDown = true;
+    carousel.classList.add('grabbing');
+    startX = e.pageX - carousel.offsetLeft;
+    scrollLeft = carousel.scrollLeft;
+  });
+  carousel.addEventListener('mouseleave', () => {
+    isDown = false;
+    carousel.classList.remove('grabbing');
+  });
+  carousel.addEventListener('mouseup', () => {
+    isDown = false;
+    carousel.classList.remove('grabbing');
+  });
+  carousel.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - carousel.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    carousel.scrollLeft = scrollLeft - walk;
+  });
+</script>
+
+</body>
+</html>

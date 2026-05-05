@@ -41,3 +41,9 @@
 - 效果描述：多个圆形进度指示器（SVG stroke-dasharray 动画），每个圆环代表一项指标评分（如 SEO 99、Performance 100、Accessibility 98）。页面滚动到可见区域时触发 IntersectionObserver，圆环从 0 动画到目标值，同时中心数字用 requestAnimationFrame 计数递增。悬停卡片时圆环高亮、数字跳动。支持多组评分主题：性能指标、用户评分、数据仪表盘等。
 - 实现原理：SVG circle 元素用 stroke-dasharray/stroke-dashoffset 控制圆弧长度，circumference = 2πr，dashoffset 从 circumference（空）到 circumference*(1-score/100)（目标值），CSS transition 或 JS requestAnimationFrame 驱动动画，IntersectionObserver 监听入场触发，数字计数用 easeOutQuart 插值
 - 状态：已实现 → 61-circular-score-cards.html，已集成到首页
+
+## 2026-05-05 tympanus.net/codrops (Playground)
+- 效果名称：SVG 滤镜文字扭曲 (SVG Filter Text Distortion)
+- 效果描述：大号标题文字在鼠标悬停或滚动时，通过 SVG feTurbulence + feDisplacementMap 滤镜产生液态扭曲、故障撕裂、溶解消散等视觉效果。多个变体展示不同滤镜组合：① 液态融化（turbulence 频率渐变）② 故障撕裂（feColorMatrix 通道分离 + 位移）③ 像素溶解（feMorphology + feBlend）④ 霓虹发光扭曲（feGaussianBlur + feComposite）。深色背景，大号白色/彩色文字，鼠标悬停触发动画。
+- 实现原理：SVG defs 中定义 filter 元素，feTurbulence 的 baseFrequency 和 seed 属性用 JS 动态修改驱动动画，feDisplacementMap 的 scale 属性控制扭曲强度，CSS filter: url(#filterId) 应用到文字元素，mousemove/scroll 事件驱动参数变化，requestAnimationFrame 平滑插值
+- 状态：已实现 → 62-svg-filter-text.html，已集成到首页

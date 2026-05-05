@@ -4,25 +4,25 @@
 - 效果名称：彩色引用卡片 (Colorful Quote Cards)
 - 效果描述：大尺寸引用卡片，每张卡片有独特的纯色背景（荧光黄 #e4f222、蓝色 #1c85e8、淡紫 #e8e8f5 等），卡片内含大号引用文字、公司 logo 和作者信息。悬停时有微妙的上移 + 阴影效果，整体排列为水平滚动或三列网格。
 - 实现原理：纯 CSS，flex 布局，每张卡片固定尺寸 320×360px，border-radius: 6px，不同背景色通过 CSS 变量控制，hover 用 transform: translateY + box-shadow 实现
-- 状态：已实现 → 48-colorful-quote-cards.html
+- 状态：已实现 → 48-colorful-quote-cards.html，已集成到首页
 
 ## 2026-05-05 raycast.com
 - 效果名称：键盘快捷键可视化 (Keyboard Shortcut Visualizer)
 - 效果描述：用圆角矩形模拟真实键帽质感，展示 option/command/shift 等修饰键与字母键的组合。键帽有立体感（内阴影+底部边框模拟厚度），支持按下动画（translateY + 阴影收缩），可展示多种快捷键组合场景。
 - 实现原理：纯 CSS，box-shadow 模拟键帽立体感（顶部高光 + 底部阴影），:active 伪类实现按下效果，flex 布局排列键位，CSS 变量控制主题色
-- 状态：已实现 → 49-keyboard-shortcuts.html
+- 状态：已实现 → 49-keyboard-shortcuts.html，已集成到首页
 
 ## 2026-05-05 stripe.com
 - 效果名称：粒子光线放射动画 (Particle Ray Burst)
 - 效果描述：从画面中心向四周放射出数百条细线/粒子轨迹，形成爆炸式光芒效果。深蓝色背景，白色/蓝色粒子带有发光光晕，粒子沿射线方向运动并逐渐消散，整体呈现宇宙星爆或神经网络激活的视觉感。
 - 实现原理：Canvas 2D API，每帧绘制大量粒子（200-500个），每个粒子有随机角度、速度、长度、透明度，用 globalCompositeOperation: 'lighter' 实现叠加发光效果，requestAnimationFrame 驱动动画循环
-- 状态：已实现 → 50-particle-ray-burst.html
+- 状态：已实现 → 50-particle-ray-burst.html，已集成到首页
 
 ## 2026-05-05 codrops (tympanus.net)
 - 效果名称：终端字符解密悬停动画 (Terminal Text Scramble Hover)
 - 效果描述：等宽字体排列的终端风格数据表格，鼠标悬停某行时，该行每一列的文字逐字符按延迟顺序快速替换成随机乱码符号，然后还原回原字母，同时每个字符上方出现闪烁方块光标，模拟黑客终端解码过程。整体深色背景，带扫描线纹理。
 - 实现原理：纯 JS（无依赖）将文字拆分成单字符 span，mouseenter 时用 setTimeout 按 position*delay 依次触发每个字符：快速随机替换乱码 3-4 次后还原原字符，CSS 伪元素 ::after 模拟光标方块，CSS 变量 --opa 控制光标闪烁，repeating-linear-gradient 制造扫描线背景。
-- 状态：已实现 → 51-terminal-text-scramble.html
+- 状态：已实现 → 51-terminal-text-scramble.html，已集成到首页
 
 ## 2026-05-05 diabrowser.com
 - 效果名称：毛玻璃浮动通知卡片 (Glassmorphism Floating UI Cards)
@@ -34,16 +34,16 @@
 - 效果名称：菱形图标网格光晕追踪 (Diamond Icon Grid Spotlight)
 - 效果描述：大量深色圆角方形图标按菱形/偏移网格排列，覆盖整个背景区域。鼠标移动时，以鼠标为中心的圆形区域内图标会逐渐亮起（发光 + 颜色变化），距离越近越亮，形成动态追踪光晕效果。图标本身是各种 SF Symbols 风格的功能图标（搜索、星标、地图、闪电等），整体营造出产品功能丰富的视觉感。
 - 实现原理：CSS Grid 偏移布局（奇偶行 margin-left 错位实现菱形排列），JS mousemove 事件计算每个图标与鼠标的距离，用 CSS 变量 --glow 控制每个图标的 box-shadow 发光强度和 opacity，距离阈值内线性插值计算亮度，requestAnimationFrame 平滑更新
-- 状态：已实现 → 53-diamond-icon-grid-spotlight.html
+- 状态：已实现 → 53-diamond-icon-grid-spotlight.html，已集成到首页
 
 ## 2026-05-05 framer.com (Holo Shader feature)
 - 效果名称：全息彩虹渐变卡片 (Holographic Rainbow Card)
 - 效果描述：模拟真实全息贴纸/卡片的光学效果。卡片表面覆盖一层随鼠标角度变化的彩虹渐变层，当鼠标移动时，彩虹光谱会随视角改变而流动偏移，模拟光线在全息薄膜上的衍射效果。同时卡片有轻微的 3D 倾斜跟随鼠标，增强立体感。静止时卡片有微弱的彩虹光泽，移动时彩虹效果变得鲜艳。
 - 实现原理：CSS perspective + rotateX/rotateY 实现 3D 倾斜跟随，CSS conic-gradient 或 linear-gradient 多层叠加模拟彩虹光谱，JS mousemove 计算鼠标相对卡片的角度，用 CSS 变量 --rx --ry --bgx --bgy 控制倾斜角度和渐变偏移，mix-blend-mode: color-dodge 或 screen 叠加彩虹层，CSS filter: brightness/saturate 增强光泽感
-- 状态：已实现 → 54-holographic-rainbow-card.html
+- 状态：已实现 → 54-holographic-rainbow-card.html，已集成到首页
 
 ## 2026-05-05 vercel.com (homepage hero)
 - 效果名称：等高线地形波纹背景 (Contour Terrain Map)
 - 效果描述：密集的等高线/波纹线条覆盖整个背景，配合彩色渐变区域（红色热区、绿色冷区、黄色中间区），形成地形图般的视觉效果。鼠标移动时，以鼠标为中心的区域波纹会动态扰动，形成涟漪扩散效果。整体呈现出科技感十足的地形数据可视化风格，中央可放置主体内容。
 - 实现原理：Canvas 2D API，用 marching squares 算法或直接绘制等值线，基于 Perlin noise / simplex noise 生成地形高度场，不同高度区间映射不同颜色（热力图配色），mousemove 事件在鼠标位置叠加扰动函数，requestAnimationFrame 驱动动画，等高线用 canvas.stroke() 绘制密集路径
-- 状态：已实现 → 55-contour-terrain-map.html
+- 状态：已实现 → 55-contour-terrain-map.html，已集成到首页

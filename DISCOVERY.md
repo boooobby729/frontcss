@@ -47,3 +47,9 @@
 - 效果描述：密集的等高线/波纹线条覆盖整个背景，配合彩色渐变区域（红色热区、绿色冷区、黄色中间区），形成地形图般的视觉效果。鼠标移动时，以鼠标为中心的区域波纹会动态扰动，形成涟漪扩散效果。整体呈现出科技感十足的地形数据可视化风格，中央可放置主体内容。
 - 实现原理：Canvas 2D API，用 marching squares 算法或直接绘制等值线，基于 Perlin noise / simplex noise 生成地形高度场，不同高度区间映射不同颜色（热力图配色），mousemove 事件在鼠标位置叠加扰动函数，requestAnimationFrame 驱动动画，等高线用 canvas.stroke() 绘制密集路径
 - 状态：已实现 → 55-contour-terrain-map.html，已集成到首页
+
+## 2026-05-05 tympanus.net/codrops (EaseReverseClipMenu)
+- 效果名称：Clip-Path 全屏菜单展开 (Clip-Path Fullscreen Menu)
+- 效果描述：黑色背景上散落着多张随机旋转的图片，右上角有一个 TOGGLE MENU 按钮。点击后，用 clip-path: polygon() 动画从右上角展开一个全屏菜单覆盖层，菜单背景是渐变/图片，菜单项为大号像素等宽字体。关闭时 clip-path 以弹性回弹动画收缩回角落。整体呈现出游戏 UI 风格的沉浸感。
+- 实现原理：nav 元素用 clip-path: polygon() 控制可见区域，关闭态为右上角小矩形（如 polygon(85% 0%, 100% 0%, 100% 15%, 85% 15%)），展开态为全屏（polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)），CSS transition cubic-bezier 控制弹性动画，背景散落图片用 CSS transform rotate + absolute 定位，菜单项用 letter-spacing + 等宽字体
+- 状态：待实现

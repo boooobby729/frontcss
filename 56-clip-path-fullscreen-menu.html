@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clip-Path Fullscreen Menu</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Courier New',Courier,monospace;color:#fff}
+
+/* ── Scene ── */
+.scene{position:relative;width:100%;height:100vh;overflow:hidden;background:#000}
+
+/* ── Scattered images ── */
+.scatter{position:absolute;inset:0;pointer-events:none;z-index:1}
+.scatter__img{
+  position:absolute;
+  width:clamp(80px,10vw,160px);
+  aspect-ratio:3/4;
+  object-fit:cover;
+  border-radius:4px;
+  overflow:hidden;
+  opacity:.85;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+  transition:opacity .4s;
+}
+.scatter__img canvas{width:100%;height:100%;display:block}
+
+/* ── Hero text ── */
+.hero{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:2;
+  pointer-events:none;
+  user-select:none;
+}
+.hero__title{
+  font-size:clamp(3rem,10vw,9rem);
+  font-weight:900;
+  letter-spacing:.08em;
+  line-height:1;
+  text-transform:uppercase;
+  color:#fff;
+  text-shadow:0 0 60px rgba(255,255,255,.15);
+}
+.hero__sub{
+  margin-top:1rem;
+  font-size:clamp(.7rem,1.2vw,1rem);
+  letter-spacing:.25em;
+  color:rgba(255,255,255,.3);
+  text-transform:uppercase;
+}
+
+/* ── Toggle button ── */
+.toggle-btn{
+  position:fixed;
+  top:24px;
+  right:24px;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 20px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:6px;
+  color:#fff;
+  font-family:'Courier New',monospace;
+  font-size:.75rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  cursor:pointer;
+  backdrop-filter:blur(10px);
+  transition:background .2s,border-color .2s;
+}
+.toggle-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3)}
+.toggle-btn__icon{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  width:16px;
+}
+.toggle-btn__icon span{
+  display:block;
+  height:1.5px;
+  background:#fff;
+  border-radius:2px;
+  transition:transform .3s,opacity .3s;
+  transform-origin:center;
+}
+.toggle-btn.is-open .toggle-btn__icon span:nth-child(1){transform:translateY(5.5px) rotate(45deg)}
+.toggle-btn.is-open .toggle-btn__icon span:nth-child(2){opacity:0;transform:scaleX(0)}
+.toggle-btn.is-open .toggle-btn__icon span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
+
+/* ── Fullscreen menu overlay ── */
+.menu{
+  position:fixed;
+  inset:0;
+  z-index:50;
+  display:grid;
+  place-items:center;
+  /* closed: clipped to top-right corner */
+  clip-path:polygon(82% 0%, 100% 0%, 100% 18%, 82% 18%);
+  transition:clip-path .7s cubic-bezier(.77,0,.18,1);
+  pointer-events:none;
+  overflow:hidden;
+}
+.menu.is-open{
+  clip-path:polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  pointer-events:auto;
+}
+
+/* Menu background */
+.menu__bg{
+  position:absolute;
+  inset:0;
+  z-index:0;
+}
+.menu__bg canvas{width:100%;height:100%;display:block}
+
+/* Menu items */
+.menu__list{
+  position:relative;
+  z-index:1;
+  list-style:none;
+  text-align:center;
+  width:100%;
+}
+.menu__item{
+  display:block;
+  font-size:clamp(1.8rem,5vw,5rem);
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.9);
+  text-decoration:none;
+  padding:.15em .5em;
+  cursor:pointer;
+  position:relative;
+  transition:color .2s,letter-spacing .3s;
+  line-height:1.15;
+}
+.menu__item::before{
+  content:'[';
+  opacity:0;
+  margin-right:.1em;
+  transition:opacity .2s;
+  color:rgba(255,255,255,.5);
+}
+.menu__item::after{
+  content:']';
+  opacity:0;
+  margin-left:.1em;
+  transition:opacity .2s;
+  color:rgba(255,255,255,.5);
+}
+.menu__item:hover{
+  color:#fff;
+  letter-spacing:.18em;
+}
+.menu__item:hover::before,
+.menu__item:hover::after{opacity:1}
+
+/* Stagger animation for menu items */
+.menu__item{
+  opacity:0;
+  transform:translateY(20px);
+  transition:
+    opacity .4s,
+    transform .4s,
+    color .2s,
+    letter-spacing .3s;
+}
+.menu.is-open .menu__item{
+  opacity:1;
+  transform:translateY(0);
+}
+.menu.is-open .menu__item:nth-child(1){transition-delay:.15s}
+.menu.is-open .menu__item:nth-child(2){transition-delay:.2s}
+.menu.is-open .menu__item:nth-child(3){transition-delay:.25s}
+.menu.is-open .menu__item:nth-child(4){transition-delay:.3s}
+.menu.is-open .menu__item:nth-child(5){transition-delay:.35s}
+.menu.is-open .menu__item:nth-child(6){transition-delay:.4s}
+.menu.is-open .menu__item:nth-child(7){transition-delay:.45s}
+
+/* ── Variant selector ── */
+.variants{
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:200;
+  display:flex;
+  gap:8px;
+}
+.var-btn{
+  padding:6px 14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:4px;
+  color:rgba(255,255,255,.5);
+  font-family:'Courier New',monospace;
+  font-size:.65rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s;
+}
+.var-btn:hover,.var-btn.active{
+  background:rgba(255,255,255,.12);
+  border-color:rgba(255,255,255,.3);
+  color:#fff;
+}
+
+/* ── Info label ── */
+.info{
+  position:fixed;
+  bottom:70px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:200;
+  font-size:.65rem;
+  letter-spacing:.12em;
+  color:rgba(255,255,255,.2);
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+</style>
+</head>
+<body>
+
+<div class="scene" id="scene">
+  <!-- Scattered decorative images (generated by canvas) -->
+  <div class="scatter" id="scatter"></div>
+
+  <!-- Hero text -->
+  <div class="hero">
+    <div class="hero__title" id="heroTitle">VOID</div>
+    <div class="hero__sub">Click the menu to explore</div>
+  </div>
+</div>
+
+<!-- Toggle button (always on top) -->
+<button class="toggle-btn" id="toggleBtn" aria-expanded="false" aria-controls="menu">
+  <div class="toggle-btn__icon">
+    <span></span><span></span><span></span>
+  </div>
+  <span id="btnLabel">OPEN MENU</span>
+</button>
+
+<!-- Fullscreen menu overlay -->
+<nav class="menu" id="menu" aria-hidden="true">
+  <div class="menu__bg"><canvas id="menuBg"></canvas></div>
+  <ul class="menu__list" id="menuList">
+    <li><a class="menu__item" href="#">EXPLORE</a></li>
+    <li><a class="menu__item" href="#">DISCOVER</a></li>
+    <li><a class="menu__item" href="#">CREATE</a></li>
+    <li><a class="menu__item" href="#">CONNECT</a></li>
+    <li><a class="menu__item" href="#">ARCHIVE</a></li>
+    <li><a class="menu__item" href="#">SETTINGS</a></li>
+    <li><a class="menu__item" href="#">EXIT</a></li>
+  </ul>
+</nav>
+
+<!-- Variant selector -->
+<div class="info">CLIP-PATH ORIGIN</div>
+<div class="variants">
+  <button class="var-btn active" data-variant="top-right">TOP RIGHT</button>
+  <button class="var-btn" data-variant="top-left">TOP LEFT</button>
+  <button class="var-btn" data-variant="center">CENTER</button>
+  <button class="var-btn" data-variant="bottom-right">BOTTOM RIGHT</button>
+  <button class="var-btn" data-variant="circle">CIRCLE</button>
+</div>
+
+<script>
+// ── Variant configs ──────────────────────────────────────────────
+const VARIANTS = {
+  'top-right': {
+    closed: 'polygon(82% 0%, 100% 0%, 100% 18%, 82% 18%)',
+    open:   'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+    easing: 'cubic-bezier(.77,0,.18,1)',
+    duration: '0.7s',
+    title: 'VOID',
+    theme: ['#1a0533','#0d1a3a','#001a0d'],
+  },
+  'top-left': {
+    closed: 'polygon(0% 0%, 18% 0%, 18% 18%, 0% 18%)',
+    open:   'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+    easing: 'cubic-bezier(.86,0,.07,1)',
+    duration: '0.65s',
+    title: 'ECHO',
+    theme: ['#1a1a00','#0a1a33','#1a0a00'],
+  },
+  'center': {
+    closed: 'polygon(45% 45%, 55% 45%, 55% 55%, 45% 55%)',
+    open:   'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+    easing: 'cubic-bezier(.68,-0.55,.27,1.55)',
+    duration: '0.8s',
+    title: 'CORE',
+    theme: ['#0a001a','#001a1a','#1a0a00'],
+  },
+  'bottom-right': {
+    closed: 'polygon(82% 82%, 100% 82%, 100% 100%, 82% 100%)',
+    open:   'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+    easing: 'cubic-bezier(.77,0,.18,1)',
+    duration: '0.7s',
+    title: 'RISE',
+    theme: ['#001a0d','#1a0533','#0d1a3a'],
+  },
+  'circle': {
+    closed: 'circle(4% at 92% 8%)',
+    open:   'circle(150% at 92% 8%)',
+    easing: 'cubic-bezier(.77,0,.18,1)',
+    duration: '0.75s',
+    title: 'PULSE',
+    theme: ['#0d0d1a','#1a0d0d','#0d1a0d'],
+  },
+};
+
+let currentVariant = 'top-right';
+let isOpen = false;
+
+// ── DOM refs ─────────────────────────────────────────────────────
+const menu     = document.getElementById('menu');
+const toggleBtn= document.getElementById('toggleBtn');
+const btnLabel = document.getElementById('btnLabel');
+const heroTitle= document.getElementById('heroTitle');
+const menuBgCanvas = document.getElementById('menuBg');
+const scatterEl= document.getElementById('scatter');
+
+// ── Draw menu background ─────────────────────────────────────────
+function drawMenuBg(theme) {
+  const ctx = menuBgCanvas.getContext('2d');
+  const W = menuBgCanvas.width  = window.innerWidth;
+  const H = menuBgCanvas.height = window.innerHeight;
+
+  // Deep gradient background
+  const grad = ctx.createRadialGradient(W*.5, H*.5, 0, W*.5, H*.5, Math.max(W,H)*.8);
+  grad.addColorStop(0, theme[0]);
+  grad.addColorStop(.5, theme[1]);
+  grad.addColorStop(1, theme[2]);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Noise texture overlay
+  const imgData = ctx.getImageData(0, 0, W, H);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const n = (Math.random() - .5) * 18;
+    d[i]   = Math.max(0, Math.min(255, d[i]   + n));
+    d[i+1] = Math.max(0, Math.min(255, d[i+1] + n));
+    d[i+2] = Math.max(0, Math.min(255, d[i+2] + n));
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  // Subtle grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  const step = 60;
+  for (let x = 0; x < W; x += step) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += step) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Glowing center orb
+  const orb = ctx.createRadialGradient(W*.5, H*.5, 0, W*.5, H*.5, W*.35);
+  orb.addColorStop(0, 'rgba(255,255,255,0.06)');
+  orb.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = orb;
+  ctx.fillRect(0, 0, W, H);
+
+  // Scanlines
+  for (let y = 0; y < H; y += 3) {
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.fillRect(0, y, W, 1);
+  }
+}
+
+// ── Draw scattered images ─────────────────────────────────────────
+const SCATTER_PALETTES = [
+  ['#c8a2c8','#a2c8c8','#c8c8a2','#a2a2c8'],
+  ['#ff9a9e','#fad0c4','#a18cd1','#fbc2eb'],
+  ['#84fab0','#8fd3f4','#a1c4fd','#c2e9fb'],
+  ['#f6d365','#fda085','#f093fb','#f5576c'],
+  ['#43e97b','#38f9d7','#4facfe','#00f2fe'],
+];
+
+function makeScatterCanvas(w, h, palette) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+
+  // Background gradient
+  const g = ctx.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, palette[0]);
+  g.addColorStop(.5, palette[1]);
+  g.addColorStop(1, palette[2]);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+
+  // Abstract shapes
+  ctx.globalAlpha = .4;
+  for (let i = 0; i < 6; i++) {
+    const x = Math.random() * w;
+    const y = Math.random() * h;
+    const r = 10 + Math.random() * 40;
+    const sg = ctx.createRadialGradient(x, y, 0, x, y, r);
+    sg.addColorStop(0, palette[Math.floor(Math.random()*palette.length)]);
+    sg.addColorStop(1, 'transparent');
+    ctx.fillStyle = sg;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Noise
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const n = (Math.random()-.5)*30;
+    d[i]   = Math.max(0,Math.min(255,d[i]+n));
+    d[i+1] = Math.max(0,Math.min(255,d[i+1]+n));
+    d[i+2] = Math.max(0,Math.min(255,d[i+2]+n));
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  return c;
+}
+
+function buildScatter() {
+  scatterEl.innerHTML = '';
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  // Avoid center zone
+  const cx = W * .5, cy = H * .5;
+  const avoidRx = W * .22;
+  const avoidRy = H * .22;
+
+  // Divide screen into zones for even distribution
+  // 4 corners + 4 edges = 8 zones, pick 10-14 images
+  const zones = [
+    // corners
+    {xMin:0,      xMax:W*.38, yMin:0,      yMax:H*.45},
+    {xMin:W*.62,  xMax:W,     yMin:0,      yMax:H*.45},
+    {xMin:0,      xMax:W*.38, yMin:H*.55,  yMax:H},
+    {xMin:W*.62,  xMax:W,     yMin:H*.55,  yMax:H},
+    // edges
+    {xMin:W*.2,   xMax:W*.5,  yMin:0,      yMax:H*.3},
+    {xMin:W*.5,   xMax:W*.8,  yMin:0,      yMax:H*.3},
+    {xMin:0,      xMax:W*.25, yMin:H*.3,   yMax:H*.7},
+    {xMin:W*.75,  xMax:W,     yMin:H*.3,   yMax:H*.7},
+    {xMin:W*.15,  xMax:W*.45, yMin:H*.7,   yMax:H},
+    {xMin:W*.55,  xMax:W*.85, yMin:H*.7,   yMax:H},
+    // extras
+    {xMin:W*.35,  xMax:W*.65, yMin:0,      yMax:H*.2},
+    {xMin:W*.35,  xMax:W*.65, yMin:H*.8,   yMax:H},
+  ];
+
+  zones.forEach((zone, i) => {
+    const w = 80 + Math.random() * 110;
+    const h = w * (1.1 + Math.random() * .6);
+    const zW = zone.xMax - zone.xMin;
+    const zH = zone.yMax - zone.yMin;
+    if (zW < w || zH < h) return;
+
+    const x = zone.xMin + Math.random() * (zW - w);
+    const y = zone.yMin + Math.random() * (zH - h);
+    const cx2 = x + w/2, cy2 = y + h/2;
+    // Skip if too close to center
+    const dx = (cx2-cx)/avoidRx, dy = (cy2-cy)/avoidRy;
+    if (dx*dx + dy*dy < 1) return;
+
+    const rot = (Math.random() - .5) * 24;
+    const palette = SCATTER_PALETTES[i % SCATTER_PALETTES.length];
+    const imgCanvas = makeScatterCanvas(Math.round(w), Math.round(h), palette);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'scatter__img';
+    wrapper.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;transform:rotate(${rot}deg)`;
+    wrapper.appendChild(imgCanvas);
+    scatterEl.appendChild(wrapper);
+  });
+}
+
+// ── Apply variant ─────────────────────────────────────────────────
+function applyVariant(name) {
+  const v = VARIANTS[name];
+  currentVariant = name;
+  menu.style.clipPath = isOpen ? v.open : v.closed;
+  menu.style.transition = `clip-path ${v.duration} ${v.easing}`;
+  heroTitle.textContent = v.title;
+  drawMenuBg(v.theme);
+
+  document.querySelectorAll('.var-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.variant === name);
+  });
+}
+
+// ── Toggle menu ───────────────────────────────────────────────────
+function toggleMenu() {
+  isOpen = !isOpen;
+  const v = VARIANTS[currentVariant];
+
+  menu.style.clipPath = isOpen ? v.open : v.closed;
+  menu.classList.toggle('is-open', isOpen);
+  toggleBtn.classList.toggle('is-open', isOpen);
+  toggleBtn.setAttribute('aria-expanded', isOpen);
+  menu.setAttribute('aria-hidden', !isOpen);
+  btnLabel.textContent = isOpen ? 'CLOSE' : 'OPEN MENU';
+}
+
+// ── Event listeners ───────────────────────────────────────────────
+toggleBtn.addEventListener('click', toggleMenu);
+
+document.querySelectorAll('.var-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (isOpen) toggleMenu(); // close first
+    setTimeout(() => applyVariant(btn.dataset.variant), isOpen ? 400 : 0);
+  });
+});
+
+// Close on menu item click
+document.querySelectorAll('.menu__item').forEach(item => {
+  item.addEventListener('click', e => {
+    e.preventDefault();
+    toggleMenu();
+  });
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && isOpen) toggleMenu();
+});
+
+// ── Init ──────────────────────────────────────────────────────────
+function init() {
+  buildScatter();
+  applyVariant('top-right');
+}
+
+window.addEventListener('resize', () => {
+  buildScatter();
+  drawMenuBg(VARIANTS[currentVariant].theme);
+});
+
+init();
+</script>
+</body>
+</html>

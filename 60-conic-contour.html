@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conic Gradient Contour Lines</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    text-align: center;
+    padding: 40px 20px 10px;
+    font-size: clamp(18px, 3vw, 26px);
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    color: #888;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #444;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    margin-bottom: 48px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2px 80px;
+  }
+
+  .card {
+    position: relative;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    background: #fff;
+    cursor: crosshair;
+  }
+
+  .card.dark { background: #0a0a0a; }
+
+  .card.fullbleed {
+    grid-column: 1 / -1;
+    aspect-ratio: 16/6;
+  }
+
+  .card-label {
+    position: absolute;
+    bottom: 14px;
+    left: 18px;
+    z-index: 10;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.45);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .card.dark .card-label { color: rgba(255,255,255,0.3); }
+
+  .conic-layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  .contour-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+
+<h1>Conic Gradient Contour Lines</h1>
+<p class="subtitle">Inspired by vercel.com &nbsp;·&nbsp; Pure SVG + CSS &nbsp;·&nbsp; Mouse-reactive</p>
+
+<div class="grid">
+  <div class="card"      id="c0"><div class="conic-layer" id="g0"></div><svg class="contour-svg" id="s0" viewBox="0 0 600 450" preserveAspectRatio="xMidYMid slice"></svg><span class="card-label">Triangle · Light</span></div>
+  <div class="card dark" id="c1"><div class="conic-layer" id="g1"></div><svg class="contour-svg" id="s1" viewBox="0 0 600 450" preserveAspectRatio="xMidYMid slice"></svg><span class="card-label">Triangle · Dark</span></div>
+  <div class="card"      id="c2"><div class="conic-layer" id="g2"></div><svg class="contour-svg" id="s2" viewBox="0 0 600 450" preserveAspectRatio="xMidYMid slice"></svg><span class="card-label">Diamond · Warm</span></div>
+  <div class="card dark" id="c3"><div class="conic-layer" id="g3"></div><svg class="contour-svg" id="s3" viewBox="0 0 600 450" preserveAspectRatio="xMidYMid slice"></svg><span class="card-label">Circle · Cool</span></div>
+  <div class="card"      id="c4"><div class="conic-layer" id="g4"></div><svg class="contour-svg" id="s4" viewBox="0 0 600 450" preserveAspectRatio="xMidYMid slice"></svg><span class="card-label">Hexagon · Neon</span></div>
+  <div class="card dark" id="c5"><div class="conic-layer" id="g5"></div><svg class="contour-svg" id="s5" viewBox="0 0 600 450" preserveAspectRatio="xMidYMid slice"></svg><span class="card-label">Starburst · Violet</span></div>
+  <div class="card fullbleed dark" id="c6"><div class="conic-layer" id="g6"></div><svg class="contour-svg" id="s6" viewBox="0 0 1200 450" preserveAspectRatio="xMidYMid slice"></svg><span class="card-label">Full-bleed Hero · Vercel-style</span></div>
+</div>
+
+<script>
+// ─── Palette definitions ───────────────────────────────────────────────────
+const PALETTES = {
+  vercel:  ['rgba(250,250,250,0)', '#f5c842', '#e84b4b', '#6fa0c0', '#4dffc0', 'rgba(250,250,250,0)'],
+  purple:  ['rgba(10,10,10,0)',    '#7c3aed', '#ec4899', '#06b6d4', '#10b981', 'rgba(10,10,10,0)'],
+  warm:    ['rgba(255,255,255,0)', '#ff9500', '#ff3b30', '#ff6b35', '#ffcc02', 'rgba(255,255,255,0)'],
+  cool:    ['rgba(10,10,10,0)',    '#0ea5e9', '#6366f1', '#8b5cf6', '#06b6d4', 'rgba(10,10,10,0)'],
+  neon:    ['rgba(255,255,255,0)', '#39ff14', '#00ffff', '#ff00ff', '#ffff00', 'rgba(255,255,255,0)'],
+  violet:  ['rgba(10,10,10,0)',    '#a855f7', '#ec4899', '#f97316', '#eab308', 'rgba(10,10,10,0)'],
+};
+
+// ─── Card configs ──────────────────────────────────────────────────────────
+const CARDS = [
+  { id:0, variant:'triangle', bg:'light', vw:600,  vh:450,  palette:'vercel', cx:50, cy:72, from:180 },
+  { id:1, variant:'triangle', bg:'dark',  vw:600,  vh:450,  palette:'purple', cx:50, cy:68, from:200 },
+  { id:2, variant:'diamond',  bg:'light', vw:600,  vh:450,  palette:'warm',   cx:50, cy:50, from:90  },
+  { id:3, variant:'circle',   bg:'dark',  vw:600,  vh:450,  palette:'cool',   cx:50, cy:50, from:270 },
+  { id:4, variant:'hexagon',  bg:'light', vw:600,  vh:450,  palette:'neon',   cx:50, cy:50, from:0   },
+  { id:5, variant:'starburst',bg:'dark',  vw:600,  vh:450,  palette:'violet', cx:50, cy:50, from:45  },
+  { id:6, variant:'triangle', bg:'dark',  vw:1200, vh:450,  palette:'vercel', cx:50, cy:72, from:180 },
+];
+
+// ─── Conic gradient builder ────────────────────────────────────────────────
+function buildConic(palette, from, cx, cy) {
+  const p = PALETTES[palette];
+  return `conic-gradient(from ${from}deg at ${cx.toFixed(1)}% ${cy.toFixed(1)}%, ${p[0]} 0deg, ${p[1]} 72deg, ${p[2]} 144deg, ${p[3]} 216deg, ${p[4]} 288deg, ${p[5]} 360deg)`;
+}
+
+// ─── SVG contour generators ────────────────────────────────────────────────
+
+function triangleContours(vw, vh, bg, fg, n=90) {
+  const cx = vw/2;
+  // Triangle: apex at top-center, base at bottom
+  const apex = { x: cx,          y: vh * 0.10 };
+  const bl   = { x: cx - vw*0.2, y: vh * 0.90 };
+  const br   = { x: cx + vw*0.2, y: vh * 0.90 };
+
+  let out = '';
+  // Horizontal contour lines clipped to triangle shape
+  // For each y level, compute the x extent of the triangle
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    // y position: from apex down to base
+    const y = apex.y + (bl.y - apex.y) * t;
+    // x extent at this y (linear interpolation along left/right edges)
+    const x1 = apex.x + (bl.x - apex.x) * t;
+    const x2 = apex.x + (br.x - apex.x) * t;
+    const opacity = Math.max(0, (1 - t) * 0.95 + 0.05);
+    out += `<line x1="${x1.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${fg}" stroke-width="0.75" opacity="${opacity.toFixed(3)}"/>`;
+  }
+
+  // Outer mask: fill everything OUTSIDE the triangle with bg color
+  // Use a large rect minus the triangle (clip-path approach via SVG clipPath)
+  out += `<defs>
+    <clipPath id="tri-clip-${vw}">
+      <polygon points="${apex.x},${apex.y} ${bl.x},${bl.y} ${br.x},${br.y}"/>
+    </clipPath>
+  </defs>`;
+  // Mask rect outside triangle
+  out += `<rect x="0" y="0" width="${vw}" height="${vh}" fill="${bg}" clip-path="url(#tri-clip-${vw})" opacity="0"/>`;
+  // Inner solid mask (top ~40% of triangle height)
+  const maskT = 0.38;
+  const my  = apex.y + (bl.y - apex.y) * maskT;
+  const mx1 = apex.x + (bl.x - apex.x) * maskT;
+  const mx2 = apex.x + (br.x - apex.x) * maskT;
+  out += `<polygon points="${apex.x},${apex.y} ${mx1.toFixed(1)},${my.toFixed(1)} ${mx2.toFixed(1)},${my.toFixed(1)}" fill="${bg}"/>`;
+
+  // Triangle border
+  out += `<polygon points="${apex.x},${apex.y} ${bl.x},${bl.y} ${br.x},${br.y}" fill="none" stroke="${fg}" stroke-width="1" opacity="0.8"/>`;
+
+  return out;
+}
+
+function diamondContours(vw, vh, bg, fg, n=80) {
+  const cx = vw/2, cy = vh/2;
+  const top   = { x: cx,        y: vh*0.06 };
+  const right = { x: vw*0.84,   y: cy };
+  const bot   = { x: cx,        y: vh*0.94 };
+  const left  = { x: vw*0.16,   y: cy };
+
+  let out = '';
+  // Upper half: horizontal lines from top to equator
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const y  = top.y + (right.y - top.y) * t;
+    const x1 = top.x + (left.x  - top.x) * t;
+    const x2 = top.x + (right.x - top.x) * t;
+    const opacity = Math.max(0, (1 - t) * 0.9 + 0.05);
+    out += `<line x1="${x1.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${fg}" stroke-width="0.75" opacity="${opacity.toFixed(3)}"/>`;
+  }
+  // Lower half: horizontal lines from equator to bottom
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const y  = right.y + (bot.y - right.y) * t;
+    const x1 = left.x  + (bot.x - left.x)  * t;
+    const x2 = right.x + (bot.x - right.x) * t;
+    const opacity = Math.max(0, t * 0.9 + 0.05);
+    out += `<line x1="${x1.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${fg}" stroke-width="0.75" opacity="${opacity.toFixed(3)}"/>`;
+  }
+  // Inner mask
+  const s = 0.32;
+  const im = [top,right,bot,left].map(p => ({ x: cx+(p.x-cx)*s, y: cy+(p.y-cy)*s }));
+  out += `<polygon points="${im.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}" fill="${bg}"/>`;
+  out += `<polygon points="${top.x},${top.y} ${right.x},${right.y} ${bot.x},${bot.y} ${left.x},${left.y}" fill="none" stroke="${fg}" stroke-width="1" opacity="0.7"/>`;
+  return out;
+}
+
+function circleContours(vw, vh, bg, fg, n=55) {
+  const cx = vw/2, cy = vh/2;
+  const maxR = Math.min(vw, vh) * 0.42;
+  let out = '';
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const r = maxR * t;
+    const opacity = Math.max(0, (1 - t) * 0.9 + 0.05);
+    out += `<circle cx="${cx}" cy="${cy}" r="${r.toFixed(1)}" fill="none" stroke="${fg}" stroke-width="0.75" opacity="${opacity.toFixed(3)}"/>`;
+  }
+  // Inner mask circle
+  out += `<circle cx="${cx}" cy="${cy}" r="${(maxR*0.28).toFixed(1)}" fill="${bg}"/>`;
+  return out;
+}
+
+function hexagonContours(vw, vh, bg, fg, n=65) {
+  const cx = vw/2, cy = vh/2;
+  const maxR = Math.min(vw, vh) * 0.40;
+  let out = '';
+  for (let i = 1; i <= n; i++) {
+    const t = i / n;
+    const r = maxR * t;
+    const pts = Array.from({length:6}, (_,j) => {
+      const a = (Math.PI/3)*j - Math.PI/6;
+      return `${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`;
+    }).join(' ');
+    const opacity = Math.max(0, (1-t)*0.9+0.05);
+    out += `<polygon points="${pts}" fill="none" stroke="${fg}" stroke-width="0.75" opacity="${opacity.toFixed(3)}"/>`;
+  }
+  // Inner mask
+  const innerR = maxR * 0.22;
+  const innerPts = Array.from({length:6}, (_,j) => {
+    const a = (Math.PI/3)*j - Math.PI/6;
+    return `${(cx+innerR*Math.cos(a)).toFixed(1)},${(cy+innerR*Math.sin(a)).toFixed(1)}`;
+  }).join(' ');
+  out += `<polygon points="${innerPts}" fill="${bg}"/>`;
+  return out;
+}
+
+function starburstContours(vw, vh, bg, fg, n=60, spokes=12) {
+  const cx = vw/2, cy = vh/2;
+  const maxR = Math.min(vw, vh) * 0.40;
+  let out = '';
+  // Radial lines (spokes)
+  for (let s = 0; s < spokes; s++) {
+    const a = (Math.PI*2/spokes)*s;
+    const x2 = cx + maxR * Math.cos(a);
+    const y2 = cy + maxR * Math.sin(a);
+    out += `<line x1="${cx}" y1="${cy}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${fg}" stroke-width="0.6" opacity="0.4"/>`;
+  }
+  // Concentric rings
+  for (let i = 1; i <= n; i++) {
+    const t = i / n;
+    const r = maxR * t;
+    const opacity = Math.max(0, (1-t)*0.85+0.05);
+    out += `<circle cx="${cx}" cy="${cy}" r="${r.toFixed(1)}" fill="none" stroke="${fg}" stroke-width="0.6" opacity="${opacity.toFixed(3)}"/>`;
+  }
+  // Inner mask
+  out += `<circle cx="${cx}" cy="${cy}" r="${(maxR*0.18).toFixed(1)}" fill="${bg}"/>`;
+  return out;
+}
+
+// ─── Build all cards ───────────────────────────────────────────────────────
+CARDS.forEach(cfg => {
+  const conicEl = document.getElementById(`g${cfg.id}`);
+  const svgEl   = document.getElementById(`s${cfg.id}`);
+  const cardEl  = document.getElementById(`c${cfg.id}`);
+  const bg = cfg.bg === 'dark' ? '#0a0a0a' : '#ffffff';
+  const fg = cfg.bg === 'dark' ? '#ffffff' : '#000000';
+
+  // Initial conic
+  conicEl.style.background = buildConic(cfg.palette, cfg.from, cfg.cx, cfg.cy);
+
+  // Build contours
+  let html = '';
+  switch (cfg.variant) {
+    case 'triangle':  html = triangleContours(cfg.vw, cfg.vh, bg, fg); break;
+    case 'diamond':   html = diamondContours(cfg.vw, cfg.vh, bg, fg);  break;
+    case 'circle':    html = circleContours(cfg.vw, cfg.vh, bg, fg);   break;
+    case 'hexagon':   html = hexagonContours(cfg.vw, cfg.vh, bg, fg);  break;
+    case 'starburst': html = starburstContours(cfg.vw, cfg.vh, bg, fg);break;
+  }
+  svgEl.innerHTML = html;
+
+  // Mouse interaction — lerp conic center toward cursor
+  let animId = null;
+  let tx = cfg.cx, ty = cfg.cy;
+  let cx = cfg.cx, cy = cfg.cy;
+
+  function tick() {
+    cx += (tx - cx) * 0.07;
+    cy += (ty - cy) * 0.07;
+    conicEl.style.background = buildConic(cfg.palette, cfg.from, cx, cy);
+    animId = requestAnimationFrame(tick);
+  }
+
+  cardEl.addEventListener('mouseenter', () => { if (!animId) animId = requestAnimationFrame(tick); });
+  cardEl.addEventListener('mouseleave', () => {
+    tx = cfg.cx; ty = cfg.cy;
+    setTimeout(() => { cancelAnimationFrame(animId); animId = null; cx = cfg.cx; cy = cfg.cy; conicEl.style.background = buildConic(cfg.palette, cfg.from, cx, cy); }, 900);
+  });
+  cardEl.addEventListener('mousemove', e => {
+    const r = cardEl.getBoundingClientRect();
+    tx = (e.clientX - r.left) / r.width  * 100;
+    ty = (e.clientY - r.top)  / r.height * 100;
+  });
+});
+</script>
+</body>
+</html>

@@ -3,44 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Frontend Effects Library</title>
+<title>Bの宝库</title>
 <style>
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
   body{background:#000;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;min-height:100vh;overflow-x:hidden;line-height:1.47}
   a{text-decoration:none;color:inherit}
 
-  /* Global Nav */
-  .global-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:48px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,.08)}
-  .global-nav-inner{max-width:1024px;width:100%;padding:0 22px;display:flex;align-items:center;justify-content:space-between}
-  .nav-logo{font-size:1.05rem;font-weight:700;letter-spacing:-.02em;color:#f5f5f7}
-  .nav-links{display:flex;gap:28px}
-  .nav-links a{font-size:.75rem;color:rgba(255,255,255,.56);transition:color .3s;letter-spacing:.01em}
-  .nav-links a:hover{color:#f5f5f7}
+  /* Layout: sidebar + main */
+  .app-layout{display:flex;min-height:100vh}
+
+  /* Sidebar */
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:rgba(10,10,12,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid rgba(255,255,255,.06);z-index:1000;display:flex;flex-direction:column;overflow-y:auto;-ms-overflow-style:none;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
+  .sidebar::-webkit-scrollbar{width:4px}
+  .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+  .sidebar-header{padding:28px 20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .sidebar-logo{font-size:1.3rem;font-weight:800;letter-spacing:-.02em;color:#f5f5f7}
+  .sidebar-logo span{background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sidebar-sub{font-size:.7rem;color:rgba(255,255,255,.3);margin-top:4px;letter-spacing:.02em}
+  .sidebar-section{padding:16px 12px 8px}
+  .sidebar-section-title{font-size:.65rem;font-weight:600;color:rgba(255,255,255,.25);letter-spacing:.08em;text-transform:uppercase;padding:0 8px;margin-bottom:8px}
+  .filter-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer;transition:all .2s;border:none;background:none;color:rgba(255,255,255,.5);font-size:.78rem;font-family:inherit;width:100%;text-align:left;letter-spacing:.01em}
+  .filter-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.8)}
+  .filter-item.active{background:rgba(255,255,255,.08);color:#f5f5f7;font-weight:500}
+  .filter-item .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;opacity:.6}
+  .filter-item.active .dot{opacity:1;box-shadow:0 0 6px currentColor}
+  .filter-item .filter-count{margin-left:auto;font-size:.65rem;color:rgba(255,255,255,.2);font-weight:400}
+
+  /* Main content */
+  .main-content{margin-left:220px;flex:1;min-width:0}
+
+  /* Mobile toggle */
+  .mobile-toggle{position:fixed;top:14px;left:14px;z-index:1100;width:36px;height:36px;border-radius:10px;background:rgba(30,30,34,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);align-items:center;justify-content:center;cursor:pointer;display:none}
+  .mobile-toggle svg{width:18px;height:18px;stroke:#f5f5f7;fill:none;stroke-width:2}
 
   /* Hero */
-  .hero{padding:160px 0 100px;text-align:center;position:relative;background:#000}
-  .hero-overline{font-size:.9rem;font-weight:500;color:rgba(255,255,255,.45);letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
-  .hero h1{font-size:clamp(3rem,7vw,5.5rem);font-weight:700;letter-spacing:-.04em;line-height:1.05;color:#f5f5f7;margin-bottom:20px}
-  .hero h1 em{font-style:normal;background:linear-gradient(90deg,#2997ff,#2dd4bf,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 100%;animation:heroGrad 8s ease infinite}
+  .hero{padding:80px 40px 60px;position:relative;background:#000}
+  .hero-overline{font-size:.8rem;font-weight:500;color:rgba(255,255,255,.35);letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px}
+  .hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:700;letter-spacing:-.03em;line-height:1.1;color:#f5f5f7;margin-bottom:12px}
+  .hero h1 em{font-style:normal;background:linear-gradient(90deg,#a78bfa,#f472b6,#2dd4bf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 100%;animation:heroGrad 8s ease infinite}
   @keyframes heroGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-  .hero-sub{font-size:clamp(1.05rem,2vw,1.55rem);color:rgba(255,255,255,.4);font-weight:400;max-width:640px;margin:0 auto 48px;line-height:1.45;letter-spacing:-.01em}
-  .hero-stats{display:flex;justify-content:center;gap:64px}
-  .hero-stat{text-align:center}
-  .hero-stat-num{font-size:2.8rem;font-weight:700;letter-spacing:-.03em;color:#f5f5f7}
-  .hero-stat-label{font-size:.8rem;color:rgba(255,255,255,.35);margin-top:4px;letter-spacing:.02em}
-
-  /* Filter Bar */
-  .filter-bar{position:sticky;top:48px;z-index:900;background:rgba(0,0,0,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,.06);padding:14px 0;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
-  .filter-bar::-webkit-scrollbar{display:none}
-  .filter-inner{max-width:1024px;margin:0 auto;padding:0 22px;display:flex;gap:6px;flex-wrap:nowrap;width:max-content;min-width:100%;justify-content:center}
-  .filter-btn{padding:7px 18px;background:transparent;border:none;border-radius:980px;color:rgba(255,255,255,.5);font-size:.8rem;font-weight:400;cursor:pointer;transition:all .3s;font-family:inherit;white-space:nowrap;letter-spacing:.01em}
-  .filter-btn:hover{color:#f5f5f7;background:rgba(255,255,255,.06)}
-  .filter-btn.active{color:#f5f5f7;background:rgba(255,255,255,.12);font-weight:500}
+  .hero-sub{font-size:1rem;color:rgba(255,255,255,.35);font-weight:400;max-width:500px;line-height:1.5;letter-spacing:-.01em}
+  .hero-stats{display:flex;gap:40px;margin-top:32px}
+  .hero-stat{text-align:left}
+  .hero-stat-num{font-size:2rem;font-weight:700;letter-spacing:-.03em;color:#f5f5f7}
+  .hero-stat-label{font-size:.72rem;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.02em}
 
   /* Card Grid */
-  .grid-section{max-width:1064px;margin:0 auto;padding:48px 20px 0}
-  .card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .grid-section{padding:0 40px 60px}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
 
   /* Card */
   .card{position:relative;background:#1d1d1f;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transition:transform .5s cubic-bezier(.25,.1,.25,1),box-shadow .5s;cursor:pointer}
@@ -116,6 +127,7 @@
   [data-cat="particle"]{--accent:#60a5fa}
   [data-cat="terminal"]{--accent:#00e676}
 [data-cat="holo"]{--accent:#a78bfa}
+  [data-cat="terrain"]{--accent:#34d399}
 
   /* Preview Animations */
   .p-bounce{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2997ff,#5e5ce6);animation:pBounce 1.4s cubic-bezier(.36,0,.66,1) infinite}
@@ -193,8 +205,16 @@
   .card.visible:hover{transform:scale(1.02) translateY(-2px);transition:opacity .55s,transform .35s cubic-bezier(.25,.1,.25,1),box-shadow .35s}
 
   /* Responsive */
-  @media(max-width:960px){.card-grid{grid-template-columns:1fr 1fr}.hero-stats{gap:40px}}
-  @media(max-width:680px){.card-grid{grid-template-columns:1fr}.nav-links{display:none}.hero h1{font-size:2.6rem}.hero-stats{gap:28px;flex-wrap:wrap}.filter-inner{justify-content:flex-start}}
+  @media(max-width:1100px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:768px){
+    .sidebar{position:fixed;left:-220px;transition:transform .3s ease}
+    .sidebar.open{transform:translateX(220px)}
+    .main-content{margin-left:0}
+    .mobile-toggle{display:flex}
+    .card-grid{grid-template-columns:1fr}
+    .hero{padding:60px 20px 40px}
+    .grid-section{padding:0 20px 40px}
+  }
 </style>
 </head>
 <body>
@@ -202,7 +222,7 @@
 <!-- Global Nav -->
 <nav class="global-nav">
   <div class="global-nav-inner">
-    <div class="nav-logo">Effects.</div>
+    <div class="nav-logo"><span>B</span>の宝库</div>
     <div class="nav-links">
       <a href="#">Featured</a>
       <a href="#">Animation</a>
@@ -215,11 +235,11 @@
 
 <!-- Hero -->
 <section class="hero">
-  <p class="hero-overline">Frontend Effects Library</p>
-  <h1>Build something<br><em>extraordinary.</em></h1>
-<p class="hero-sub">654+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+  <p class="hero-overline">Bの宝库</p>
+  <h1><em>Bの宝库</em></h1>
+<p class="hero-sub">658+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
 <div class="hero-stats">
-<div class="hero-stat"><div class="hero-stat-num" data-target="654" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+<div class="hero-stat"><div class="hero-stat-num" data-target="658" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
 <div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
@@ -275,6 +295,7 @@
     <button class="filter-btn" data-cat="terminal">终端特效</button>
 <button class="filter-btn" data-cat="spotlight">光晕追踪</button>
 <button class="filter-btn" data-cat="holo">全息卡片</button>
+<button class="filter-btn" data-cat="terrain">地形图</button>
 </div>
 </div>
 
@@ -287,6 +308,15 @@
 <div class="card-visual" id="holoPreviewWrap" style="background:#080810;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px"></div>
 <div class="card-content"><h3>全息彩虹卡片</h3><p>灵感来自 Framer Holo Shader。模拟真实全息贴纸的光学衍射效果，鼠标悬停时彩虹光谱随视角流动偏移，同时卡片有 3D 倾斜跟随。6 种主题变体：宇宙、极光、太阳、深海、合成波、棱镜。</p></div>
 <div class="card-footer"><span class="tag">holo</span><span class="tag">3d-tilt</span><span class="count">6 种效果</span></div>
+</a>
+
+<!-- contour-terrain-map (置顶) -->
+<a class="card" data-cat="terrain" href="55-contour-terrain-map.html" data-source="https://vercel.com/">
+<div class="card-visual" id="terrainPreviewWrap" style="background:#f5f5f0;overflow:hidden;position:relative">
+  <canvas id="idx-terrain-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+</div>
+<div class="card-content"><h3>等高线地形波纹背景</h3><p>灵感来自 Vercel 首页。Marching Squares 算法 + Simplex Noise 生成动态地形高度场，7 种配色主题（热力/极地/熔岩/深海/矩阵/彩虹/暗金），鼠标移动触发涟漪扰动。</p></div>
+<div class="card-footer"><span class="tag">Canvas</span><span class="tag">Marching Squares</span><span class="count">7 种主题</span></div>
 </a>
 
 <!-- diamond-icon-grid-spotlight (置顶) -->
@@ -756,8 +786,8 @@
 
 <!-- Footer -->
 <footer class="footer">
-  <p class="footer-note">Built with pure HTML / CSS / JavaScript</p>
-  <p class="footer-zero">Zero Dependencies.</p>
+  <p class="footer-note">Crafted with pure HTML, CSS & JavaScript</p>
+  <p class="footer-zero">Bの宝库 — Zero Dependencies</p>
 </footer>
 
 <script>
@@ -1155,6 +1185,39 @@ const grid=document.getElementById('spotlightPreviewGrid');if(!grid)return;
     }
     animFrame();
   })();
+
+// Terrain Preview
+(function(){
+  var canvas=document.getElementById('idx-terrain-canvas');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d'),W,H,cols,rows,field,time=0,RES=5;
+  var p=new Uint8Array(256);
+  for(var i=0;i<256;i++)p[i]=i;
+  var s=42*2147483647|0;
+  for(var i=255;i>0;i--){s=(s*16807)%2147483647;var j=(s%(i+1)+i+1)%(i+1);var tmp=p[i];p[i]=p[j];p[j]=tmp;}
+  var perm=new Uint8Array(512),pm12=new Uint8Array(512);
+  for(var i=0;i<512;i++){perm[i]=p[i&255];pm12[i]=perm[i]%12;}
+  var g3=[[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+  function n2(xin,yin){
+    var F2=0.5*(Math.sqrt(3)-1),G2=(3-Math.sqrt(3))/6;
+    var si=(xin+yin)*F2,i=Math.floor(xin+si),j=Math.floor(yin+si),t=(i+j)*G2;
+    var x0=xin-(i-t),y0=yin-(j-t),i1=x0>y0?1:0,j1=x0>y0?0:1;
+    var x1=x0-i1+G2,y1=y0-j1+G2,x2=x0-1+2*G2,y2=y0-1+2*G2;
+    var ii=i&255,jj=j&255;
+    var gi0=pm12[ii+perm[jj]],gi1=pm12[ii+i1+perm[jj+j1]],gi2=pm12[ii+1+perm[jj+1]];
+    var n0=0,n1=0,n2=0,t0=0.5-x0*x0-y0*y0,t1=0.5-x1*x1-y1*y1,t2=0.5-x2*x2-y2*y2;
+    if(t0>=0){t0*=t0;n0=t0*t0*(g3[gi0][0]*x0+g3[gi0][1]*y0);}
+    if(t1>=0){t1*=t1;n1=t1*t1*(g3[gi1][0]*x1+g3[gi1][1]*y1);}
+    if(t2>=0){t2*=t2;n2=t2*t2*(g3[gi2][0]*x2+g3[gi2][1]*y2);}
+    return 70*(n0+n1+n2);
+  }
+  function resize(){var r=canvas.parentElement.getBoundingClientRect();canvas.width=r.width;canvas.height=r.height;W=r.width;H=r.height;cols=Math.ceil(W/RES)+2;rows=Math.ceil(H/RES)+2;field=new Float32Array(cols*rows);}
+  function update(){for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){var nx=c*RES/W*2.8,ny=r*RES/H*2.8,v=n2(nx+time*0.8,ny+time*0.5)*0.6+n2(nx*2.1-time*0.4,ny*2.1+time*0.3)*0.4;field[r*cols+c]=(v+1)*0.5;}}
+  function lc(v){if(v<0.25)return'rgba(220,60,40,'+(0.5+v)+')';if(v<0.5)return'rgba(230,180,30,'+(0.4+v*0.5)+')';if(v<0.75)return'rgba(40,180,100,'+(0.35+v*0.4)+')';return'rgba(60,160,220,'+(0.3+v*0.35)+')';}
+  function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#f5f5f0';ctx.fillRect(0,0,W,H);var LEVELS=22;for(var lv=1;lv<LEVELS;lv++){var thr=lv/LEVELS;ctx.beginPath();for(var r=0;r<rows-1;r++)for(var c=0;c<cols-1;c++){var x=c*RES,y=r*RES,tl=field[r*cols+c],tr=field[r*cols+c+1],bl=field[(r+1)*cols+c],br=field[(r+1)*cols+c+1];var st=(tl>=thr?8:0)|(tr>=thr?4:0)|(br>=thr?2:0)|(bl>=thr?1:0);if(st===0||st===15)continue;var ip=function(a,b){return(thr-a)/(b-a);};var top={x:x+RES*ip(tl,tr),y:y},right={x:x+RES,y:y+RES*ip(tr,br)},bottom={x:x+RES*ip(bl,br),y:y+RES},left={x:x,y:y+RES*ip(tl,bl)};var lines={1:[left,bottom],2:[bottom,right],3:[left,right],4:[top,right],6:[top,bottom],7:[top,left],8:[top,left],9:[top,bottom],11:[top,right],12:[left,right],13:[bottom,right],14:[left,bottom]};var pts=lines[st];if(!pts)continue;ctx.moveTo(pts[0].x,pts[0].y);ctx.lineTo(pts[1].x,pts[1].y);}ctx.strokeStyle=lc(thr);ctx.lineWidth=lv%4===0?1.4:0.6;ctx.stroke();}}
+  resize();window.addEventListener('resize',resize);
+  function loop(){time+=0.00025;update();draw();requestAnimationFrame(loop);}loop();
+})();
 </script>
 </body>
 </html>

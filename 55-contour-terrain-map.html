@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>55 - 等高线地形波纹背景 Contour Terrain Map</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1.page-title {
+    text-align: center;
+    padding: 40px 20px 10px;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  p.page-desc {
+    text-align: center;
+    color: rgba(255,255,255,0.45);
+    font-size: 0.9rem;
+    padding-bottom: 40px;
+  }
+
+  /* ── Demo sections ── */
+  .demo-section {
+    position: relative;
+    width: 100%;
+    height: 520px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+
+  .demo-section canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Hero content overlay */
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 20px;
+    backdrop-filter: blur(8px);
+  }
+
+  .hero-badge span { color: #fff; font-weight: 600; }
+
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    text-align: center;
+    line-height: 1.1;
+    max-width: 700px;
+    padding: 0 20px;
+    margin-bottom: 16px;
+  }
+
+  .hero-sub {
+    font-size: clamp(0.85rem, 1.5vw, 1rem);
+    color: rgba(255,255,255,0.55);
+    text-align: center;
+    max-width: 480px;
+    padding: 0 20px;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 12px;
+    pointer-events: all;
+  }
+
+  .btn-primary {
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s;
+  }
+
+  .btn-secondary:hover { background: rgba(255,255,255,0.14); }
+
+  /* Labels */
+  .demo-label {
+    position: absolute;
+    bottom: 16px;
+    left: 20px;
+    z-index: 20;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(6px);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* Variant grid */
+  .variants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 6px;
+    padding: 6px 0 60px;
+  }
+
+  .variant-card {
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .variant-card canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .variant-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    z-index: 10;
+  }
+
+  .variant-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 3px;
+  }
+
+  .variant-desc {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">等高线地形波纹背景</h1>
+<p class="page-desc">Contour Terrain Map · 灵感来自 Vercel 首页 · 鼠标移动触发地形扰动</p>
+
+<!-- ── Hero Demo ── -->
+<div class="demo-section" id="hero-demo">
+  <canvas id="canvas-hero"></canvas>
+  <div class="hero-content">
+    <div class="hero-badge"><span>New</span> 等高线地形可视化</div>
+    <h2 class="hero-title">Build on the<br>Terrain Cloud.</h2>
+    <p class="hero-sub">密集等高线配合热力图配色，鼠标移动时地形实时扰动，营造沉浸式科技感背景。</p>
+    <div class="hero-btns">
+      <button class="btn-primary">开始探索</button>
+      <button class="btn-secondary">查看演示</button>
+    </div>
+  </div>
+  <div class="demo-label">Vercel 风格 · 热力地形</div>
+</div>
+
+<!-- ── Variants ── -->
+<div class="variants-grid">
+  <div class="variant-card" id="v1">
+    <canvas id="canvas-v1"></canvas>
+    <div class="variant-info">
+      <div class="variant-name">极地冰川</div>
+      <div class="variant-desc">蓝白冷色调，模拟极地地形等高线</div>
+    </div>
+  </div>
+  <div class="variant-card" id="v2">
+    <canvas id="canvas-v2"></canvas>
+    <div class="variant-info">
+      <div class="variant-name">熔岩地貌</div>
+      <div class="variant-desc">红橙热色调，模拟火山地形热力图</div>
+    </div>
+  </div>
+  <div class="variant-card" id="v3">
+    <canvas id="canvas-v3"></canvas>
+    <div class="variant-info">
+      <div class="variant-name">深海地形</div>
+      <div class="variant-desc">深蓝绿色调，模拟海底地形测深图</div>
+    </div>
+  </div>
+  <div class="variant-card" id="v4">
+    <canvas id="canvas-v4"></canvas>
+    <div class="variant-info">
+      <div class="variant-name">数字矩阵</div>
+      <div class="variant-desc">单色绿线，赛博朋克终端风格</div>
+    </div>
+  </div>
+  <div class="variant-card" id="v5">
+    <canvas id="canvas-v5"></canvas>
+    <div class="variant-info">
+      <div class="variant-name">彩虹地形</div>
+      <div class="variant-desc">全光谱配色，地理信息系统风格</div>
+    </div>
+  </div>
+  <div class="variant-card" id="v6">
+    <canvas id="canvas-v6"></canvas>
+    <div class="variant-info">
+      <div class="variant-name">暗金地图</div>
+      <div class="variant-desc">黑金配色，高端地图可视化风格</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// Simplex Noise (自包含实现，无外部依赖)
+// ─────────────────────────────────────────────
+class SimplexNoise {
+  constructor(seed = Math.random()) {
+    this.p = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) this.p[i] = i;
+    let s = seed * 2147483647 | 0;
+    for (let i = 255; i > 0; i--) {
+      s = (s * 16807) % 2147483647;
+      const j = (s % (i + 1) + i + 1) % (i + 1);
+      [this.p[i], this.p[j]] = [this.p[j], this.p[i]];
+    }
+    this.perm = new Uint8Array(512);
+    this.permMod12 = new Uint8Array(512);
+    for (let i = 0; i < 512; i++) {
+      this.perm[i] = this.p[i & 255];
+      this.permMod12[i] = this.perm[i] % 12;
+    }
+  }
+
+  noise2D(xin, yin) {
+    const grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+    const F2 = 0.5 * (Math.sqrt(3) - 1);
+    const G2 = (3 - Math.sqrt(3)) / 6;
+    const s = (xin + yin) * F2;
+    const i = Math.floor(xin + s), j = Math.floor(yin + s);
+    const t = (i + j) * G2;
+    const X0 = i - t, Y0 = j - t;
+    const x0 = xin - X0, y0 = yin - Y0;
+    const i1 = x0 > y0 ? 1 : 0, j1 = x0 > y0 ? 0 : 1;
+    const x1 = x0 - i1 + G2, y1 = y0 - j1 + G2;
+    const x2 = x0 - 1 + 2 * G2, y2 = y0 - 1 + 2 * G2;
+    const ii = i & 255, jj = j & 255;
+    const gi0 = this.permMod12[ii + this.perm[jj]];
+    const gi1 = this.permMod12[ii + i1 + this.perm[jj + j1]];
+    const gi2 = this.permMod12[ii + 1 + this.perm[jj + 1]];
+    let n0 = 0, n1 = 0, n2 = 0;
+    let t0 = 0.5 - x0*x0 - y0*y0;
+    if (t0 >= 0) { t0 *= t0; n0 = t0 * t0 * (grad3[gi0][0]*x0 + grad3[gi0][1]*y0); }
+    let t1 = 0.5 - x1*x1 - y1*y1;
+    if (t1 >= 0) { t1 *= t1; n1 = t1 * t1 * (grad3[gi1][0]*x1 + grad3[gi1][1]*y1); }
+    let t2 = 0.5 - x2*x2 - y2*y2;
+    if (t2 >= 0) { t2 *= t2; n2 = t2 * t2 * (grad3[gi2][0]*x2 + grad3[gi2][1]*y2); }
+    return 70 * (n0 + n1 + n2); // [-1, 1]
+  }
+}
+
+// ─────────────────────────────────────────────
+// Color palette definitions
+// ─────────────────────────────────────────────
+const PALETTES = {
+  vercel: {
+    bg: '#f5f5f0',
+    lineColor: (v) => {
+      // v in [0,1]: 0=low, 1=high
+      if (v < 0.25) return `rgba(220, 60, 40, ${0.55 + v})`;       // red-hot
+      if (v < 0.5)  return `rgba(230, 180, 30, ${0.45 + v * 0.5})`; // yellow
+      if (v < 0.75) return `rgba(40, 180, 100, ${0.4 + v * 0.4})`;  // green
+      return `rgba(60, 160, 220, ${0.35 + v * 0.35})`;              // blue-cool
+    },
+    fillColor: (v) => {
+      if (v < 0.25) return `rgba(220, 60, 40, ${v * 0.18})`;
+      if (v < 0.5)  return `rgba(230, 180, 30, ${v * 0.12})`;
+      if (v < 0.75) return `rgba(40, 180, 100, ${v * 0.10})`;
+      return `rgba(60, 160, 220, ${v * 0.08})`;
+    },
+    lineWidth: 0.7,
+    levels: 28,
+    speed: 0.00025,
+    noiseScale: 2.8,
+  },
+  polar: {
+    bg: '#050d1a',
+    lineColor: (v) => `rgba(${Math.round(100 + v*155)}, ${Math.round(180 + v*75)}, 255, ${0.25 + v * 0.55})`,
+    fillColor: (v) => `rgba(80, 160, 255, ${v * 0.06})`,
+    lineWidth: 0.6,
+    levels: 24,
+    speed: 0.0002,
+    noiseScale: 3.2,
+  },
+  lava: {
+    bg: '#0a0200',
+    lineColor: (v) => {
+      const r = Math.round(180 + v * 75);
+      const g = Math.round(v * 80);
+      return `rgba(${r}, ${g}, 0, ${0.3 + v * 0.6})`;
+    },
+    fillColor: (v) => `rgba(200, 40, 0, ${v * 0.1})`,
+    lineWidth: 0.65,
+    levels: 22,
+    speed: 0.0003,
+    noiseScale: 2.5,
+  },
+  ocean: {
+    bg: '#010810',
+    lineColor: (v) => `rgba(0, ${Math.round(100 + v*155)}, ${Math.round(140 + v*115)}, ${0.2 + v * 0.6})`,
+    fillColor: (v) => `rgba(0, 150, 180, ${v * 0.07})`,
+    lineWidth: 0.55,
+    levels: 30,
+    speed: 0.00018,
+    noiseScale: 3.5,
+  },
+  matrix: {
+    bg: '#000800',
+    lineColor: (v) => `rgba(0, ${Math.round(160 + v*95)}, ${Math.round(v*40)}, ${0.2 + v * 0.7})`,
+    fillColor: (v) => `rgba(0, 200, 0, ${v * 0.04})`,
+    lineWidth: 0.5,
+    levels: 20,
+    speed: 0.0004,
+    noiseScale: 2.2,
+  },
+  rainbow: {
+    bg: '#050508',
+    lineColor: (v) => `hsl(${Math.round(v * 300)}, 90%, ${40 + v * 35}%)`,
+    fillColor: (v) => `hsla(${Math.round(v * 300)}, 80%, 50%, ${v * 0.06})`,
+    lineWidth: 0.7,
+    levels: 32,
+    speed: 0.00022,
+    noiseScale: 3.0,
+  },
+  gold: {
+    bg: '#060400',
+    lineColor: (v) => {
+      const b = Math.round(v * 60);
+      return `rgba(${Math.round(160 + v*95)}, ${Math.round(120 + v*80)}, ${b}, ${0.25 + v * 0.6})`;
+    },
+    fillColor: (v) => `rgba(200, 160, 20, ${v * 0.07})`,
+    lineWidth: 0.6,
+    levels: 26,
+    speed: 0.00020,
+    noiseScale: 2.9,
+  },
+};
+
+// ─────────────────────────────────────────────
+// Core renderer
+// ─────────────────────────────────────────────
+class ContourMap {
+  constructor(canvas, paletteName, options = {}) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.palette = PALETTES[paletteName];
+    this.noise = new SimplexNoise(options.seed || Math.random());
+    this.noise2 = new SimplexNoise(options.seed2 || Math.random());
+    this.time = 0;
+    this.mouse = { x: -9999, y: -9999 };
+    this.mouseInfluence = 0;
+    this.raf = null;
+    this.paused = false;
+
+    // Resolution: use lower res for performance, upscale via CSS
+    this.resolution = options.resolution || 3; // pixels per grid cell
+
+    this._resize();
+    this._bindEvents();
+    this._loop();
+  }
+
+  _resize() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.W = rect.width;
+    this.H = rect.height;
+    this._buildGrid();
+  }
+
+  _buildGrid() {
+    const r = this.resolution;
+    this.cols = Math.ceil(this.W / r) + 2;
+    this.rows = Math.ceil(this.H / r) + 2;
+    this.field = new Float32Array(this.cols * this.rows);
+  }
+
+  _bindEvents() {
+    const el = this.canvas.parentElement;
+    el.addEventListener('mousemove', (e) => {
+      const rect = el.getBoundingClientRect();
+      this.mouse.x = e.clientX - rect.left;
+      this.mouse.y = e.clientY - rect.top;
+      this.mouseInfluence = 1;
+    });
+    el.addEventListener('mouseleave', () => {
+      this.mouseInfluence = 0;
+    });
+    window.addEventListener('resize', () => this._resize());
+  }
+
+  _updateField() {
+    const { cols, rows, resolution: r, noise, noise2, time, mouse, mouseInfluence } = this;
+    const ns = this.palette.noiseScale;
+    const W = this.W, H = this.H;
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const wx = col * r;
+        const wy = row * r;
+
+        // Base noise layers
+        const nx = wx / W * ns;
+        const ny = wy / H * ns;
+        let v = noise.noise2D(nx + time * 0.8, ny + time * 0.5) * 0.6
+              + noise2.noise2D(nx * 2.1 - time * 0.4, ny * 2.1 + time * 0.3) * 0.3
+              + noise.noise2D(nx * 4.3 + time * 0.2, ny * 4.3 - time * 0.15) * 0.1;
+
+        // Mouse distortion
+        if (mouseInfluence > 0) {
+          const dx = wx - mouse.x;
+          const dy = wy - mouse.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          const radius = Math.min(W, H) * 0.28;
+          if (dist < radius) {
+            const strength = (1 - dist / radius);
+            const ripple = Math.sin(dist * 0.04 - time * 8) * strength * 0.35;
+            v += ripple * mouseInfluence;
+          }
+        }
+
+        // Normalize to [0, 1]
+        this.field[row * cols + col] = (v + 1) * 0.5;
+      }
+    }
+  }
+
+  _drawContours() {
+    const { ctx, cols, rows, resolution: r, field, palette } = this;
+    const levels = palette.levels;
+
+    ctx.clearRect(0, 0, this.W, this.H);
+
+    // Background
+    ctx.fillStyle = palette.bg;
+    ctx.fillRect(0, 0, this.W, this.H);
+
+    // Draw filled bands first (subtle color areas)
+    for (let lv = 0; lv < levels; lv++) {
+      const threshold = lv / levels;
+      const nextThreshold = (lv + 1) / levels;
+      const midV = (threshold + nextThreshold) * 0.5;
+
+      ctx.beginPath();
+      this._marchingSquares(threshold, true);
+      ctx.fillStyle = palette.fillColor(midV);
+      ctx.fill();
+    }
+
+    // Draw contour lines
+    for (let lv = 1; lv < levels; lv++) {
+      const threshold = lv / levels;
+      ctx.beginPath();
+      this._marchingSquares(threshold, false);
+      ctx.strokeStyle = palette.lineColor(threshold);
+      ctx.lineWidth = palette.lineWidth * (lv % 4 === 0 ? 1.8 : 1);
+      ctx.stroke();
+    }
+  }
+
+  // Marching squares: trace contour at given threshold
+  _marchingSquares(threshold, fill) {
+    const { ctx, cols, rows, resolution: r, field } = this;
+
+    for (let row = 0; row < rows - 1; row++) {
+      for (let col = 0; col < cols - 1; col++) {
+        const x = col * r;
+        const y = row * r;
+
+        const tl = field[row * cols + col];
+        const tr = field[row * cols + col + 1];
+        const bl = field[(row+1) * cols + col];
+        const br = field[(row+1) * cols + col + 1];
+
+        const state = (tl >= threshold ? 8 : 0)
+                    | (tr >= threshold ? 4 : 0)
+                    | (br >= threshold ? 2 : 0)
+                    | (bl >= threshold ? 1 : 0);
+
+        if (state === 0 || state === 15) {
+          if (fill && state === 15) {
+            ctx.rect(x, y, r, r);
+          }
+          continue;
+        }
+
+        // Interpolate edge midpoints
+        const lerp = (a, b, t) => a + (b - a) * t;
+        const interp = (a, b) => (threshold - a) / (b - a);
+
+        const top    = { x: x + r * interp(tl, tr), y };
+        const right  = { x: x + r, y: y + r * interp(tr, br) };
+        const bottom = { x: x + r * interp(bl, br), y: y + r };
+        const left   = { x, y: y + r * interp(tl, bl) };
+
+        if (fill) {
+          // Fill polygon for this cell
+          this._fillCell(ctx, state, x, y, r, top, right, bottom, left, tl, tr, bl, br, threshold);
+        } else {
+          // Draw contour line segment
+          this._drawLine(ctx, state, top, right, bottom, left);
+        }
+      }
+    }
+  }
+
+  _drawLine(ctx, state, top, right, bottom, left) {
+    const lines = {
+      1:  [left, bottom],
+      2:  [bottom, right],
+      3:  [left, right],
+      4:  [top, right],
+      5:  [top, left, bottom, right], // saddle
+      6:  [top, bottom],
+      7:  [top, left],
+      8:  [top, left],
+      9:  [top, bottom],
+      10: [left, bottom, top, right], // saddle
+      11: [top, right],
+      12: [left, right],
+      13: [bottom, right],
+      14: [left, bottom],
+    };
+    const pts = lines[state];
+    if (!pts) return;
+    if (pts.length === 4) {
+      ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y);
+      ctx.moveTo(pts[2].x, pts[2].y); ctx.lineTo(pts[3].x, pts[3].y);
+    } else {
+      ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y);
+    }
+  }
+
+  _fillCell(ctx, state, x, y, r, top, right, bottom, left) {
+    const corners = {
+      TL: { x, y },
+      TR: { x: x+r, y },
+      BR: { x: x+r, y: y+r },
+      BL: { x, y: y+r },
+    };
+    // Polygon vertices for each marching squares case (above-threshold region)
+    const polys = {
+      1:  [corners.BL, left, bottom],
+      2:  [bottom, right, corners.BR],
+      3:  [left, right, corners.BR, corners.BL],
+      4:  [top, corners.TR, right],
+      5:  [top, corners.TR, right, bottom, left], // approx
+      6:  [top, corners.TR, corners.BR, bottom],
+      7:  [top, corners.TR, corners.BR, corners.BL, left],
+      8:  [corners.TL, top, left],
+      9:  [corners.TL, top, bottom, corners.BL],
+      10: [corners.TL, top, right, corners.BR, bottom, left], // approx
+      11: [corners.TL, top, right, corners.BR, corners.BL],
+      12: [corners.TL, corners.TR, right, left],
+      13: [corners.TL, corners.TR, right, bottom, corners.BL],
+      14: [corners.TL, corners.TR, corners.BR, bottom, left],
+    };
+    const poly = polys[state];
+    if (!poly || poly.length < 3) return;
+    ctx.moveTo(poly[0].x, poly[0].y);
+    for (let i = 1; i < poly.length; i++) ctx.lineTo(poly[i].x, poly[i].y);
+    ctx.closePath();
+  }
+
+  _loop() {
+    this.time += this.palette.speed;
+    this._updateField();
+    this._drawContours();
+    this.raf = requestAnimationFrame(() => this._loop());
+  }
+
+  destroy() {
+    if (this.raf) cancelAnimationFrame(this.raf);
+  }
+}
+
+// ─────────────────────────────────────────────
+// Initialize all canvases
+// ─────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  new ContourMap(document.getElementById('canvas-hero'), 'vercel', { seed: 42, seed2: 137 });
+  new ContourMap(document.getElementById('canvas-v1'), 'polar',   { seed: 11, seed2: 22, resolution: 4 });
+  new ContourMap(document.getElementById('canvas-v2'), 'lava',    { seed: 33, seed2: 44, resolution: 4 });
+  new ContourMap(document.getElementById('canvas-v3'), 'ocean',   { seed: 55, seed2: 66, resolution: 4 });
+  new ContourMap(document.getElementById('canvas-v4'), 'matrix',  { seed: 77, seed2: 88, resolution: 4 });
+  new ContourMap(document.getElementById('canvas-v5'), 'rainbow', { seed: 99, seed2: 10, resolution: 4 });
+  new ContourMap(document.getElementById('canvas-v6'), 'gold',    { seed: 21, seed2: 34, resolution: 4 });
+});
+</script>
+</body>
+</html>

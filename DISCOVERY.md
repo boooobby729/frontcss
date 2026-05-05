@@ -46,4 +46,4 @@
 - 效果名称：等高线地形波纹背景 (Contour Terrain Map)
 - 效果描述：密集的等高线/波纹线条覆盖整个背景，配合彩色渐变区域（红色热区、绿色冷区、黄色中间区），形成地形图般的视觉效果。鼠标移动时，以鼠标为中心的区域波纹会动态扰动，形成涟漪扩散效果。整体呈现出科技感十足的地形数据可视化风格，中央可放置主体内容。
 - 实现原理：Canvas 2D API，用 marching squares 算法或直接绘制等值线，基于 Perlin noise / simplex noise 生成地形高度场，不同高度区间映射不同颜色（热力图配色），mousemove 事件在鼠标位置叠加扰动函数，requestAnimationFrame 驱动动画，等高线用 canvas.stroke() 绘制密集路径
-- 状态：待实现
+- 状态：已实现 → 55-contour-terrain-map.html

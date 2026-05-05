@@ -34,4 +34,10 @@
 - 效果名称：彩色等高线光晕背景 (Conic Gradient Contour Lines)
 - 效果描述：页面 hero 区域有一个震撼的视觉效果：底层是 conic-gradient 彩色光晕（黄/红/蓝/绿渐变，从中心向外辐射），上层叠加密集的 SVG 等高线（大量 line 元素从三角形顶点向两侧延伸，opacity 从 1 逐渐降低），三角形内部用白色 polygon 遮罩，形成镂空等高线效果。鼠标移动时光晕跟随偏移，整体呈现出地形图般的科技感。
 - 实现原理：底层 div 用 conic-gradient(from 180deg at 50% 70%, ...) 实现彩色光晕；SVG 层用 JS 动态生成大量 line 元素，从三角形顶点出发，按等差间距向底边延伸，每条线 opacity 按距离衰减；三角形遮罩用 polygon fill 背景色覆盖内部；mousemove 事件驱动 conic-gradient 的中心点偏移，实现光晕跟随效果
-- 状态：待实现
+- 状态：已实现 → 60-conic-contour.html，已集成到首页
+
+## 2026-05-05 framer.com (Performance Section)
+- 效果名称：圆形进度评分卡 (Circular Score Cards)
+- 效果描述：多个圆形进度指示器（SVG stroke-dasharray 动画），每个圆环代表一项指标评分（如 SEO 99、Performance 100、Accessibility 98）。页面滚动到可见区域时触发 IntersectionObserver，圆环从 0 动画到目标值，同时中心数字用 requestAnimationFrame 计数递增。悬停卡片时圆环高亮、数字跳动。支持多组评分主题：性能指标、用户评分、数据仪表盘等。
+- 实现原理：SVG circle 元素用 stroke-dasharray/stroke-dashoffset 控制圆弧长度，circumference = 2πr，dashoffset 从 circumference（空）到 circumference*(1-score/100)（目标值），CSS transition 或 JS requestAnimationFrame 驱动动画，IntersectionObserver 监听入场触发，数字计数用 easeOutQuart 插值
+- 状态：已实现 → 61-circular-score-cards.html，已集成到首页

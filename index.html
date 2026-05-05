@@ -7,14 +7,14 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-body{background:#000;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;min-height:100vh;overflow-x:hidden}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;min-height:100vh;overflow-x:hidden}
 a{text-decoration:none;color:inherit}
 
 /* ── Layout ── */
 .app-layout{display:flex;min-height:100vh}
 
 /* ── Sidebar ── */
-.sidebar{position:fixed;top:0;left:0;bottom:0;width:230px;background:rgba(28,28,30,.72);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-right:1px solid rgba(255,255,255,.07);z-index:100;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:none}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:230px;background:rgba(6,6,6,.95);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-right:1px solid rgba(255,255,255,.06);z-index:100;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:none}
 .sidebar::-webkit-scrollbar{display:none}
 .sidebar-header{padding:36px 20px 20px}
 .sidebar-logo{font-size:1rem;font-weight:600;letter-spacing:-.02em;color:rgba(255,255,255,.9)}
@@ -27,22 +27,26 @@ a{text-decoration:none;color:inherit}
 
 /* ── Main ── */
 .main-content{margin-left:230px;flex:1;min-width:0}
-.page-header{padding:48px 32px 28px}
+.page-header{padding:40px 32px 16px}
 .page-title{font-size:1.75rem;font-weight:600;letter-spacing:-.03em;line-height:1;color:rgba(255,255,255,.9)}
 
 /* ── Grid ── */
 .grid-section{padding:0 0 80px}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.04)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:rgba(255,255,255,.07)}
 
 /* ── Card ── */
-.card{position:relative;background:#000;text-decoration:none;color:inherit;opacity:0;transform:translateY(8px);display:none;flex-direction:column;transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
+.card{position:relative;background:#111;text-decoration:none;color:inherit;opacity:0;transform:translateY(8px);display:none;flex-direction:column;transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
 .card.visible{opacity:1;transform:none}
 .card.show{display:flex}
-.card:hover{background:#0a0a0a;z-index:1}
-.card-visual{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#000 !important}
-.card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:transparent !important}
+.card:hover{background:#161616;z-index:1}
+.card:hover .card-visual{background:#161616 !important}
+.card:hover .card-visual .stage{background:#161616 !important}
+.card:hover .card-info{background:#161616}
+.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
+.card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
+.card-visual *{--bg-override:none}
 .card-visual iframe{width:166%;height:166%;border:none;pointer-events:none;transform:scale(.6);transform-origin:center center}
-.card-info{padding:10px 14px 14px;background:#000}
+.card-info{padding:8px 12px 12px;background:#111}
 .card-info h3{font-size:.72rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.2);margin-top:1px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
@@ -180,9 +184,9 @@ a{text-decoration:none;color:inherit}
   @keyframes shake { 0%, 100% { transform: translateX(0); } 10% { transform: translateX(-8px) rotate(-2deg); } 20% { transform: translateX(8px) rotate(2deg); } 30% { transform: translateX(-6px) rotate(-1deg); } 40% { transform: translateX(6px) rotate(1deg); } 50% { transform: translateX(-4px); } 60% { transform: translateX(4px); } 70% { transform: translateX(-2px); } 80% { transform: translateX(2px); } }
 
   /* 16. Gradient Border Spin */
-  .gradient-border { width: 80px; height: 80px; border-radius: 16px; position: relative; background: #13131a; z-index: 0; }
+  .gradient-border { width: 80px; height: 80px; border-radius: 16px; position: relative;  z-index: 0; }
   .gradient-border::before { content: ''; position: absolute; inset: -3px; border-radius: 18px; background: conic-gradient(from 0deg, #667eea, #f093fb, #43e97b, #f5576c, #667eea); z-index: -1; animation: spinBorder 3s linear infinite; }
-  .gradient-border::after { content: ''; position: absolute; inset: 3px; border-radius: 13px; background: #13131a; z-index: -1; }
+  .gradient-border::after { content: ''; position: absolute; inset: 3px; border-radius: 13px;  z-index: -1; }
   @keyframes spinBorder { to { transform: rotate(360deg); } }
 
   /* 17. Stagger Bars */
@@ -221,7 +225,7 @@ a{text-decoration:none;color:inherit}
 
   /* 22. Color Cycle */
   .color-cycle { width: 60px; height: 60px; border-radius: 50%; animation: colorCycle 4s linear infinite; }
-  @keyframes colorCycle { 0% { background: #667eea; } 16% { background: #f093fb; } 33% { background: #f5576c; } 50% { background: #ffa500; } 66% { background: #43e97b; } 83% { background: #00c6ff; } 100% { background: #667eea; } }
+  @keyframes colorCycle { 0% { background: #667eea; } 16% { background: #f093fb; } 33% { background: #f5576c; } 50% { background: #ffa500; } 66% { background: #43e97b; } 83% {  } 100% { background: #667eea; } }
 
   /* 23. Swing Door */
   .swing-door { width: 50px; height: 80px; background: linear-gradient(to bottom, #764ba2, #667eea); border-radius: 4px; transform-origin: left center; animation: swingDoor 3s ease-in-out infinite; }
@@ -443,9 +447,9 @@ a{text-decoration:none;color:inherit}
 
 
   /* 1. Border Gradient Hover */
-  .border-grad { width: 200px; height: 60px; position: relative; display: flex; align-items: center; justify-content: center; background: #13131a; border-radius: 12px; cursor: pointer; overflow: hidden; z-index: 0; }
+  .border-grad { width: 200px; height: 60px; position: relative; display: flex; align-items: center; justify-content: center;  border-radius: 12px; cursor: pointer; overflow: hidden; z-index: 0; }
   .border-grad::before { content: ''; position: absolute; inset: -2px; background: conic-gradient(#667eea, #f093fb, #f5576c, #43e97b, #667eea); border-radius: 14px; z-index: -2; opacity: 0; transition: opacity .4s; animation: borderSpin 3s linear infinite; }
-  .border-grad::after { content: ''; position: absolute; inset: 2px; background: #13131a; border-radius: 10px; z-index: -1; }
+  .border-grad::after { content: ''; position: absolute; inset: 2px;  border-radius: 10px; z-index: -1; }
   .border-grad:hover::before { opacity: 1; }
   .border-grad span { color: #ccc; font-weight: 600; transition: color .3s; position: relative; z-index: 1; }
   .border-grad:hover span { color: #fff; }
@@ -470,7 +474,7 @@ a{text-decoration:none;color:inherit}
   .tilt-card span { color: #aaa; font-weight: 600; font-size: .9rem; }
 
   /* 5. Glowing Icon */
-  .glow-icon { width: 70px; height: 70px; border-radius: 50%; background: #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; transition: all .3s ease; border: 1px solid #ffffff10; }
+  .glow-icon { width: 70px; height: 70px; border-radius: 50%;  display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; transition: all .3s ease; border: 1px solid #ffffff10; }
   .glow-icon:hover { background: #667eea; box-shadow: 0 0 20px #667eea88, 0 0 60px #667eea44; transform: scale(1.1); }
 
   /* 6. Slide Fill Button */
@@ -483,7 +487,7 @@ a{text-decoration:none;color:inherit}
   .img-zoom { width: 200px; height: 140px; border-radius: 12px; overflow: hidden; cursor: pointer; position: relative; }
   .img-zoom-bg { width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e, #2d1b69, #764ba2); transition: transform .6s ease; }
   .img-zoom:hover .img-zoom-bg { transform: scale(1.2); }
-  .img-zoom-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .4s; }
+  .img-zoom-overlay { position: absolute; inset: 0;  display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .4s; }
   .img-zoom:hover .img-zoom-overlay { opacity: 1; }
   .img-zoom-overlay span { color: #fff; font-weight: 600; transform: translateY(10px); transition: transform .4s; }
   .img-zoom:hover .img-zoom-overlay span { transform: translateY(0); }
@@ -495,13 +499,13 @@ a{text-decoration:none;color:inherit}
 
   /* 9. Stagger List */
   .stagger-list { display: flex; flex-direction: column; gap: 8px; width: 200px; }
-  .stagger-item { padding: 10px 16px; background: #1a1a2e; border-radius: 8px; color: #aaa; font-size: .85rem; transform: translateX(-20px); opacity: 0; transition: all .4s ease; cursor: pointer; border-left: 3px solid transparent; }
+  .stagger-item { padding: 10px 16px;  border-radius: 8px; color: #aaa; font-size: .85rem; transform: translateX(-20px); opacity: 0; transition: all .4s ease; cursor: pointer; border-left: 3px solid transparent; }
   .stagger-list:hover .stagger-item { transform: translateX(0); opacity: 1; }
   .stagger-list:hover .stagger-item:nth-child(1) { transition-delay: 0s; }
   .stagger-list:hover .stagger-item:nth-child(2) { transition-delay: .08s; }
   .stagger-list:hover .stagger-item:nth-child(3) { transition-delay: .16s; }
   .stagger-list:hover .stagger-item:nth-child(4) { transition-delay: .24s; }
-  .stagger-item:hover { border-left-color: #667eea; color: #fff; background: #1e1e3e; }
+  .stagger-item:hover { border-left-color: #667eea; color: #fff;  }
 
   /* 10. Morphing Shape */
   .morph-shape { width: 100px; height: 100px; background: linear-gradient(135deg, #fa709a, #fee140); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; transition: border-radius .8s ease, transform .8s ease, background .8s ease; cursor: pointer; }
@@ -512,7 +516,7 @@ a{text-decoration:none;color:inherit}
   /* 11. Curtain Reveal */
   .curtain { width: 200px; height: 120px; position: relative; cursor: pointer; overflow: hidden; border-radius: 12px; }
   .curtain-bg { width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; }
-  .curtain::before, .curtain::after { content: ''; position: absolute; top: 0; width: 50%; height: 100%; background: #1a1a2e; transition: transform .5s ease; z-index: 1; }
+  .curtain::before, .curtain::after { content: ''; position: absolute; top: 0; width: 50%; height: 100%;  transition: transform .5s ease; z-index: 1; }
   .curtain::before { left: 0; transform-origin: left; }
   .curtain::after { right: 0; transform-origin: right; }
   .curtain:hover::before { transform: scaleX(0); }
@@ -527,11 +531,11 @@ a{text-decoration:none;color:inherit}
   .flip-reveal-inner { width: 100%; height: 100%; transition: transform .6s; transform-style: preserve-3d; position: relative; }
   .flip-reveal:hover .flip-reveal-inner { transform: rotateY(180deg); }
   .flip-reveal-front, .flip-reveal-back { position: absolute; inset: 0; border-radius: 12px; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; font-weight: 600; }
-  .flip-reveal-front { background: #1a1a2e; color: #aaa; border: 1px solid #ffffff10; }
+  .flip-reveal-front {  color: #aaa; border: 1px solid #ffffff10; }
   .flip-reveal-back { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #000; transform: rotateY(180deg); }
 
   /* 14. Scale Up Card */
-  .scale-up { width: 180px; height: 120px; background: #1a1a2e; border-radius: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .4s cubic-bezier(.175,.885,.32,1.275); border: 1px solid #ffffff10; color: #888; font-weight: 600; }
+  .scale-up { width: 180px; height: 120px;  border-radius: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .4s cubic-bezier(.175,.885,.32,1.275); border: 1px solid #ffffff10; color: #888; font-weight: 600; }
   .scale-up:hover { transform: scale(1.08); background: linear-gradient(135deg, #667eea22, #764ba222); border-color: #667eea44; color: #fff; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
 
   /* 15. Diagonal Swipe */
@@ -541,7 +545,7 @@ a{text-decoration:none;color:inherit}
   .diag-swipe:hover::before { transform: rotate(-45deg) translateY(0); }
 
   /* 16. Icon Rotate */
-  .icon-rotate { width: 60px; height: 60px; border-radius: 12px; background: #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; transition: all .5s ease; border: 1px solid #ffffff10; }
+  .icon-rotate { width: 60px; height: 60px; border-radius: 12px;  display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; transition: all .5s ease; border: 1px solid #ffffff10; }
   .icon-rotate:hover { transform: rotate(360deg); background: #f093fb; box-shadow: 0 0 20px rgba(240,147,251,.3); }
 
   /* 17. Text Slide Replace */
@@ -551,7 +555,7 @@ a{text-decoration:none;color:inherit}
   .text-slide:hover span { transform: translateY(-100%); }
 
   /* 18. Shadow Lift */
-  .shadow-lift { width: 180px; height: 60px; background: #1a1a2e; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .4s ease; color: #aaa; font-weight: 600; border: 1px solid #ffffff08; }
+  .shadow-lift { width: 180px; height: 60px;  border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .4s ease; color: #aaa; font-weight: 600; border: 1px solid #ffffff08; }
   .shadow-lift:hover { transform: translateY(-6px); box-shadow: 0 14px 40px rgba(102,126,234,.2); border-color: #667eea33; color: #fff; }
 
   /* 19. Border Draw */
@@ -571,7 +575,7 @@ a{text-decoration:none;color:inherit}
   .color-invert:hover { background: transparent; color: #fff; }
 
   /* 22. Spotlight Follow */
-  .spotlight { width: 200px; height: 120px; background: #111; border-radius: 16px; position: relative; overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .spotlight { width: 200px; height: 120px;  border-radius: 16px; position: relative; overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .spotlight::before { content: ''; position: absolute; width: 150px; height: 150px; background: radial-gradient(circle, rgba(102,126,234,.3), transparent 70%); top: var(--sy, 50%); left: var(--sx, 50%); transform: translate(-50%,-50%); transition: top .1s, left .1s; pointer-events: none; }
   .spotlight span { color: #aaa; font-weight: 600; position: relative; z-index: 1; transition: color .3s; }
   .spotlight:hover span { color: #fff; }
@@ -681,7 +685,7 @@ a{text-decoration:none;color:inherit}
   /* 2. 3D Cube */
   .cube-scene { width: 120px; height: 120px; perspective: 600px; }
   .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: cubeRotate 8s linear infinite; }
-  .cube-face { position: absolute; width: 120px; height: 120px; border: 2px solid rgba(102,126,234,.3); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; background: rgba(10,10,15,.8); backdrop-filter: blur(4px); }
+  .cube-face { position: absolute; width: 120px; height: 120px; border: 2px solid rgba(102,126,234,.3); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700;  backdrop-filter: blur(4px); }
   .cube-face:nth-child(1) { transform: rotateY(0deg) translateZ(60px); color: #667eea; }
   .cube-face:nth-child(2) { transform: rotateY(90deg) translateZ(60px); color: #f093fb; }
   .cube-face:nth-child(3) { transform: rotateY(180deg) translateZ(60px); color: #43e97b; }
@@ -875,7 +879,7 @@ a{text-decoration:none;color:inherit}
   @keyframes squareSpin { 0% { transform: perspective(100px) rotateX(0) rotateY(0); } 25% { transform: perspective(100px) rotateX(180deg) rotateY(0); } 50% { transform: perspective(100px) rotateX(180deg) rotateY(180deg); } 75% { transform: perspective(100px) rotateX(0) rotateY(180deg); } 100% { transform: perspective(100px) rotateX(0) rotateY(0); } }
 
   /* 7. Skeleton Screen */
-  .skeleton { width: 220px; padding: 16px; background: #1a1a2e; border-radius: 12px; }
+  .skeleton { width: 220px; padding: 16px;  border-radius: 12px; }
   .sk-line { height: 12px; background: linear-gradient(90deg, #1e1e3e 25%, #2a2a4e 50%, #1e1e3e 75%); background-size: 200% 100%; border-radius: 6px; margin-bottom: 10px; animation: shimmer 1.5s infinite; }
   .sk-line:nth-child(1) { width: 60%; }
   .sk-line:nth-child(2) { width: 100%; }
@@ -885,7 +889,7 @@ a{text-decoration:none;color:inherit}
 
   /* 8. Progress Bar */
   .progress-wrap { width: 220px; }
-  .progress-bar { height: 6px; background: #1e1e2e; border-radius: 3px; overflow: hidden; }
+  .progress-bar { height: 6px;  border-radius: 3px; overflow: hidden; }
   .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #f093fb); border-radius: 3px; animation: progressFill 2s ease-in-out infinite; }
   @keyframes progressFill { 0% { width: 0; } 50% { width: 100%; } 100% { width: 0; } }
   .progress-label { display: flex; justify-content: space-between; margin-top: 6px; font-size: .75rem; color: #555; }
@@ -918,7 +922,7 @@ a{text-decoration:none;color:inherit}
   @keyframes cubeGridScale { 0%, 70%, 100% { transform: scale3D(1,1,1); } 35% { transform: scale3D(0,0,1); } }
 
   /* 12. Typing Dots */
-  .typing { display: flex; gap: 6px; padding: 12px 20px; background: #1a1a2e; border-radius: 20px; }
+  .typing { display: flex; gap: 6px; padding: 12px 20px;  border-radius: 20px; }
   .typing span { width: 8px; height: 8px; border-radius: 50%; background: #888; animation: typingDot 1.4s ease-in-out infinite; }
   .typing span:nth-child(1) { animation-delay: 0s; }
   .typing span:nth-child(2) { animation-delay: .2s; }
@@ -939,7 +943,7 @@ a{text-decoration:none;color:inherit}
 
   /* 15. Gradient Spinner */
   .gradient-spinner { width: 50px; height: 50px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, #667eea); animation: gSpin 1s linear infinite; position: relative; }
-  .gradient-spinner::after { content: ''; position: absolute; inset: 5px; background: #13131a; border-radius: 50%; }
+  .gradient-spinner::after { content: ''; position: absolute; inset: 5px;  border-radius: 50%; }
   @keyframes gSpin { to { transform: rotate(360deg); } }
 
   /* 16. Dot Orbit */
@@ -1024,7 +1028,7 @@ a{text-decoration:none;color:inherit}
 
   /* 7. Blinds / Shutters */
   .s7-blinds { position: absolute; inset: 0; display: flex; z-index: 3; pointer-events: none; }
-  .s7-blind { flex: 1; background: #0a0a0f; transform: scaleY(0); transition: transform .5s ease; transform-origin: top; }
+  .s7-blind { flex: 1;  transform: scaleY(0); transition: transform .5s ease; transform-origin: top; }
   .s7.active .s7-blind { transform: scaleY(1); }
   .s7.active .s7-blind:nth-child(1) { transition-delay: 0s; }
   .s7.active .s7-blind:nth-child(2) { transition-delay: .05s; }
@@ -1045,7 +1049,7 @@ a{text-decoration:none;color:inherit}
 
   /* 10. Pixel Dissolve */
   .s10-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(5, 1fr); z-index: 3; pointer-events: none; }
-  .s10-cell { background: #0a0a0f; opacity: 0; transition: opacity .4s ease; }
+  .s10-cell {  opacity: 0; transition: opacity .4s ease; }
   .s10.active .s10-cell { opacity: 1; }
 
   /* === EXPANDED === */
@@ -1067,13 +1071,13 @@ a{text-decoration:none;color:inherit}
 
   /* 14. Curtain */
   .s14-curtain { position:absolute; inset:0; z-index:3; pointer-events:none; display:flex; }
-  .s14-left, .s14-right { flex:1; background:#0a0a0f; transition: transform .8s cubic-bezier(.4,0,.2,1); }
+  .s14-left, .s14-right { flex:1;  transition: transform .8s cubic-bezier(.4,0,.2,1); }
   .s14-left { transform-origin: left; transform: scaleX(0); }
   .s14-right { transform-origin: right; transform: scaleX(0); }
   .s14.active .s14-left, .s14.active .s14-right { transform: scaleX(1); }
 
   /* 15. Fade Through Black */
-  .s15-overlay { position:absolute; inset:0; background:#0a0a0f; z-index:3; pointer-events:none; opacity:0; transition: opacity .5s; }
+  .s15-overlay { position:absolute; inset:0;  z-index:3; pointer-events:none; opacity:0; transition: opacity .5s; }
   .s15.active .s15-overlay { opacity:1; }
   .s15.active .page-a { opacity: 0; transition-delay: .3s; }
 
@@ -1139,7 +1143,7 @@ a{text-decoration:none;color:inherit}
   @keyframes badgePop { 0%{ transform: scale(1);} 50%{ transform: scale(1.4);} 100%{ transform: scale(1);} }
 
   /* 5. Expanding Search */
-  .search-wrap { position: relative; width: 50px; height: 50px; transition: width .4s cubic-bezier(.4,0,.2,1); border-radius: 25px; background: #1e1e2e; overflow: hidden; cursor: pointer; display: flex; align-items: center; }
+  .search-wrap { position: relative; width: 50px; height: 50px; transition: width .4s cubic-bezier(.4,0,.2,1); border-radius: 25px;  overflow: hidden; cursor: pointer; display: flex; align-items: center; }
   .search-wrap.open { width: 260px; cursor: text; }
   .search-icon { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .search-icon svg { width: 20px; height: 20px; fill: none; stroke: #888; stroke-width: 2; }
@@ -1152,14 +1156,14 @@ a{text-decoration:none;color:inherit}
   .fab:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(102,126,234,.6); }
   .fab svg { width: 24px; height: 24px; fill: #fff; transition: transform .3s; }
   .fab.open svg { transform: rotate(45deg); }
-  .fab-item { position: absolute; width: 44px; height: 44px; border-radius: 50%; background: #1e1e2e; border: 1px solid #333; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0); transition: all .3s cubic-bezier(.68,-.55,.27,1.55); cursor: pointer; }
+  .fab-item { position: absolute; width: 44px; height: 44px; border-radius: 50%;  border: 1px solid #333; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0); transition: all .3s cubic-bezier(.68,-.55,.27,1.55); cursor: pointer; }
   .fab-item svg { width: 18px; height: 18px; fill: #aaa; }
   .fab.open ~ .fab-item:nth-child(2) { opacity: 1; transform: scale(1) translateY(-70px); }
   .fab.open ~ .fab-item:nth-child(3) { opacity: 1; transform: scale(1) translate(-50px, -50px); transition-delay: .05s; }
   .fab.open ~ .fab-item:nth-child(4) { opacity: 1; transform: scale(1) translateX(-70px); transition-delay: .1s; }
 
   /* 7. Pull to Refresh */
-  .pull-demo { width: 200px; height: 140px; background: #1a1a24; border-radius: 12px; overflow: hidden; position: relative; cursor: grab; }
+  .pull-demo { width: 200px; height: 140px;  border-radius: 12px; overflow: hidden; position: relative; cursor: grab; }
   .pull-arrow { text-align: center; padding: 10px; color: #667eea; font-size: 1.2rem; transform: translateY(-40px); transition: transform .3s; }
   .pull-demo.pulling .pull-arrow { transform: translateY(0); }
   .pull-content { padding: 12px; font-size: .75rem; color: #666; }
@@ -1167,19 +1171,19 @@ a{text-decoration:none;color:inherit}
   /* 8. Swipe Action */
   .swipe-item { width: 260px; height: 60px; position: relative; overflow: hidden; border-radius: 10px; }
   .swipe-bg { position: absolute; inset: 0; background: #f5576c; display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; color: #fff; font-size: .85rem; font-weight: 600; border-radius: 10px; }
-  .swipe-fg { position: absolute; inset: 0; background: #1e1e2e; display: flex; align-items: center; padding: 0 20px; border-radius: 10px; cursor: grab; transition: transform .3s; font-size: .85rem; color: #ccc; }
+  .swipe-fg { position: absolute; inset: 0;  display: flex; align-items: center; padding: 0 20px; border-radius: 10px; cursor: grab; transition: transform .3s; font-size: .85rem; color: #ccc; }
   .swipe-item.swiped .swipe-fg { transform: translateX(-100px); }
 
   /* 9. Tooltip Hover */
   .tip-wrap { position: relative; display: inline-block; }
-  .tip-trigger { padding: 10px 24px; background: #1e1e2e; border: 1px solid #333; border-radius: 8px; color: #ccc; cursor: pointer; font-size: .85rem; }
+  .tip-trigger { padding: 10px 24px;  border: 1px solid #333; border-radius: 8px; color: #ccc; cursor: pointer; font-size: .85rem; }
   .tip-bubble { position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(10px); background: #333; color: #fff; padding: 8px 14px; border-radius: 8px; font-size: .75rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: all .3s cubic-bezier(.68,-.55,.27,1.55); }
   .tip-bubble::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #333; }
   .tip-wrap:hover .tip-bubble { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* 10. Progress Steps */
   .steps { display: flex; align-items: center; gap: 0; }
-  .step-dot { width: 32px; height: 32px; border-radius: 50%; background: #1e1e2e; border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-size: .75rem; color: #666; cursor: pointer; transition: all .3s; position: relative; z-index: 1; }
+  .step-dot { width: 32px; height: 32px; border-radius: 50%;  border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-size: .75rem; color: #666; cursor: pointer; transition: all .3s; position: relative; z-index: 1; }
   .step-dot.active { background: #667eea; border-color: #667eea; color: #fff; }
   .step-dot.done { background: #43e97b; border-color: #43e97b; color: #fff; }
   .step-line { width: 40px; height: 2px; background: #333; position: relative; }
@@ -1199,12 +1203,12 @@ a{text-decoration:none;color:inherit}
   .heart-btn.liked { color: #f5576c; }
 
   /* 13. Copy Feedback */
-  .copy-btn { padding: 10px 24px; background: #1a1a2e; border: 1px solid #333; border-radius: 8px; color: #ccc; cursor: pointer; transition: all .3s; font-family: inherit; }
+  .copy-btn { padding: 10px 24px;  border: 1px solid #333; border-radius: 8px; color: #ccc; cursor: pointer; transition: all .3s; font-family: inherit; }
   .copy-btn.copied { background: #43e97b; color: #000; border-color: #43e97b; }
 
   /* 14. Tooltip */
   .tooltip-wrap { position: relative; display: inline-block; }
-  .tooltip-text { visibility: hidden; opacity: 0; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%) translateY(8px); background: #1a1a2e; border: 1px solid #333; padding: 6px 14px; border-radius: 8px; font-size: .75rem; color: #ccc; white-space: nowrap; transition: all .3s; pointer-events: none; }
+  .tooltip-text { visibility: hidden; opacity: 0; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%) translateY(8px);  border: 1px solid #333; padding: 6px 14px; border-radius: 8px; font-size: .75rem; color: #ccc; white-space: nowrap; transition: all .3s; pointer-events: none; }
   .tooltip-text::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1a1a2e; }
   .tooltip-wrap:hover .tooltip-text { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -1218,7 +1222,7 @@ a{text-decoration:none;color:inherit}
   .drag-handle span { width: 20px; height: 2px; background: #555; border-radius: 1px; }
 
   /* 17. Pill Toggle */
-  .pill-toggle { display: flex; background: #1a1a2e; border-radius: 30px; padding: 4px; border: 1px solid #333; }
+  .pill-toggle { display: flex;  border-radius: 30px; padding: 4px; border: 1px solid #333; }
   .pill-opt { padding: 8px 20px; border-radius: 26px; cursor: pointer; font-size: .8rem; color: #888; transition: all .3s; }
   .pill-opt.active { background: #667eea; color: #fff; }
 
@@ -1229,7 +1233,7 @@ a{text-decoration:none;color:inherit}
   @keyframes badgePop { from { transform: scale(0); } to { transform: scale(1); } }
 
   /* 19. Slider Track */
-  .slider-track { width: 200px; height: 6px; background: #1a1a2e; border-radius: 3px; position: relative; }
+  .slider-track { width: 200px; height: 6px;  border-radius: 3px; position: relative; }
   .slider-fill { height: 100%; width: 60%; background: linear-gradient(90deg,#667eea,#f093fb); border-radius: 3px; transition: width .3s; }
   .slider-thumb { width: 18px; height: 18px; background: #fff; border-radius: 50%; position: absolute; top: -6px; left: 60%; transform: translateX(-50%); box-shadow: 0 2px 8px rgba(0,0,0,.3); cursor: pointer; }
 
@@ -1363,7 +1367,7 @@ a{text-decoration:none;color:inherit}
   /* 3. Gradient Border Spin */
   .btn-gradient-wrap{position:relative;padding:3px;border-radius:12px;background:conic-gradient(from 0deg,#667eea,#f093fb,#43e97b,#f5576c,#667eea);animation:gradSpin 3s linear infinite}
   @keyframes gradSpin{to{filter:hue-rotate(360deg)}}
-  .btn-gradient-inner{display:block;padding:12px 36px;background:#13131a;border-radius:9px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;border:none;font-family:inherit}
+  .btn-gradient-inner{display:block;padding:12px 36px;border-radius:9px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;border:none;font-family:inherit}
 
   /* 4. Pulse Ring Button */
   .btn-pulse-wrap{position:relative;display:inline-block}
@@ -1373,14 +1377,14 @@ a{text-decoration:none;color:inherit}
   @keyframes pulseRing{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(1.15)}}
 
   /* 5. Slide Arrow Button */
-  .btn-arrow{padding:14px 56px 14px 32px;background:#1e1e2e;border:1px solid #333;color:#ccc;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;position:relative;overflow:hidden;transition:all .3s;font-family:inherit}
+  .btn-arrow{padding:14px 56px 14px 32px;border:1px solid #333;color:#ccc;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;position:relative;overflow:hidden;transition:all .3s;font-family:inherit}
   .btn-arrow::after{content:'\2192';position:absolute;right:20px;top:50%;transform:translateY(-50%);transition:right .3s,opacity .3s;opacity:.6}
   .btn-arrow:hover{padding-right:64px;border-color:#667eea;color:#fff}
   .btn-arrow:hover::after{right:16px;opacity:1}
 
   /* 6. Shutter Reveal */
   .btn-shutter{padding:14px 40px;background:#f5576c;color:#fff;border:none;font-size:1rem;font-weight:600;cursor:pointer;position:relative;overflow:hidden;border-radius:8px;font-family:inherit}
-  .btn-shutter::before{content:attr(data-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#1e1e2e;color:#f5576c;transform:translateY(100%);transition:transform .3s}
+  .btn-shutter::before{content:attr(data-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#f5576c;transform:translateY(100%);transition:transform .3s}
   .btn-shutter:hover::before{transform:translateY(0)}
 
   /* 7. Outline Draw */
@@ -1400,11 +1404,11 @@ a{text-decoration:none;color:inherit}
   .btn-3d:active{top:4px;box-shadow:0 2px 0 #4a3a8a,0 3px 10px rgba(0,0,0,.3)}
 
   /* 10. Magnetic Stretch */
-  .btn-magnetic{padding:14px 40px;background:#1e1e2e;border:1px solid #43e97b;color:#43e97b;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;transition:transform .2s,border-radius .3s;font-family:inherit}
+  .btn-magnetic{padding:14px 40px;border:1px solid #43e97b;color:#43e97b;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;transition:transform .2s,border-radius .3s;font-family:inherit}
   .btn-magnetic:hover{border-radius:24px}
 
   /* 11. Text Swap Button */
-  .btn-swap{padding:14px 40px;background:#1e1e2e;border:1px solid #333;color:#ccc;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;position:relative;overflow:hidden;height:50px;font-family:inherit}
+  .btn-swap{padding:14px 40px;border:1px solid #333;color:#ccc;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;position:relative;overflow:hidden;height:50px;font-family:inherit}
   .btn-swap-inner{display:flex;flex-direction:column;transition:transform .3s;line-height:22px}
   .btn-swap:hover .btn-swap-inner{transform:translateY(-22px)}
 
@@ -1425,12 +1429,12 @@ a{text-decoration:none;color:inherit}
   .btn-text-reveal:hover { color: #0a0a0f; }
 
   /* 15. Icon Spin Button */
-  .btn-icon-spin { padding: 14px 36px; background: #13131a; border: 1px solid #333; border-radius: 12px; color: #ccc; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: .95rem; font-family: inherit; }
+  .btn-icon-spin { padding: 14px 36px;  border: 1px solid #333; border-radius: 12px; color: #ccc; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: .95rem; font-family: inherit; }
   .btn-icon-spin .icon { transition: transform .4s; display: inline-block; }
   .btn-icon-spin:hover .icon { transform: rotate(360deg); }
 
   /* 16. Glitch Button */
-  .btn-glitch { padding: 14px 40px; background: #0a0a0f; border: 2px solid #f5576c; color: #f5576c; font-weight: 700; font-size: 1rem; cursor: pointer; position: relative; text-transform: uppercase; font-family: 'Courier New', monospace; }
+  .btn-glitch { padding: 14px 40px;  border: 2px solid #f5576c; color: #f5576c; font-weight: 700; font-size: 1rem; cursor: pointer; position: relative; text-transform: uppercase; font-family: 'Courier New', monospace; }
   .btn-glitch:hover { animation: btnGlitch .3s infinite; }
   @keyframes btnGlitch { 0% { transform: translate(0); } 20% { transform: translate(-2px,1px); } 40% { transform: translate(2px,-1px); } 60% { transform: translate(-1px,2px); } 80% { transform: translate(1px,-2px); } 100% { transform: translate(0); } }
 
@@ -1567,7 +1571,7 @@ a{text-decoration:none;color:inherit}
   /* 20. Frosted Overlay */
   .img-frost { width: 180px; height: 120px; background: linear-gradient(135deg,#667eea,#f093fb); border-radius: 12px; position: relative; overflow: hidden; }
   .img-frost-overlay { position: absolute; inset: 0; backdrop-filter: blur(0); -webkit-backdrop-filter: blur(0); transition: backdrop-filter .5s; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; opacity: 0; transition: all .5s; }
-  .img-frost:hover .img-frost-overlay { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(0,0,0,.3); opacity: 1; }
+  .img-frost:hover .img-frost-overlay { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);  opacity: 1; }
 
 
 
@@ -1586,33 +1590,33 @@ a{text-decoration:none;color:inherit}
   .hamburger.open span:nth-child(3){top:16px;transform:rotate(-45deg)}
 
   /* 2. Tab Bar with Sliding Indicator */
-  .tabbar{display:flex;background:#1a1a24;border-radius:10px;padding:4px;position:relative;gap:0}
+  .tabbar{display:flex;border-radius:10px;padding:4px;position:relative;gap:0}
   .tabbar-item{padding:10px 24px;color:#888;font-size:.85rem;cursor:pointer;position:relative;z-index:1;transition:color .3s;border:none;background:none;font-family:inherit}
   .tabbar-item.active{color:#fff}
   .tabbar-indicator{position:absolute;height:calc(100% - 8px);top:4px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:0}
 
   /* 3. Sidebar Push */
-  .sidebar-demo{width:300px;height:180px;background:#0f0f1a;border-radius:12px;overflow:hidden;display:flex;position:relative}
-  .sidebar-panel{width:0;background:#1a1a2e;transition:width .3s;overflow:hidden;flex-shrink:0;border-right:1px solid #1e1e2e}
+  .sidebar-demo{width:300px;height:180px;border-radius:12px;overflow:hidden;display:flex;position:relative}
+  .sidebar-panel{width:0;transition:width .3s;overflow:hidden;flex-shrink:0;border-right:1px solid #1e1e2e}
   .sidebar-panel.open{width:100px}
   .sidebar-panel ul{list-style:none;padding:12px;width:100px}
   .sidebar-panel li{padding:6px 8px;color:#888;font-size:.7rem;border-radius:4px;white-space:nowrap;cursor:pointer;transition:background .2s}
   .sidebar-panel li:hover{background:#667eea22;color:#667eea}
   .sidebar-content{flex:1;padding:16px;display:flex;flex-direction:column;gap:8px}
-  .sidebar-toggle{width:28px;height:28px;background:#1e1e2e;border:1px solid #333;border-radius:6px;color:#888;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+  .sidebar-toggle{width:28px;height:28px;border:1px solid #333;border-radius:6px;color:#888;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem}
 
   /* 4. Dropdown Fade */
   .dropdown-wrap{position:relative;display:inline-block}
-  .dropdown-trigger{padding:10px 24px;background:#1e1e2e;border:1px solid #333;border-radius:8px;color:#ccc;cursor:pointer;font-size:.85rem;display:flex;align-items:center;gap:8px}
+  .dropdown-trigger{padding:10px 24px;border:1px solid #333;border-radius:8px;color:#ccc;cursor:pointer;font-size:.85rem;display:flex;align-items:center;gap:8px}
   .dropdown-trigger::after{content:'\25BC';font-size:.6rem;transition:transform .3s}
-  .dropdown-menu{position:absolute;top:calc(100% + 8px);left:0;min-width:180px;background:#1a1a24;border:1px solid #1e1e2e;border-radius:10px;padding:6px;opacity:0;transform:translateY(-8px);pointer-events:none;transition:all .3s;z-index:10}
+  .dropdown-menu{position:absolute;top:calc(100% + 8px);left:0;min-width:180px;border:1px solid #1e1e2e;border-radius:10px;padding:6px;opacity:0;transform:translateY(-8px);pointer-events:none;transition:all .3s;z-index:10}
   .dropdown-wrap.open .dropdown-menu{opacity:1;transform:translateY(0);pointer-events:auto}
   .dropdown-wrap.open .dropdown-trigger::after{transform:rotate(180deg)}
   .dropdown-menu a{display:block;padding:8px 14px;color:#aaa;font-size:.8rem;text-decoration:none;border-radius:6px;transition:background .2s}
   .dropdown-menu a:hover{background:#667eea22;color:#fff}
 
   /* 5. Pill Navigation */
-  .pill-nav{display:flex;gap:6px;background:#1a1a24;padding:6px;border-radius:50px}
+  .pill-nav{display:flex;gap:6px;padding:6px;border-radius:50px}
   .pill-item{padding:8px 20px;border-radius:50px;color:#888;font-size:.8rem;cursor:pointer;transition:all .3s;border:none;background:none;font-family:inherit}
   .pill-item.active{background:linear-gradient(135deg,#43e97b,#38f9d7);color:#000;font-weight:600}
 
@@ -1625,7 +1629,7 @@ a{text-decoration:none;color:inherit}
   .breadcrumb-item:hover ~ .breadcrumb-sep{transform:translateX(2px)}
 
   /* 7. Bottom Nav with Bulge */
-  .bottom-nav{display:flex;background:#1a1a24;border-radius:24px;padding:8px 16px;gap:16px;align-items:flex-end;position:relative}
+  .bottom-nav{display:flex;border-radius:24px;padding:8px 16px;gap:16px;align-items:flex-end;position:relative}
   .bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 12px;transition:all .3s;color:#666;font-size:.65rem}
   .bottom-nav-item svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;transition:all .3s}
   .bottom-nav-item.active{color:#667eea;transform:translateY(-12px)}
@@ -1636,7 +1640,7 @@ a{text-decoration:none;color:inherit}
   .circular-wrap{position:relative;width:160px;height:160px}
   .circular-center{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#f5576c,#fa709a);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;border:none;color:#fff;font-size:1.2rem;transition:transform .3s}
   .circular-center.open{transform:translate(-50%,-50%) rotate(45deg)}
-  .circular-item{position:absolute;width:36px;height:36px;border-radius:50%;background:#1e1e2e;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#888;opacity:0;transform:translate(-50%,-50%) scale(0);transition:all .4s cubic-bezier(.68,-.55,.27,1.55);cursor:pointer}
+  .circular-item{position:absolute;width:36px;height:36px;border-radius:50%;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#888;opacity:0;transform:translate(-50%,-50%) scale(0);transition:all .4s cubic-bezier(.68,-.55,.27,1.55);cursor:pointer}
   .circular-wrap.open .circular-item{opacity:1;transform:translate(-50%,-50%) scale(1)}
   .circular-wrap.open .ci-1{top:10%;left:50%}
   .circular-wrap.open .ci-2{top:25%;left:85%}
@@ -1647,7 +1651,7 @@ a{text-decoration:none;color:inherit}
 
   /* 9. Accordion Menu */
   .accordion{width:240px}
-  .acc-header{padding:12px 16px;background:#1a1a24;border:1px solid #1e1e2e;border-radius:8px;color:#ccc;font-size:.85rem;cursor:pointer;display:flex;justify-content:space-between;margin-bottom:4px;transition:background .2s}
+  .acc-header{padding:12px 16px;border:1px solid #1e1e2e;border-radius:8px;color:#ccc;font-size:.85rem;cursor:pointer;display:flex;justify-content:space-between;margin-bottom:4px;transition:background .2s}
   .acc-header:hover{background:#1e1e2e}
   .acc-header::after{content:'+';transition:transform .3s}
   .acc-header.open::after{transform:rotate(45deg)}
@@ -1666,7 +1670,7 @@ a{text-decoration:none;color:inherit}
   /* === EXPANDED === */
 
   /* 11. Pill Nav */
-  .nav-pill { display: flex; background: #13131a; border-radius: 50px; padding: 4px; border: 1px solid #1e1e2e; }
+  .nav-pill { display: flex;  border-radius: 50px; padding: 4px; border: 1px solid #1e1e2e; }
   .nav-pill a { padding: 10px 24px; border-radius: 46px; color: #888; text-decoration: none; font-size: .85rem; transition: all .3s; }
   .nav-pill a.active { background: #667eea; color: #fff; }
 
@@ -1678,7 +1682,7 @@ a{text-decoration:none;color:inherit}
   .nav-dots a:hover::after { width: 6px; height: 6px; border-radius: 50%; }
 
   /* 13. Sidebar Mini */
-  .sidebar-mini { width: 56px; background: #13131a; border-radius: 16px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; border: 1px solid #1e1e2e; }
+  .sidebar-mini { width: 56px;  border-radius: 16px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; border: 1px solid #1e1e2e; }
   .sidebar-mini a { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #888; text-decoration: none; transition: all .3s; font-size: .9rem; }
   .sidebar-mini a:hover { background: #667eea22; color: #667eea; }
 
@@ -1694,28 +1698,28 @@ a{text-decoration:none;color:inherit}
   .fab-btn:hover { transform: rotate(45deg); }
   .fab-items { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; opacity: 0; pointer-events: none; transition: all .3s; }
   .fab-group:hover .fab-items { opacity: 1; pointer-events: auto; }
-  .fab-item { width: 44px; height: 44px; border-radius: 50%; background: #1a1a2e; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: .9rem; cursor: pointer; transition: all .3s; }
+  .fab-item { width: 44px; height: 44px; border-radius: 50%;  border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: .9rem; cursor: pointer; transition: all .3s; }
   .fab-item:hover { background: #667eea; color: #fff; }
 
   /* 16. Tabs Animated */
-  .tabs-anim { display: flex; background: #13131a; border-radius: 12px; border: 1px solid #1e1e2e; overflow: hidden; }
+  .tabs-anim { display: flex;  border-radius: 12px; border: 1px solid #1e1e2e; overflow: hidden; }
   .tabs-anim a { flex: 1; padding: 14px 20px; color: #888; text-decoration: none; text-align: center; font-size: .85rem; transition: all .3s; position: relative; }
   .tabs-anim a::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #667eea; transform: scaleX(0); transition: transform .3s; }
   .tabs-anim a:hover { color: #fff; background: #ffffff05; }
   .tabs-anim a:hover::after { transform: scaleX(1); }
 
   /* 17. Command Palette */
-  .cmd-palette { width: 300px; background: #13131a; border: 1px solid #333; border-radius: 12px; overflow: hidden; }
+  .cmd-palette { width: 300px;  border: 1px solid #333; border-radius: 12px; overflow: hidden; }
   .cmd-input { width: 100%; padding: 14px 18px; background: transparent; border: none; border-bottom: 1px solid #1e1e2e; color: #ccc; font-size: .9rem; outline: none; font-family: inherit; }
   .cmd-items { padding: 8px; }
   .cmd-item { padding: 10px 14px; border-radius: 8px; color: #888; font-size: .85rem; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; }
   .cmd-item:hover { background: #667eea22; color: #fff; }
-  .cmd-kbd { font-size: .7rem; color: #555; background: #0a0a0f; padding: 2px 8px; border-radius: 4px; border: 1px solid #333; }
+  .cmd-kbd { font-size: .7rem; color: #555;  padding: 2px 8px; border-radius: 4px; border: 1px solid #333; }
 
   /* 18. Progress Steps */
   .steps { display: flex; align-items: center; gap: 0; }
   .step { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .step-circle { width: 32px; height: 32px; border-radius: 50%; background: #1a1a2e; border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-size: .75rem; color: #888; transition: all .3s; }
+  .step-circle { width: 32px; height: 32px; border-radius: 50%;  border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-size: .75rem; color: #888; transition: all .3s; }
   .step.done .step-circle { background: #667eea; border-color: #667eea; color: #fff; }
   .step-label { font-size: .7rem; color: #555; }
   .step-line { width: 40px; height: 2px; background: #333; margin-bottom: 20px; }
@@ -1723,11 +1727,11 @@ a{text-decoration:none;color:inherit}
 
   /* 19. Tag Cloud */
   .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; max-width: 280px; justify-content: center; }
-  .tag-cloud a { padding: 6px 16px; background: #1a1a2e; border: 1px solid #333; border-radius: 20px; color: #888; font-size: .75rem; text-decoration: none; transition: all .3s; }
+  .tag-cloud a { padding: 6px 16px;  border: 1px solid #333; border-radius: 20px; color: #888; font-size: .75rem; text-decoration: none; transition: all .3s; }
   .tag-cloud a:hover { border-color: #667eea; color: #667eea; background: #667eea11; }
 
   /* 20. Dock Nav */
-  .dock-nav { display: flex; align-items: end; gap: 6px; background: rgba(30,30,50,.8); padding: 8px 12px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid #ffffff10; }
+  .dock-nav { display: flex; align-items: end; gap: 6px;  padding: 8px 12px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid #ffffff10; }
   .dock-item { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: all .2s; }
   .dock-item:hover { transform: scale(1.4) translateY(-8px); }
 
@@ -1750,7 +1754,7 @@ a{text-decoration:none;color:inherit}
   .outlined-group{position:relative;width:260px}
   .outlined-input{width:100%;padding:14px 16px;background:none;border:2px solid #333;border-radius:8px;color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .3s}
   .outlined-input:focus{border-color:#667eea}
-  .outlined-label{position:absolute;top:14px;left:12px;color:#666;font-size:1rem;pointer-events:none;transition:all .3s;background:#13131a;padding:0 6px}
+  .outlined-label{position:absolute;top:14px;left:12px;color:#666;font-size:1rem;pointer-events:none;transition:all .3s;padding:0 6px}
   .outlined-input:focus~.outlined-label,.outlined-input:not(:placeholder-shown)~.outlined-label{top:-10px;font-size:.72rem;color:#667eea}
 
   /* 3. Underline Expand */
@@ -1760,7 +1764,7 @@ a{text-decoration:none;color:inherit}
   .underline-group:focus-within::after{width:100%}
 
   /* 4. Search Morph */
-  .search-morph{width:48px;height:48px;border-radius:50%;background:#1e1e2e;border:2px solid #333;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);overflow:hidden;position:relative}
+  .search-morph{width:48px;height:48px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);overflow:hidden;position:relative}
   .search-morph.open{width:260px;border-radius:24px;border-color:#667eea}
   .search-morph svg{width:20px;height:20px;fill:none;stroke:#888;stroke-width:2;flex-shrink:0;transition:stroke .3s}
   .search-morph.open svg{stroke:#667eea}
@@ -1769,9 +1773,9 @@ a{text-decoration:none;color:inherit}
 
   /* 5. Password Strength */
   .pw-group{width:260px}
-  .pw-input{width:100%;padding:12px 16px;background:#1a1a24;border:1px solid #333;border-radius:8px;color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .3s}
+  .pw-input{width:100%;padding:12px 16px;border:1px solid #333;border-radius:8px;color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .3s}
   .pw-input:focus{border-color:#667eea}
-  .pw-bar{height:4px;background:#1e1e2e;border-radius:2px;margin-top:8px;overflow:hidden}
+  .pw-bar{height:4px;border-radius:2px;margin-top:8px;overflow:hidden}
   .pw-fill{height:100%;width:0;border-radius:2px;transition:all .3s}
   .pw-text{font-size:.72rem;color:#666;margin-top:4px}
 
@@ -1794,17 +1798,17 @@ a{text-decoration:none;color:inherit}
 
   /* 8. Range Slider */
   .range-wrap{width:260px;position:relative}
-  .range-slider{-webkit-appearance:none;width:100%;height:6px;background:#1e1e2e;border-radius:3px;outline:none}
+  .range-slider{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;outline:none}
   .range-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;cursor:pointer;box-shadow:0 2px 10px rgba(102,126,234,.4)}
   .range-value{text-align:center;color:#667eea;font-size:1.2rem;font-weight:700;margin-top:8px}
 
   /* 9. OTP Input */
   .otp-group{display:flex;gap:10px}
-  .otp-input{width:44px;height:52px;background:#1a1a24;border:2px solid #333;border-radius:10px;color:#fff;font-size:1.2rem;text-align:center;outline:none;font-family:inherit;caret-color:#667eea;transition:border-color .3s}
+  .otp-input{width:44px;height:52px;border:2px solid #333;border-radius:10px;color:#fff;font-size:1.2rem;text-align:center;outline:none;font-family:inherit;caret-color:#667eea;transition:border-color .3s}
   .otp-input:focus{border-color:#667eea;box-shadow:0 0 0 3px #667eea22}
 
   /* 10. Textarea Auto-grow */
-  .auto-textarea{width:260px;min-height:48px;max-height:160px;padding:12px 16px;background:#1a1a24;border:1px solid #333;border-radius:10px;color:#fff;font-size:.9rem;outline:none;resize:none;font-family:inherit;transition:border-color .3s;overflow:auto}
+  .auto-textarea{width:260px;min-height:48px;max-height:160px;padding:12px 16px;border:1px solid #333;border-radius:10px;color:#fff;font-size:.9rem;outline:none;resize:none;font-family:inherit;transition:border-color .3s;overflow:auto}
   .auto-textarea:focus{border-color:#667eea}
   .char-count{font-size:.7rem;color:#555;text-align:right;width:260px}
 
@@ -1812,14 +1816,14 @@ a{text-decoration:none;color:inherit}
 
   /* 11. Float Label */
   .float-field { position: relative; width: 220px; }
-  .float-field input { width: 100%; padding: 16px 12px 6px; background: #13131a; border: 1px solid #333; border-radius: 10px; color: #ccc; font-size: .9rem; outline: none; transition: border-color .3s; font-family: inherit; }
+  .float-field input { width: 100%; padding: 16px 12px 6px;  border: 1px solid #333; border-radius: 10px; color: #ccc; font-size: .9rem; outline: none; transition: border-color .3s; font-family: inherit; }
   .float-field input:focus { border-color: #667eea; }
   .float-field label { position: absolute; top: 50%; left: 12px; transform: translateY(-50%); color: #666; font-size: .85rem; transition: all .3s; pointer-events: none; }
   .float-field input:focus + label, .float-field input:not(:placeholder-shown) + label { top: 6px; transform: translateY(0); font-size: .65rem; color: #667eea; }
 
   /* 12. OTP Input */
   .otp-group { display: flex; gap: 8px; }
-  .otp-input { width: 44px; height: 52px; background: #13131a; border: 1px solid #333; border-radius: 10px; text-align: center; color: #fff; font-size: 1.2rem; font-weight: 700; outline: none; transition: border-color .3s; caret-color: #667eea; font-family: inherit; }
+  .otp-input { width: 44px; height: 52px;  border: 1px solid #333; border-radius: 10px; text-align: center; color: #fff; font-size: 1.2rem; font-weight: 700; outline: none; transition: border-color .3s; caret-color: #667eea; font-family: inherit; }
   .otp-input:focus { border-color: #667eea; box-shadow: 0 0 0 3px #667eea22; }
 
   /* 13. Star Rating */
@@ -1829,25 +1833,25 @@ a{text-decoration:none;color:inherit}
   .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: #ffa500; }
 
   /* 14. Chip Input */
-  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; background: #13131a; border: 1px solid #333; border-radius: 10px; padding: 8px 12px; min-width: 220px; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px;  border: 1px solid #333; border-radius: 10px; padding: 8px 12px; min-width: 220px; }
   .chip { padding: 4px 12px; background: #667eea22; border: 1px solid #667eea44; border-radius: 20px; font-size: .75rem; color: #667eea; display: flex; align-items: center; gap: 6px; }
   .chip-x { cursor: pointer; font-size: .6rem; opacity: .6; }
   .chip-x:hover { opacity: 1; }
 
   /* 15. Segmented Control */
-  .seg-ctrl { display: flex; background: #13131a; border-radius: 10px; padding: 3px; border: 1px solid #333; }
+  .seg-ctrl { display: flex;  border-radius: 10px; padding: 3px; border: 1px solid #333; }
   .seg-opt { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: .8rem; color: #888; transition: all .3s; text-align: center; }
   .seg-opt.active { background: #667eea; color: #fff; }
 
   /* 16. Date Picker Style */
-  .date-field { display: flex; align-items: center; gap: 8px; background: #13131a; border: 1px solid #333; border-radius: 10px; padding: 12px 16px; width: 220px; }
+  .date-field { display: flex; align-items: center; gap: 8px;  border: 1px solid #333; border-radius: 10px; padding: 12px 16px; width: 220px; }
   .date-field span { color: #888; font-size: .85rem; }
   .date-icon { color: #667eea; }
 
   /* 17. Slider With Value */
   .slider-group { display: flex; flex-direction: column; align-items: center; gap: 8px; }
   .slider-val { font-size: 1.4rem; font-weight: 700; color: #667eea; }
-  .slider-bar { width: 200px; -webkit-appearance: none; height: 6px; background: #1a1a2e; border-radius: 3px; outline: none; }
+  .slider-bar { width: 200px; -webkit-appearance: none; height: 6px;  border-radius: 3px; outline: none; }
   .slider-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #667eea; border-radius: 50%; cursor: pointer; }
 
   /* 18. Color Picker Preview */
@@ -1857,7 +1861,7 @@ a{text-decoration:none;color:inherit}
 
   /* 19. Textarea Counter */
   .ta-wrap { width: 240px; position: relative; }
-  .ta-wrap textarea { width: 100%; height: 80px; background: #13131a; border: 1px solid #333; border-radius: 10px; padding: 12px; color: #ccc; font-size: .85rem; resize: none; outline: none; font-family: inherit; }
+  .ta-wrap textarea { width: 100%; height: 80px;  border: 1px solid #333; border-radius: 10px; padding: 12px; color: #ccc; font-size: .85rem; resize: none; outline: none; font-family: inherit; }
   .ta-wrap textarea:focus { border-color: #667eea; }
   .ta-count { position: absolute; bottom: 8px; right: 12px; font-size: .7rem; color: #555; }
 
@@ -1907,7 +1911,7 @@ a{text-decoration:none;color:inherit}
   .h-bars{width:280px;display:flex;flex-direction:column;gap:12px}
   .h-bar-row{display:flex;align-items:center;gap:10px}
   .h-bar-name{width:60px;font-size:.75rem;color:#888;text-align:right;flex-shrink:0}
-  .h-bar-track{flex:1;height:10px;background:#1e1e2e;border-radius:5px;overflow:hidden}
+  .h-bar-track{flex:1;height:10px;border-radius:5px;overflow:hidden}
   .h-bar-fill{height:100%;border-radius:5px;width:0;animation:hBarFill 1s ease forwards}
   @keyframes hBarFill{to{width:var(--w)}}
   .h-bar-val{width:32px;font-size:.75rem;color:#ccc;font-weight:600}
@@ -1946,7 +1950,7 @@ a{text-decoration:none;color:inherit}
 
   /* 11. Donut Chart */
   .donut { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#667eea 0% 35%, #f093fb 35% 60%, #43e97b 60% 80%, #333 80% 100%); position: relative; }
-  .donut::after { content: '80%'; position: absolute; inset: 20px; background: #13131a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #ccc; font-size: .9rem; }
+  .donut::after { content: '80%'; position: absolute; inset: 20px;  border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #ccc; font-size: .9rem; }
 
   /* 12. Gauge */
   .gauge { width: 120px; height: 60px; border-radius: 120px 120px 0 0; background: conic-gradient(from -90deg at 50% 100%, #667eea 0deg, #f093fb 108deg, #333 108deg 180deg); position: relative; overflow: hidden; }
@@ -1962,12 +1966,12 @@ a{text-decoration:none;color:inherit}
   .h-bars { display: flex; flex-direction: column; gap: 10px; width: 200px; }
   .h-bar { display: flex; align-items: center; gap: 8px; }
   .h-bar-label { font-size: .7rem; color: #888; width: 30px; text-align: right; }
-  .h-bar-track { flex: 1; height: 8px; background: #1a1a2e; border-radius: 4px; overflow: hidden; }
+  .h-bar-track { flex: 1; height: 8px;  border-radius: 4px; overflow: hidden; }
   .h-bar-fill { height: 100%; border-radius: 4px; animation: barGrow 1s ease forwards; transform-origin: left; }
   @keyframes barGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
   /* 15. Stat Card */
-  .stat-card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 16px 24px; text-align: center; min-width: 120px; }
+  .stat-card {  border: 1px solid #1e1e2e; border-radius: 12px; padding: 16px 24px; text-align: center; min-width: 120px; }
   .stat-num { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg,#667eea,#f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .stat-label { font-size: .7rem; color: #888; margin-top: 4px; }
   .stat-change { font-size: .7rem; color: #43e97b; margin-top: 2px; }
@@ -1998,7 +2002,7 @@ a{text-decoration:none;color:inherit}
 
   /* 20. Metric Tiles */
   .metric-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .metric-tile { background: #13131a; border: 1px solid #1e1e2e; border-radius: 10px; padding: 12px; text-align: center; }
+  .metric-tile {  border: 1px solid #1e1e2e; border-radius: 10px; padding: 12px; text-align: center; }
   .metric-tile .val { font-size: 1.2rem; font-weight: 700; }
   .metric-tile .lbl { font-size: .65rem; color: #888; margin-top: 2px; }
 

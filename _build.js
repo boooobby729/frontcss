@@ -157,8 +157,14 @@ function cleanCss(css) {
     .replace(/\s*\.card-info h3\s*\{[^}]*\}/g, '')
     .replace(/\s*\.card-info \.tag\s*\{[^}]*\}/g, '')
     .replace(/\s*\.card-info p\s*\{[^}]*\}/g, '')
-    // 清除 stage 自带的背景色（防止污染卡片预览区）
-    .replace(/(\.stage[^{]*\{[^}]*)background\s*:[^;]+;/g, '$1');
+    // 清除 stage 自带的背景色
+    .replace(/(\.stage[^{]*\{[^}]*)background\s*:[^;]+;/g, '$1')
+    // 清除子页面 html 背景
+    .replace(/\s*html\s*\{[^}]*\}/g, '')
+    // 清除所有深色纯色背景（#0xx #1xx 系列，如 #0a0a0f #13131a #111 #000 等）
+    .replace(/background(?:-color)?\s*:\s*#[0-1][0-9a-fA-F][0-9a-fA-F](?:[0-9a-fA-F]{3})?\s*(?:!important)?\s*;/gi, '')
+    // 清除 rgb/rgba 三通道都极低的深色
+    .replace(/background(?:-color)?\s*:\s*rgba?\(\s*(?:\d|[01]\d|2[0-9]|30)\s*,\s*(?:\d|[01]\d|2[0-9]|30)\s*,\s*(?:\d|[01]\d|2[0-9]|30)[^)]*\)\s*(?:!important)?\s*;/gi, '');
 }
 
 // ============================================================
@@ -285,14 +291,14 @@ const finalHtml = `<!DOCTYPE html>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-body{background:#000;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;min-height:100vh;overflow-x:hidden}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;min-height:100vh;overflow-x:hidden}
 a{text-decoration:none;color:inherit}
 
 /* ── Layout ── */
 .app-layout{display:flex;min-height:100vh}
 
 /* ── Sidebar ── */
-.sidebar{position:fixed;top:0;left:0;bottom:0;width:230px;background:rgba(28,28,30,.72);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-right:1px solid rgba(255,255,255,.07);z-index:100;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:none}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:230px;background:rgba(6,6,6,.95);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-right:1px solid rgba(255,255,255,.06);z-index:100;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:none}
 .sidebar::-webkit-scrollbar{display:none}
 .sidebar-header{padding:36px 20px 20px}
 .sidebar-logo{font-size:1rem;font-weight:600;letter-spacing:-.02em;color:rgba(255,255,255,.9)}
@@ -305,22 +311,26 @@ a{text-decoration:none;color:inherit}
 
 /* ── Main ── */
 .main-content{margin-left:230px;flex:1;min-width:0}
-.page-header{padding:48px 32px 28px}
+.page-header{padding:40px 32px 16px}
 .page-title{font-size:1.75rem;font-weight:600;letter-spacing:-.03em;line-height:1;color:rgba(255,255,255,.9)}
 
 /* ── Grid ── */
 .grid-section{padding:0 0 80px}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.04)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:rgba(255,255,255,.07)}
 
 /* ── Card ── */
-.card{position:relative;background:#000;text-decoration:none;color:inherit;opacity:0;transform:translateY(8px);display:none;flex-direction:column;transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
+.card{position:relative;background:#111;text-decoration:none;color:inherit;opacity:0;transform:translateY(8px);display:none;flex-direction:column;transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
 .card.visible{opacity:1;transform:none}
 .card.show{display:flex}
-.card:hover{background:#0a0a0a;z-index:1}
-.card-visual{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#000 !important}
-.card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:transparent !important}
+.card:hover{background:#161616;z-index:1}
+.card:hover .card-visual{background:#161616 !important}
+.card:hover .card-visual .stage{background:#161616 !important}
+.card:hover .card-info{background:#161616}
+.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
+.card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
+.card-visual *{--bg-override:none}
 .card-visual iframe{width:166%;height:166%;border:none;pointer-events:none;transform:scale(.6);transform-origin:center center}
-.card-info{padding:10px 14px 14px;background:#000}
+.card-info{padding:8px 12px 12px;background:#111}
 .card-info h3{font-size:.72rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.2);margin-top:1px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 

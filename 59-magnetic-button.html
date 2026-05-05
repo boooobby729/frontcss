@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>59 · 磁力吸附按钮 Magnetic Button</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── Layout ── */
+.page-title{text-align:center;padding:60px 20px 12px;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;letter-spacing:-.02em;background:linear-gradient(135deg,#fff 40%,rgba(255,255,255,.45));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.page-sub{text-align:center;color:rgba(255,255,255,.38);font-size:.85rem;letter-spacing:.05em;text-transform:uppercase;margin-bottom:60px}
+
+.section{padding:40px 40px 60px;max-width:1100px;margin:0 auto}
+.section-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.3);margin-bottom:32px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+
+/* Variant rows */
+.row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:32px;margin-bottom:48px}
+.row-label{text-align:center;font-size:.75rem;color:rgba(255,255,255,.25);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+
+/* ── Magnetic wrapper ── */
+.mag-wrap{display:inline-flex;align-items:center;justify-content:center;/* padding creates magnetic detection zone */padding:24px;cursor:pointer;user-select:none}
+
+/* ── Base button styles ── */
+.mag-btn{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  white-space:nowrap;
+  /* smooth spring-like return */
+  transition:transform .6s cubic-bezier(.23,1,.32,1);
+  will-change:transform;
+}
+.mag-btn .label{
+  position:relative;z-index:1;pointer-events:none;
+  transition:transform .6s cubic-bezier(.23,1,.32,1);
+  display:flex;align-items:center;gap:8px;
+}
+
+/* Variant A: Solid pill */
+.btn-solid{
+  background:#fff;color:#000;
+  padding:14px 32px;border-radius:100px;
+  font-size:.95rem;font-weight:600;letter-spacing:.02em;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.btn-solid:hover{box-shadow:0 8px 32px rgba(255,255,255,.18)}
+
+/* Variant B: Outline */
+.btn-outline{
+  border:1.5px solid rgba(255,255,255,.35);color:#fff;
+  padding:13px 31px;border-radius:100px;
+  font-size:.95rem;font-weight:500;letter-spacing:.02em;
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(8px);
+}
+.btn-outline:hover{border-color:rgba(255,255,255,.75);background:rgba(255,255,255,.08)}
+
+/* Variant C: Glow gradient */
+.btn-glow{
+  background:linear-gradient(135deg,#6c63ff,#e040fb,#ff6b6b);
+  color:#fff;padding:14px 32px;border-radius:100px;
+  font-size:.95rem;font-weight:600;
+  box-shadow:0 0 0 rgba(108,99,255,0);
+  transition:transform .6s cubic-bezier(.23,1,.32,1),box-shadow .3s ease;
+}
+.btn-glow:hover{box-shadow:0 0 40px rgba(108,99,255,.55)}
+
+/* Variant D: Circle icon */
+.btn-circle{
+  width:72px;height:72px;border-radius:50%;
+  background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.2);
+  font-size:1.4rem;
+  backdrop-filter:blur(8px);
+}
+.btn-circle:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5)}
+
+/* Variant E: Dark card */
+.btn-card{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  color:#fff;padding:16px 36px;border-radius:16px;
+  font-size:.95rem;font-weight:500;letter-spacing:.01em;
+  backdrop-filter:blur(12px);
+}
+.btn-card:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.2)}
+
+/* Variant F: Neon */
+.btn-neon{
+  color:#0ff;padding:13px 31px;border-radius:8px;
+  font-size:.9rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  border:1.5px solid #0ff;
+  background:transparent;
+  box-shadow:0 0 0 rgba(0,255,255,0),inset 0 0 0 rgba(0,255,255,0);
+  transition:transform .6s cubic-bezier(.23,1,.32,1),box-shadow .25s ease;
+}
+.btn-neon:hover{
+  box-shadow:0 0 18px rgba(0,255,255,.6),0 0 40px rgba(0,255,255,.2),inset 0 0 12px rgba(0,255,255,.08);
+}
+
+/* Variant G: Big CTA */
+.btn-cta{
+  background:linear-gradient(145deg,#1a1a2e,#16213e);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;padding:20px 52px;border-radius:18px;
+  font-size:1.1rem;font-weight:600;letter-spacing:.01em;
+  box-shadow:0 4px 24px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.btn-cta:hover{border-color:rgba(255,255,255,.25)}
+
+/* Variant H: Tag/chip */
+.btn-tag{
+  background:#1c1c2e;color:rgba(255,255,255,.75);
+  padding:8px 18px;border-radius:100px;font-size:.8rem;
+  border:1px solid rgba(255,255,255,.1);letter-spacing:.04em;
+}
+.btn-tag:hover{background:#252538;color:#fff}
+
+/* Arrow SVG inline */
+.arrow{display:inline-block;width:16px;height:16px;vertical-align:middle}
+
+/* ── Separator / description ── */
+.desc{text-align:center;max-width:560px;margin:0 auto 60px;color:rgba(255,255,255,.35);font-size:.85rem;line-height:1.7}
+
+/* ── Big showcase ── */
+.showcase{display:flex;align-items:center;justify-content:center;padding:60px 20px;gap:48px;flex-wrap:wrap;background:radial-gradient(ellipse 70% 50% at 50% 60%,rgba(108,99,255,.12) 0%,transparent 70%)}
+</style>
+</head>
+<body>
+
+<h1 class="page-title">磁力吸附按钮</h1>
+<p class="page-sub">Magnetic Button · 8 Variants</p>
+
+<div class="desc">鼠标靠近时按钮被磁力吸引跟随，移开后弹性回弹。<br>按钮内文字以更大幅度独立运动，形成视差层次感。</div>
+
+<!-- Big showcase row -->
+<div class="showcase">
+  <div class="mag-wrap">
+    <button class="mag-btn btn-solid"><span class="label">Get Started →</span></button>
+  </div>
+  <div class="mag-wrap">
+    <button class="mag-btn btn-glow"><span class="label">
+      <svg class="arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Explore
+    </span></button>
+  </div>
+  <div class="mag-wrap">
+    <button class="mag-btn btn-circle"><span class="label">✦</span></button>
+  </div>
+  <div class="mag-wrap">
+    <button class="mag-btn btn-cta"><span class="label">Start Building</span></button>
+  </div>
+</div>
+
+<div class="section">
+
+  <!-- Row 1: Solid + Outline -->
+  <div class="section-label">形状变体 Shape Variants</div>
+  <div class="row">
+    <div>
+      <div class="row-label">Solid Pill</div>
+      <div class="mag-wrap">
+        <button class="mag-btn btn-solid"><span class="label">Download</span></button>
+      </div>
+    </div>
+    <div>
+      <div class="row-label">Outline</div>
+      <div class="mag-wrap">
+        <button class="mag-btn btn-outline"><span class="label">Learn More</span></button>
+      </div>
+    </div>
+    <div>
+      <div class="row-label">Rounded Card</div>
+      <div class="mag-wrap">
+        <button class="mag-btn btn-card"><span class="label">View Demo</span></button>
+      </div>
+    </div>
+    <div>
+      <div class="row-label">Sharp Tag</div>
+      <div class="mag-wrap">
+        <button class="mag-btn btn-neon"><span class="label">Connect</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Circles + Tags -->
+  <div class="section-label">图标 & 标签 Icon & Tag</div>
+  <div class="row">
+    <div>
+      <div class="row-label">Circle ×3</div>
+      <div style="display:flex;gap:16px">
+        <div class="mag-wrap">
+          <button class="mag-btn btn-circle"><span class="label">✦</span></button>
+        </div>
+        <div class="mag-wrap">
+          <button class="mag-btn btn-circle"><span class="label">→</span></button>
+        </div>
+        <div class="mag-wrap">
+          <button class="mag-btn btn-circle"><span class="label">↗</span></button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="row-label">Tag chips</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <div class="mag-wrap" style="padding:12px">
+          <button class="mag-btn btn-tag"><span class="label">#magnetic</span></button>
+        </div>
+        <div class="mag-wrap" style="padding:12px">
+          <button class="mag-btn btn-tag"><span class="label">#spring</span></button>
+        </div>
+        <div class="mag-wrap" style="padding:12px">
+          <button class="mag-btn btn-tag"><span class="label">#parallax</span></button>
+        </div>
+        <div class="mag-wrap" style="padding:12px">
+          <button class="mag-btn btn-tag"><span class="label">#css</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Gradient + Neon -->
+  <div class="section-label">发光效果 Glow Variants</div>
+  <div class="row">
+    <div>
+      <div class="row-label">Gradient Glow</div>
+      <div class="mag-wrap">
+        <button class="mag-btn btn-glow"><span class="label">✦ Create Now</span></button>
+      </div>
+    </div>
+    <div>
+      <div class="row-label">Neon Cyan</div>
+      <div class="mag-wrap">
+        <button class="mag-btn btn-neon"><span class="label">Execute</span></button>
+      </div>
+    </div>
+    <div>
+      <div class="row-label">Big CTA</div>
+      <div class="mag-wrap">
+        <button class="mag-btn btn-cta"><span class="label">
+          <svg class="arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Launch Project
+        </span></button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /section -->
+
+<script>
+// ─────────────────────────────────────────────
+//  Magnetic Button — pure JS spring physics
+//  Works on any element with class .mag-wrap
+// ─────────────────────────────────────────────
+(function(){
+
+  // Tuning
+  const MAGNET_STRENGTH  = 0.38;   // how far btn travels (0-1 fraction of distance)
+  const LABEL_STRENGTH   = 0.65;   // label moves more than the button
+  const TRANSITION_IN    = '0s';   // while inside zone — no delay, JS drives it
+  const TRANSITION_OUT   = '0.65s cubic-bezier(.23,1,.32,1)';  // spring return
+
+  const wraps = document.querySelectorAll('.mag-wrap');
+
+  wraps.forEach(wrap => {
+    const btn   = wrap.querySelector('.mag-btn');
+    const label = btn ? btn.querySelector('.label') : null;
+    if(!btn) return;
+
+    let rAF = null;
+    let targetBX = 0, targetBY = 0;
+    let targetLX = 0, targetLY = 0;
+    let curBX = 0, curBY = 0;
+    let curLX = 0, curLY = 0;
+    let inside = false;
+
+    function lerp(a, b, t){ return a + (b-a)*t }
+
+    function animate(){
+      curBX = lerp(curBX, targetBX, 0.14);
+      curBY = lerp(curBY, targetBY, 0.14);
+      curLX = lerp(curLX, targetLX, 0.14);
+      curLY = lerp(curLY, targetLY, 0.14);
+
+      btn.style.transform = `translate(${curBX.toFixed(2)}px,${curBY.toFixed(2)}px)`;
+      if(label) label.style.transform = `translate(${curLX.toFixed(2)}px,${curLY.toFixed(2)}px)`;
+
+      const stoppedB = Math.abs(curBX - targetBX) < 0.05 && Math.abs(curBY - targetBY) < 0.05;
+      const stoppedL = Math.abs(curLX - targetLX) < 0.05 && Math.abs(curLY - targetLY) < 0.05;
+
+      if(!inside && stoppedB && stoppedL){
+        // snap to zero exactly
+        curBX=curBY=curLX=curLY=0;
+        btn.style.transform  = '';
+        if(label) label.style.transform = '';
+        rAF = null;
+        return;
+      }
+      rAF = requestAnimationFrame(animate);
+    }
+
+    function startLoop(){
+      if(!rAF) rAF = requestAnimationFrame(animate);
+    }
+
+    wrap.addEventListener('mousemove', e => {
+      inside = true;
+      btn.style.transition  = 'none';
+      if(label) label.style.transition = 'none';
+
+      const r  = btn.getBoundingClientRect();
+      const cx = r.left + r.width  / 2;
+      const cy = r.top  + r.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+
+      targetBX = dx * MAGNET_STRENGTH;
+      targetBY = dy * MAGNET_STRENGTH;
+      targetLX = dx * LABEL_STRENGTH;
+      targetLY = dy * LABEL_STRENGTH;
+
+      startLoop();
+    });
+
+    wrap.addEventListener('mouseleave', () => {
+      inside = false;
+      // back to 0 — lerp handles the spring return
+      targetBX = targetBY = targetLX = targetLY = 0;
+      startLoop();
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

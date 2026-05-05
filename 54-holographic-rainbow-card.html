@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>54 · 全息彩虹卡片 Holographic Rainbow Card</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080810;
+    --card-w: 280px;
+    --card-h: 390px;
+    --radius: 18px;
+  }
+
+  body {
+    background: var(--bg);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    padding: 60px 20px 20px;
+  }
+  header h1 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  header p {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Section labels ── */
+  .section-label {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin: 50px 0 28px;
+  }
+
+  /* ── Grid ── */
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    padding: 0 40px 80px;
+  }
+
+  /* ── Card shell ── */
+  .card-wrap {
+    perspective: 800px;
+    cursor: pointer;
+  }
+
+  .card {
+    width: var(--card-w);
+    height: var(--card-h);
+    border-radius: var(--radius);
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.08s linear, box-shadow 0.3s ease;
+    will-change: transform;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.08),
+      0 20px 60px rgba(0,0,0,0.6),
+      0 0 40px rgba(0,0,0,0.4);
+  }
+
+  .card:hover {
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.15),
+      0 30px 80px rgba(0,0,0,0.7),
+      0 0 60px rgba(120,80,255,0.15);
+  }
+
+  /* ── Base layer (card artwork) ── */
+  .card-base {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  /* ── Holographic foil layer ── */
+  .card-holo {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    opacity: var(--holo-opacity, 0.15);
+    transition: opacity 0.4s ease;
+    mix-blend-mode: color-dodge;
+    background:
+      repeating-linear-gradient(
+        calc(var(--holo-angle, 0deg) + 0deg),
+        hsla(0,   100%, 65%, 0.5) 0%,
+        hsla(30,  100%, 65%, 0.5) 8%,
+        hsla(60,  100%, 65%, 0.5) 16%,
+        hsla(90,  100%, 65%, 0.5) 24%,
+        hsla(120, 100%, 65%, 0.5) 32%,
+        hsla(150, 100%, 65%, 0.5) 40%,
+        hsla(180, 100%, 65%, 0.5) 48%,
+        hsla(210, 100%, 65%, 0.5) 56%,
+        hsla(240, 100%, 65%, 0.5) 64%,
+        hsla(270, 100%, 65%, 0.5) 72%,
+        hsla(300, 100%, 65%, 0.5) 80%,
+        hsla(330, 100%, 65%, 0.5) 88%,
+        hsla(360, 100%, 65%, 0.5) 100%
+      );
+    background-size: 200% 200%;
+    background-position: var(--bgx, 50%) var(--bgy, 50%);
+    filter: brightness(1.2) saturate(1.4);
+  }
+
+  .card:hover .card-holo {
+    opacity: var(--holo-opacity-hover, 0.55);
+  }
+
+  /* ── Glare layer ── */
+  .card-glare {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    background: radial-gradient(
+      circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255,255,255,0.18) 0%,
+      rgba(255,255,255,0.06) 30%,
+      transparent 65%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  .card:hover .card-glare {
+    opacity: 1;
+  }
+
+  /* ── Card content ── */
+  .card-content {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    pointer-events: none;
+  }
+
+  /* ── Variant 1: Cosmic Dark ── */
+  .card--cosmic .card-base {
+    background:
+      radial-gradient(ellipse at 20% 20%, #1a0533 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, #001a3a 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 50%, #0d0d1a 0%, #050510 100%);
+  }
+  .card--cosmic .card-stars {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 45%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 30%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 75%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 45% 85%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 55%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(2px 2px at 60% 40%, rgba(200,180,255,0.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 78% 12%, rgba(180,220,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 42% 62%, rgba(255,200,180,0.7) 0%, transparent 100%);
+  }
+  .card--cosmic .card-planet {
+    position: absolute;
+    bottom: 60px;
+    right: 30px;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #7b4fff, #3a0080 60%, #1a0040);
+    box-shadow:
+      inset -8px -8px 20px rgba(0,0,0,0.5),
+      0 0 30px rgba(120,60,255,0.4),
+      0 0 60px rgba(80,20,200,0.2);
+  }
+  .card--cosmic .card-planet::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -20px;
+    right: -20px;
+    height: 18px;
+    margin-top: -9px;
+    border-radius: 50%;
+    border: 3px solid rgba(180,140,255,0.4);
+    transform: rotateX(70deg);
+    box-shadow: 0 0 10px rgba(180,140,255,0.3);
+  }
+  .card--cosmic .label-top {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(180,140,255,0.7);
+  }
+  .card--cosmic .label-main {
+    margin-top: auto;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(150,100,255,0.5);
+  }
+  .card--cosmic .label-sub {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: rgba(180,160,255,0.6);
+  }
+  .card--cosmic { --holo-opacity: 0.12; --holo-opacity-hover: 0.5; }
+
+  /* ── Variant 2: Aurora Green ── */
+  .card--aurora .card-base {
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(0,255,120,0.25) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 100%, rgba(0,180,255,0.2) 0%, transparent 50%),
+      linear-gradient(160deg, #020d08 0%, #030f12 50%, #020810 100%);
+  }
+  .card--aurora .card-aurora-waves {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg,
+        transparent 0%,
+        rgba(0,255,120,0.08) 20%,
+        rgba(0,220,180,0.12) 35%,
+        rgba(0,180,255,0.08) 50%,
+        transparent 70%
+      );
+    filter: blur(8px);
+  }
+  .card--aurora .card-aurora-waves::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(200deg,
+        transparent 0%,
+        rgba(100,255,180,0.06) 30%,
+        rgba(0,200,255,0.1) 55%,
+        transparent 80%
+      );
+    filter: blur(12px);
+  }
+  .card--aurora .label-top {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(0,255,150,0.6);
+  }
+  .card--aurora .label-main {
+    margin-top: auto;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(0,255,120,0.4);
+  }
+  .card--aurora .label-sub {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: rgba(100,255,200,0.5);
+  }
+  .card--aurora { --holo-opacity: 0.1; --holo-opacity-hover: 0.45; }
+
+  /* ── Variant 3: Solar Flare ── */
+  .card--solar .card-base {
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(255,160,0,0.3) 0%, transparent 55%),
+      radial-gradient(ellipse at 20% 80%, rgba(255,60,0,0.2) 0%, transparent 50%),
+      linear-gradient(160deg, #120800 0%, #0f0500 100%);
+  }
+  .card--solar .card-sun {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #fff8e0, #ffcc00 40%, #ff6600 70%, #cc2200);
+    box-shadow:
+      0 0 20px rgba(255,180,0,0.8),
+      0 0 50px rgba(255,120,0,0.5),
+      0 0 100px rgba(255,60,0,0.3);
+  }
+  .card--solar .card-sun::before {
+    content: '';
+    position: absolute;
+    inset: -15px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,200,0,0.15) 0%, transparent 70%);
+    animation: pulse-sun 2s ease-in-out infinite;
+  }
+  @keyframes pulse-sun {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
+  .card--solar .label-top {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,180,60,0.7);
+  }
+  .card--solar .label-main {
+    margin-top: auto;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,150,0,0.6);
+  }
+  .card--solar .label-sub {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: rgba(255,180,80,0.55);
+  }
+  .card--solar { --holo-opacity: 0.1; --holo-opacity-hover: 0.48; }
+
+  /* ── Variant 4: Ocean Deep ── */
+  .card--ocean .card-base {
+    background:
+      radial-gradient(ellipse at 60% 20%, rgba(0,120,255,0.2) 0%, transparent 55%),
+      radial-gradient(ellipse at 30% 90%, rgba(0,200,220,0.15) 0%, transparent 50%),
+      linear-gradient(160deg, #020812 0%, #030a18 100%);
+  }
+  .card--ocean .card-waves {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 160px;
+    background:
+      repeating-linear-gradient(
+        -5deg,
+        transparent 0px,
+        transparent 18px,
+        rgba(0,150,255,0.06) 18px,
+        rgba(0,150,255,0.06) 20px
+      );
+    mask-image: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  }
+  .card--ocean .card-bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(100,200,255,0.3), rgba(0,100,200,0.1));
+    border: 1px solid rgba(100,200,255,0.2);
+  }
+  .card--ocean .card-bubble:nth-child(1) { width: 12px; height: 12px; bottom: 80px; left: 40px; }
+  .card--ocean .card-bubble:nth-child(2) { width: 8px; height: 8px; bottom: 110px; left: 70px; }
+  .card--ocean .card-bubble:nth-child(3) { width: 16px; height: 16px; bottom: 60px; left: 100px; }
+  .card--ocean .card-bubble:nth-child(4) { width: 6px; height: 6px; bottom: 130px; left: 55px; }
+  .card--ocean .label-top {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(60,180,255,0.65);
+  }
+  .card--ocean .label-main {
+    margin-top: auto;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(0,150,255,0.5);
+  }
+  .card--ocean .label-sub {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: rgba(80,180,255,0.5);
+  }
+  .card--ocean { --holo-opacity: 0.1; --holo-opacity-hover: 0.45; }
+
+  /* ── Variant 5: Neon Synthwave ── */
+  .card--synth .card-base {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,0,180,0.2) 0%, transparent 50%),
+      radial-gradient(ellipse at 0% 100%, rgba(80,0,255,0.2) 0%, transparent 50%),
+      radial-gradient(ellipse at 100% 100%, rgba(0,200,255,0.15) 0%, transparent 50%),
+      linear-gradient(160deg, #0d0010 0%, #080018 100%);
+  }
+  .card--synth .card-grid-lines {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 180px;
+    background:
+      linear-gradient(to top, rgba(255,0,180,0.15) 0%, transparent 100%),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 28px,
+        rgba(255,0,180,0.08) 28px,
+        rgba(255,0,180,0.08) 30px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 18px,
+        rgba(255,0,180,0.06) 18px,
+        rgba(255,0,180,0.06) 20px
+      );
+    mask-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    transform: perspective(200px) rotateX(20deg);
+    transform-origin: bottom;
+  }
+  .card--synth .card-sun-synth {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 40px;
+    border-radius: 80px 80px 0 0;
+    background: linear-gradient(to bottom, #ff00b4, #ff6600);
+    box-shadow:
+      0 0 20px rgba(255,0,180,0.6),
+      0 0 50px rgba(255,0,100,0.3);
+    overflow: hidden;
+  }
+  .card--synth .card-sun-synth::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 5px,
+      rgba(0,0,0,0.4) 5px,
+      rgba(0,0,0,0.4) 7px
+    );
+  }
+  .card--synth .label-top {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,0,180,0.7);
+  }
+  .card--synth .label-main {
+    margin-top: auto;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,0,180,0.6), 0 0 40px rgba(80,0,255,0.4);
+  }
+  .card--synth .label-sub {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: rgba(255,100,220,0.55);
+  }
+  .card--synth { --holo-opacity: 0.12; --holo-opacity-hover: 0.52; }
+
+  /* ── Variant 6: Prismatic White ── */
+  .card--prism .card-base {
+    background:
+      radial-gradient(ellipse at 30% 30%, rgba(200,200,255,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 70%, rgba(255,200,200,0.1) 0%, transparent 50%),
+      linear-gradient(135deg, #0e0e14 0%, #12121a 100%);
+  }
+  .card--prism .card-crystal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    width: 100px;
+    height: 120px;
+    clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
+    background: linear-gradient(135deg,
+      rgba(255,255,255,0.15) 0%,
+      rgba(200,180,255,0.1) 30%,
+      rgba(180,220,255,0.08) 60%,
+      rgba(255,200,180,0.1) 100%
+    );
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow:
+      inset 0 0 30px rgba(255,255,255,0.05),
+      0 0 40px rgba(200,180,255,0.1);
+  }
+  .card--prism .card-crystal::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 20%;
+    width: 60%;
+    height: 40%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
+  }
+  .card--prism .label-top {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(200,180,255,0.6);
+  }
+  .card--prism .label-main {
+    margin-top: auto;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(200,180,255,0.4);
+  }
+  .card--prism .label-sub {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: rgba(200,200,255,0.45);
+  }
+  .card--prism { --holo-opacity: 0.15; --holo-opacity-hover: 0.6; }
+
+  /* ── Shimmer badge ── */
+  .card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: rgba(255,255,255,0.6);
+    backdrop-filter: blur(4px);
+    width: fit-content;
+    margin-top: 10px;
+  }
+  .card-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.8;
+  }
+
+  /* ── Footer hint ── */
+  .hint {
+    text-align: center;
+    padding: 0 20px 60px;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.05em;
+  }
+  .hint span {
+    display: inline-block;
+    animation: float-hint 3s ease-in-out infinite;
+  }
+  @keyframes float-hint {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Holographic Rainbow Card</h1>
+  <p>全息彩虹卡片 · 鼠标悬停感受光学衍射效果</p>
+</header>
+
+<p class="section-label">Cosmic · Aurora · Solar · Ocean · Synthwave · Prismatic</p>
+
+<div class="grid">
+
+  <!-- Card 1: Cosmic Dark -->
+  <div class="card-wrap">
+    <div class="card card--cosmic" data-card>
+      <div class="card-base">
+        <div class="card-stars"></div>
+        <div class="card-planet"></div>
+      </div>
+      <div class="card-holo"></div>
+      <div class="card-glare"></div>
+      <div class="card-content">
+        <span class="label-top">Cosmic Series</span>
+        <div class="card-badge">Holographic</div>
+        <div class="label-main">Deep<br>Space</div>
+        <div class="label-sub">Saturn · Ring Nebula</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Aurora -->
+  <div class="card-wrap">
+    <div class="card card--aurora" data-card>
+      <div class="card-base">
+        <div class="card-aurora-waves"></div>
+      </div>
+      <div class="card-holo"></div>
+      <div class="card-glare"></div>
+      <div class="card-content">
+        <span class="label-top">Aurora Series</span>
+        <div class="card-badge">Holographic</div>
+        <div class="label-main">Northern<br>Lights</div>
+        <div class="label-sub">Borealis · Iceland</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: Solar Flare -->
+  <div class="card-wrap">
+    <div class="card card--solar" data-card>
+      <div class="card-base">
+        <div class="card-sun"></div>
+      </div>
+      <div class="card-holo"></div>
+      <div class="card-glare"></div>
+      <div class="card-content">
+        <span class="label-top">Solar Series</span>
+        <div class="card-badge">Holographic</div>
+        <div class="label-main">Solar<br>Flare</div>
+        <div class="label-sub">Corona · Prominence</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 4: Ocean Deep -->
+  <div class="card-wrap">
+    <div class="card card--ocean" data-card>
+      <div class="card-base">
+        <div class="card-waves"></div>
+        <div class="card-bubble"></div>
+        <div class="card-bubble"></div>
+        <div class="card-bubble"></div>
+        <div class="card-bubble"></div>
+      </div>
+      <div class="card-holo"></div>
+      <div class="card-glare"></div>
+      <div class="card-content">
+        <span class="label-top">Ocean Series</span>
+        <div class="card-badge">Holographic</div>
+        <div class="label-main">Abyss<br>Zone</div>
+        <div class="label-sub">Mariana · Bioluminescence</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 5: Synthwave -->
+  <div class="card-wrap">
+    <div class="card card--synth" data-card>
+      <div class="card-base">
+        <div class="card-grid-lines"></div>
+        <div class="card-sun-synth"></div>
+      </div>
+      <div class="card-holo"></div>
+      <div class="card-glare"></div>
+      <div class="card-content">
+        <span class="label-top">Synth Series</span>
+        <div class="card-badge">Holographic</div>
+        <div class="label-main">Neon<br>Horizon</div>
+        <div class="label-sub">Retrowave · 1984</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 6: Prismatic -->
+  <div class="card-wrap">
+    <div class="card card--prism" data-card>
+      <div class="card-base">
+        <div class="card-crystal"></div>
+      </div>
+      <div class="card-holo"></div>
+      <div class="card-glare"></div>
+      <div class="card-content">
+        <span class="label-top">Prism Series</span>
+        <div class="card-badge">Holographic</div>
+        <div class="label-main">Crystal<br>Lattice</div>
+        <div class="label-sub">Refraction · Spectrum</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="hint"><span>✦ 将鼠标移到卡片上，感受全息光学效果 ✦</span></p>
+
+<script>
+  const cards = document.querySelectorAll('[data-card]');
+  const MAX_TILT = 18;   // degrees
+  const HOLO_RANGE = 120; // gradient shift range %
+
+  cards.forEach(card => {
+    const wrap = card.parentElement;
+    const holo = card.querySelector('.card-holo');
+    const glare = card.querySelector('.card-glare');
+
+    let rafId = null;
+    let targetRx = 0, targetRy = 0;
+    let currentRx = 0, currentRy = 0;
+    let isHovered = false;
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function animate() {
+      currentRx = lerp(currentRx, targetRx, 0.12);
+      currentRy = lerp(currentRy, targetRy, 0.12);
+
+      card.style.setProperty('--rx', `${currentRx}deg`);
+      card.style.setProperty('--ry', `${currentRy}deg`);
+
+      if (isHovered || Math.abs(currentRx) > 0.05 || Math.abs(currentRy) > 0.05) {
+        rafId = requestAnimationFrame(animate);
+      } else {
+        currentRx = 0;
+        currentRy = 0;
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+        rafId = null;
+      }
+    }
+
+    wrap.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      // Normalized -1 to 1
+      const nx = (e.clientX - cx) / (rect.width / 2);
+      const ny = (e.clientY - cy) / (rect.height / 2);
+
+      // Tilt: mouse right → card rotates right (positive Y), mouse up → card tilts back (negative X)
+      targetRy = nx * MAX_TILT;
+      targetRx = -ny * MAX_TILT;
+
+      // Holographic gradient position
+      const bgx = 50 + nx * HOLO_RANGE * 0.5;
+      const bgy = 50 + ny * HOLO_RANGE * 0.5;
+      const angle = Math.atan2(ny, nx) * (180 / Math.PI);
+
+      card.style.setProperty('--bgx', `${bgx}%`);
+      card.style.setProperty('--bgy', `${bgy}%`);
+      card.style.setProperty('--holo-angle', `${angle + 90}deg`);
+
+      // Glare position
+      const mx = ((e.clientX - rect.left) / rect.width) * 100;
+      const my = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty('--mx', `${mx}%`);
+      card.style.setProperty('--my', `${my}%`);
+
+      if (!rafId) {
+        isHovered = true;
+        rafId = requestAnimationFrame(animate);
+      }
+    });
+
+    wrap.addEventListener('mouseleave', () => {
+      isHovered = false;
+      targetRx = 0;
+      targetRy = 0;
+      // Reset holo to center
+      card.style.setProperty('--bgx', '50%');
+      card.style.setProperty('--bgy', '50%');
+      card.style.setProperty('--holo-angle', '0deg');
+      if (!rafId) {
+        rafId = requestAnimationFrame(animate);
+      }
+    });
+  });
+</script>
+</body>
+</html>

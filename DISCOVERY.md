@@ -35,3 +35,9 @@
 - 效果描述：大量深色圆角方形图标按菱形/偏移网格排列，覆盖整个背景区域。鼠标移动时，以鼠标为中心的圆形区域内图标会逐渐亮起（发光 + 颜色变化），距离越近越亮，形成动态追踪光晕效果。图标本身是各种 SF Symbols 风格的功能图标（搜索、星标、地图、闪电等），整体营造出产品功能丰富的视觉感。
 - 实现原理：CSS Grid 偏移布局（奇偶行 margin-left 错位实现菱形排列），JS mousemove 事件计算每个图标与鼠标的距离，用 CSS 变量 --glow 控制每个图标的 box-shadow 发光强度和 opacity，距离阈值内线性插值计算亮度，requestAnimationFrame 平滑更新
 - 状态：已实现 → 53-diamond-icon-grid-spotlight.html
+
+## 2026-05-05 framer.com (Holo Shader feature)
+- 效果名称：全息彩虹渐变卡片 (Holographic Rainbow Card)
+- 效果描述：模拟真实全息贴纸/卡片的光学效果。卡片表面覆盖一层随鼠标角度变化的彩虹渐变层，当鼠标移动时，彩虹光谱会随视角改变而流动偏移，模拟光线在全息薄膜上的衍射效果。同时卡片有轻微的 3D 倾斜跟随鼠标，增强立体感。静止时卡片有微弱的彩虹光泽，移动时彩虹效果变得鲜艳。
+- 实现原理：CSS perspective + rotateX/rotateY 实现 3D 倾斜跟随，CSS conic-gradient 或 linear-gradient 多层叠加模拟彩虹光谱，JS mousemove 计算鼠标相对卡片的角度，用 CSS 变量 --rx --ry --bgx --bgy 控制倾斜角度和渐变偏移，mix-blend-mode: color-dodge 或 screen 叠加彩虹层，CSS filter: brightness/saturate 增强光泽感
+- 状态：已实现 → 54-holographic-rainbow-card.html

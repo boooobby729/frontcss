@@ -100,6 +100,7 @@
   [data-cat="kbd"]{--accent:#a78bfa}
   [data-cat="particle"]{--accent:#60a5fa}
   [data-cat="terminal"]{--accent:#00e676}
+[data-cat="holo"]{--accent:#a78bfa}
 
   /* Preview Animations */
   .p-bounce{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2997ff,#5e5ce6);animation:pBounce 1.4s cubic-bezier(.36,0,.66,1) infinite}
@@ -201,10 +202,10 @@
 <section class="hero">
   <p class="hero-overline">Frontend Effects Library</p>
   <h1>Build something<br><em>extraordinary.</em></h1>
-  <p class="hero-sub">650+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
-  <div class="hero-stats">
-    <div class="hero-stat"><div class="hero-stat-num" data-target="650" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
-    <div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
+<p class="hero-sub">654+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+<div class="hero-stats">
+<div class="hero-stat"><div class="hero-stat-num" data-target="654" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+<div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
 </section>
@@ -256,16 +257,24 @@
     <button class="filter-btn" data-cat="kbd">键盘快捷键</button>
     <button class="filter-btn" data-cat="particle">粒子特效</button>
     <button class="filter-btn" data-cat="terminal">终端特效</button>
-    <button class="filter-btn" data-cat="spotlight">光晕追踪</button>
-  </div>
+<button class="filter-btn" data-cat="spotlight">光晕追踪</button>
+<button class="filter-btn" data-cat="holo">全息卡片</button>
+</div>
 </div>
 
 <!-- Cards Grid -->
 <section class="grid-section">
   <div class="card-grid">
 
-    <!-- diamond-icon-grid-spotlight (置顶) -->
-    <a class="card" data-cat="spotlight" href="53-diamond-icon-grid-spotlight.html">
+<!-- holographic-rainbow-card (置顶) -->
+<a class="card" data-cat="holo" href="54-holographic-rainbow-card.html">
+<div class="card-visual" id="holoPreviewWrap" style="background:#080810;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px"></div>
+<div class="card-content"><h3>全息彩虹卡片</h3><p>灵感来自 Framer Holo Shader。模拟真实全息贴纸的光学衍射效果，鼠标悬停时彩虹光谱随视角流动偏移，同时卡片有 3D 倾斜跟随。6 种主题变体：宇宙、极光、太阳、深海、合成波、棱镜。</p></div>
+<div class="card-footer"><span class="tag">holo</span><span class="tag">3d-tilt</span><span class="count">6 种效果</span></div>
+</a>
+
+<!-- diamond-icon-grid-spotlight (置顶) -->
+<a class="card" data-cat="spotlight" href="53-diamond-icon-grid-spotlight.html">
       <div class="card-visual" id="spotlightPreviewWrap" style="background:#0a0a0f;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center">
         <div id="spotlightPreviewGrid" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:5px;padding:6px 4px"></div>
         <div style="position:relative;z-index:2;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(124,106,247,.8);text-shadow:0 0 12px rgba(124,106,247,.6)">SPOTLIGHT</div>
@@ -977,9 +986,49 @@
     animate();
   })();
 
-  // Diamond Icon Grid Spotlight preview
-  (function(){
-    const grid=document.getElementById('spotlightPreviewGrid');if(!grid)return;
+// Holographic Rainbow Card preview
+(function(){
+const wrap=document.getElementById('holoPreviewWrap');if(!wrap)return;
+// Create 3 mini holo cards
+const themes=[
+  {bg:'radial-gradient(ellipse at 30% 30%,#1a0533,#050510)',color:'#a78bfa'},
+  {bg:'radial-gradient(ellipse at 30% 0%,rgba(0,255,120,.25) 0%,transparent 50%),linear-gradient(160deg,#020d08,#030f12)',color:'#34d399'},
+  {bg:'radial-gradient(ellipse at 50% 30%,rgba(255,160,0,.3) 0%,transparent 55%),linear-gradient(160deg,#120800,#0f0500)',color:'#fb923c'},
+];
+const cards=themes.map(t=>{
+  const c=document.createElement('div');
+  c.style.cssText='width:52px;height:72px;border-radius:8px;background:'+t.bg+';border:1px solid rgba(255,255,255,.1);position:relative;overflow:hidden;flex-shrink:0;transition:transform .3s ease;';
+  // holo layer
+  const h=document.createElement('div');
+  h.style.cssText='position:absolute;inset:0;border-radius:8px;mix-blend-mode:color-dodge;opacity:.15;background:repeating-linear-gradient(45deg,hsl(0,100%,65%) 0%,hsl(60,100%,65%) 16%,hsl(120,100%,65%) 32%,hsl(180,100%,65%) 48%,hsl(240,100%,65%) 64%,hsl(300,100%,65%) 80%,hsl(360,100%,65%) 100%);background-size:200% 200%;transition:opacity .4s,background-position .3s;';
+  c.appendChild(h);
+  // dot
+  const d=document.createElement('div');
+  d.style.cssText='position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:'+t.color+';box-shadow:0 0 6px '+t.color+';';
+  c.appendChild(d);
+  wrap.appendChild(c);
+  return {el:c,holo:h};
+});
+// Animate: cycle holo shimmer
+let t=0;
+function frame(){
+  t+=0.02;
+  cards.forEach((c,i)=>{
+    const phase=t+i*1.2;
+    const bx=50+Math.sin(phase)*40;
+    const by=50+Math.cos(phase*0.7)*40;
+    c.holo.style.backgroundPosition=bx+'% '+by+'%';
+    c.holo.style.opacity=(0.12+Math.abs(Math.sin(phase))*0.35).toString();
+    c.el.style.transform='rotateY('+Math.sin(phase)*8+'deg) rotateX('+Math.cos(phase*0.8)*5+'deg)';
+  });
+  requestAnimationFrame(frame);
+}
+frame();
+})();
+
+// Diamond Icon Grid Spotlight preview
+(function(){
+const grid=document.getElementById('spotlightPreviewGrid');if(!grid)return;
     const wrap=document.getElementById('spotlightPreviewWrap');if(!wrap)return;
     const ICONS_MINI=[
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="10" height="10"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>',

@@ -218,86 +218,111 @@
 </style>
 </head>
 <body>
+<div class="app-layout">
 
-<!-- Global Nav -->
-<nav class="global-nav">
-  <div class="global-nav-inner">
-    <div class="nav-logo"><span>B</span>の宝库</div>
-    <div class="nav-links">
-      <a href="#">Featured</a>
-      <a href="#">Animation</a>
-      <a href="#">Interaction</a>
-      <a href="#">Visual</a>
-      <a href="#">Advanced</a>
-    </div>
+<!-- Mobile toggle -->
+<div class="mobile-toggle" id="mobileToggle">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo"><span>B</span>の宝库</div>
+    <div class="sidebar-sub">Frontend Effects Library</div>
   </div>
-</nav>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">筛选</div>
+    <button class="filter-item active" data-cat="all"><div class="dot" style="background:linear-gradient(135deg,#2997ff,#bf5af2)"></div>全部<span class="filter-count" id="countAll">55</span></button>
+    <button class="filter-item" data-cat="fav" id="favFilterBtn"><div class="dot" style="background:#ff3b30"></div>我的收藏<span class="filter-count" id="countFav">0</span></button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">动画</div>
+    <button class="filter-item" data-cat="anim"><div class="dot" style="background:#2997ff"></div>CSS 动画</button>
+    <button class="filter-item" data-cat="loading"><div class="dot" style="background:#30d158"></div>加载动画</button>
+    <button class="filter-item" data-cat="transition"><div class="dot" style="background:#bf5af2"></div>页面过渡</button>
+    <button class="filter-item" data-cat="micro"><div class="dot" style="background:#ff453a"></div>微交互</button>
+    <button class="filter-item" data-cat="physics"><div class="dot" style="background:#5e5ce6"></div>弹性物理</button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">文字</div>
+    <button class="filter-item" data-cat="text"><div class="dot" style="background:#bf5af2"></div>文字特效</button>
+    <button class="filter-item" data-cat="textadv"><div class="dot" style="background:#64d2ff"></div>高级文字</button>
+    <button class="filter-item" data-cat="kinetic"><div class="dot" style="background:#f43f5e"></div>创意文字</button>
+    <button class="filter-item" data-cat="typo"><div class="dot" style="background:#38bdf8"></div>排版动画</button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">交互</div>
+    <button class="filter-item" data-cat="hover"><div class="dot" style="background:#30d158"></div>悬停效果</button>
+    <button class="filter-item" data-cat="cursor"><div class="dot" style="background:#64d2ff"></div>光标特效</button>
+    <button class="filter-item" data-cat="cursor2"><div class="dot" style="background:#30d158"></div>鼠标交互</button>
+    <button class="filter-item" data-cat="scroll"><div class="dot" style="background:#64d2ff"></div>滚动效果</button>
+    <button class="filter-item" data-cat="story"><div class="dot" style="background:#64d2ff"></div>滚动叙事</button>
+    <button class="filter-item" data-cat="button"><div class="dot" style="background:#ff6482"></div>创意按钮</button>
+    <button class="filter-item" data-cat="form"><div class="dot" style="background:#30d158"></div>表单交互</button>
+    <button class="filter-item" data-cat="nav"><div class="dot" style="background:#5e5ce6"></div>导航菜单</button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">视觉</div>
+    <button class="filter-item" data-cat="bg"><div class="dot" style="background:#5e5ce6"></div>背景特效</button>
+    <button class="filter-item" data-cat="gradient"><div class="dot" style="background:#ffd60a"></div>渐变色彩</button>
+    <button class="filter-item" data-cat="liquid"><div class="dot" style="background:#f472b6"></div>液态背景</button>
+    <button class="filter-item" data-cat="glass"><div class="dot" style="background:#f0abfc"></div>毛玻璃</button>
+    <button class="filter-item" data-cat="darkmode"><div class="dot" style="background:#818cf8"></div>暗黑特效</button>
+    <button class="filter-item" data-cat="morphism"><div class="dot" style="background:#ffd60a"></div>设计风格</button>
+    <button class="filter-item" data-cat="image"><div class="dot" style="background:#2997ff"></div>图片特效</button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">高级</div>
+    <button class="filter-item" data-cat="svg"><div class="dot" style="background:#ff453a"></div>SVG 动画</button>
+    <button class="filter-item" data-cat="canvas"><div class="dot" style="background:#ffd60a"></div>Canvas</button>
+    <button class="filter-item" data-cat="3d"><div class="dot" style="background:#ff6482"></div>3D 效果</button>
+    <button class="filter-item" data-cat="3dcard"><div class="dot" style="background:#ff6482"></div>卡片 3D</button>
+    <button class="filter-item" data-cat="morph"><div class="dot" style="background:#a78bfa"></div>形变动画</button>
+    <button class="filter-item" data-cat="genart"><div class="dot" style="background:#e879f9"></div>生成艺术</button>
+    <button class="filter-item" data-cat="audio"><div class="dot" style="background:#38bdf8"></div>音频可视化</button>
+    <button class="filter-item" data-cat="dataviz"><div class="dot" style="background:#fb923c"></div>数据可视化</button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">布局</div>
+    <button class="filter-item" data-cat="layout"><div class="dot" style="background:#bf5af2"></div>创意布局</button>
+    <button class="filter-item" data-cat="marquee"><div class="dot" style="background:#fb923c"></div>无限滚动</button>
+    <button class="filter-item" data-cat="clippath"><div class="dot" style="background:#4ade80"></div>裁剪路径</button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">灵感</div>
+    <button class="filter-item" data-cat="holo"><div class="dot" style="background:#a78bfa"></div>全息卡片</button>
+    <button class="filter-item" data-cat="spotlight"><div class="dot" style="background:#7c6af7"></div>光晕追踪</button>
+    <button class="filter-item" data-cat="terminal"><div class="dot" style="background:#00e676"></div>终端特效</button>
+    <button class="filter-item" data-cat="particle"><div class="dot" style="background:#60a5fa"></div>粒子特效</button>
+    <button class="filter-item" data-cat="kbd"><div class="dot" style="background:#a89cf7"></div>键盘快捷键</button>
+    <button class="filter-item" data-cat="quote"><div class="dot" style="background:#e4f222"></div>引用卡片</button>
+    <button class="filter-item" data-cat="collect"><div class="dot" style="background:#f472b6"></div>Collect</button>
+    <button class="filter-item" data-cat="terrain"><div class="dot" style="background:#4ade80"></div>地形图</button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
 
 <!-- Hero -->
 <section class="hero">
-  <p class="hero-overline">Bの宝库</p>
   <h1><em>Bの宝库</em></h1>
-<p class="hero-sub">658+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
-<div class="hero-stats">
-<div class="hero-stat"><div class="hero-stat-num" data-target="658" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
-<div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
+  <p class="hero-sub">纯前端效果收藏库，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num" data-target="665" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" data-target="55" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
 </section>
-
-<!-- Filter Bar -->
-<div class="filter-bar">
-  <div class="filter-inner">
-    <button class="filter-btn active" data-cat="all">All</button>
-    <button class="filter-btn" data-cat="fav" id="favFilterBtn">⭐ 收藏</button>
-    <button class="filter-btn" data-cat="anim">CSS 动画</button>
-    <button class="filter-btn" data-cat="text">文字特效</button>
-    <button class="filter-btn" data-cat="hover">悬停交互</button>
-    <button class="filter-btn" data-cat="scroll">滚动效果</button>
-    <button class="filter-btn" data-cat="bg">背景特效</button>
-    <button class="filter-btn" data-cat="svg">SVG 动画</button>
-    <button class="filter-btn" data-cat="3d">3D 效果</button>
-    <button class="filter-btn" data-cat="loading">加载动画</button>
-    <button class="filter-btn" data-cat="layout">创意布局</button>
-    <button class="filter-btn" data-cat="canvas">Canvas</button>
-    <button class="filter-btn" data-cat="cursor">光标特效</button>
-    <button class="filter-btn" data-cat="transition">页面过渡</button>
-    <button class="filter-btn" data-cat="micro">微交互</button>
-    <button class="filter-btn" data-cat="textadv">高级文字</button>
-    <button class="filter-btn" data-cat="morphism">设计风格</button>
-    <button class="filter-btn" data-cat="button">创意按钮</button>
-    <button class="filter-btn" data-cat="image">图片特效</button>
-    <button class="filter-btn" data-cat="nav">导航菜单</button>
-    <button class="filter-btn" data-cat="form">表单交互</button>
-    <button class="filter-btn" data-cat="dataviz">数据可视化</button>
-    <button class="filter-btn" data-cat="morph">形变 Morphing</button>
-    <button class="filter-btn" data-cat="audio">音频可视化</button>
-    <button class="filter-btn" data-cat="kinetic">创意文字</button>
-    <button class="filter-btn" data-cat="cursor2">鼠标交互</button>
-    <button class="filter-btn" data-cat="3dcard">卡片 3D</button>
-    <button class="filter-btn" data-cat="gradient">渐变色彩</button>
-    <button class="filter-btn" data-cat="physics">弹性物理</button>
-    <button class="filter-btn" data-cat="story">滚动叙事</button>
-    <button class="filter-btn" data-cat="liquid">液态背景</button>
-    <button class="filter-btn" data-cat="transition">页面过渡</button>
-    <button class="filter-btn" data-cat="dataviz">数据可视化</button>
-    <button class="filter-btn" data-cat="hover">悬停效果</button>
-    <button class="filter-btn" data-cat="genart">生成艺术</button>
-    <button class="filter-btn" data-cat="typo">排版动画</button>
-    <button class="filter-btn" data-cat="darkmode">暗黑特效</button>
-    <button class="filter-btn" data-cat="glass">毛玻璃</button>
-    <button class="filter-btn" data-cat="marquee">无限滚动</button>
-    <button class="filter-btn" data-cat="clippath">裁剪路径</button>
-    <button class="filter-btn" data-cat="collect">灵感收集</button>
-    <button class="filter-btn" data-cat="quote">引用卡片</button>
-    <button class="filter-btn" data-cat="kbd">键盘快捷键</button>
-    <button class="filter-btn" data-cat="particle">粒子特效</button>
-    <button class="filter-btn" data-cat="terminal">终端特效</button>
-<button class="filter-btn" data-cat="spotlight">光晕追踪</button>
-<button class="filter-btn" data-cat="holo">全息卡片</button>
-<button class="filter-btn" data-cat="terrain">地形图</button>
-</div>
-</div>
 
 <!-- Cards Grid -->
 <section class="grid-section">
@@ -781,6 +806,134 @@
       <div class="card-footer"><span class="tag">clip-path</span><span class="tag">polygon</span><span class="count">6 种效果</span></div>
     </a>
 
+    <!-- 46 -->
+    <a class="card" data-cat="collect" href="46-collect.html">
+      <div class="card-visual" style="background:#000;overflow:hidden;position:relative">
+        <div style="width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,transparent 38%,rgba(255,172,227,.9) 52%,rgba(255,241,172,.6) 58%,rgba(121,201,255,.8) 68%,rgba(74,96,209,.9) 82%,transparent 100%);filter:blur(6px);opacity:.85"></div>
+      </div>
+      <div class="card-content"><h3>Collect 灵感收集</h3><p>Dia 风格彩虹渐变弹性拉伸效果。滚动到底部，彩虹光晕从底部弹性浮现，停止后柔和消散。</p></div>
+      <div class="card-footer"><span class="tag">radial-gradient</span><span class="tag">elastic</span><span class="count">1 种效果</span></div>
+    </a>
+
+    <!-- 47 -->
+    <a class="card" data-cat="collect" href="47-collect-text.html">
+      <div class="card-visual" style="background:#000;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center">
+        <div id="cardTextPreview47" style="font-family:Inter,-apple-system,sans-serif;font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-.03em;display:flex;gap:1px"></div>
+      </div>
+      <div class="card-content"><h3>Collect 文本变化</h3><p>Dia 风格文本动画效果集。可变字体字重波浪、文字轮播切换、逐字模糊揭示、打字机效果。</p></div>
+      <div class="card-footer"><span class="tag">variable-font</span><span class="tag">text-swap</span><span class="count">4 种效果</span></div>
+    </a>
+
+    <!-- 48 -->
+    <a class="card" data-cat="quote" href="48-colorful-quote-cards.html">
+      <div class="card-visual" style="background:#080910;overflow:hidden;display:flex;gap:6px;align-items:center;justify-content:center;padding:12px">
+        <div style="width:48px;height:60px;border-radius:6px;background:#e4f222;flex-shrink:0"></div>
+        <div style="width:48px;height:60px;border-radius:6px;background:#1c85e8;flex-shrink:0"></div>
+        <div style="width:48px;height:60px;border-radius:6px;background:#e8e8f5;flex-shrink:0"></div>
+      </div>
+      <div class="card-content"><h3>彩色引用卡片</h3><p>灵感来自 linear.app。荧光黄、蓝、淡紫等纯色背景，5 种布局变体：三列网格、横向滚动、扇形叠放、瀑布流、大卡片。</p></div>
+      <div class="card-footer"><span class="tag">quote-cards</span><span class="tag">fan-stack</span><span class="count">5 种效果</span></div>
+    </a>
+
+    <!-- 49 -->
+    <a class="card" data-cat="kbd" href="49-keyboard-shortcuts.html">
+      <div class="card-visual" style="background:#0a0a0f;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:5px;padding:16px">
+        <div style="display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:7px;background:#252535;border:1px solid rgba(255,255,255,0.12);box-shadow:0 1px 0 rgba(255,255,255,0.08) inset,0 3px 0 #0d0d18;font-size:0.82rem;color:rgba(255,255,255,0.7)">⌘</div>
+        <div style="color:rgba(255,255,255,0.3);font-size:0.72rem">+</div>
+        <div style="display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:7px;background:#1e1a4a;border:1px solid rgba(124,106,247,0.4);box-shadow:0 1px 0 rgba(255,255,255,0.1) inset,0 3px 0 #0d0d18,0 4px 12px rgba(124,106,247,0.25);font-size:0.82rem;color:#a89cf7;font-weight:700">K</div>
+      </div>
+      <div class="card-content"><h3>键盘快捷键可视化</h3><p>灵感来自 Raycast。CSS 模拟真实键帽立体感，支持按下动画，5 种展示形式：Hero 组合键、卡片网格、命令面板、行内徽章、迷你键盘。</p></div>
+      <div class="card-footer"><span class="tag">keycap</span><span class="tag">box-shadow</span><span class="count">5 种效果</span></div>
+    </a>
+
+    <!-- 50 -->
+    <a class="card" data-cat="particle" href="50-particle-ray-burst.html">
+      <div class="card-visual" style="background:#020510;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <canvas id="miniRayBurst50" width="200" height="100" style="width:200px;height:100px"></canvas>
+      </div>
+      <div class="card-content"><h3>粒子光线放射</h3><p>灵感来自 Stripe 的星爆动画。Canvas 粒子从中心向四周放射，叠加发光效果，5 种变体：经典蓝色放射、极光多色、光纤束、脉冲环、可交互超新星。</p></div>
+      <div class="card-footer"><span class="tag">canvas</span><span class="tag">particles</span><span class="count">5 种效果</span></div>
+    </a>
+
+    <!-- 51 -->
+    <a class="card" data-cat="terminal" href="51-terminal-text-scramble.html">
+      <div class="card-visual" style="background:#050e08;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;padding:14px 10px;font-family:'Courier New',monospace">
+        <div id="termPreview51" style="width:100%;font-size:9px;letter-spacing:.04em;line-height:1.6;color:#00e676;text-transform:uppercase"></div>
+      </div>
+      <div class="card-content"><h3>终端字符解密</h3><p>灵感来自 Codrops。悬停时每列文字逐字符按波浪延迟随机替换成乱码符号后还原，搭配方块光标闪烁。5 种主题变体：经典绿色、琥珀、赛博蓝、极简白、紫色。</p></div>
+      <div class="card-footer"><span class="tag">terminal</span><span class="tag">scramble</span><span class="count">5 种变体</span></div>
+    </a>
+
+    <!-- 52 -->
+    <a class="card" data-cat="glass" href="52-glassmorphism-floating-ui-cards.html">
+      <div class="card-visual" style="background:radial-gradient(ellipse 120% 80% at 50% 110%,#3b1fa8,#0a0a1a);overflow:hidden;position:relative">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px">
+          <div style="width:70px;height:80px;border-radius:12px;background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);box-shadow:0 8px 24px rgba(0,0,0,0.4);padding:8px">
+            <div style="width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,#ff6b6b,#ee5a24);margin-bottom:6px;display:flex;align-items:center;justify-content:center;font-size:0.6rem">📅</div>
+            <div style="height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin-bottom:4px"></div>
+            <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;width:70%"></div>
+          </div>
+          <div style="width:80px;height:70px;border-radius:12px;background:rgba(255,255,255,0.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 8px 24px rgba(0,0,0,0.4);padding:8px;margin-top:-16px">
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
+              <div style="width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#7c3aed)"></div>
+              <div style="height:4px;flex:1;background:rgba(255,255,255,0.15);border-radius:2px"></div>
+            </div>
+            <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:2px;margin-bottom:3px"></div>
+            <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:2px;width:80%;margin-bottom:8px"></div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;height:16px;border-radius:4px;background:rgba(167,139,250,0.2);border:1px solid rgba(167,139,250,0.3)"></div>
+              <div style="flex:1;height:16px;border-radius:4px;background:rgba(255,255,255,0.05)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-content"><h3>毛玻璃浮动 UI 卡片</h3><p>灵感来自 Dia Browser。蓝紫渐变背景上多个毛玻璃通知卡片漂浮，入场动画 + 鼠标视差 + 堆叠展开 + 锁屏小组件。</p></div>
+      <div class="card-footer"><span class="tag">glassmorphism</span><span class="tag">parallax</span><span class="count">5 种变体</span></div>
+    </a>
+
+    <!-- 53 -->
+    <a class="card" data-cat="cursor2" href="53-diamond-icon-grid-spotlight.html">
+      <div class="card-visual" style="background:#0a0a12;overflow:hidden;position:relative">
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:8px;width:100%">
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.3">⚡</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.5">🔍</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(41,151,255,0.15);border:1px solid rgba(41,151,255,0.3);display:flex;align-items:center;justify-content:center;font-size:0.6rem;box-shadow:0 0 8px rgba(41,151,255,0.3)">★</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(41,151,255,0.08);border:1px solid rgba(41,151,255,0.2);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.8">📍</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.4">🔔</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.2">💡</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.2">🗂</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(41,151,255,0.1);border:1px solid rgba(41,151,255,0.25);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.9">🗺</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(41,151,255,0.2);border:1px solid rgba(41,151,255,0.4);display:flex;align-items:center;justify-content:center;font-size:0.6rem;box-shadow:0 0 12px rgba(41,151,255,0.4)">⚡</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(41,151,255,0.1);border:1px solid rgba(41,151,255,0.2);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.7">🔍</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.3">★</div>
+          <div style="aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.2">📍</div>
+        </div>
+      </div>
+      <div class="card-content"><h3>菱形图标网格光晕</h3><p>灵感来自 linear.app。大量图标按偏移网格排列，鼠标移动时以光标为中心的圆形区域内图标动态发光，距离越近越亮。</p></div>
+      <div class="card-footer"><span class="tag">mousemove</span><span class="tag">spotlight</span><span class="count">1 种效果</span></div>
+    </a>
+
+    <!-- 54 -->
+    <a class="card" data-cat="holo" href="54-holographic-rainbow-card.html">
+      <div class="card-visual" style="background:#0a0a12;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <div style="width:90px;height:120px;border-radius:12px;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(255,255,255,0.15);position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5)">
+          <div style="position:absolute;inset:0;background:conic-gradient(from 0deg at 50% 50%,rgba(255,0,128,0.3),rgba(255,165,0,0.3),rgba(255,255,0,0.3),rgba(0,255,128,0.3),rgba(0,128,255,0.3),rgba(128,0,255,0.3),rgba(255,0,128,0.3));mix-blend-mode:screen;animation:holoRot 4s linear infinite"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.05),transparent,rgba(255,255,255,0.08))"></div>
+        </div>
+      </div>
+      <div class="card-content"><h3>全息彩虹卡片</h3><p>灵感来自 Framer Holo Shader。模拟全息贴纸光学效果，鼠标移动时彩虹光谱随视角流动，3D 倾斜跟随，mix-blend-mode 叠加。</p></div>
+      <div class="card-footer"><span class="tag">holographic</span><span class="tag">conic-gradient</span><span class="count">5 种效果</span></div>
+    </a>
+
+    <!-- 55 -->
+    <a class="card" data-cat="canvas" href="55-contour-terrain-map.html">
+      <div class="card-visual" style="background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <canvas id="miniTerrain55" width="200" height="100" style="width:200px;height:100px"></canvas>
+      </div>
+      <div class="card-content"><h3>等高线地形波纹</h3><p>灵感来自 Vercel 首页。Canvas 绘制 Perlin noise 地形等高线，热力图配色，鼠标移动时波纹动态扰动，5 种变体。</p></div>
+      <div class="card-footer"><span class="tag">canvas</span><span class="tag">perlin-noise</span><span class="count">5 种效果</span></div>
+    </a>
+
   </div>
 </section>
 
@@ -789,6 +942,9 @@
   <p class="footer-note">Crafted with pure HTML, CSS & JavaScript</p>
   <p class="footer-zero">Bの宝库 — Zero Dependencies</p>
 </footer>
+
+</main><!-- /.main-content -->
+</div><!-- /.app-layout -->
 
 <script>
   // Favorites: localStorage persistence
@@ -815,9 +971,11 @@
       const isNowFav=toggleFav(href);
       btn.classList.toggle('active',isNowFav);
       // If currently filtering by fav, hide unfavorited cards
-      if(document.getElementById('favFilterBtn').classList.contains('active')&&!isNowFav){
+      const favFilter=document.querySelector('.filter-item[data-cat="fav"]');
+      if(favFilter&&favFilter.classList.contains('active')&&!isNowFav){
         card.style.display='none';
       }
+      if(typeof updateFavCount==='function')updateFavCount();
     });
     card.appendChild(btn);
 
@@ -840,10 +998,10 @@
     }
   });
 
-  // Filter (enhanced with fav support)
-  document.querySelectorAll('.filter-btn').forEach(btn=>{
+  // Filter (sidebar filter items)
+  document.querySelectorAll('.filter-item').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.filter-item').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       const cat=btn.dataset.cat;
       if(cat==='fav'){
@@ -856,8 +1014,35 @@
           card.style.display=cat==='all'||card.dataset.cat===cat?'':'none';
         });
       }
+      // On mobile, close sidebar after selection
+      if(window.innerWidth<=768){
+        document.getElementById('sidebar').classList.remove('open');
+      }
     });
   });
+
+  // Mobile sidebar toggle
+  (function(){
+    const toggle=document.getElementById('mobileToggle');
+    const sidebar=document.getElementById('sidebar');
+    if(!toggle||!sidebar)return;
+    toggle.addEventListener('click',()=>{
+      sidebar.classList.toggle('open');
+    });
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click',(e)=>{
+      if(window.innerWidth<=768&&sidebar.classList.contains('open')&&!sidebar.contains(e.target)&&e.target!==toggle){
+        sidebar.classList.remove('open');
+      }
+    });
+  })();
+
+  // Update fav count in sidebar
+  function updateFavCount(){
+    const favCountEl=document.querySelector('.filter-item[data-cat="fav"] .filter-count');
+    if(favCountEl)favCountEl.textContent=getFavs().length;
+  }
+  updateFavCount();
 
   // Card reveal: stagger animation on load + scroll-triggered for off-screen cards
   (function(){
@@ -1185,6 +1370,93 @@ const grid=document.getElementById('spotlightPreviewGrid');if(!grid)return;
     }
     animFrame();
   })();
+
+// Mini Ray Burst 50 preview (card #50)
+(function(){
+  var canvas=document.getElementById('miniRayBurst50');if(!canvas)return;
+  var dpr=window.devicePixelRatio||1,W=200,H=100;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  var ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+  var cx=W/2,cy=H*0.65,NUM=120,ps=[];
+  function rnd(a,b){return a+Math.random()*(b-a);}
+  for(var i=0;i<NUM;i++){var angle=rnd(0,Math.PI*2),speed=rnd(0.4,2.5),life=rnd(0,1);ps.push({x:cx+Math.cos(angle)*speed*life*30,y:cy+Math.sin(angle)*speed*life*30,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-rnd(0.1,0.4),life:life,maxLife:rnd(0.5,1),len:rnd(10,50),w:rnd(0.3,1)});}
+  function frame(){
+    var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H));
+    bg.addColorStop(0,'#1a1f6e');bg.addColorStop(0.4,'#0d1147');bg.addColorStop(1,'#020510');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    ctx.globalCompositeOperation='lighter';
+    var glow=ctx.createRadialGradient(cx,cy,0,cx,cy,50);
+    glow.addColorStop(0,'rgba(80,120,255,0.4)');glow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+    ps.forEach(function(p){
+      p.x+=p.vx;p.y+=p.vy;p.life-=0.015;
+      if(p.life<=0){p.x=cx;p.y=cy;var a=rnd(0,Math.PI*2),s=rnd(0.4,2.5);p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-rnd(0.1,0.4);p.life=rnd(0.5,1);p.maxLife=p.life;}
+      var alpha=p.life/p.maxLife;
+      var spd=Math.max(Math.sqrt(p.vx*p.vx+p.vy*p.vy),0.01);
+      var tx=p.x-p.vx*(p.len/spd),ty=p.y-p.vy*(p.len/spd);
+      var g=ctx.createLinearGradient(tx,ty,p.x,p.y);
+      g.addColorStop(0,'rgba(180,210,255,0)');g.addColorStop(1,'rgba(200,220,255,'+(alpha*0.9)+')');
+      ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(p.x,p.y);
+      ctx.strokeStyle=g;ctx.lineWidth=p.w;ctx.stroke();
+    });
+    ctx.globalCompositeOperation='source-over';
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// Terminal Scramble 51 preview (card #51)
+(function(){
+  var el=document.getElementById('termPreview51');if(!el)return;
+  var rows=[
+    ['MOUNT VESPERA','PLANET THALASSA','2157-03-14'],
+    ['KRAXION','EXO-PLANET ZYRA','2243-11-09'],
+    ['HELION PEAK','PLANET ELARA','2180-05-18'],
+  ];
+  var GLYPHS='abcdefghijklmnopqrstuvwxyz!@#$%^&*-_+=;:<>,';
+  function rndGlyph(c){return c===' '?c:GLYPHS[Math.floor(Math.random()*GLYPHS.length)];}
+  var rowIdx=0;
+  function scrambleRow(){
+    var data=rows[rowIdx%rows.length];rowIdx++;
+    var text=data.join('  ');
+    var chars=text.split(''),step=0,total=chars.length;
+    var interval=setInterval(function(){
+      step++;
+      var line=chars.map(function(c,i){return i<=step*1.5?c:rndGlyph(c);}).join('');
+      el.textContent=line;
+      if(step>=total)clearInterval(interval);
+    },28);
+  }
+  function loop(){scrambleRow();setTimeout(loop,1200);}
+  setTimeout(loop,400);
+})();
+
+// Mini Terrain 55 preview (card #55)
+(function(){
+  var canvas=document.getElementById('miniTerrain55');if(!canvas)return;
+  var ctx=canvas.getContext('2d'),W=200,H=100,RES=5;
+  canvas.width=W;canvas.height=H;
+  var p=new Uint8Array(256);
+  for(var i=0;i<256;i++)p[i]=i;
+  var s=42*2147483647|0;
+  for(var i=255;i>0;i--){s=(s*16807)%2147483647;var j=(s%(i+1)+i+1)%(i+1);var tmp=p[i];p[i]=p[j];p[j]=tmp;}
+  var perm=new Uint8Array(512),pm12=new Uint8Array(512);
+  for(var i=0;i<512;i++){perm[i]=p[i&255];pm12[i]=perm[i]%12;}
+  var g3=[[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+  function n2(xin,yin){var F2=0.5*(Math.sqrt(3)-1),G2=(3-Math.sqrt(3))/6,si=(xin+yin)*F2,ii=Math.floor(xin+si),jj=Math.floor(yin+si),t=(ii+jj)*G2,x0=xin-(ii-t),y0=yin-(jj-t),i1=x0>y0?1:0,j1=x0>y0?0:1,x1=x0-i1+G2,y1=y0-j1+G2,x2=x0-1+2*G2,y2=y0-1+2*G2,ia=ii&255,ja=jj&255,gi0=pm12[ia+perm[ja]],gi1=pm12[ia+i1+perm[ja+j1]],gi2=pm12[ia+1+perm[ja+1]],n0=0,n1=0,n2v=0,t0=0.5-x0*x0-y0*y0,t1=0.5-x1*x1-y1*y1,t2=0.5-x2*x2-y2*y2;if(t0>=0){t0*=t0;n0=t0*t0*(g3[gi0][0]*x0+g3[gi0][1]*y0);}if(t1>=0){t1*=t1;n1=t1*t1*(g3[gi1][0]*x1+g3[gi1][1]*y1);}if(t2>=0){t2*=t2;n2v=t2*t2*(g3[gi2][0]*x2+g3[gi2][1]*y2);}return 70*(n0+n1+n2v);}
+  var cols=Math.ceil(W/RES)+2,rows=Math.ceil(H/RES)+2,field=new Float32Array(cols*rows),time=0;
+  function lc(v){if(v<0.25)return'rgba(220,60,40,'+(0.5+v)+')';if(v<0.5)return'rgba(230,180,30,'+(0.4+v*0.5)+')';if(v<0.75)return'rgba(40,180,100,'+(0.35+v*0.4)+')';return'rgba(60,160,220,'+(0.3+v*0.35)+')';}
+  function loop(){
+    time+=0.00025;
+    for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){var nx=c*RES/W*2.8,ny=r*RES/H*2.8,v=n2(nx+time*0.8,ny+time*0.5)*0.6+n2(nx*2.1-time*0.4,ny*2.1+time*0.3)*0.4;field[r*cols+c]=(v+1)*0.5;}
+    ctx.clearRect(0,0,W,H);ctx.fillStyle='#f5f5f0';ctx.fillRect(0,0,W,H);
+    var LEVELS=22;
+    for(var lv=1;lv<LEVELS;lv++){var thr=lv/LEVELS;ctx.beginPath();for(var r=0;r<rows-1;r++)for(var c=0;c<cols-1;c++){var x=c*RES,y=r*RES,tl=field[r*cols+c],tr=field[r*cols+c+1],bl=field[(r+1)*cols+c],br=field[(r+1)*cols+c+1],st=(tl>=thr?8:0)|(tr>=thr?4:0)|(br>=thr?2:0)|(bl>=thr?1:0);if(st===0||st===15)continue;var ip=function(a,b){return(thr-a)/(b-a);};var top={x:x+RES*ip(tl,tr),y:y},right={x:x+RES,y:y+RES*ip(tr,br)},bottom={x:x+RES*ip(bl,br),y:y+RES},left={x:x,y:y+RES*ip(tl,bl)};var lines={1:[left,bottom],2:[bottom,right],3:[left,right],4:[top,right],6:[top,bottom],7:[top,left],8:[top,left],9:[top,bottom],11:[top,right],12:[left,right],13:[bottom,right],14:[left,bottom]};var pts=lines[st];if(!pts)continue;ctx.moveTo(pts[0].x,pts[0].y);ctx.lineTo(pts[1].x,pts[1].y);}ctx.strokeStyle=lc(thr);ctx.lineWidth=lv%4===0?1.4:0.6;ctx.stroke();}
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
 
 // Terrain Preview
 (function(){

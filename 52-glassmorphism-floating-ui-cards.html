@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>52 · 毛玻璃浮动通知卡片 Glassmorphism Floating UI Cards</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  .back {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 999;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    font-size: 0.82rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 14px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    transition: color 0.2s, background 0.2s;
+  }
+  .back:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+  .page-header {
+    text-align: center;
+    padding: 60px 20px 20px;
+  }
+  .page-header h1 {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ── Demo sections ── */
+  .demo-section {
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    overflow: hidden;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .demo-label {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+    z-index: 100;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* ══════════════════════════════════════
+     DEMO 1 — Floating Notification Cards
+     ══════════════════════════════════════ */
+  .demo-1 {
+    background: radial-gradient(ellipse 120% 80% at 50% 110%, #3b1fa8 0%, #1a0a5e 30%, #0a0a1a 70%);
+  }
+
+  /* Big arc background */
+  .arc-bg {
+    position: absolute;
+    bottom: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140%;
+    padding-bottom: 140%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(100,60,255,0.25) 0%, rgba(60,20,180,0.15) 40%, transparent 70%);
+    clip-path: ellipse(50% 50% at 50% 100%);
+    pointer-events: none;
+  }
+
+  /* Floating cards container */
+  .float-cards {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    height: 520px;
+  }
+
+  /* Base glass card */
+  .fcard {
+    position: absolute;
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px;
+    box-shadow:
+      0 2px 0 rgba(255,255,255,0.08) inset,
+      0 20px 60px rgba(0,0,0,0.4),
+      0 4px 20px rgba(80,40,200,0.15);
+    padding: 16px 18px;
+    opacity: 0;
+    transform: translateY(30px) scale(0.96);
+    transition: opacity 0.7s cubic-bezier(0.25,0.1,0.25,1),
+                transform 0.7s cubic-bezier(0.25,0.1,0.25,1);
+    will-change: transform;
+  }
+  .fcard.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Card 1 — Calendar reminder */
+  .fcard-1 {
+    width: 240px;
+    top: 40px;
+    left: 60px;
+    transition-delay: 0.1s;
+  }
+  .fcard-1 .fc-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  .fcard-1 .fc-title { font-size: 0.82rem; font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .fcard-1 .fc-sub { font-size: 0.72rem; color: rgba(255,255,255,0.5); }
+  .fcard-1 .fc-time { font-size: 0.68rem; color: rgba(255,255,255,0.3); margin-top: 8px; }
+
+  /* Card 2 — Meeting notification */
+  .fcard-2 {
+    width: 280px;
+    top: 30px;
+    right: 50px;
+    transition-delay: 0.25s;
+  }
+  .fcard-2 .fc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .fcard-2 .fc-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: #fff;
+  }
+  .fcard-2 .fc-name { font-size: 0.8rem; font-weight: 600; color: #fff; }
+  .fcard-2 .fc-role { font-size: 0.68rem; color: rgba(255,255,255,0.4); }
+  .fcard-2 .fc-msg { font-size: 0.75rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
+  .fcard-2 .fc-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .fcard-2 .fc-btn {
+    flex: 1; padding: 7px; border-radius: 8px; font-size: 0.72rem; font-weight: 500;
+    text-align: center; cursor: pointer; border: none;
+  }
+  .fcard-2 .fc-btn-accept { background: rgba(167,139,250,0.25); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.3); }
+  .fcard-2 .fc-btn-decline { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
+
+  /* Card 3 — Progress card */
+  .fcard-3 {
+    width: 220px;
+    top: 200px;
+    left: 30px;
+    transition-delay: 0.4s;
+  }
+  .fcard-3 .fc-title { font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 12px; }
+  .fcard-3 .fc-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .fcard-3 .fc-progress-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); width: 50px; flex-shrink: 0; }
+  .fcard-3 .fc-progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .fcard-3 .fc-progress-fill { height: 100%; border-radius: 2px; }
+  .fcard-3 .fc-progress-val { font-size: 0.68rem; color: rgba(255,255,255,0.4); width: 28px; text-align: right; }
+
+  /* Card 4 — Message bubble */
+  .fcard-4 {
+    width: 260px;
+    top: 220px;
+    right: 40px;
+    transition-delay: 0.55s;
+  }
+  .fcard-4 .fc-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .fcard-4 .fc-dot { width: 8px; height: 8px; border-radius: 50%; background: #30d158; box-shadow: 0 0 6px #30d158; }
+  .fcard-4 .fc-app { font-size: 0.72rem; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 0.05em; }
+  .fcard-4 .fc-count { margin-left: auto; font-size: 0.65rem; background: rgba(48,209,88,0.2); color: #30d158; padding: 2px 8px; border-radius: 10px; }
+  .fcard-4 .fc-messages { display: flex; flex-direction: column; gap: 6px; }
+  .fcard-4 .fc-bubble {
+    padding: 8px 12px; border-radius: 10px; font-size: 0.73rem; line-height: 1.4;
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);
+  }
+  .fcard-4 .fc-bubble.mine { background: rgba(48,209,88,0.15); color: rgba(255,255,255,0.8); align-self: flex-end; }
+
+  /* Card 5 — Stats mini */
+  .fcard-5 {
+    width: 200px;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%) translateY(30px) scale(0.96);
+    transition-delay: 0.7s;
+  }
+  .fcard-5.visible {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  .fcard-5 .fc-stats { display: flex; gap: 16px; }
+  .fcard-5 .fc-stat-item { text-align: center; flex: 1; }
+  .fcard-5 .fc-stat-num { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; }
+  .fcard-5 .fc-stat-lbl { font-size: 0.65rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+  /* ══════════════════════════════════════
+     DEMO 2 — Parallax Mouse Tracking
+     ══════════════════════════════════════ */
+  .demo-2 {
+    background: radial-gradient(ellipse 100% 80% at 30% 60%, #0f2a5e 0%, #050d1f 60%);
+    cursor: none;
+  }
+
+  .parallax-scene {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    height: 520px;
+  }
+
+  .pcard {
+    position: absolute;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    padding: 18px 20px;
+    transition: transform 0.1s ease-out;
+    will-change: transform;
+  }
+
+  /* Spotlight cursor */
+  .spotlight {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(100,80,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: left 0.08s ease-out, top 0.08s ease-out;
+    z-index: 50;
+  }
+
+  /* ══════════════════════════════════════
+     DEMO 3 — Stacked Notification Stack
+     ══════════════════════════════════════ */
+  .demo-3 {
+    background: linear-gradient(160deg, #0a0a1a 0%, #0d1a2e 50%, #0a0a1a 100%);
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .notif-stack {
+    position: relative;
+    width: 340px;
+    height: 200px;
+    cursor: pointer;
+  }
+
+  .notif-card {
+    position: absolute;
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    transform-origin: bottom center;
+  }
+
+  .notif-card:nth-child(1) { z-index: 3; top: 0; transform: scale(1); }
+  .notif-card:nth-child(2) { z-index: 2; top: 12px; transform: scale(0.95); opacity: 0.7; }
+  .notif-card:nth-child(3) { z-index: 1; top: 24px; transform: scale(0.9); opacity: 0.4; }
+
+  .notif-stack.expanded .notif-card:nth-child(1) { top: 0; transform: scale(1); }
+  .notif-stack.expanded .notif-card:nth-child(2) { top: 90px; transform: scale(1); opacity: 1; }
+  .notif-stack.expanded .notif-card:nth-child(3) { top: 180px; transform: scale(1); opacity: 1; }
+
+  .notif-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .notif-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+  .notif-title { font-size: 0.8rem; font-weight: 600; color: #fff; }
+  .notif-time { margin-left: auto; font-size: 0.65rem; color: rgba(255,255,255,0.3); }
+  .notif-body { font-size: 0.73rem; color: rgba(255,255,255,0.55); line-height: 1.5; }
+
+  .demo-3-hint {
+    margin-top: 220px;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  /* ══════════════════════════════════════
+     DEMO 4 — iOS-style Lock Screen Widgets
+     ══════════════════════════════════════ */
+  .demo-4 {
+    background: linear-gradient(160deg, #0a1628 0%, #1a0a2e 50%, #0a1628 100%);
+  }
+
+  .lockscreen {
+    position: relative;
+    width: 320px;
+    padding: 40px 20px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ls-time {
+    font-size: 4rem;
+    font-weight: 200;
+    letter-spacing: -0.04em;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .ls-date {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+  }
+
+  .ls-widget {
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .ls-widget-row { display: flex; align-items: center; gap: 12px; }
+  .ls-widget-icon { font-size: 1.4rem; }
+  .ls-widget-info { flex: 1; }
+  .ls-widget-title { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.8); }
+  .ls-widget-sub { font-size: 0.68rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .ls-widget-val { font-size: 1.1rem; font-weight: 600; color: #fff; }
+
+  .ls-widgets-row { display: flex; gap: 10px; width: 100%; }
+  .ls-widget-sm {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .ls-widget-sm .ls-sm-icon { font-size: 1.3rem; margin-bottom: 6px; }
+  .ls-widget-sm .ls-sm-val { font-size: 1.1rem; font-weight: 700; color: #fff; }
+  .ls-widget-sm .ls-sm-lbl { font-size: 0.62rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+  /* ══════════════════════════════════════
+     DEMO 5 — Floating Action Cards (Dia style)
+     ══════════════════════════════════════ */
+  .demo-5 {
+    background: radial-gradient(ellipse 120% 100% at 50% 100%, #1a0a4e 0%, #0a0a1a 60%);
+    min-height: 700px;
+  }
+
+  .dia-scene {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    height: 600px;
+  }
+
+  /* Big radial arc */
+  .dia-arc {
+    position: absolute;
+    bottom: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160%;
+    padding-bottom: 80%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 80%, rgba(120,60,255,0.3) 0%, rgba(60,20,180,0.1) 50%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .dia-card {
+    position: absolute;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.1) inset,
+      0 24px 64px rgba(0,0,0,0.5),
+      0 4px 16px rgba(80,40,200,0.1);
+    padding: 18px 20px;
+    opacity: 0;
+    transform: translateY(40px) scale(0.94);
+    transition: opacity 0.8s cubic-bezier(0.25,0.1,0.25,1),
+                transform 0.8s cubic-bezier(0.25,0.1,0.25,1);
+  }
+  .dia-card.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Floating animation */
+  @keyframes floatA { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  @keyframes floatB { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  @keyframes floatC { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+  .dia-card.visible.float-a { animation: floatA 4s ease-in-out infinite; }
+  .dia-card.visible.float-b { animation: floatB 5s ease-in-out infinite; animation-delay: -1.5s; }
+  .dia-card.visible.float-c { animation: floatC 3.5s ease-in-out infinite; animation-delay: -0.8s; }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back">← 返回资源库</a>
+
+<div class="page-header">
+  <h1>毛玻璃浮动 UI 卡片</h1>
+  <p>灵感来自 Dia Browser · backdrop-filter + 视差 + 入场动画 · 5 种变体</p>
+</div>
+
+<!-- ══════════════════════════════════════
+     DEMO 1 — Floating Notification Cards
+     ══════════════════════════════════════ -->
+<div class="demo-section demo-1" id="demo1">
+  <div class="demo-label">01 · 浮动通知卡片</div>
+  <div class="arc-bg"></div>
+  <div class="float-cards" id="floatCards">
+
+    <!-- Card 1: Calendar -->
+    <div class="fcard fcard-1" id="fc1">
+      <div class="fc-icon">📅</div>
+      <div class="fc-title">设计评审会议</div>
+      <div class="fc-sub">今天 · 下午 3:00 — 4:00</div>
+      <div class="fc-time">30 分钟后开始</div>
+    </div>
+
+    <!-- Card 2: Meeting invite -->
+    <div class="fcard fcard-2" id="fc2">
+      <div class="fc-header">
+        <div class="fc-avatar">L</div>
+        <div>
+          <div class="fc-name">Lin Wei</div>
+          <div class="fc-role">产品设计师</div>
+        </div>
+      </div>
+      <div class="fc-msg">邀请你参加「Q2 设计系统」同步会议，明天上午 10:00 开始。</div>
+      <div class="fc-actions">
+        <button class="fc-btn fc-btn-accept">接受</button>
+        <button class="fc-btn fc-btn-decline">拒绝</button>
+      </div>
+    </div>
+
+    <!-- Card 3: Progress -->
+    <div class="fcard fcard-3" id="fc3">
+      <div class="fc-title">本周进度</div>
+      <div class="fc-progress-row">
+        <div class="fc-progress-label">设计</div>
+        <div class="fc-progress-bar"><div class="fc-progress-fill" style="width:78%;background:linear-gradient(90deg,#a78bfa,#7c3aed)"></div></div>
+        <div class="fc-progress-val">78%</div>
+      </div>
+      <div class="fc-progress-row">
+        <div class="fc-progress-label">开发</div>
+        <div class="fc-progress-bar"><div class="fc-progress-fill" style="width:52%;background:linear-gradient(90deg,#60a5fa,#2563eb)"></div></div>
+        <div class="fc-progress-val">52%</div>
+      </div>
+      <div class="fc-progress-row">
+        <div class="fc-progress-label">测试</div>
+        <div class="fc-progress-bar"><div class="fc-progress-fill" style="width:35%;background:linear-gradient(90deg,#34d399,#059669)"></div></div>
+        <div class="fc-progress-val">35%</div>
+      </div>
+    </div>
+
+    <!-- Card 4: Messages -->
+    <div class="fcard fcard-4" id="fc4">
+      <div class="fc-header">
+        <div class="fc-dot"></div>
+        <div class="fc-app">Messages</div>
+        <div class="fc-count">3 条新消息</div>
+      </div>
+      <div class="fc-messages">
+        <div class="fc-bubble">组件库更新好了，可以看一下 👀</div>
+        <div class="fc-bubble mine">好的，马上看！</div>
+        <div class="fc-bubble">新的 token 规范也发你了</div>
+      </div>
+    </div>
+
+    <!-- Card 5: Stats -->
+    <div class="fcard fcard-5" id="fc5">
+      <div class="fc-stats">
+        <div class="fc-stat-item">
+          <div class="fc-stat-num" style="color:#a78bfa">24</div>
+          <div class="fc-stat-lbl">组件</div>
+        </div>
+        <div class="fc-stat-item">
+          <div class="fc-stat-num" style="color:#60a5fa">8</div>
+          <div class="fc-stat-lbl">页面</div>
+        </div>
+        <div class="fc-stat-item">
+          <div class="fc-stat-num" style="color:#34d399">3</div>
+          <div class="fc-stat-lbl">版本</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DEMO 2 — Parallax Mouse Tracking
+     ══════════════════════════════════════ -->
+<div class="demo-section demo-2" id="demo2">
+  <div class="demo-label">02 · 鼠标视差跟随</div>
+  <div class="spotlight" id="spotlight"></div>
+  <div class="parallax-scene" id="parallaxScene">
+
+    <div class="pcard" id="pc1" style="width:220px;top:60px;left:80px">
+      <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:8px;letter-spacing:0.05em">WEATHER</div>
+      <div style="font-size:2.5rem;font-weight:200;color:#fff;letter-spacing:-0.03em">18°</div>
+      <div style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:4px">多云 · 北京</div>
+    </div>
+
+    <div class="pcard" id="pc2" style="width:260px;top:40px;right:60px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#f472b6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:0.85rem">🎵</div>
+        <div>
+          <div style="font-size:0.8rem;font-weight:600;color:#fff">Midnight Rain</div>
+          <div style="font-size:0.68rem;color:rgba(255,255,255,0.4)">Taylor Swift</div>
+        </div>
+      </div>
+      <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden">
+        <div style="width:62%;height:100%;background:linear-gradient(90deg,#f472b6,#ec4899);border-radius:2px"></div>
+      </div>
+    </div>
+
+    <div class="pcard" id="pc3" style="width:200px;top:220px;left:40px">
+      <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:10px;letter-spacing:0.05em">ACTIVITY</div>
+      <div style="display:flex;gap:3px;align-items:flex-end;height:40px">
+        <div style="flex:1;background:rgba(96,165,250,0.3);border-radius:2px;height:40%"></div>
+        <div style="flex:1;background:rgba(96,165,250,0.5);border-radius:2px;height:65%"></div>
+        <div style="flex:1;background:rgba(96,165,250,0.7);border-radius:2px;height:50%"></div>
+        <div style="flex:1;background:#60a5fa;border-radius:2px;height:90%"></div>
+        <div style="flex:1;background:rgba(96,165,250,0.6);border-radius:2px;height:70%"></div>
+        <div style="flex:1;background:rgba(96,165,250,0.4);border-radius:2px;height:45%"></div>
+        <div style="flex:1;background:rgba(96,165,250,0.3);border-radius:2px;height:30%"></div>
+      </div>
+    </div>
+
+    <div class="pcard" id="pc4" style="width:240px;top:200px;right:50px">
+      <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:10px;letter-spacing:0.05em">UPCOMING</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:3px;height:28px;border-radius:2px;background:#a78bfa;flex-shrink:0"></div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:500;color:#fff">设计评审</div>
+            <div style="font-size:0.65rem;color:rgba(255,255,255,0.35)">14:00 — 15:00</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:3px;height:28px;border-radius:2px;background:#60a5fa;flex-shrink:0"></div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:500;color:#fff">产品同步</div>
+            <div style="font-size:0.65rem;color:rgba(255,255,255,0.35)">16:30 — 17:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pcard" id="pc5" style="width:180px;bottom:80px;left:50%;transform:translateX(-50%)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#30d158;box-shadow:0 0 8px #30d158"></div>
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.7)">系统运行正常</div>
+      </div>
+      <div style="font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:4px">所有服务 · 99.9% 可用</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DEMO 3 — Stacked Notification Stack
+     ══════════════════════════════════════ -->
+<div class="demo-section demo-3" id="demo3">
+  <div class="demo-label">03 · 堆叠通知展开</div>
+  <div class="notif-stack" id="notifStack">
+    <div class="notif-card">
+      <div class="notif-header">
+        <div class="notif-icon" style="background:rgba(167,139,250,0.2)">🔔</div>
+        <div class="notif-title">设计系统更新</div>
+        <div class="notif-time">刚刚</div>
+      </div>
+      <div class="notif-body">Button 组件新增 ghost 变体，Spacing token 已更新至 v2.1</div>
+    </div>
+    <div class="notif-card">
+      <div class="notif-header">
+        <div class="notif-icon" style="background:rgba(96,165,250,0.2)">💬</div>
+        <div class="notif-title">新评论</div>
+        <div class="notif-time">5 分钟前</div>
+      </div>
+      <div class="notif-body">Alex 在「首页重设计」上留下了评论：「导航栏间距需要调整」</div>
+    </div>
+    <div class="notif-card">
+      <div class="notif-header">
+        <div class="notif-icon" style="background:rgba(52,211,153,0.2)">✅</div>
+        <div class="notif-title">任务完成</div>
+        <div class="notif-time">12 分钟前</div>
+      </div>
+      <div class="notif-body">「移动端适配」已标记为完成，共修改 8 个页面</div>
+    </div>
+  </div>
+  <div class="demo-3-hint">点击展开 / 收起通知</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DEMO 4 — iOS Lock Screen Widgets
+     ══════════════════════════════════════ -->
+<div class="demo-section demo-4" id="demo4">
+  <div class="demo-label">04 · 锁屏小组件</div>
+  <div class="lockscreen">
+    <div class="ls-time" id="lsTime">10:24</div>
+    <div class="ls-date" id="lsDate">星期二，5月5日</div>
+
+    <div class="ls-widget">
+      <div class="ls-widget-row">
+        <div class="ls-widget-icon">🎵</div>
+        <div class="ls-widget-info">
+          <div class="ls-widget-title">Midnight Rain</div>
+          <div class="ls-widget-sub">Taylor Swift · Midnights</div>
+        </div>
+        <div style="display:flex;gap:12px">
+          <span style="font-size:1rem;cursor:pointer;opacity:0.6">⏮</span>
+          <span style="font-size:1rem;cursor:pointer">⏸</span>
+          <span style="font-size:1rem;cursor:pointer;opacity:0.6">⏭</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ls-widgets-row">
+      <div class="ls-widget-sm">
+        <div class="ls-sm-icon">🌤</div>
+        <div class="ls-sm-val">18°</div>
+        <div class="ls-sm-lbl">北京</div>
+      </div>
+      <div class="ls-widget-sm">
+        <div class="ls-sm-icon">🔋</div>
+        <div class="ls-sm-val">76%</div>
+        <div class="ls-sm-lbl">电量</div>
+      </div>
+      <div class="ls-widget-sm">
+        <div class="ls-sm-icon">🏃</div>
+        <div class="ls-sm-val">4.2k</div>
+        <div class="ls-sm-lbl">步数</div>
+      </div>
+    </div>
+
+    <div class="ls-widget">
+      <div class="ls-widget-row">
+        <div class="ls-widget-icon">📅</div>
+        <div class="ls-widget-info">
+          <div class="ls-widget-title">设计评审</div>
+          <div class="ls-widget-sub">下午 3:00 · 30 分钟后</div>
+        </div>
+        <div class="ls-widget-val" style="color:#a78bfa">3:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DEMO 5 — Dia-style Floating Cards
+     ══════════════════════════════════════ -->
+<div class="demo-section demo-5" id="demo5">
+  <div class="demo-label">05 · Dia 风格浮动卡片</div>
+  <div class="dia-scene" id="diaScene">
+    <div class="dia-arc"></div>
+
+    <!-- Search card -->
+    <div class="dia-card float-a" id="dc1" style="width:320px;top:40px;left:50%;transform:translateX(-50%)">
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);border-radius:10px;padding:10px 14px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span style="font-size:0.82rem;color:rgba(255,255,255,0.3)">搜索任何内容...</span>
+        <span style="margin-left:auto;font-size:0.65rem;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px;color:rgba(255,255,255,0.3)">⌘K</span>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="dia-card float-b" id="dc2" style="width:200px;top:160px;left:60px">
+      <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-bottom:10px;letter-spacing:0.08em">快捷操作</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.04);cursor:pointer">
+          <span style="font-size:0.9rem">✏️</span>
+          <span style="font-size:0.75rem;color:rgba(255,255,255,0.7)">新建文档</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.04);cursor:pointer">
+          <span style="font-size:0.9rem">📋</span>
+          <span style="font-size:0.75rem;color:rgba(255,255,255,0.7)">粘贴内容</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:rgba(167,139,250,0.1);cursor:pointer;border:1px solid rgba(167,139,250,0.2)">
+          <span style="font-size:0.9rem">🤖</span>
+          <span style="font-size:0.75rem;color:#c4b5fd">AI 助手</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent files -->
+    <div class="dia-card float-c" id="dc3" style="width:240px;top:160px;right:60px">
+      <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-bottom:10px;letter-spacing:0.08em">最近文件</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:28px;height:28px;border-radius:6px;background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.2);display:flex;align-items:center;justify-content:center;font-size:0.75rem">📄</div>
+          <div>
+            <div style="font-size:0.75rem;color:rgba(255,255,255,0.8)">设计规范 v3.pdf</div>
+            <div style="font-size:0.62rem;color:rgba(255,255,255,0.3)">2 小时前</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:28px;height:28px;border-radius:6px;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.2);display:flex;align-items:center;justify-content:center;font-size:0.75rem">🎨</div>
+          <div>
+            <div style="font-size:0.75rem;color:rgba(255,255,255,0.8)">首页重设计.fig</div>
+            <div style="font-size:0.62rem;color:rgba(255,255,255,0.3)">昨天</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI suggestion -->
+    <div class="dia-card float-a" id="dc4" style="width:300px;bottom:80px;left:50%;transform:translateX(-50%)">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#a78bfa,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0">✨</div>
+        <div>
+          <div style="font-size:0.75rem;font-weight:600;color:#c4b5fd;margin-bottom:4px">AI 建议</div>
+          <div style="font-size:0.73rem;color:rgba(255,255,255,0.6);line-height:1.5">根据你的日程，下午 2:30 前完成设计稿会更好，这样评审前有缓冲时间。</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Demo 1: Intersection Observer trigger ──
+(function() {
+  const cards = document.querySelectorAll('.fcard');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.2 });
+  cards.forEach(c => obs.observe(c));
+})();
+
+// ── Demo 2: Parallax mouse tracking ──
+(function() {
+  const scene = document.getElementById('demo2');
+  const spotlight = document.getElementById('spotlight');
+  const cards = [
+    { el: document.getElementById('pc1'), depth: 0.03 },
+    { el: document.getElementById('pc2'), depth: 0.05 },
+    { el: document.getElementById('pc3'), depth: 0.04 },
+    { el: document.getElementById('pc4'), depth: 0.06 },
+    { el: document.getElementById('pc5'), depth: 0.02 },
+  ];
+
+  scene.addEventListener('mousemove', e => {
+    const rect = scene.getBoundingClientRect();
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const dx = mx - cx;
+    const dy = my - cy;
+
+    // Move spotlight
+    spotlight.style.left = mx + 'px';
+    spotlight.style.top = my + 'px';
+
+    // Parallax cards
+    cards.forEach(({ el, depth }) => {
+      const ox = dx * depth;
+      const oy = dy * depth;
+      el.style.transform = `translate(${ox}px, ${oy}px)`;
+    });
+  });
+
+  scene.addEventListener('mouseleave', () => {
+    cards.forEach(({ el }) => {
+      el.style.transform = '';
+    });
+  });
+})();
+
+// ── Demo 3: Notification stack expand ──
+(function() {
+  const stack = document.getElementById('notifStack');
+  stack.addEventListener('click', () => {
+    stack.classList.toggle('expanded');
+  });
+})();
+
+// ── Demo 4: Live clock ──
+(function() {
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('lsTime').textContent = h + ':' + m;
+    const days = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+    const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    document.getElementById('lsDate').textContent =
+      days[now.getDay()] + '，' + months[now.getMonth()] + now.getDate() + '日';
+  }
+  updateClock();
+  setInterval(updateClock, 10000);
+})();
+
+// ── Demo 5: Dia cards entrance ──
+(function() {
+  const cards = document.querySelectorAll('.dia-card');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 150);
+      }
+    });
+  }, { threshold: 0.15 });
+  cards.forEach(c => obs.observe(c));
+})();
+</script>
+
+</body>
+</html>

@@ -52,4 +52,10 @@
 - 效果名称：Clip-Path 全屏菜单展开 (Clip-Path Fullscreen Menu)
 - 效果描述：黑色背景上散落着多张随机旋转的图片，右上角有一个 TOGGLE MENU 按钮。点击后，用 clip-path: polygon() 动画从右上角展开一个全屏菜单覆盖层，菜单背景是渐变/图片，菜单项为大号像素等宽字体。关闭时 clip-path 以弹性回弹动画收缩回角落。整体呈现出游戏 UI 风格的沉浸感。
 - 实现原理：nav 元素用 clip-path: polygon() 控制可见区域，关闭态为右上角小矩形（如 polygon(85% 0%, 100% 0%, 100% 15%, 85% 15%)），展开态为全屏（polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)），CSS transition cubic-bezier 控制弹性动画，背景散落图片用 CSS transform rotate + absolute 定位，菜单项用 letter-spacing + 等宽字体
-- 状态：待实现
+- 状态：已实现 → 56-clip-path-fullscreen-menu.html，已集成到首页
+
+## 2026-05-05 raycast.com (AI page)
+- 效果名称：App 图标星系网格 (App Icon Galaxy Grid)
+- 效果描述：大量 App 图标（圆角方形，深色背景）以椭圆形星系状排列，中心图标（主角）发出紫红色光晕高亮，周围图标按距离中心的远近逐渐降低亮度和透明度，边缘图标几乎不可见。鼠标移动时，悬停的图标会轻微放大并发光，整体有微弱的浮动动画（各图标以不同频率和幅度上下漂浮）。背景是纯黑色，营造出宇宙星系的空间感。
+- 实现原理：绝对定位布局，用 JS 计算椭圆轨道坐标（参数方程 x=cx+a*cos(t), y=cy+b*sin(t)），多层椭圆轨道嵌套，每个图标的 opacity 和 filter:brightness 根据到中心距离线性衰减，CSS animation keyframes 驱动各图标独立浮动（translateY + 随机 delay/duration），mousemove 事件检测悬停图标触发 scale(1.15) + box-shadow 发光，中心图标用 radial-gradient 光晕 + CSS animation 呼吸发光
+- 状态：已实现 → 57-app-icon-galaxy.html，已集成到首页

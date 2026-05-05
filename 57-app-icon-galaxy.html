@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Icon Galaxy Grid</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    text-align: center;
+    padding: 60px 20px 20px;
+    position: relative;
+    z-index: 10;
+  }
+
+  header h1 {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  header p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.45);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── VARIANT 1: Galaxy Grid ── */
+  .variant {
+    position: relative;
+    margin: 40px auto;
+    max-width: 1100px;
+    padding: 0 20px;
+  }
+
+  .variant-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 16px;
+    padding-left: 4px;
+  }
+
+  /* Galaxy scene */
+  .galaxy-scene {
+    position: relative;
+    width: 100%;
+    height: 560px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #050508;
+    cursor: default;
+  }
+
+  /* Ambient glow behind center */
+  .galaxy-scene::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    height: 220px;
+    background: radial-gradient(ellipse, rgba(180, 60, 255, 0.18) 0%, rgba(255, 60, 120, 0.10) 40%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    animation: ambientPulse 4s ease-in-out infinite;
+  }
+
+  @keyframes ambientPulse {
+    0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  }
+
+  /* Icon base */
+  .app-icon {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.25s ease,
+                filter 0.25s ease;
+    cursor: pointer;
+    user-select: none;
+    z-index: 2;
+    will-change: transform;
+  }
+
+  .app-icon:hover {
+    transform: translate(-50%, -50%) scale(1.22) !important;
+    z-index: 20;
+  }
+
+  /* Center hero icon */
+  .app-icon.center {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    font-size: 34px;
+    z-index: 10;
+    animation: centerFloat 3s ease-in-out infinite, centerGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes centerFloat {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0px) scale(1); }
+    50% { transform: translate(-50%, -50%) translateY(-6px) scale(1); }
+  }
+
+  @keyframes centerGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200,80,255,0), 0 0 30px 8px rgba(200,80,255,0.35), 0 0 60px 20px rgba(200,80,255,0.15); }
+    50% { box-shadow: 0 0 0 6px rgba(200,80,255,0.12), 0 0 40px 12px rgba(200,80,255,0.5), 0 0 80px 30px rgba(200,80,255,0.2); }
+  }
+
+  /* Float animations for orbit icons */
+  @keyframes float0 { 0%,100%{transform:translate(-50%,-50%) translateY(0px)} 50%{transform:translate(-50%,-50%) translateY(-5px)} }
+  @keyframes float1 { 0%,100%{transform:translate(-50%,-50%) translateY(0px)} 50%{transform:translate(-50%,-50%) translateY(-7px)} }
+  @keyframes float2 { 0%,100%{transform:translate(-50%,-50%) translateY(0px)} 50%{transform:translate(-50%,-50%) translateY(-4px)} }
+  @keyframes float3 { 0%,100%{transform:translate(-50%,-50%) translateY(0px)} 50%{transform:translate(-50%,-50%) translateY(-6px)} }
+  @keyframes float4 { 0%,100%{transform:translate(-50%,-50%) translateY(0px)} 50%{transform:translate(-50%,-50%) translateY(-8px)} }
+  @keyframes float5 { 0%,100%{transform:translate(-50%,-50%) translateY(0px)} 50%{transform:translate(-50%,-50%) translateY(-3px)} }
+
+  /* ── VARIANT 2: Constellation ── */
+  .constellation-scene {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #03030a;
+    cursor: default;
+  }
+
+  .constellation-scene canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── VARIANT 3: Floating Shelf ── */
+  .shelf-scene {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: linear-gradient(160deg, #0a0a18 0%, #0d0510 50%, #080810 100%);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 14px;
+    padding-top: 40px;
+  }
+
+  .shelf-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .shelf-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.3s ease,
+                filter 0.3s ease;
+    position: relative;
+  }
+
+  .shelf-icon:hover {
+    transform: scale(1.3) translateY(-4px);
+    z-index: 10;
+  }
+
+  .shelf-icon::after {
+    content: attr(data-name);
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .shelf-icon:hover::after {
+    opacity: 1;
+  }
+
+  /* Neighbor scale effect via JS */
+  .shelf-icon.neighbor-1 { transform: scale(1.12); }
+  .shelf-icon.neighbor-2 { transform: scale(1.06); }
+
+  footer {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255,255,255,0.2);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>App Icon Galaxy Grid</h1>
+  <p>App 图标以星系轨道排列，中心聚焦发光，边缘渐隐消散</p>
+</header>
+
+<!-- VARIANT 1: Galaxy Orbit -->
+<div class="variant">
+  <div class="variant-label">01 — Galaxy Orbit · 星系轨道</div>
+  <div class="galaxy-scene" id="galaxyScene"></div>
+</div>
+
+<!-- VARIANT 2: Constellation Lines -->
+<div class="variant">
+  <div class="variant-label">02 — Constellation · 星座连线</div>
+  <div class="constellation-scene" id="constellationScene">
+    <canvas id="constellationCanvas"></canvas>
+  </div>
+</div>
+
+<!-- VARIANT 3: Floating Shelf -->
+<div class="variant">
+  <div class="variant-label">03 — Floating Shelf · 悬浮货架</div>
+  <div class="shelf-scene" id="shelfScene"></div>
+</div>
+
+<footer>App Icon Galaxy Grid · Inspired by Raycast</footer>
+
+<script>
+window.addEventListener('load', function() {
+// ─────────────────────────────────────────────
+// Icon data
+// ─────────────────────────────────────────────
+const ICONS = [
+  { emoji: '✦', bg: 'linear-gradient(135deg,#2d1b4e,#4a1a6e)', name: 'Raycast', glow: '#c850ff' },
+  { emoji: '🤖', bg: 'linear-gradient(135deg,#1a1a2e,#16213e)', name: 'ChatGPT', glow: '#10a37f' },
+  { emoji: '⚡', bg: 'linear-gradient(135deg,#1e1e2e,#2d2d4e)', name: 'Bolt', glow: '#f59e0b' },
+  { emoji: '🎨', bg: 'linear-gradient(135deg,#1a0a2e,#2e1a4e)', name: 'Figma', glow: '#a855f7' },
+  { emoji: '📦', bg: 'linear-gradient(135deg,#0a1628,#1a2a48)', name: 'Linear', glow: '#5e6ad2' },
+  { emoji: '🌿', bg: 'linear-gradient(135deg,#0a2010,#1a3a20)', name: 'Notion', glow: '#22c55e' },
+  { emoji: '🔮', bg: 'linear-gradient(135deg,#1a0a3e,#2e1a5e)', name: 'Arc', glow: '#8b5cf6' },
+  { emoji: '🎵', bg: 'linear-gradient(135deg,#1a0a0a,#3a1010)', name: 'Music', glow: '#ef4444' },
+  { emoji: '📷', bg: 'linear-gradient(135deg,#1a0a1a,#3a1a3a)', name: 'Camera', glow: '#ec4899' },
+  { emoji: '🌐', bg: 'linear-gradient(135deg,#0a1a2e,#1a2a4e)', name: 'Browser', glow: '#3b82f6' },
+  { emoji: '💬', bg: 'linear-gradient(135deg,#0a2a1a,#1a4a2a)', name: 'Messages', glow: '#34d399' },
+  { emoji: '📊', bg: 'linear-gradient(135deg,#1a1a0a,#3a3a1a)', name: 'Sheets', glow: '#84cc16' },
+  { emoji: '🔑', bg: 'linear-gradient(135deg,#2a1a0a,#4a2a1a)', name: '1Password', glow: '#f97316' },
+  { emoji: '🎯', bg: 'linear-gradient(135deg,#2a0a0a,#4a1a1a)', name: 'Focus', glow: '#f43f5e' },
+  { emoji: '🌙', bg: 'linear-gradient(135deg,#0a0a2a,#1a1a4a)', name: 'Dark', glow: '#818cf8' },
+  { emoji: '☕', bg: 'linear-gradient(135deg,#2a1a0a,#3a2a1a)', name: 'Theine', glow: '#d97706' },
+  { emoji: '🦙', bg: 'linear-gradient(135deg,#1a2a1a,#2a3a2a)', name: 'Ollama', glow: '#4ade80' },
+  { emoji: '🐙', bg: 'linear-gradient(135deg,#0a0a1a,#1a1a2a)', name: 'GitHub', glow: '#e2e8f0' },
+  { emoji: '🧠', bg: 'linear-gradient(135deg,#1a0a2a,#2a1a3a)', name: 'Brain', glow: '#c084fc' },
+  { emoji: '🔭', bg: 'linear-gradient(135deg,#0a1a2a,#1a2a3a)', name: 'Perplexity', glow: '#38bdf8' },
+  { emoji: '🎪', bg: 'linear-gradient(135deg,#2a0a1a,#3a1a2a)', name: 'Framer', glow: '#fb7185' },
+  { emoji: '🌊', bg: 'linear-gradient(135deg,#0a1a2a,#0a2a3a)', name: 'Linear', glow: '#06b6d4' },
+  { emoji: '🦅', bg: 'linear-gradient(135deg,#1a1a0a,#2a2a1a)', name: 'Eagle', glow: '#eab308' },
+  { emoji: '🎲', bg: 'linear-gradient(135deg,#1a0a1a,#2a1a2a)', name: 'Dice', glow: '#d946ef' },
+  { emoji: '🔬', bg: 'linear-gradient(135deg,#0a2a2a,#1a3a3a)', name: 'Research', glow: '#2dd4bf' },
+  { emoji: '🏔️', bg: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)', name: 'Peak', glow: '#94a3b8' },
+  { emoji: '🌺', bg: 'linear-gradient(135deg,#2a0a0a,#3a1a1a)', name: 'Bloom', glow: '#fb923c' },
+  { emoji: '⚙️', bg: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)', name: 'Settings', glow: '#64748b' },
+  { emoji: '🎸', bg: 'linear-gradient(135deg,#2a1a0a,#3a2a0a)', name: 'Guitar', glow: '#fbbf24' },
+  { emoji: '🌈', bg: 'linear-gradient(135deg,#1a0a2a,#2a1a3a)', name: 'Prism', glow: '#a78bfa' },
+];
+
+// ─────────────────────────────────────────────
+// VARIANT 1: Galaxy Orbit
+// ─────────────────────────────────────────────
+(function buildGalaxy() {
+  const scene = document.getElementById('galaxyScene');
+  const W = scene.getBoundingClientRect().width || 1060;
+  const H = 560;
+  const cx = W / 2;
+  const cy = H / 2;
+
+  // Orbit rings: [a (x-radius), b (y-radius), count, startAngle, iconSize]
+  const orbits = [
+    { a: 0,   b: 0,   count: 1,  start: 0,    size: 72, isCenter: true },
+    { a: 110, b: 68,  count: 6,  start: 0.3,  size: 56 },
+    { a: 210, b: 118, count: 10, start: 0.8,  size: 52 },
+    { a: 310, b: 165, count: 14, start: 0.2,  size: 48 },
+  ];
+
+  let iconIdx = 0;
+  const floatAnims = ['float0','float1','float2','float3','float4','float5'];
+
+  orbits.forEach((orbit, orbitIdx) => {
+    for (let i = 0; i < orbit.count; i++) {
+      const icon = ICONS[iconIdx % ICONS.length];
+      iconIdx++;
+
+      const el = document.createElement('div');
+      el.className = 'app-icon' + (orbit.isCenter ? ' center' : '');
+      el.textContent = icon.emoji;
+      el.title = icon.name;
+
+      // Position
+      let x, y;
+      if (orbit.isCenter) {
+        x = cx; y = cy;
+      } else {
+        const angle = orbit.start + (i / orbit.count) * Math.PI * 2;
+        x = cx + orbit.a * Math.cos(angle);
+        y = cy + orbit.b * Math.sin(angle);
+      }
+
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.width = orbit.size + 'px';
+      el.style.height = orbit.size + 'px';
+      el.style.borderRadius = Math.round(orbit.size * 0.24) + 'px';
+      el.style.fontSize = Math.round(orbit.size * 0.46) + 'px';
+      el.style.background = icon.bg;
+      el.style.transform = 'translate(-50%, -50%)';
+
+      // Distance-based opacity & brightness
+      const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+      const maxDist = 340;
+      const t = Math.min(dist / maxDist, 1);
+      const opacity = orbit.isCenter ? 1 : Math.max(0.15, 1 - t * 0.82);
+      const brightness = orbit.isCenter ? 1 : Math.max(0.3, 1 - t * 0.65);
+
+      el.style.opacity = opacity;
+      el.style.filter = `brightness(${brightness})`;
+
+      // Glow on hover
+      el.addEventListener('mouseenter', () => {
+        el.style.boxShadow = `0 0 20px 4px ${icon.glow}55, 0 0 40px 10px ${icon.glow}22`;
+        el.style.filter = 'brightness(1.3)';
+        el.style.opacity = '1';
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.boxShadow = '';
+        el.style.filter = `brightness(${brightness})`;
+        el.style.opacity = opacity;
+      });
+
+      // Float animation
+      if (!orbit.isCenter) {
+        const animName = floatAnims[Math.floor(Math.random() * floatAnims.length)];
+        const dur = 2.5 + Math.random() * 2.5;
+        const delay = -Math.random() * 3;
+        el.style.animation = `${animName} ${dur}s ${delay}s ease-in-out infinite`;
+      }
+
+      // Center icon glow
+      if (orbit.isCenter) {
+        el.style.boxShadow = `0 0 0 0 rgba(200,80,255,0), 0 0 30px 8px rgba(200,80,255,0.35), 0 0 60px 20px rgba(200,80,255,0.15)`;
+      }
+
+      scene.appendChild(el);
+    }
+  });
+
+  // Responsive reposition on resize
+  window.addEventListener('resize', () => {
+    // Simple: just rebuild (debounced)
+  });
+})();
+
+// ─────────────────────────────────────────────
+// VARIANT 2: Constellation Lines
+// ─────────────────────────────────────────────
+(function buildConstellation() {
+  const scene = document.getElementById('constellationScene');
+  const canvas = document.getElementById('constellationCanvas');
+
+  const W = scene.getBoundingClientRect().width || 1060;
+  const H = 480;
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Place icons randomly (but seeded-ish)
+  const nodes = [];
+  const count = 22;
+  const margin = 60;
+
+  // Use a simple deterministic spread — evenly distributed around center
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const r = 70 + (i % 4) * 60;
+    const x = W / 2 + r * Math.cos(angle);
+    const y = H / 2 + r * Math.sin(angle) * 0.52;
+    const icon = ICONS[i % ICONS.length];
+    const dist = Math.sqrt((x - W/2)**2 + (y - H/2)**2);
+    const maxD = 320;
+    const t = Math.min(dist / maxD, 1);
+    nodes.push({ x, y, icon, opacity: Math.max(0.2, 1 - t * 0.75), vx: 0, vy: 0,
+      baseX: x, baseY: y, phase: Math.random() * Math.PI * 2, speed: 0.4 + Math.random() * 0.6 });
+  }
+
+  // Draw lines between nearby nodes
+  function drawLines(time) {
+    ctx.clearRect(0, 0, W, H);
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < 160) {
+          const alpha = (1 - d / 160) * 0.18;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(160,100,255,${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  // Render icons as DOM elements
+  nodes.forEach((node, i) => {
+    const el = document.createElement('div');
+    el.className = 'app-icon';
+    el.textContent = node.icon.emoji;
+    el.title = node.icon.name;
+    el.style.cssText = `
+      position: absolute;
+      left: ${node.x}px;
+      top: ${node.y}px;
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      font-size: 22px;
+      background: ${node.icon.bg};
+      opacity: ${node.opacity};
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s, filter 0.25s, opacity 0.25s;
+    `;
+    el.addEventListener('mouseenter', () => {
+      el.style.transform = 'translate(-50%,-50%) scale(1.25)';
+      el.style.boxShadow = `0 0 20px 4px ${node.icon.glow}55`;
+      el.style.filter = 'brightness(1.4)';
+      el.style.opacity = '1';
+      el.style.zIndex = '20';
+    });
+    el.addEventListener('mouseleave', () => {
+      el.style.transform = 'translate(-50%,-50%) scale(1)';
+      el.style.boxShadow = '';
+      el.style.filter = '';
+      el.style.opacity = node.opacity;
+      el.style.zIndex = '2';
+    });
+    node.el = el;
+    scene.appendChild(el);
+  });
+
+  // Animate float + lines
+  let t = 0;
+  function animate() {
+    t += 0.008;
+    nodes.forEach(node => {
+      node.x = node.baseX + Math.sin(t * node.speed + node.phase) * 5;
+      node.y = node.baseY + Math.cos(t * node.speed * 0.7 + node.phase) * 3;
+      if (node.el) {
+        node.el.style.left = node.x + 'px';
+        node.el.style.top = node.y + 'px';
+      }
+    });
+    drawLines(t);
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ─────────────────────────────────────────────
+// VARIANT 3: Floating Shelf (Dock-style)
+// ─────────────────────────────────────────────
+(function buildShelf() {
+  const scene = document.getElementById('shelfScene');
+
+  // 5 columns × 4 rows
+  const cols = 7;
+  const rows = 4;
+  const gap = 14;
+  const iconSize = 52;
+
+  // Build grid
+  const grid = [];
+  let idx = 0;
+  for (let c = 0; c < cols; c++) {
+    const col = document.createElement('div');
+    col.className = 'shelf-row';
+    col.style.gap = gap + 'px';
+    // no extra margin — gap is handled by flex gap
+
+    // Vertical offset for wave shape
+    const offset = Math.abs(c - Math.floor(cols / 2));
+    col.style.marginTop = (offset * 18) + 'px';
+
+    for (let r = 0; r < rows; r++) {
+      const icon = ICONS[idx % ICONS.length];
+      idx++;
+
+      const el = document.createElement('div');
+      el.className = 'shelf-icon';
+      el.textContent = icon.emoji;
+      el.setAttribute('data-name', icon.name);
+      el.setAttribute('data-col', c);
+      el.setAttribute('data-row', r);
+      el.style.background = icon.bg;
+      el.style.width = iconSize + 'px';
+      el.style.height = iconSize + 'px';
+
+      // Distance from center column
+      const distFromCenter = Math.abs(c - Math.floor(cols / 2));
+      const baseOpacity = Math.max(0.25, 1 - distFromCenter * 0.14);
+      const baseBrightness = Math.max(0.4, 1 - distFromCenter * 0.12);
+      el.style.opacity = baseOpacity;
+      el.style.filter = `brightness(${baseBrightness})`;
+
+      // Float animation
+      const dur = 2.2 + Math.random() * 2;
+      const delay = -Math.random() * 3;
+      const floatAnim = ['float0','float1','float2','float3','float4','float5'][Math.floor(Math.random()*6)];
+      el.style.animation = `${floatAnim} ${dur}s ${delay}s ease-in-out infinite`;
+
+      el.addEventListener('mouseenter', () => {
+        el.style.boxShadow = `0 8px 32px ${icon.glow}55, 0 0 0 1px ${icon.glow}33`;
+        el.style.filter = 'brightness(1.4)';
+        el.style.opacity = '1';
+        // Neighbor effect
+        const thisCol = parseInt(el.getAttribute('data-col'));
+        const thisRow = parseInt(el.getAttribute('data-row'));
+        document.querySelectorAll('.shelf-icon').forEach(other => {
+          const oc = parseInt(other.getAttribute('data-col'));
+          const or = parseInt(other.getAttribute('data-row'));
+          const d = Math.abs(oc - thisCol) + Math.abs(or - thisRow);
+          if (d === 1) {
+            other.style.transform = 'scale(1.1) translateY(-2px)';
+          } else if (d === 2) {
+            other.style.transform = 'scale(1.05)';
+          }
+        });
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.boxShadow = '';
+        el.style.filter = `brightness(${baseBrightness})`;
+        el.style.opacity = baseOpacity;
+        document.querySelectorAll('.shelf-icon').forEach(other => {
+          other.style.transform = '';
+        });
+      });
+
+      col.appendChild(el);
+      grid.push(el);
+    }
+    scene.appendChild(col);
+  }
+})();
+
+}); // end window load
+</script>
+</body>
+</html>

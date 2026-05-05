@@ -29,3 +29,9 @@
 - 效果描述：在蓝紫色径向渐变背景上，多个半透明毛玻璃 UI 卡片以不同位置漂浮，卡片模拟真实 App 通知（日历提醒、会议通知、消息气泡等）。页面加载时卡片从下方淡入上浮，鼠标移动时卡片有轻微视差跟随效果。背景是超大径向渐变圆形被 clip-path 裁剪成半圆弧，营造出沉浸式空间感。
 - 实现原理：CSS backdrop-filter: blur() 实现毛玻璃效果，box-shadow 多层叠加（外阴影+内高光）增加质感，radial-gradient 超大圆形背景 + clip-path 裁剪，JS IntersectionObserver 触发入场动画（translateY + scale + opacity），mousemove 事件驱动视差位移
 - 状态：已实现 → 52-glassmorphism-floating-ui-cards.html，已集成到首页
+
+## 2026-05-05 linear.app (features page)
+- 效果名称：菱形图标网格光晕追踪 (Diamond Icon Grid Spotlight)
+- 效果描述：大量深色圆角方形图标按菱形/偏移网格排列，覆盖整个背景区域。鼠标移动时，以鼠标为中心的圆形区域内图标会逐渐亮起（发光 + 颜色变化），距离越近越亮，形成动态追踪光晕效果。图标本身是各种 SF Symbols 风格的功能图标（搜索、星标、地图、闪电等），整体营造出产品功能丰富的视觉感。
+- 实现原理：CSS Grid 偏移布局（奇偶行 margin-left 错位实现菱形排列），JS mousemove 事件计算每个图标与鼠标的距离，用 CSS 变量 --glow 控制每个图标的 box-shadow 发光强度和 opacity，距离阈值内线性插值计算亮度，requestAnimationFrame 平滑更新
+- 状态：已实现 → 53-diamond-icon-grid-spotlight.html

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diamond Icon Grid Spotlight · 菱形图标网格光晕追踪</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --icon-bg: #111118;
+    --icon-border: #1e1e2a;
+    --icon-color: #3a3a50;
+    --icon-size: 52px;
+    --icon-gap: 10px;
+    --radius: 14px;
+    --spotlight-color: #7c6af7;
+    --spotlight-color2: #4fa8e8;
+    --spotlight-color3: #e86f4f;
+  }
+
+  body {
+    background: var(--bg);
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Header ─── */
+  .page-header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    position: relative;
+    z-index: 10;
+  }
+  .page-header h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .page-header p {
+    font-size: 16px;
+    color: #666;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ─── Variants ─── */
+  .variants {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .variant {
+    position: relative;
+    overflow: hidden;
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ─── Icon Grid ─── */
+  .icon-grid-wrap {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .icon-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--icon-gap);
+    padding: calc(var(--icon-size) / 2) calc(var(--icon-size) / 2);
+    pointer-events: all;
+    user-select: none;
+  }
+
+  .icon-row {
+    display: flex;
+    gap: var(--icon-gap);
+    flex-shrink: 0;
+  }
+
+  .icon-row:nth-child(even) {
+    margin-left: calc((var(--icon-size) + var(--icon-gap)) / 2);
+  }
+
+  .icon-cell {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    flex-shrink: 0;
+    border-radius: var(--radius);
+    background: var(--icon-bg);
+    border: 1px solid var(--icon-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--icon-color);
+    transition: color 0.15s ease, border-color 0.15s ease;
+    position: relative;
+    will-change: box-shadow, color, border-color;
+  }
+
+  .icon-cell svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  /* ─── Content overlay ─── */
+  .variant-content {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    padding: 40px 20px;
+    pointer-events: none;
+  }
+
+  .variant-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 16px;
+    padding: 4px 12px;
+    border: 1px solid #222;
+    border-radius: 20px;
+  }
+
+  .variant-title {
+    font-size: clamp(24px, 4vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+
+  .variant-desc {
+    font-size: 15px;
+    color: #555;
+    max-width: 360px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ─── Gradient overlays to fade edges ─── */
+  .variant::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 50%, transparent 30%, var(--bg) 80%);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* ─── Variant 1: Purple spotlight ─── */
+  .v1 { --spot: #7c6af7; }
+  .v1 .variant-label { color: #7c6af7; border-color: #7c6af720; }
+  .v1 .variant-title { color: #fff; }
+
+  /* ─── Variant 2: Blue spotlight ─── */
+  .v2 { --spot: #4fa8e8; background: #080c12; }
+  .v2 .icon-cell { background: #0a0f18; border-color: #141c28; color: #1e2a3a; }
+  .v2 .variant-label { color: #4fa8e8; border-color: #4fa8e820; }
+  .v2 .variant-title { color: #fff; }
+
+  /* ─── Variant 3: Warm orange spotlight ─── */
+  .v3 { --spot: #e86f4f; background: #100a08; }
+  .v3 .icon-cell { background: #150e0a; border-color: #251810; color: #2a1a10; }
+  .v3 .variant-label { color: #e86f4f; border-color: #e86f4f20; }
+  .v3 .variant-title { color: #fff; }
+
+  /* ─── Variant 4: Multi-color ─── */
+  .v4 { --spot: #a8e84f; background: #080f08; }
+  .v4 .icon-cell { background: #0a150a; border-color: #141e14; color: #1a2a1a; }
+  .v4 .variant-label { color: #a8e84f; border-color: #a8e84f20; }
+  .v4 .variant-title { color: #fff; }
+
+  /* ─── Divider ─── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #1e1e2a 30%, #1e1e2a 70%, transparent);
+    margin: 0 40px;
+  }
+
+  /* ─── Footer ─── */
+  .page-footer {
+    text-align: center;
+    padding: 40px 20px 60px;
+    color: #333;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Diamond Icon Grid Spotlight</h1>
+  <p>菱形偏移网格 + 鼠标追踪光晕。移动鼠标，感受图标随光晕亮起的效果。</p>
+</div>
+
+<div class="variants">
+
+  <!-- Variant 1: Purple -->
+  <div class="variant v1" data-spot="#7c6af7">
+    <div class="icon-grid-wrap">
+      <div class="icon-grid" id="grid1"></div>
+    </div>
+    <div class="variant-content">
+      <div class="variant-label">Variant 01 · Purple</div>
+      <div class="variant-title">Everything you need<br>to ship faster</div>
+      <div class="variant-desc">Move your mouse across the grid to reveal the spotlight effect</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Variant 2: Blue -->
+  <div class="variant v2" data-spot="#4fa8e8">
+    <div class="icon-grid-wrap">
+      <div class="icon-grid" id="grid2"></div>
+    </div>
+    <div class="variant-content">
+      <div class="variant-label">Variant 02 · Blue</div>
+      <div class="variant-title">Built for teams<br>that move fast</div>
+      <div class="variant-desc">Each icon lights up based on proximity to your cursor</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Variant 3: Warm -->
+  <div class="variant v3" data-spot="#e86f4f">
+    <div class="icon-grid-wrap">
+      <div class="icon-grid" id="grid3"></div>
+    </div>
+    <div class="variant-content">
+      <div class="variant-label">Variant 03 · Warm</div>
+      <div class="variant-title">Hundreds of features<br>one unified tool</div>
+      <div class="variant-desc">Distance-based glow with smooth interpolation</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Variant 4: Green + multi-color icons -->
+  <div class="variant v4" data-spot="#a8e84f" data-multicolor="true">
+    <div class="icon-grid-wrap">
+      <div class="icon-grid" id="grid4"></div>
+    </div>
+    <div class="variant-content">
+      <div class="variant-label">Variant 04 · Multi-color</div>
+      <div class="variant-title">Every icon tells<br>a different story</div>
+      <div class="variant-desc">Icons reveal their unique accent colors on hover</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  Inspired by linear.app · Pure HTML/CSS/JS · Zero dependencies
+</div>
+
+<script>
+// ─── Icon SVG paths (SF Symbols style) ───────────────────────────────────────
+const ICONS = [
+  // Search
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>`,
+  // Star
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  // Lightning
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  // Map
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
+  // Settings
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+  // Bell
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+  // Layers
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
+  // Target
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+  // Play
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+  // Grid
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
+  // Refresh
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`,
+  // Share
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
+  // Lock
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  // Bulb
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>`,
+  // Contrast
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20" opacity="0.3"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor" stroke="none"/></svg>`,
+  // Arrow right
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+  // Filter
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`,
+  // Camera
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
+  // Bookmark
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+  // Globe
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  // Code
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+  // Heart
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+  // Trending up
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+  // Users
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+];
+
+// Multi-color accent colors for variant 4
+const ACCENT_COLORS = [
+  '#7c6af7', '#4fa8e8', '#e86f4f', '#a8e84f',
+  '#f7c46a', '#e84fa8', '#4fe8c8', '#e84f4f',
+  '#6af7c4', '#f76a6a', '#6af7a8', '#a86af7',
+];
+
+// ─── Build a grid ─────────────────────────────────────────────────────────────
+function buildGrid(containerId, variantEl) {
+  const container = document.getElementById(containerId);
+  const wrap = container.parentElement;
+  const isMulticolor = variantEl.dataset.multicolor === 'true';
+  const spotColor = variantEl.dataset.spot || '#7c6af7';
+
+  const CELL = 52 + 10; // icon-size + gap
+  const cols = Math.ceil(wrap.offsetWidth / CELL) + 3;
+  const rows = Math.ceil(wrap.offsetHeight / CELL) + 3;
+
+  const cells = [];
+
+  for (let r = 0; r < rows; r++) {
+    const row = document.createElement('div');
+    row.className = 'icon-row';
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'icon-cell';
+      const iconIdx = (r * cols + c + r * 3) % ICONS.length;
+      cell.innerHTML = ICONS[iconIdx];
+
+      if (isMulticolor) {
+        const accentIdx = (r * cols + c + r * 7) % ACCENT_COLORS.length;
+        cell.dataset.accent = ACCENT_COLORS[accentIdx];
+      }
+
+      row.appendChild(cell);
+      cells.push(cell);
+    }
+    container.appendChild(row);
+  }
+
+  return cells;
+}
+
+// ─── Spotlight effect ─────────────────────────────────────────────────────────
+function initSpotlight(variantEl, cells) {
+  const spotColor = variantEl.dataset.spot || '#7c6af7';
+  const isMulticolor = variantEl.dataset.multicolor === 'true';
+  const RADIUS = 200; // px — spotlight radius
+  const MAX_GLOW = 28; // max glow spread px
+
+  let mouseX = -9999, mouseY = -9999;
+  let rafId = null;
+  let isActive = false;
+
+  function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return { r, g, b };
+  }
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function update() {
+    const wrapRect = variantEl.getBoundingClientRect();
+
+    cells.forEach(cell => {
+      const rect = cell.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2 - wrapRect.left;
+      const cy = rect.top + rect.height / 2 - wrapRect.top;
+      const lx = mouseX - wrapRect.left;
+      const ly = mouseY - wrapRect.top;
+      const dist = Math.sqrt((cx - lx) ** 2 + (cy - ly) ** 2);
+
+      if (dist < RADIUS) {
+        const t = 1 - dist / RADIUS; // 0..1, closer = higher
+        const eased = t * t * (3 - 2 * t); // smoothstep
+
+        const color = isMulticolor ? (cell.dataset.accent || spotColor) : spotColor;
+        const { r, g, b } = hexToRgb(color);
+
+        const glowSize = Math.round(lerp(0, MAX_GLOW, eased));
+        const glowOpacity = lerp(0, 0.7, eased).toFixed(2);
+        const iconOpacity = lerp(0.18, 1, eased).toFixed(2);
+        const borderOpacity = lerp(0.08, 0.6, eased).toFixed(2);
+
+        cell.style.boxShadow = `0 0 ${glowSize}px rgba(${r},${g},${b},${glowOpacity}), inset 0 0 ${Math.round(glowSize * 0.5)}px rgba(${r},${g},${b},${(glowOpacity * 0.3).toFixed(2)})`;
+        cell.style.color = `rgba(${r},${g},${b},${iconOpacity})`;
+        cell.style.borderColor = `rgba(${r},${g},${b},${borderOpacity})`;
+        cell.style.background = `rgba(${r},${g},${b},${(eased * 0.08).toFixed(3)})`;
+      } else {
+        cell.style.boxShadow = '';
+        cell.style.color = '';
+        cell.style.borderColor = '';
+        cell.style.background = '';
+      }
+    });
+
+    rafId = null;
+  }
+
+  variantEl.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (!rafId) rafId = requestAnimationFrame(update);
+  });
+
+  variantEl.addEventListener('mouseleave', () => {
+    mouseX = -9999;
+    mouseY = -9999;
+    if (!rafId) rafId = requestAnimationFrame(update);
+  });
+}
+
+// ─── Init all variants ────────────────────────────────────────────────────────
+function init() {
+  const variants = document.querySelectorAll('.variant');
+  variants.forEach((variantEl, i) => {
+    const gridId = `grid${i + 1}`;
+    const cells = buildGrid(gridId, variantEl);
+    initSpotlight(variantEl, cells);
+  });
+}
+
+// Wait for layout
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  // Small delay to ensure layout is complete
+  requestAnimationFrame(() => requestAnimationFrame(init));
+}
+</script>
+</body>
+</html>

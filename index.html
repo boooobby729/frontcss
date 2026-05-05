@@ -92,6 +92,7 @@
   [data-cat="typo"]{--accent:#38bdf8}
   [data-cat="darkmode"]{--accent:#818cf8}
   [data-cat="glass"]{--accent:#f0abfc}
+  [data-cat="spotlight"]{--accent:#7c6af7}
   [data-cat="marquee"]{--accent:#fb923c}
   [data-cat="clippath"]{--accent:#4ade80}
   [data-cat="collect"]{--accent:#f472b6}
@@ -200,9 +201,9 @@
 <section class="hero">
   <p class="hero-overline">Frontend Effects Library</p>
   <h1>Build something<br><em>extraordinary.</em></h1>
-  <p class="hero-sub">646+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+  <p class="hero-sub">650+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="hero-stat-num" data-target="646" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" data-target="650" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
@@ -255,12 +256,23 @@
     <button class="filter-btn" data-cat="kbd">键盘快捷键</button>
     <button class="filter-btn" data-cat="particle">粒子特效</button>
     <button class="filter-btn" data-cat="terminal">终端特效</button>
+    <button class="filter-btn" data-cat="spotlight">光晕追踪</button>
   </div>
 </div>
 
 <!-- Cards Grid -->
 <section class="grid-section">
   <div class="card-grid">
+
+    <!-- diamond-icon-grid-spotlight (置顶) -->
+    <a class="card" data-cat="spotlight" href="53-diamond-icon-grid-spotlight.html">
+      <div class="card-visual" id="spotlightPreviewWrap" style="background:#0a0a0f;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center">
+        <div id="spotlightPreviewGrid" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:5px;padding:6px 4px"></div>
+        <div style="position:relative;z-index:2;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(124,106,247,.8);text-shadow:0 0 12px rgba(124,106,247,.6)">SPOTLIGHT</div>
+      </div>
+      <div class="card-content"><h3>菱形图标网格光晕</h3><p>灵感来自 linear.app features 页面。大量深色图标按菱形偏移网格排列，鼠标移动时以光标为中心的圆形区域内图标逐渐亮起，距离越近越亮。4 种颜色变体：紫色、蓝色、暖橙、多彩。</p></div>
+      <div class="card-footer"><span class="tag">spotlight</span><span class="tag">icon-grid</span><span class="count">4 种效果</span></div>
+    </a>
 
     <!-- terminal-text-scramble (置顶) -->
     <a class="card" data-cat="terminal" href="51-terminal-text-scramble.html">
@@ -963,6 +975,64 @@
       cards.forEach(el=>{el.style.transform=`rotate(${parseFloat(getComputedStyle(el).getPropertyValue('--r'))||0}deg)`;});
     });
     animate();
+  })();
+
+  // Diamond Icon Grid Spotlight preview
+  (function(){
+    const grid=document.getElementById('spotlightPreviewGrid');if(!grid)return;
+    const wrap=document.getElementById('spotlightPreviewWrap');if(!wrap)return;
+    const ICONS_MINI=[
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="10" height="10"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="10" height="10"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="10" height="10"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="10" height="10"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="10" height="10"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="10" height="10"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+    ];
+    const CELL=18,GAP=4,COLS=14,ROWS=8;
+    const cells=[];
+    for(let r=0;r<ROWS;r++){
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;gap:'+GAP+'px;flex-shrink:0;';
+      if(r%2===1)row.style.marginLeft=((CELL+GAP)/2)+'px';
+      for(let c=0;c<COLS;c++){
+        const cell=document.createElement('div');
+        cell.style.cssText='width:'+CELL+'px;height:'+CELL+'px;flex-shrink:0;border-radius:4px;background:#111118;border:1px solid #1e1e2a;display:flex;align-items:center;justify-content:center;color:#2a2a40;transition:color .1s,border-color .1s;';
+        cell.innerHTML=ICONS_MINI[(r*COLS+c)%ICONS_MINI.length];
+        row.appendChild(cell);
+        cells.push(cell);
+      }
+      grid.appendChild(row);
+    }
+    // Animate spotlight
+    let angle=0;
+    const R=40;
+    const cx=wrap.offsetWidth/2,cy=wrap.offsetHeight/2;
+    function animFrame(){
+      angle+=0.025;
+      const mx=cx+Math.cos(angle)*R;
+      const my=cy+Math.sin(angle*0.7)*R*0.6;
+      const wRect=wrap.getBoundingClientRect();
+      cells.forEach(cell=>{
+        const rect=cell.getBoundingClientRect();
+        const ccx=rect.left-wRect.left+rect.width/2;
+        const ccy=rect.top-wRect.top+rect.height/2;
+        const dist=Math.sqrt((ccx-mx)**2+(ccy-my)**2);
+        const RADIUS=55;
+        if(dist<RADIUS){
+          const t=1-dist/RADIUS;
+          const e=t*t*(3-2*t);
+          const a=(e*0.9).toFixed(2);
+          cell.style.color='rgba(124,106,247,'+a+')';
+          cell.style.borderColor='rgba(124,106,247,'+(e*0.5).toFixed(2)+')';
+          cell.style.boxShadow='0 0 '+(e*10).toFixed(0)+'px rgba(124,106,247,'+(e*0.5).toFixed(2)+')';
+        } else {
+          cell.style.color='';cell.style.borderColor='';cell.style.boxShadow='';
+        }
+      });
+      requestAnimationFrame(animFrame);
+    }
+    animFrame();
   })();
 </script>
 </body>

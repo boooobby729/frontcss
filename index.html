@@ -149,6 +149,22 @@
   .p-particle{position:absolute;width:3px;height:3px;border-radius:50%;animation:pFloat 3s ease-in-out infinite}
   @keyframes pFloat{0%,100%{transform:translate(0,0);opacity:.3}50%{transform:translate(8px,-16px);opacity:1}}
 
+  .glass-preview-orb{position:absolute;border-radius:50%;filter:blur(10px);opacity:.65;animation:gOrb 7s ease-in-out infinite}
+  .glass-preview-orb.orb-a{width:78px;height:78px;left:-10px;top:-6px;background:radial-gradient(circle,#7c6cf7 0%,rgba(124,108,247,.15) 65%,transparent 78%)}
+  .glass-preview-orb.orb-b{width:88px;height:88px;right:-6px;bottom:-10px;background:radial-gradient(circle,#d16eff 0%,rgba(209,110,255,.14) 62%,transparent 80%);animation-delay:-2.4s}
+  .glass-preview-card,.glass-preview-pill{position:absolute;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06));box-shadow:0 10px 30px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .glass-preview-card{border-radius:16px;animation:gFloat 5.8s ease-in-out infinite}
+  .glass-preview-card.card-a{width:104px;height:58px;left:18px;top:18px;--r:-7deg;transform:rotate(var(--r))}
+  .glass-preview-card.card-b{width:90px;height:50px;right:18px;bottom:18px;display:flex;align-items:center;gap:8px;padding:0 12px;--r:9deg;transform:rotate(var(--r));animation-delay:-2.2s}
+  .glass-preview-pill{width:56px;height:18px;border-radius:999px;left:66px;bottom:12px;opacity:.82;--r:0deg;animation:gFloat 6.6s ease-in-out infinite;animation-delay:-1.5s}
+  .glass-preview-line{position:absolute;left:14px;height:6px;border-radius:999px;background:rgba(255,255,255,.72)}
+  .glass-preview-line.line-short{top:16px;width:38px;opacity:.95}
+  .glass-preview-line.line-long{top:29px;width:62px;opacity:.48}
+  .glass-preview-line.line-mid{position:static;width:42px;height:6px;opacity:.58}
+  .glass-preview-avatar{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.92),rgba(255,255,255,.42));box-shadow:0 0 0 1px rgba(255,255,255,.18) inset}
+  @keyframes gFloat{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-8px) rotate(var(--r,0deg))}}
+  @keyframes gOrb{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.08) translateY(-6px)}}
+
   /* Footer */
   .footer{text-align:center;padding:48px 20px 64px;border-top:1px solid rgba(255,255,255,.06);margin-top:60px}
   .footer-note{font-size:.75rem;color:rgba(255,255,255,.25);letter-spacing:.01em;margin-bottom:4px}
@@ -184,9 +200,9 @@
 <section class="hero">
   <p class="hero-overline">Frontend Effects Library</p>
   <h1>Build something<br><em>extraordinary.</em></h1>
-  <p class="hero-sub">645+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
+  <p class="hero-sub">646+ 种纯前端效果，涵盖动画、交互、视觉与创意，零依赖，开箱即用。</p>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="hero-stat-num" data-target="645" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" data-target="646" data-suffix="+">0</div><div class="hero-stat-label">效果收录</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="45" data-suffix="">0</div><div class="hero-stat-label">效果分类</div></div>
     <div class="hero-stat"><div class="hero-stat-num" data-target="0" data-suffix="">0</div><div class="hero-stat-label">外部依赖</div></div>
   </div>
@@ -300,6 +316,27 @@
       <div class="card-visual" style="background:#000;overflow:hidden;position:relative"><div id="cardTextPreview" style="font-family:Inter,-apple-system,sans-serif;font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.03em;display:flex;gap:1px"></div></div>
       <div class="card-content"><h3>Collect 文本变化</h3><p>Dia 风格文本动画效果集。可变字体字重波浪、文字轮播切换、逐字模糊揭示、打字机效果。</p></div>
       <div class="card-footer"><span class="tag">variable-font</span><span class="tag">text-swap</span><span class="count">4 种效果</span></div>
+    </a>
+
+    <!-- glassmorphism-floating-ui (置顶) -->
+    <a class="card" data-cat="glass" href="52-glassmorphism-floating-ui-cards.html">
+      <div class="card-visual" style="background:radial-gradient(circle at 30% 20%, rgba(94,92,230,.35), transparent 38%), radial-gradient(circle at 72% 30%, rgba(191,90,242,.28), transparent 34%), linear-gradient(180deg,#060816,#0a0f23 60%,#05070d);overflow:hidden;position:relative">
+        <div id="glassPreviewScene" style="position:relative;width:190px;height:110px">
+          <div class="glass-preview-orb orb-a"></div>
+          <div class="glass-preview-orb orb-b"></div>
+          <div class="glass-preview-card card-a">
+            <div class="glass-preview-line line-short"></div>
+            <div class="glass-preview-line line-long"></div>
+          </div>
+          <div class="glass-preview-card card-b">
+            <div class="glass-preview-avatar"></div>
+            <div class="glass-preview-line line-mid"></div>
+          </div>
+          <div class="glass-preview-pill"></div>
+        </div>
+      </div>
+      <div class="card-content"><h3>毛玻璃浮动通知卡片</h3><p>灵感来自 Dia Browser 的漂浮 UI。半透明毛玻璃卡片在蓝紫渐变空间中缓慢悬浮，包含通知、会议、消息等 5 种界面变体，并带轻微视差与入场上浮质感。</p></div>
+      <div class="card-footer"><span class="tag">glassmorphism</span><span class="tag">floating-ui</span><span class="count">5 种效果</span></div>
     </a>
 
     <!-- 1 -->
@@ -895,6 +932,37 @@
       requestAnimationFrame(tick);
     }
     tick();
+  })();
+
+  // Glassmorphism floating cards preview
+  (function(){
+    const scene=document.getElementById('glassPreviewScene');if(!scene)return;
+    const cards=[...scene.querySelectorAll('.glass-preview-card,.glass-preview-pill')];
+    let t=0;
+    function animate(){
+      t+=0.016;
+      cards.forEach((el,i)=>{
+        const x=Math.sin(t*1.2+i*1.7)*4;
+        const y=Math.cos(t*1.5+i*1.2)*3;
+        const r=parseFloat(getComputedStyle(el).getPropertyValue('--r'))||0;
+        el.style.transform=`translate(${x}px,${y}px) rotate(${r}deg)`;
+      });
+      requestAnimationFrame(animate);
+    }
+    scene.addEventListener('pointermove',e=>{
+      const rect=scene.getBoundingClientRect();
+      const rx=(e.clientX-rect.left)/rect.width-.5;
+      const ry=(e.clientY-rect.top)/rect.height-.5;
+      cards.forEach((el,i)=>{
+        const r=parseFloat(getComputedStyle(el).getPropertyValue('--r'))||0;
+        const factor=(i+1)*2.2;
+        el.style.transform=`translate(${rx*factor*2}px,${ry*factor*1.6}px) rotate(${r}deg)`;
+      });
+    });
+    scene.addEventListener('pointerleave',()=>{
+      cards.forEach(el=>{el.style.transform=`rotate(${parseFloat(getComputedStyle(el).getPropertyValue('--r'))||0}deg)`;});
+    });
+    animate();
   })();
 </script>
 </body>

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{background:#080810;color:#f5f5f7;font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;overflow-x:hidden}
+
+/* ── Global Nav ── */
+.page-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:rgba(8,8,16,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.page-nav .logo{font-size:.85rem;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.5)}
+.page-nav .logo em{font-style:normal;background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:6px}
+.nav-links a{font-size:.72rem;padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);text-decoration:none;transition:all .2s}
+.nav-links a:hover,.nav-links a.active{background:rgba(255,255,255,.08);color:#f5f5f7;border-color:rgba(255,255,255,.2)}
+
+/* ── Section Layout ── */
+.section{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px 60px;position:relative}
+.section-label{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:12px}
+.section-title{font-size:clamp(1.6rem,4vw,2.8rem);font-weight:800;letter-spacing:-.03em;text-align:center;margin-bottom:8px}
+.section-desc{font-size:.82rem;color:rgba(255,255,255,.35);text-align:center;max-width:480px;line-height:1.6;margin-bottom:48px}
+
+/* ── Scroll Progress Bar ── */
+.scroll-progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#a78bfa,#f472b6,#fb923c);z-index:200;transition:width .1s linear;width:0%}
+
+/* ══════════════════════════════════════════════
+   VARIANT 1 · Perspective Coverflow
+   ══════════════════════════════════════════════ */
+#v1{background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(167,139,250,.08) 0%,transparent 70%)}
+.coverflow-stage{width:100%;max-width:900px;height:320px;perspective:1200px;position:relative;overflow:visible}
+.coverflow-track{display:flex;align-items:center;justify-content:center;height:100%;gap:0;position:relative;transform-style:preserve-3d}
+.cf-card{width:200px;height:280px;flex-shrink:0;border-radius:16px;position:absolute;transition:transform .6s cubic-bezier(.4,0,.2,1),opacity .6s,box-shadow .6s;cursor:pointer;overflow:hidden;user-select:none}
+.cf-card .cf-inner{width:100%;height:100%;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:20px;position:relative;overflow:hidden}
+.cf-card .cf-bg{position:absolute;inset:0;border-radius:16px}
+.cf-card .cf-num{font-size:4rem;font-weight:900;opacity:.12;position:absolute;top:12px;right:16px;line-height:1}
+.cf-card .cf-title{font-size:.9rem;font-weight:700;position:relative;z-index:1;text-align:center}
+.cf-card .cf-sub{font-size:.65rem;opacity:.6;margin-top:4px;position:relative;z-index:1}
+.cf-card .cf-shine{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15) 0%,transparent 50%);border-radius:16px;pointer-events:none}
+
+/* Coverflow positions */
+.cf-card[data-pos="-2"]{transform:translateX(-340px) rotateY(55deg) scale(.75);opacity:.4;z-index:1}
+.cf-card[data-pos="-1"]{transform:translateX(-190px) rotateY(40deg) scale(.88);opacity:.7;z-index:2}
+.cf-card[data-pos="0"]{transform:translateX(0) rotateY(0deg) scale(1);opacity:1;z-index:5;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.cf-card[data-pos="1"]{transform:translateX(190px) rotateY(-40deg) scale(.88);opacity:.7;z-index:2}
+.cf-card[data-pos="2"]{transform:translateX(340px) rotateY(-55deg) scale(.75);opacity:.4;z-index:1}
+.cf-card[data-pos="-3"]{transform:translateX(-460px) rotateY(65deg) scale(.6);opacity:.15;z-index:0}
+.cf-card[data-pos="3"]{transform:translateX(460px) rotateY(-65deg) scale(.6);opacity:.15;z-index:0}
+
+.cf-dots{display:flex;gap:8px;margin-top:28px;justify-content:center}
+.cf-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s;cursor:pointer}
+.cf-dot.active{background:#a78bfa;width:20px;border-radius:3px}
+
+/* ══════════════════════════════════════════════
+   VARIANT 2 · Scroll-Snap Depth Zoom
+   ══════════════════════════════════════════════ */
+#v2{background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(244,114,182,.07) 0%,transparent 70%)}
+.depth-scroll-wrap{width:100%;max-width:700px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;gap:24px;padding:40px 200px;scrollbar-width:none;cursor:grab;-webkit-overflow-scrolling:touch}
+.depth-scroll-wrap::-webkit-scrollbar{display:none}
+.depth-scroll-wrap:active{cursor:grabbing}
+.depth-card{flex-shrink:0;width:260px;height:340px;border-radius:20px;scroll-snap-align:center;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.4,0,.2,1),box-shadow .4s;transform:scale(.82) translateZ(-60px);opacity:.55}
+.depth-card.snap-active{transform:scale(1) translateZ(0);opacity:1;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.depth-card .dc-bg{position:absolute;inset:0}
+.depth-card .dc-content{position:absolute;bottom:0;left:0;right:0;padding:24px;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 100%)}
+.depth-card .dc-tag{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px}
+.depth-card .dc-title{font-size:1rem;font-weight:700}
+.depth-card .dc-icon{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+
+/* ══════════════════════════════════════════════
+   VARIANT 3 · Infinite Scroll Ticker (3D Tilt)
+   ══════════════════════════════════════════════ */
+#v3{background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(251,146,60,.07) 0%,transparent 70%);overflow:hidden}
+.ticker-scene{width:100%;perspective:800px;overflow:hidden;padding:20px 0}
+.ticker-row{display:flex;gap:20px;width:max-content;animation:tickerScroll 28s linear infinite}
+.ticker-row.reverse{animation-direction:reverse;animation-duration:22s}
+.ticker-row:hover{animation-play-state:paused}
+@keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker-item{flex-shrink:0;width:220px;height:140px;border-radius:14px;position:relative;overflow:hidden;transition:transform .3s,box-shadow .3s;cursor:pointer}
+.ticker-item:hover{transform:scale(1.06) rotateY(-8deg) rotateX(4deg);box-shadow:0 20px 50px rgba(0,0,0,.5);z-index:10}
+.ticker-item .ti-bg{position:absolute;inset:0}
+.ticker-item .ti-label{position:absolute;bottom:12px;left:14px;font-size:.72rem;font-weight:600}
+.ticker-item .ti-badge{position:absolute;top:10px;right:10px;font-size:.55rem;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,.15);backdrop-filter:blur(6px)}
+
+/* ══════════════════════════════════════════════
+   VARIANT 4 · Scroll-Driven Rotary Dial
+   ══════════════════════════════════════════════ */
+#v4{background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(100,210,255,.07) 0%,transparent 70%)}
+.rotary-scene{width:100%;max-width:600px;display:flex;gap:48px;align-items:center;justify-content:center}
+.rotary-dial{width:280px;height:280px;position:relative;flex-shrink:0}
+.dial-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
+.dial-center{position:absolute;inset:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.dial-item{position:absolute;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04)}
+.dial-item.active{background:rgba(167,139,250,.2);border-color:rgba(167,139,250,.5);box-shadow:0 0 20px rgba(167,139,250,.3);transform:scale(1.15)!important}
+.rotary-info{flex:1;min-width:0}
+.rotary-info .ri-num{font-size:3rem;font-weight:900;opacity:.15;line-height:1;margin-bottom:4px}
+.rotary-info .ri-title{font-size:1.3rem;font-weight:700;margin-bottom:8px}
+.rotary-info .ri-desc{font-size:.78rem;color:rgba(255,255,255,.4);line-height:1.6}
+.rotary-info .ri-tags{display:flex;gap:6px;margin-top:16px;flex-wrap:wrap}
+.rotary-info .ri-tag{font-size:.6rem;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4)}
+
+/* ══════════════════════════════════════════════
+   VARIANT 5 · Scroll-Reveal Stack
+   ══════════════════════════════════════════════ */
+#v5{background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(48,209,88,.07) 0%,transparent 70%);min-height:auto;padding-bottom:80px}
+.stack-scene{width:100%;max-width:480px;position:relative;height:360px}
+.stack-card{position:absolute;left:0;right:0;height:220px;border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s,box-shadow .5s}
+.stack-card .sc-bg{position:absolute;inset:0}
+.stack-card .sc-content{position:absolute;inset:0;padding:28px;display:flex;flex-direction:column;justify-content:space-between}
+.stack-card .sc-eyebrow{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;opacity:.5}
+.stack-card .sc-title{font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
+.stack-card .sc-footer{display:flex;align-items:center;justify-content:space-between}
+.stack-card .sc-num{font-size:.7rem;opacity:.4}
+.stack-card .sc-arrow{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:background .2s}
+.stack-card:hover .sc-arrow{background:rgba(255,255,255,.2)}
+.stack-nav{display:flex;gap:10px;margin-top:16px;justify-content:center}
+.stack-nav button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:transparent;color:#f5f5f7;cursor:pointer;font-size:.9rem;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.stack-nav button:hover{background:rgba(255,255,255,.08)}
+
+/* ── Color Palettes ── */
+.grad-violet{background:linear-gradient(135deg,#1a0533 0%,#4c1d95 50%,#7c3aed 100%)}
+.grad-rose{background:linear-gradient(135deg,#1f0a14 0%,#9f1239 50%,#f43f5e 100%)}
+.grad-amber{background:linear-gradient(135deg,#1c0f00 0%,#92400e 50%,#f59e0b 100%)}
+.grad-cyan{background:linear-gradient(135deg,#001a1f 0%,#0e7490 50%,#22d3ee 100%)}
+.grad-emerald{background:linear-gradient(135deg,#001a0a 0%,#065f46 50%,#10b981 100%)}
+.grad-indigo{background:linear-gradient(135deg,#0a0a2e 0%,#1e3a8a 50%,#6366f1 100%)}
+.grad-pink{background:linear-gradient(135deg,#1a0010 0%,#831843 50%,#ec4899 100%)}
+.grad-orange{background:linear-gradient(135deg,#1a0800 0%,#7c2d12 50%,#ea580c 100%)}
+.grad-teal{background:linear-gradient(135deg,#001a18 0%,#134e4a 50%,#14b8a6 100%)}
+.grad-sky{background:linear-gradient(135deg,#00101a 0%,#0c4a6e 50%,#0ea5e9 100%)}
+
+/* ── Divider ── */
+.divider{width:1px;height:80px;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.1),transparent);margin:0 auto}
+
+/* ── Footer ── */
+.page-footer{text-align:center;padding:40px 20px;border-top:1px solid rgba(255,255,255,.04)}
+.page-footer p{font-size:.7rem;color:rgba(255,255,255,.18)}
+.page-footer a{color:rgba(167,139,250,.6);text-decoration:none}
+.page-footer a:hover{color:#a78bfa}
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Nav -->
+<nav class="page-nav">
+  <div class="logo">Bの宝库 · <em>58</em></div>
+  <div class="nav-links">
+    <a href="#v1" class="active">Coverflow</a>
+    <a href="#v2">Depth Zoom</a>
+    <a href="#v3">Ticker</a>
+    <a href="#v4">Rotary</a>
+    <a href="#v5">Stack</a>
+  </div>
+</nav>
+
+<!-- ══ VARIANT 1 · Perspective Coverflow ══ -->
+<section class="section" id="v1">
+  <div class="section-label">Variant 01</div>
+  <h2 class="section-title">Perspective <em style="font-style:normal;background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Coverflow</em></h2>
+  <p class="section-desc">经典 iTunes 风格 3D 封面流，滚动或点击切换，CSS perspective + rotateY 实现</p>
+
+  <div class="coverflow-stage" id="cfStage">
+    <div class="coverflow-track" id="cfTrack">
+      <!-- Cards injected by JS -->
+    </div>
+  </div>
+  <div class="cf-dots" id="cfDots"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ VARIANT 2 · Scroll-Snap Depth Zoom ══ -->
+<section class="section" id="v2">
+  <div class="section-label">Variant 02</div>
+  <h2 class="section-title">Scroll-Snap <em style="font-style:normal;background:linear-gradient(135deg,#f472b6,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Depth Zoom</em></h2>
+  <p class="section-desc">横向滚动吸附，中心卡片自动放大，两侧缩小营造景深感</p>
+
+  <div class="depth-scroll-wrap" id="depthWrap">
+    <!-- Cards injected by JS -->
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ VARIANT 3 · Infinite Ticker ══ -->
+<section class="section" id="v3">
+  <div class="section-label">Variant 03</div>
+  <h2 class="section-title">Infinite <em style="font-style:normal;background:linear-gradient(135deg,#fb923c,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent">3D Ticker</em></h2>
+  <p class="section-desc">双行无限滚动跑马灯，悬停暂停，鼠标悬浮触发 3D 倾斜效果</p>
+
+  <div class="ticker-scene" id="tickerScene">
+    <div class="ticker-row" id="tickerRow1"></div>
+    <div style="height:16px"></div>
+    <div class="ticker-row reverse" id="tickerRow2"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ VARIANT 4 · Rotary Dial ══ -->
+<section class="section" id="v4">
+  <div class="section-label">Variant 04</div>
+  <h2 class="section-title">Rotary <em style="font-style:normal;background:linear-gradient(135deg,#64d2ff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Dial Selector</em></h2>
+  <p class="section-desc">圆形拨盘选择器，点击旋转切换内容，配合右侧信息面板展示详情</p>
+
+  <div class="rotary-scene">
+    <div class="rotary-dial" id="rotaryDial">
+      <div class="dial-ring"></div>
+      <div class="dial-center" id="dialCenter">✦</div>
+    </div>
+    <div class="rotary-info" id="rotaryInfo"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ VARIANT 5 · Scroll-Reveal Stack ══ -->
+<section class="section" id="v5">
+  <div class="section-label">Variant 05</div>
+  <h2 class="section-title">Stacked <em style="font-style:normal;background:linear-gradient(135deg,#30d158,#64d2ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Card Reveal</em></h2>
+  <p class="section-desc">堆叠卡片，点击展开下一张，带有弹性过渡与深度层次感</p>
+
+  <div class="stack-scene" id="stackScene"></div>
+  <div class="stack-nav">
+    <button id="stackPrev">←</button>
+    <button id="stackNext">→</button>
+  </div>
+</section>
+
+<footer class="page-footer">
+  <p>Scroll-Driven 3D Carousel · 5 Variants · Zero Dependencies · <a href="index.html">← 返回宝库</a></p>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════
+   Scroll Progress
+═══════════════════════════════════════════ */
+const progressBar = document.getElementById('scrollProgress');
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+  progressBar.style.width = pct + '%';
+}, { passive: true });
+
+/* ═══════════════════════════════════════════
+   Nav active link on scroll
+═══════════════════════════════════════════ */
+const sections = ['v1','v2','v3','v4','v5'];
+const navLinks = document.querySelectorAll('.nav-links a');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+
+/* ═══════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════ */
+const CARDS = [
+  { title: 'Aurora Borealis', sub: 'Atmospheric', grad: 'grad-violet', emoji: '🌌', tags: ['CSS', 'Animation'] },
+  { title: 'Neon Cityscape', sub: 'Urban Glow', grad: 'grad-rose', emoji: '🌆', tags: ['Canvas', 'Glow'] },
+  { title: 'Desert Dunes', sub: 'Warm Tones', grad: 'grad-amber', emoji: '🏜️', tags: ['Gradient', 'Scroll'] },
+  { title: 'Deep Ocean', sub: 'Fluid Motion', grad: 'grad-cyan', emoji: '🌊', tags: ['WebGL', 'Fluid'] },
+  { title: 'Forest Mist', sub: 'Organic Feel', grad: 'grad-emerald', emoji: '🌿', tags: ['SVG', 'Morph'] },
+  { title: 'Cosmic Drift', sub: 'Space Theme', grad: 'grad-indigo', emoji: '🪐', tags: ['Particle', '3D'] },
+  { title: 'Cherry Bloom', sub: 'Spring Vibes', grad: 'grad-pink', emoji: '🌸', tags: ['Spring', 'Physics'] },
+  { title: 'Lava Flow', sub: 'Molten Core', grad: 'grad-orange', emoji: '🌋', tags: ['Noise', 'Shader'] },
+  { title: 'Glacier Peak', sub: 'Ice & Snow', grad: 'grad-teal', emoji: '🏔️', tags: ['Parallax', 'Depth'] },
+  { title: 'Sky Portal', sub: 'Infinite Blue', grad: 'grad-sky', emoji: '☁️', tags: ['Clip-Path', 'Reveal'] },
+];
+
+/* ═══════════════════════════════════════════
+   VARIANT 1 · Coverflow
+═══════════════════════════════════════════ */
+(function initCoverflow() {
+  const track = document.getElementById('cfTrack');
+  const dotsEl = document.getElementById('cfDots');
+  let current = 0;
+  const total = CARDS.length;
+
+  // Build cards
+  CARDS.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'cf-card';
+    card.dataset.index = i;
+    card.innerHTML = `
+      <div class="cf-inner">
+        <div class="cf-bg ${c.grad}"></div>
+        <div class="cf-shine"></div>
+        <div class="cf-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="cf-title">${c.emoji} ${c.title}</div>
+        <div class="cf-sub">${c.sub}</div>
+      </div>`;
+    card.addEventListener('click', () => goTo(i));
+    track.appendChild(card);
+  });
+
+  // Build dots
+  CARDS.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'cf-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(dot);
+  });
+
+  function goTo(idx) {
+    current = ((idx % total) + total) % total;
+    render();
+  }
+
+  function render() {
+    const cards = track.querySelectorAll('.cf-card');
+    cards.forEach(card => {
+      const i = parseInt(card.dataset.index);
+      let pos = i - current;
+      // Wrap around
+      if (pos > total / 2) pos -= total;
+      if (pos < -total / 2) pos += total;
+      // Clamp display to ±3
+      if (Math.abs(pos) > 3) {
+        card.style.display = 'none';
+      } else {
+        card.style.display = '';
+        card.dataset.pos = pos;
+      }
+    });
+    // Update dots
+    dotsEl.querySelectorAll('.cf-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  // Wheel scroll
+  let wheelTimer;
+  document.getElementById('cfStage').addEventListener('wheel', e => {
+    e.preventDefault();
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(() => {
+      goTo(current + (e.deltaY > 0 ? 1 : -1));
+    }, 50);
+  }, { passive: false });
+
+  // Touch
+  let touchStartX = 0;
+  document.getElementById('cfStage').addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  document.getElementById('cfStage').addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) goTo(current + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') goTo(current - 1);
+    if (e.key === 'ArrowRight') goTo(current + 1);
+  });
+
+  // Auto-play
+  let autoPlay = setInterval(() => goTo(current + 1), 3200);
+  document.getElementById('cfStage').addEventListener('mouseenter', () => clearInterval(autoPlay));
+  document.getElementById('cfStage').addEventListener('mouseleave', () => { autoPlay = setInterval(() => goTo(current + 1), 3200); });
+
+  render();
+})();
+
+/* ═══════════════════════════════════════════
+   VARIANT 2 · Depth Zoom
+═══════════════════════════════════════════ */
+(function initDepthZoom() {
+  const wrap = document.getElementById('depthWrap');
+
+  // Duplicate for seamless feel
+  const items = [...CARDS, ...CARDS.slice(0, 4)];
+  items.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'depth-card';
+    card.innerHTML = `
+      <div class="dc-bg ${c.grad}"></div>
+      <div class="dc-icon">${c.emoji}</div>
+      <div class="dc-content">
+        <div class="dc-tag">${c.tags[0]}</div>
+        <div class="dc-title">${c.title}</div>
+      </div>`;
+    wrap.appendChild(card);
+  });
+
+  function updateActive() {
+    const wrapRect = wrap.getBoundingClientRect();
+    const wrapCenter = wrapRect.left + wrapRect.width / 2;
+    let closest = null, minDist = Infinity;
+    wrap.querySelectorAll('.depth-card').forEach(card => {
+      const rect = card.getBoundingClientRect();
+      const cardCenter = rect.left + rect.width / 2;
+      const dist = Math.abs(cardCenter - wrapCenter);
+      if (dist < minDist) { minDist = dist; closest = card; }
+      card.classList.remove('snap-active');
+    });
+    if (closest) closest.classList.add('snap-active');
+  }
+
+  wrap.addEventListener('scroll', updateActive, { passive: true });
+
+  // Drag scroll
+  let isDown = false, startX, scrollLeft;
+  wrap.addEventListener('mousedown', e => { isDown = true; startX = e.pageX - wrap.offsetLeft; scrollLeft = wrap.scrollLeft; wrap.style.cursor = 'grabbing'; });
+  wrap.addEventListener('mouseleave', () => { isDown = false; wrap.style.cursor = 'grab'; });
+  wrap.addEventListener('mouseup', () => { isDown = false; wrap.style.cursor = 'grab'; });
+  wrap.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - wrap.offsetLeft;
+    wrap.scrollLeft = scrollLeft - (x - startX) * 1.5;
+  });
+
+  // Init scroll to center first card
+  setTimeout(() => {
+    const firstCard = wrap.querySelector('.depth-card');
+    if (firstCard) wrap.scrollLeft = firstCard.offsetLeft - wrap.offsetWidth / 2 + firstCard.offsetWidth / 2;
+    updateActive();
+  }, 100);
+})();
+
+/* ═══════════════════════════════════════════
+   VARIANT 3 · Infinite Ticker
+═══════════════════════════════════════════ */
+(function initTicker() {
+  const row1 = document.getElementById('tickerRow1');
+  const row2 = document.getElementById('tickerRow2');
+
+  function buildRow(el, items, offset) {
+    // Duplicate for seamless loop
+    const all = [...items, ...items];
+    all.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'ticker-item';
+      item.innerHTML = `
+        <div class="ti-bg ${c.grad}"></div>
+        <div class="ti-label">${c.emoji} ${c.title}</div>
+        <div class="ti-badge">${c.tags[0]}</div>`;
+      // 3D tilt on hover
+      item.addEventListener('mousemove', e => {
+        const rect = item.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        item.style.transform = `scale(1.06) rotateY(${x * 20}deg) rotateX(${-y * 12}deg)`;
+      });
+      item.addEventListener('mouseleave', () => { item.style.transform = ''; });
+      el.appendChild(item);
+    });
+  }
+
+  buildRow(row1, CARDS, 0);
+  buildRow(row2, [...CARDS].reverse(), 0);
+})();
+
+/* ═══════════════════════════════════════════
+   VARIANT 4 · Rotary Dial
+═══════════════════════════════════════════ */
+(function initRotary() {
+  const dial = document.getElementById('rotaryDial');
+  const info = document.getElementById('rotaryInfo');
+  const center = document.getElementById('dialCenter');
+  let activeIdx = 0;
+  const items = CARDS.slice(0, 8);
+  const n = items.length;
+  const radius = 100;
+
+  const dialItems = items.map((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'dial-item' + (i === 0 ? ' active' : '');
+    el.textContent = c.emoji;
+    el.title = c.title;
+    dial.appendChild(el);
+    return el;
+  });
+
+  function positionItems(rotationOffset) {
+    dialItems.forEach((el, i) => {
+      const angle = (i / n) * 2 * Math.PI + rotationOffset;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      el.style.left = (140 + x - 28) + 'px';
+      el.style.top = (140 + y - 28) + 'px';
+    });
+  }
+
+  function updateInfo(idx) {
+    const c = items[idx];
+    info.innerHTML = `
+      <div class="ri-num">${String(idx + 1).padStart(2, '0')}</div>
+      <div class="ri-title">${c.emoji} ${c.title}</div>
+      <div class="ri-desc">${c.sub} — 一种独特的视觉风格，融合了现代设计语言与动态交互体验。</div>
+      <div class="ri-tags">${c.tags.map(t => `<span class="ri-tag">${t}</span>`).join('')}</div>`;
+  }
+
+  let currentAngle = -Math.PI / 2; // Start at top
+  let targetAngle = currentAngle;
+  let animFrame;
+
+  function animateTo(target) {
+    cancelAnimationFrame(animFrame);
+    function step() {
+      currentAngle += (target - currentAngle) * 0.12;
+      positionItems(currentAngle);
+      if (Math.abs(target - currentAngle) > 0.001) animFrame = requestAnimationFrame(step);
+      else { currentAngle = target; positionItems(currentAngle); }
+    }
+    step();
+  }
+
+  function goTo(idx) {
+    activeIdx = ((idx % n) + n) % n;
+    dialItems.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
+    // Rotate so active item is at top
+    targetAngle = -Math.PI / 2 - (activeIdx / n) * 2 * Math.PI;
+    // Normalize to avoid spinning backwards
+    while (targetAngle - currentAngle > Math.PI) targetAngle -= 2 * Math.PI;
+    while (currentAngle - targetAngle > Math.PI) targetAngle += 2 * Math.PI;
+    animateTo(targetAngle);
+    updateInfo(activeIdx);
+    center.textContent = items[activeIdx].emoji;
+  }
+
+  dialItems.forEach((el, i) => el.addEventListener('click', () => goTo(i)));
+
+  // Wheel on dial
+  dial.addEventListener('wheel', e => {
+    e.preventDefault();
+    goTo(activeIdx + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
+
+  // Auto-rotate
+  let autoR = setInterval(() => goTo(activeIdx + 1), 2800);
+  dial.addEventListener('mouseenter', () => clearInterval(autoR));
+  dial.addEventListener('mouseleave', () => { autoR = setInterval(() => goTo(activeIdx + 1), 2800); });
+
+  positionItems(currentAngle);
+  updateInfo(0);
+})();
+
+/* ═══════════════════════════════════════════
+   VARIANT 5 · Stacked Cards
+═══════════════════════════════════════════ */
+(function initStack() {
+  const scene = document.getElementById('stackScene');
+  const prevBtn = document.getElementById('stackPrev');
+  const nextBtn = document.getElementById('stackNext');
+  let current = 0;
+  const items = CARDS.slice(0, 6);
+  const n = items.length;
+
+  const cardEls = items.map((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'stack-card';
+    card.innerHTML = `
+      <div class="sc-bg ${c.grad}"></div>
+      <div class="sc-content">
+        <div>
+          <div class="sc-eyebrow">${c.tags.join(' · ')}</div>
+          <div class="sc-title">${c.title}</div>
+        </div>
+        <div class="sc-footer">
+          <div class="sc-num">${String(i+1).padStart(2,'0')} / ${String(n).padStart(2,'0')}</div>
+          <div class="sc-arrow">→</div>
+        </div>
+      </div>`;
+    card.addEventListener('click', () => goTo(current + 1));
+    scene.appendChild(card);
+    return card;
+  });
+
+  function render() {
+    cardEls.forEach((card, i) => {
+      const rel = ((i - current) % n + n) % n;
+      if (rel === 0) {
+        // Active card
+        card.style.transform = 'translateY(0) scale(1)';
+        card.style.opacity = '1';
+        card.style.zIndex = n;
+        card.style.boxShadow = '0 24px 60px rgba(0,0,0,.6)';
+      } else if (rel === 1) {
+        card.style.transform = 'translateY(28px) scale(0.95)';
+        card.style.opacity = '0.7';
+        card.style.zIndex = n - 1;
+        card.style.boxShadow = 'none';
+      } else if (rel === 2) {
+        card.style.transform = 'translateY(50px) scale(0.9)';
+        card.style.opacity = '0.4';
+        card.style.zIndex = n - 2;
+        card.style.boxShadow = 'none';
+      } else if (rel === n - 1) {
+        // Exiting card (goes up)
+        card.style.transform = 'translateY(-60px) scale(1.02)';
+        card.style.opacity = '0';
+        card.style.zIndex = 0;
+        card.style.boxShadow = 'none';
+      } else {
+        card.style.transform = 'translateY(60px) scale(0.85)';
+        card.style.opacity = '0';
+        card.style.zIndex = 0;
+        card.style.boxShadow = 'none';
+      }
+    });
+  }
+
+  function goTo(idx) {
+    current = ((idx % n) + n) % n;
+    render();
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  // Swipe
+  let touchStartY = 0;
+  scene.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+  scene.addEventListener('touchend', e => {
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dy) > 40) goTo(current + (dy < 0 ? 1 : -1));
+  }, { passive: true });
+
+  render();
+})();
+</script>
+</body>
+</html>

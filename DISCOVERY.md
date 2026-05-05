@@ -1,5 +1,11 @@
 # 前端效果发现记录
 
+## 2026-05-05 tympanus.net/codrops (Playground)
+- 效果名称：滚动驱动 3D 轮播 (On-Scroll 3D Carousel)
+- 效果描述：一组卡片（图片/内容卡）在滚动时以 3D 透视旋转展示。卡片沿 Y 轴旋转，形成类似翻书或旋转木马的效果。每张卡片有不同的旋转角度和深度，随滚动进度平滑过渡。整体呈现出强烈的空间感和层次感，非常适合作品集或产品展示。
+- 实现原理：CSS perspective + rotateY 实现 3D 透视，IntersectionObserver 或 scroll 事件监听滚动进度，根据元素在视口中的位置计算旋转角度（从 -45deg 到 0deg 到 45deg），CSS transition 或 requestAnimationFrame 平滑更新 transform，卡片用 backface-visibility: hidden 避免背面显示，整体容器设置 perspective: 1000px
+- 状态：待实现
+
 ## 2026-05-05 linear.app
 - 效果名称：彩色引用卡片 (Colorful Quote Cards)
 - 效果描述：大尺寸引用卡片，每张卡片有独特的纯色背景（荧光黄 #e4f222、蓝色 #1c85e8、淡紫 #e8e8f5 等），卡片内含大号引用文字、公司 logo 和作者信息。悬停时有微妙的上移 + 阴影效果，整体排列为水平滚动或三列网格。

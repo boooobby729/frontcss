@@ -42,7 +42,7 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
 .card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-3px);box-shadow:0 16px 32px rgba(0,0,0,.4)}
 .card-visual{width:100%;height:180px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#0a0a12}
 .card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px}
-.card-visual iframe{width:100%;height:100%;border:none;pointer-events:none;transform:scale(.6);transform-origin:center center;width:166%;height:166%}
+.card-visual iframe{width:166%;height:166%;border:none;pointer-events:none;transform:scale(.6);transform-origin:center center}
 .card-content{padding:10px 16px 4px}
 .card-content h3{font-size:.8rem;font-weight:600;color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-footer{padding:0 16px 10px;display:flex;align-items:center;gap:8px}
@@ -2012,18 +2012,18 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo"><span>B</span>の宝库</div>
-    <div class="sidebar-sub">255 Effects · Pure CSS/JS</div>
+    <div class="sidebar-sub">275 Effects · Pure CSS/JS</div>
   </div>
   <nav class="sidebar-nav">
     <button class="filter-item" data-cat="fav"><div class="dot" style="background:#ff3b30"></div>我的收藏<span class="filter-count" id="countFav">0</span></button>
     <button class="filter-item active" data-cat="01-css-animations"><div class="dot" style="background:#2997ff"></div>CSS 动画<span class="filter-count">35</span></button>
-    <button class="filter-item" data-cat="02-text-effects"><div class="dot" style="background:#bf5af2"></div>文字特效<span class="filter-count">24</span></button>
-    <button class="filter-item" data-cat="03-hover-interactions"><div class="dot" style="background:#30d158"></div>悬停交互<span class="filter-count">24</span></button>
+    <button class="filter-item" data-cat="02-text-effects"><div class="dot" style="background:#bf5af2"></div>文字特效<span class="filter-count">25</span></button>
+    <button class="filter-item" data-cat="03-hover-interactions"><div class="dot" style="background:#30d158"></div>悬停交互<span class="filter-count">25</span></button>
     <button class="filter-item" data-cat="04-scroll-effects"><div class="dot" style="background:#ff453a"></div>滚动交互<span class="filter-count">1</span></button>
     <button class="filter-item" data-cat="05-background-effects"><div class="dot" style="background:#ff6482"></div>背景特效<span class="filter-count">1</span></button>
     <button class="filter-item" data-cat="06-svg-animations"><div class="dot" style="background:#64d2ff"></div>SVG 动画<span class="filter-count">14</span></button>
-    <button class="filter-item" data-cat="07-3d-effects"><div class="dot" style="background:#5e5ce6"></div>3D<span class="filter-count">9</span></button>
-    <button class="filter-item" data-cat="08-loading-animations"><div class="dot" style="background:#fb923c"></div>加载动画<span class="filter-count">8</span></button>
+    <button class="filter-item" data-cat="07-3d-effects"><div class="dot" style="background:#5e5ce6"></div>3D<span class="filter-count">14</span></button>
+    <button class="filter-item" data-cat="08-loading-animations"><div class="dot" style="background:#fb923c"></div>加载动画<span class="filter-count">20</span></button>
     <button class="filter-item" data-cat="09-creative-layouts"><div class="dot" style="background:#ffd60a"></div>创意布局<span class="filter-count">1</span></button>
     <button class="filter-item" data-cat="10-canvas-effects"><div class="dot" style="background:#ac8e68"></div>Canvas / JS 特效<span class="filter-count">1</span></button>
     <button class="filter-item" data-cat="11-cursor-effects"><div class="dot" style="background:#2997ff"></div>光标特效<span class="filter-count">1</span></button>
@@ -2073,7 +2073,7 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
     <button class="filter-item" data-cat="55-contour-terrain-map"><div class="dot" style="background:#ff6482"></div>等高线地形波纹背景 Contour Terrain Map<span class="filter-count">1</span></button>
     <button class="filter-item" data-cat="56-clip-path-fullscreen-menu"><div class="dot" style="background:#64d2ff"></div>Clip-Path Fullscreen Menu<span class="filter-count">1</span></button>
     <button class="filter-item" data-cat="57-app-icon-galaxy"><div class="dot" style="background:#5e5ce6"></div>App Icon Galaxy Grid<span class="filter-count">1</span></button>
-<button class="filter-item" data-cat="58-scroll-3d-carousel"><div class="dot" style="background:#fb923c"></div>Scroll-Driven 3D Carousel<span class="filter-count">1</span></button>
+    <button class="filter-item" data-cat="58-scroll-3d-carousel"><div class="dot" style="background:#fb923c"></div>Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播<span class="filter-count">1</span></button>
   </nav>
 </aside>
 
@@ -2086,57 +2086,57 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
 <section class="grid-section">
   <div class="card-grid">
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="bounce-ball"></div><div class="bounce-ball-shadow"></div></div>
+      <div class="card-visual"><div class="stage"><div class="bounce-ball"></div><div class="bounce-ball-shadow"></div></div></div>
       <div class="card-content"><h3>弹跳球</h3></div>
       <div class="card-footer"><span class="tag">@keyframes + shadow</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="pulse-ring"></div></div>
+      <div class="card-visual"><div class="stage"><div class="pulse-ring"></div></div></div>
       <div class="card-content"><h3>脉冲扩散</h3></div>
       <div class="card-footer"><span class="tag">伪元素 + 波纹</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="spin-morph"></div></div>
+      <div class="card-visual"><div class="stage"><div class="spin-morph"></div></div></div>
       <div class="card-content"><h3>形变旋转</h3></div>
       <div class="card-footer"><span class="tag">border-radius + rotate</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="pendulum-wrap"><div class="pendulum-line"><div class="pendulum-ball"></div></div>
+      <div class="card-visual"><div class="stage"><div class="pendulum-wrap"><div class="pendulum-line"><div class="pendulum-ball"></div></div></div></div></div>
       <div class="card-content"><h3>钟摆摇摆</h3></div>
       <div class="card-footer"><span class="tag">transform-origin</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="breathe"></div></div>
+      <div class="card-visual"><div class="stage"><div class="breathe"></div></div></div>
       <div class="card-content"><h3>呼吸灯</h3></div>
       <div class="card-footer"><span class="tag">scale + box-shadow</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="elastic"></div></div>
+      <div class="card-visual"><div class="stage"><div class="elastic"></div></div></div>
       <div class="card-content"><h3>弹性形变</h3></div>
       <div class="card-footer"><span class="tag">squash & stretch</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="ripple-container"><div class="r"></div><div class="r"></div><div class="r"></div><div class="ripple-dot"></div></div>
+      <div class="card-visual"><div class="stage"><div class="ripple-container"><div class="r"></div><div class="r"></div><div class="r"></div><div class="ripple-dot"></div></div></div></div>
       <div class="card-content"><h3>波纹扩散</h3></div>
       <div class="card-footer"><span class="tag">多层延迟动画</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="dna"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="dna"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div></div>
       <div class="card-content"><h3>DNA 螺旋</h3></div>
       <div class="card-footer"><span class="tag">延迟编排</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="flip-card"><div class="flip-inner"><div class="flip-front">&#9824;</div><div class="flip-back">&#9829;</div></div>
+      <div class="card-visual"><div class="stage"><div class="flip-card"><div class="flip-inner"><div class="flip-front">&#9824;</div><div class="flip-back">&#9829;</div></div></div></div></div>
       <div class="card-content"><h3>卡牌翻转</h3></div>
       <div class="card-footer"><span class="tag">3D preserve + backface</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="jump-text"><span>B</span><span>o</span><span>u</span><span>n</span><span>c</span><span>e</span><span>!</span></div></div>
+      <div class="card-visual"><div class="stage"><div class="jump-text"><span>B</span><span>o</span><span>u</span><span>n</span><span>c</span><span>e</span><span>!</span></div></div></div>
       <div class="card-content"><h3>跳跃文字</h3></div>
       <div class="card-footer"><span class="tag">逐字延迟</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="orbit"><div class="orbit-center"></div><div class="orbit-ring"></div><div class="orbit-ring"></div></div>
+      <div class="card-visual"><div class="stage"><div class="orbit"><div class="orbit-center"></div><div class="orbit-ring"></div><div class="orbit-ring"></div></div></div></div>
       <div class="card-content"><h3>轨道旋转</h3></div>
       <div class="card-footer"><span class="tag">多轨道 + 伪元素</span></div>
     </a>
@@ -2146,117 +2146,117 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
       <div class="card-footer"><span class="tag">squash & stretch hover</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="floating"></div></div>
+      <div class="card-visual"><div class="stage"><div class="floating"></div></div></div>
       <div class="card-content"><h3>悬浮漂移</h3></div>
       <div class="card-footer"><span class="tag">translateY + rotate</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="typewriter-cursor"></div></div>
+      <div class="card-visual"><div class="stage"><div class="typewriter-cursor"></div></div></div>
       <div class="card-content"><h3>打字光标</h3></div>
       <div class="card-footer"><span class="tag">step-end 闪烁</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="shake-box"></div></div>
+      <div class="card-visual"><div class="stage"><div class="shake-box"></div></div></div>
       <div class="card-content"><h3>抖动震颤</h3></div>
       <div class="card-footer"><span class="tag">translateX 随机抖</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="gradient-border"></div></div>
+      <div class="card-visual"><div class="stage"><div class="gradient-border"></div></div></div>
       <div class="card-content"><h3>渐变边框旋转</h3></div>
       <div class="card-footer"><span class="tag">conic-gradient 旋转</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="stagger-bars"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="stagger-bars"><span></span><span></span><span></span><span></span><span></span></div></div></div>
       <div class="card-content"><h3>交错柱状图</h3></div>
       <div class="card-footer"><span class="tag">stagger delay + scaleY</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="heartbeat">&#10084;</div></div>
+      <div class="card-visual"><div class="stage"><div class="heartbeat">&#10084;</div></div></div>
       <div class="card-content"><h3>心跳脉动</h3></div>
       <div class="card-footer"><span class="tag">双峰缩放</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="infinite-rotate"></div></div>
+      <div class="card-visual"><div class="stage"><div class="infinite-rotate"></div></div></div>
       <div class="card-content"><h3>无限旋转环</h3></div>
       <div class="card-footer"><span class="tag">border-top 旋转</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="fold"><div class="fold-face"></div><div class="fold-face"></div></div>
+      <div class="card-visual"><div class="stage"><div class="fold"><div class="fold-face"></div><div class="fold-face"></div></div></div></div>
       <div class="card-content"><h3>折叠翻页</h3></div>
       <div class="card-footer"><span class="tag">perspective + rotateX</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="glitch-box"></div></div>
+      <div class="card-visual"><div class="stage"><div class="glitch-box"></div></div></div>
       <div class="card-content"><h3>故障闪烁</h3></div>
       <div class="card-footer"><span class="tag">clip-path 切片抖动</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="color-cycle"></div></div>
+      <div class="card-visual"><div class="stage"><div class="color-cycle"></div></div></div>
       <div class="card-content"><h3>色彩轮转</h3></div>
       <div class="card-footer"><span class="tag">background 颜色循环</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="swing-door"></div></div>
+      <div class="card-visual"><div class="stage"><div class="swing-door"></div></div></div>
       <div class="card-content"><h3>推门开合</h3></div>
       <div class="card-footer"><span class="tag">rotateY + perspective</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="meteor-container"><div class="meteor"></div><div class="meteor"></div><div class="meteor"></div></div>
+      <div class="card-visual"><div class="stage"><div class="meteor-container"><div class="meteor"></div><div class="meteor"></div><div class="meteor"></div></div></div></div>
       <div class="card-content"><h3>流星滑落</h3></div>
       <div class="card-footer"><span class="tag">translate 对角线</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="spring"></div></div>
+      <div class="card-visual"><div class="stage"><div class="spring"></div></div></div>
       <div class="card-content"><h3>弹簧回弹</h3></div>
       <div class="card-footer"><span class="tag">cubic-bezier 过冲</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>
       <div class="card-content"><h3>打字省略号</h3></div>
       <div class="card-footer"><span class="tag">逐个弹起</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="zigzag"></div></div>
+      <div class="card-visual"><div class="stage"><div class="zigzag"></div></div></div>
       <div class="card-content"><h3>Z 字轨迹</h3></div>
       <div class="card-footer"><span class="tag">多段 translate</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="scale-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="scale-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div></div>
       <div class="card-content"><h3>缩放脉冲阵列</h3></div>
       <div class="card-footer"><span class="tag">grid + stagger scale</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="rotate-scale"></div></div>
+      <div class="card-visual"><div class="stage"><div class="rotate-scale"></div></div></div>
       <div class="card-content"><h3>旋转缩放变形</h3></div>
       <div class="card-footer"><span class="tag">rotate + scale + radius</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="domino"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="domino"><span></span><span></span><span></span><span></span><span></span></div></div></div>
       <div class="card-content"><h3>多米诺翻倒</h3></div>
       <div class="card-footer"><span class="tag">stagger rotateX</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="morph-blob"></div></div>
+      <div class="card-visual"><div class="stage"><div class="morph-blob"></div></div></div>
       <div class="card-content"><h3>变形流体球</h3></div>
       <div class="card-footer"><span class="tag">border-radius 变形</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="neon-flicker">NEON</div></div>
+      <div class="card-visual"><div class="stage"><div class="neon-flicker">NEON</div></div></div>
       <div class="card-content"><h3>霓虹闪烁</h3></div>
       <div class="card-footer"><span class="tag">text-shadow 闪烁</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="conveyor"><div class="conveyor-inner"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="conveyor"><div class="conveyor-inner"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div></div></div>
       <div class="card-content"><h3>传送带</h3></div>
       <div class="card-footer"><span class="tag">translateX 循环移动</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="clock"></div></div>
+      <div class="card-visual"><div class="stage"><div class="clock"></div></div></div>
       <div class="card-content"><h3>时钟指针</h3></div>
       <div class="card-footer"><span class="tag">transform-origin 旋转</span></div>
     </a>
     <a class="card" data-cat="01-css-animations" href="01-css-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="accordion-sq"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="accordion-sq"><span></span><span></span><span></span><span></span><span></span></div></div></div>
       <div class="card-content"><h3>手风琴压缩</h3></div>
       <div class="card-footer"><span class="tag">stagger scaleX</span></div>
     </a>
@@ -2380,6 +2380,11 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
       <div class="card-content"><h3>烟雾消散</h3></div>
       <div class="card-footer"><span class="tag">blur + opacity 渐隐</span></div>
     </a>
+    <a class="card" data-cat="02-text-effects" href="02-text-effects.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="highlight-text">Highlight Text</div></div></div>
+      <div class="card-content"><h3>高亮滑过</h3></div>
+      <div class="card-footer"><span class="tag">伪元素 scaleX 背景</span></div>
+    </a>
     <a class="card" data-cat="03-hover-interactions" href="03-hover-interactions.html" target="_blank">
       <div class="card-visual"><div class="stage"><div class="border-grad"><span>Hover Me</span></div></div></div>
       <div class="card-content"><h3>旋转渐变边框</h3></div>
@@ -2500,6 +2505,11 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
       <div class="card-content"><h3>背景滑动</h3></div>
       <div class="card-footer"><span class="tag">background-position</span></div>
     </a>
+    <a class="card" data-cat="03-hover-interactions" href="03-hover-interactions.html" target="_blank">
+      <div class="card-visual"><div class="stage"><button class="shake-hover">Shake!</button></div></div>
+      <div class="card-content"><h3>抖动按钮</h3></div>
+      <div class="card-footer"><span class="tag">shake animation</span></div>
+    </a>
     <a class="card" data-cat="06-svg-animations" href="06-svg-animations.html" target="_blank">
       <div class="card-visual"><div class="stage"><svg class="svg-check" width="60" height="60" viewBox="0 0 60 60"><line x1="15" y1="32" x2="26" y2="42"/><line x1="26" y1="42" x2="45" y2="18"/></svg></div></div>
       <div class="card-content"><h3>勾选绘制</h3></div>
@@ -2546,7 +2556,8 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
       <div class="card-footer"><span class="tag">rotate transform-origin</span></div>
     </a>
     <a class="card" data-cat="06-svg-animations" href="06-svg-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><svg class="svg-dna" width="140" height="60" viewBox="0 0 140 60">
+      <div class="card-visual"><div class="stage">
+      <svg class="svg-dna" width="140" height="60" viewBox="0 0 140 60">
         <line x1="0" y1="30" x2="140" y2="30" stroke="#333" stroke-width=".5"/>
         <circle cx="10" cy="50" r="4" fill="#667eea" style="animation-delay:0s"/>
         <circle cx="30" cy="50" r="4" fill="#f093fb" style="animation-delay:.15s"/>
@@ -2562,12 +2573,14 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
         <circle cx="90" cy="10" r="4" fill="#43e97b" style="animation-delay:.3s;animation-direction:alternate-reverse"/>
         <circle cx="110" cy="10" r="4" fill="#f5576c" style="animation-delay:.15s;animation-direction:alternate-reverse"/>
         <circle cx="130" cy="10" r="4" fill="#43e97b" style="animation-delay:0s;animation-direction:alternate-reverse"/>
-      </svg></div></div>
+      </svg>
+    </div></div>
       <div class="card-content"><h3>DNA 双螺旋</h3></div>
       <div class="card-footer"><span class="tag">cy animate alternate</span></div>
     </a>
     <a class="card" data-cat="06-svg-animations" href="06-svg-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><svg class="svg-audio" width="120" height="60" viewBox="0 0 120 60">
+      <div class="card-visual"><div class="stage">
+      <svg class="svg-audio" width="120" height="60" viewBox="0 0 120 60">
         <rect x="5"  y="10" width="10" height="50" rx="3" fill="#667eea" style="animation-delay:0s"/>
         <rect x="20" y="10" width="10" height="50" rx="3" fill="#764ba2" style="animation-delay:.1s"/>
         <rect x="35" y="10" width="10" height="50" rx="3" fill="#f093fb" style="animation-delay:.2s"/>
@@ -2575,12 +2588,14 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
         <rect x="65" y="10" width="10" height="50" rx="3" fill="#ffa500" style="animation-delay:.4s"/>
         <rect x="80" y="10" width="10" height="50" rx="3" fill="#43e97b" style="animation-delay:.5s"/>
         <rect x="95" y="10" width="10" height="50" rx="3" fill="#38f9d7" style="animation-delay:.6s"/>
-      </svg></div></div>
+      </svg>
+    </div></div>
       <div class="card-content"><h3>音频波形</h3></div>
       <div class="card-footer"><span class="tag">scaleY stagger bars</span></div>
     </a>
     <a class="card" data-cat="06-svg-animations" href="06-svg-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><svg class="svg-ripple" width="100" height="100" viewBox="0 0 100 100">
+      <div class="card-visual"><div class="stage">
+      <svg class="svg-ripple" width="100" height="100" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="5">
           <animate attributeName="r" from="5" to="45" dur="1.5s" repeatCount="indefinite"/>
           <animate attributeName="opacity" from=".8" to="0" dur="1.5s" repeatCount="indefinite"/>
@@ -2594,356 +2609,546 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
           <animate attributeName="opacity" from=".8" to="0" dur="1.5s" begin="1s" repeatCount="indefinite"/>
         </circle>
         <circle cx="50" cy="50" r="4" fill="#667eea"/>
-      </svg></div></div>
+      </svg>
+    </div></div>
       <div class="card-content"><h3>点击涟漪</h3></div>
       <div class="card-footer"><span class="tag">SMIL r + opacity</span></div>
     </a>
     <a class="card" data-cat="06-svg-animations" href="06-svg-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><svg class="svg-cursor" width="160" height="40" viewBox="0 0 160 40">
+      <div class="card-visual"><div class="stage">
+      <svg class="svg-cursor" width="160" height="40" viewBox="0 0 160 40">
         <text x="5" y="28">&gt; hello world</text>
         <rect class="cursor" x="128" y="12" width="8" height="20" rx="1" fill="#43e97b"/>
-      </svg></div></div>
+      </svg>
+    </div></div>
       <div class="card-content"><h3>打字光标</h3></div>
       <div class="card-footer"><span class="tag">text + rect blink</span></div>
     </a>
     <a class="card" data-cat="06-svg-animations" href="06-svg-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><svg width="100" height="100" viewBox="0 0 100 100">
+      <div class="card-visual"><div class="stage">
+      <svg width="100" height="100" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="45" fill="none" stroke="#1e1e2e" stroke-width="2"/>
         <line x1="50" y1="50" x2="50" y2="22" stroke="#fff" stroke-width="2.5" stroke-linecap="round" class="svg-clock-hour"/>
         <line x1="50" y1="50" x2="50" y2="15" stroke="#888" stroke-width="1.5" stroke-linecap="round" class="svg-clock-min"/>
         <line x1="50" y1="50" x2="50" y2="12" stroke="#f5576c" stroke-width="1" stroke-linecap="round" class="svg-clock-sec"/>
         <circle cx="50" cy="50" r="3" fill="#f5576c"/>
-      </svg></div></div>
+      </svg>
+    </div></div>
       <div class="card-content"><h3>SVG 时钟</h3></div>
       <div class="card-footer"><span class="tag">rotate hands infinite</span></div>
     </a>
     <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><button class="btn-3d">Press Me</button></div><p class="hint">点击按钮</p></div>
-    <div class="card"><h3>3D 立体文字</h3><span class="tag">多层 text-shadow</span><div class="stage"><div class="text-3d">3D</div></div>
+      <div class="card-visual"><div class="stage"><button class="btn-3d">Press Me</button></div></div>
       <div class="card-content"><h3>3D 按压按钮</h3></div>
       <div class="card-footer"><span class="tag">box-shadow + translateY</span></div>
     </a>
     <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="book-fold"><div class="book-page">Page</div><div class="book-cover">Cover</div></div>
+      <div class="card-visual"><div class="stage"><div class="text-3d">3D</div></div></div>
+      <div class="card-content"><h3>3D 立体文字</h3></div>
+      <div class="card-footer"><span class="tag">多层 text-shadow</span></div>
+    </a>
+    <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="book-fold"><div class="book-page">Page</div><div class="book-cover">Cover</div></div></div></div>
       <div class="card-content"><h3>翻书效果</h3></div>
       <div class="card-footer"><span class="tag">rotateY transform-origin</span></div>
     </a>
     <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="parallax-3d"><div class="parallax-layer"></div><div class="parallax-layer"></div><div class="parallax-layer">Depth</div></div>
+      <div class="card-visual"><div class="stage"><div class="stage" style="perspective:400px"><div class="pyramid"><div class="pyramid-face"></div><div class="pyramid-face"></div><div class="pyramid-face"></div><div class="pyramid-face"></div></div></div></div></div>
+      <div class="card-content"><h3>金字塔旋转</h3></div>
+      <div class="card-footer"><span class="tag">border 三角形 + 3D</span></div>
+    </a>
+    <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="parallax-3d"><div class="parallax-layer"></div><div class="parallax-layer"></div><div class="parallax-layer">Depth</div></div></div></div>
       <div class="card-content"><h3>视差层叠</h3></div>
       <div class="card-footer"><span class="tag">translateZ 多层</span></div>
     </a>
     <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="ring-3d"></div></div>
+      <div class="card-visual"><div class="stage"><div class="ring-3d"></div></div></div>
       <div class="card-content"><h3>3D 旋转环</h3></div>
       <div class="card-footer"><span class="tag">perspective rotateX</span></div>
     </a>
     <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="flip-text-3d"><span>F</span><span>L</span><span>I</span><span>P</span></div></div>
+      <div class="card-visual"><div class="stage"><div class="flip-text-3d"><span>F</span><span>L</span><span>I</span><span>P</span></div></div></div>
       <div class="card-content"><h3>3D 翻转文字</h3></div>
       <div class="card-footer"><span class="tag">逐字 rotateX 翻转</span></div>
     </a>
     <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="stack-3d"><div class="stack-item"></div><div class="stack-item"></div><div class="stack-item"></div></div>
+      <div class="card-visual"><div class="stage"><div class="stage" style="perspective:400px"><div class="cylinder"><div class="cyl-strip"></div><div class="cyl-strip"></div><div class="cyl-strip"></div><div class="cyl-strip"></div><div class="cyl-strip"></div><div class="cyl-strip"></div></div></div></div></div>
+      <div class="card-content"><h3>3D 圆柱体</h3></div>
+      <div class="card-footer"><span class="tag">rotateY 条带拼合</span></div>
+    </a>
+    <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="stack-3d"><div class="stack-item"></div><div class="stack-item"></div><div class="stack-item"></div></div></div></div>
       <div class="card-content"><h3>3D 堆叠卡片</h3></div>
       <div class="card-footer"><span class="tag">悬停散开 translateZ</span></div>
     </a>
     <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="badge-3d">&#9670;</div></div>
+      <div class="card-visual"><div class="stage"><div class="badge-3d">&#9670;</div></div></div>
       <div class="card-content"><h3>3D 悬浮徽章</h3></div>
       <div class="card-footer"><span class="tag">rotateXY + float</span></div>
     </a>
     <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="door-3d"><div class="door-frame">Room</div><div class="door-panel"></div></div>
+      <div class="card-visual"><div class="stage"><div class="door-3d"><div class="door-frame">Room</div><div class="door-panel"></div></div></div></div>
       <div class="card-content"><h3>3D 开门效果</h3></div>
       <div class="card-footer"><span class="tag">rotateY 门轴旋转</span></div>
     </a>
     <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="fold-panel"><div class="fold-seg">A</div><div class="fold-seg">B</div><div class="fold-seg">C</div></div>
+      <div class="card-visual"><div class="stage"><div class="stage" style="perspective:400px"><div class="hex-3d"><div class="hex-face"></div><div class="hex-face"></div><div class="hex-face"></div><div class="hex-face"></div><div class="hex-face"></div><div class="hex-face"></div></div></div></div></div>
+      <div class="card-content"><h3>3D 六边形</h3></div>
+      <div class="card-footer"><span class="tag">clip-path + rotateY</span></div>
+    </a>
+    <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="fold-panel"><div class="fold-seg">A</div><div class="fold-seg">B</div><div class="fold-seg">C</div></div></div></div>
       <div class="card-content"><h3>3D 折叠面板</h3></div>
       <div class="card-footer"><span class="tag">rotateY 三段折叠</span></div>
     </a>
+    <a class="card" data-cat="07-3d-effects" href="07-3d-effects.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="stage" style="perspective:400px"><div class="sphere-3d" id="sphere3d"></div></div></div></div>
+      <div class="card-content"><h3>3D 点阵球体</h3></div>
+      <div class="card-footer"><span class="tag">多点 translateZ 排列</span></div>
+    </a>
     <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="dual-ring"></div></div>
+      <div class="card-visual"><div class="stage"><div class="dots-bounce"><span></span><span></span><span></span></div></div></div>
+      <div class="card-content"><h3>弹跳圆点</h3></div>
+      <div class="card-footer"><span class="tag">scale + delay</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="spinner-ring"></div></div></div>
+      <div class="card-content"><h3>旋转环</h3></div>
+      <div class="card-footer"><span class="tag">border-top + rotate</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="pulse-dots"><span></span><span></span><span></span></div></div></div>
+      <div class="card-content"><h3>脉冲圆点</h3></div>
+      <div class="card-footer"><span class="tag">scale + opacity</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="bars"><span></span><span></span><span></span><span></span><span></span></div></div></div>
+      <div class="card-content"><h3>音频条</h3></div>
+      <div class="card-footer"><span class="tag">height + delay</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="orbit-spin"></div></div></div>
+      <div class="card-content"><h3>轨道旋转</h3></div>
+      <div class="card-footer"><span class="tag">dual pseudo + spin</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="square-spin"></div></div></div>
+      <div class="card-content"><h3>翻转方块</h3></div>
+      <div class="card-footer"><span class="tag">perspective rotateXY</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="skeleton"><div class="sk-avatar"></div><div class="sk-line"></div><div class="sk-line"></div><div class="sk-line"></div></div></div></div>
+      <div class="card-content"><h3>骨架屏</h3></div>
+      <div class="card-footer"><span class="tag">shimmer gradient</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="progress-wrap"><div class="progress-bar"><div class="progress-fill"></div></div><div class="progress-label"><span>Loading...</span><span>50%</span></div></div></div></div>
+      <div class="card-content"><h3>进度条</h3></div>
+      <div class="card-footer"><span class="tag">width animation</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="liquid"><div class="liquid-drop"></div><div class="liquid-drop"></div></div></div></div>
+      <div class="card-content"><h3>液态融合</h3></div>
+      <div class="card-footer"><span class="tag">translateX + scale</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="circ-progress"><svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="30" fill="none" stroke="#1e1e2e" stroke-width="5"/><circle cx="35" cy="35" r="30" fill="none" stroke="#667eea" stroke-width="5" stroke-dasharray="120 69" stroke-linecap="round" transform="rotate(-90 35 35)"><animate attributeName="stroke-dashoffset" from="0" to="-189" dur="2s" repeatCount="indefinite"/></circle></svg><div class="num">75%</div></div></div></div>
+      <div class="card-content"><h3>环形进度</h3></div>
+      <div class="card-footer"><span class="tag">SVG stroke-dasharray</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="cube-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div></div>
+      <div class="card-content"><h3>九宫格</h3></div>
+      <div class="card-footer"><span class="tag">scale3D grid delay</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="typing"><span></span><span></span><span></span></div></div></div>
+      <div class="card-content"><h3>输入中...</h3></div>
+      <div class="card-footer"><span class="tag">chat typing indicator</span></div>
+    </a>
+    <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
+      <div class="card-visual"><div class="stage"><div class="dual-ring"></div></div></div>
       <div class="card-content"><h3>双环旋转</h3></div>
       <div class="card-footer"><span class="tag">双 border 反向旋转</span></div>
     </a>
     <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="cube-flip"></div></div>
+      <div class="card-visual"><div class="stage"><div class="cube-flip"></div></div></div>
       <div class="card-content"><h3>方块翻转</h3></div>
       <div class="card-footer"><span class="tag">perspective rotateXY</span></div>
     </a>
     <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="gradient-spinner"></div></div>
+      <div class="card-visual"><div class="stage"><div class="gradient-spinner"></div></div></div>
       <div class="card-content"><h3>渐变旋转器</h3></div>
       <div class="card-footer"><span class="tag">conic-gradient</span></div>
     </a>
     <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="dot-orbit"><span></span><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="dot-orbit"><span></span><span></span><span></span><span></span></div></div></div>
       <div class="card-content"><h3>轨道圆点</h3></div>
       <div class="card-footer"><span class="tag">四圆点旋转</span></div>
     </a>
     <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="text-loading"><span>L</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span></div></div>
+      <div class="card-visual"><div class="stage"><div class="text-loading"><span>L</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span></div></div></div>
       <div class="card-content"><h3>文字加载</h3></div>
       <div class="card-footer"><span class="tag">逐字淡入淡出</span></div>
     </a>
     <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="hourglass"></div></div>
+      <div class="card-visual"><div class="stage"><div class="hourglass"></div></div></div>
       <div class="card-content"><h3>沙漏翻转</h3></div>
       <div class="card-footer"><span class="tag">rotateZ 翻转</span></div>
     </a>
     <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="wifi-load"><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="wifi-load"><span></span><span></span><span></span></div></div></div>
       <div class="card-content"><h3>WiFi 信号</h3></div>
       <div class="card-footer"><span class="tag">弧形淡入淡出</span></div>
     </a>
     <a class="card" data-cat="08-loading-animations" href="08-loading-animations.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="newton"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="newton"><span></span><span></span><span></span><span></span><span></span></div></div></div>
       <div class="card-content"><h3>牛顿摆</h3></div>
       <div class="card-footer"><span class="tag">transform-origin 摆动</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s1" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s1" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>圆形展开</h3></div>
       <div class="card-footer"><span class="tag">clip-path: circle()</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s2" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s2" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>对角擦除</h3></div>
       <div class="card-footer"><span class="tag">clip-path: polygon()</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s3" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s3" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>中间分裂</h3></div>
       <div class="card-footer"><span class="tag">clip-path: inset()</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s4" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s4" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>上滑切换</h3></div>
       <div class="card-footer"><span class="tag">translateY(-100%)</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s5" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s5" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>缩小消失</h3></div>
       <div class="card-footer"><span class="tag">scale(.8) + opacity</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s6" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s6" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>3D 翻页</h3></div>
       <div class="card-footer"><span class="tag">rotateY + perspective</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s7" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s7" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
         <div class="s7-blinds"><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div><div class="s7-blind"></div></div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>百叶窗</h3></div>
       <div class="card-footer"><span class="tag">scaleY + stagger delay</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s8" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s8" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>菱形缩放</h3></div>
       <div class="card-footer"><span class="tag">polygon diamond + scale</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s9" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s9" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>圆形吸入</h3></div>
       <div class="card-footer"><span class="tag">circle() ease-in-out</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s10" onclick="togglePixel(this)"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s10" onclick="togglePixel(this)">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
         <div class="s10-grid" id="pixelGrid"></div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>像素溶解</h3></div>
       <div class="card-footer"><span class="tag">grid cells + random delay</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s11" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s11" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>虹膜开合</h3></div>
       <div class="card-footer"><span class="tag">circle() 反向</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s12" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s12" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>左滑切换</h3></div>
       <div class="card-footer"><span class="tag">translateX 双页联动</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s13" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s13" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>旋转缩放</h3></div>
       <div class="card-footer"><span class="tag">rotate + scale + fade</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s14" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s14" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
         <div class="s14-curtain"><div class="s14-left"></div><div class="s14-right"></div></div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>幕布拉开</h3></div>
       <div class="card-footer"><span class="tag">scaleX 双侧</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s15" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s15" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
         <div class="s15-overlay"></div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>黑场过渡</h3></div>
       <div class="card-footer"><span class="tag">opacity overlay</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s16" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s16" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>上下分裂</h3></div>
       <div class="card-footer"><span class="tag">polygon 上半裁切</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s17" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s17" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>极速放大</h3></div>
       <div class="card-footer"><span class="tag">scale(3) + fade</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s18" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s18" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>交叉淡入</h3></div>
       <div class="card-footer"><span class="tag">opacity cross-fade</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s19" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s19" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>开门效果</h3></div>
       <div class="card-footer"><span class="tag">rotateY perspective</span></div>
     </a>
     <a class="card" data-cat="12-page-transitions" href="12-page-transitions.html" target="_blank">
-      <div class="card-visual"><div class="stage s20" onclick="this.classList.toggle('active')"><div class="page page-a">Page A</div>
+      <div class="card-visual"><div class="stage s20" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
-        <div class="hint">Click to toggle</div></div></div>
+        <div class="hint">Click to toggle</div>
+      </div></div>
       <div class="card-content"><h3>旋涡消失</h3></div>
       <div class="card-footer"><span class="tag">rotate + scale(0)</span></div>
     </a>
     <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><button class="ripple-btn" onclick="createRipple(event)">Click Me</button></div></div>
-      <div class="card-content"><h3>涟漪按钮</h3></div>
-      <div class="card-footer"><span class="tag">click ripple animation</span></div>
+      <div class="card-visual"><div class="stage">
+        <div class="toggle-icons">
+          <span class="toggle-label">OFF</span>
+          <div class="toggle-track" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+          <span class="toggle-label toggle-label-on">ON</span>
+        </div>
+      </div></div>
+      <div class="card-content"><h3>开关切换</h3></div>
+      <div class="card-footer"><span class="tag">cubic-bezier bounce</span></div>
     </a>
     <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><span class="heart-btn" onclick="this.classList.toggle('liked')">&#9825;</span></div></div>
+      <div class="card-visual"><div class="stage">
+        <div class="checkbox-wrap">
+          <div class="cb" onclick="this.classList.toggle('checked')"><svg viewBox="0 0 18 18"><polyline points="3 9 7 13 15 5"/></svg></div>
+          <div class="cb" onclick="this.classList.toggle('checked')"><svg viewBox="0 0 18 18"><polyline points="3 9 7 13 15 5"/></svg></div>
+          <div class="cb" onclick="this.classList.toggle('checked')"><svg viewBox="0 0 18 18"><polyline points="3 9 7 13 15 5"/></svg></div>
+        </div>
+      </div></div>
+      <div class="card-content"><h3>复选框动画</h3></div>
+      <div class="card-footer"><span class="tag">stroke-dashoffset reveal</span></div>
+    </a>
+    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
+      <div class="card-visual"><div class="stage">
+        <button class="heart-btn" onclick="toggleHeart(this)">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+      </div></div>
       <div class="card-content"><h3>点赞心跳</h3></div>
-      <div class="card-footer"><span class="tag">scale bounce</span></div>
+      <div class="card-footer"><span class="tag">scale pop + particles</span></div>
     </a>
     <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><button class="copy-btn" onclick="copyFeedback(this)">Copy Code</button></div></div>
-      <div class="card-content"><h3>复制反馈</h3></div>
-      <div class="card-footer"><span class="tag">状态切换 + 颜色</span></div>
+      <div class="card-visual"><div class="stage" style="gap:20px;">
+        <div class="bell-wrap" onclick="addNotif()">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div class="badge" id="notifBadge">0</div>
+        </div>
+        <button onclick="clearNotif()" style="background:#1e1e2e;border:1px solid #333;color:#888;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.75rem;">Clear</button>
+      </div></div>
+      <div class="card-content"><h3>通知徽章</h3></div>
+      <div class="card-footer"><span class="tag">scale bounce + count</span></div>
     </a>
     <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="tooltip-wrap"><span style="color:#667eea;cursor:pointer;font-weight:600;">Hover Me</span><div class="tooltip-text">This is a tooltip!</div></div>
+      <div class="card-visual"><div class="stage">
+        <div class="search-wrap" onclick="openSearch(this)">
+          <div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <input class="search-input" placeholder="Search..." onclick="event.stopPropagation()">
+        </div>
+      </div></div>
+      <div class="card-content"><h3>展开搜索框</h3></div>
+      <div class="card-footer"><span class="tag">width transition + focus</span></div>
+    </a>
+    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
+      <div class="card-visual"><div class="stage">
+        <div class="fab-wrap">
+          <button class="fab" onclick="this.classList.toggle('open')">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="#fff" stroke-width="2"/><line x1="5" y1="12" x2="19" y2="12" stroke="#fff" stroke-width="2"/></svg>
+          </button>
+          <div class="fab-item"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+          <div class="fab-item"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          <div class="fab-item"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg></div>
+        </div>
+      </div></div>
+      <div class="card-content"><h3>浮动操作按钮</h3></div>
+      <div class="card-footer"><span class="tag">FAB + stagger open</span></div>
+    </a>
+    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
+      <div class="card-visual"><div class="stage">
+        <div class="pull-demo" onmousedown="startPull(this,event)" id="pullDemo">
+          <div class="pull-arrow">&#8635; Pull down</div>
+          <div class="pull-content">Item 1<br>Item 2<br>Item 3<br>Item 4</div>
+        </div>
+      </div></div>
+      <div class="card-content"><h3>下拉刷新</h3></div>
+      <div class="card-footer"><span class="tag">drag + spring back</span></div>
+    </a>
+    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
+      <div class="card-visual"><div class="stage">
+        <div class="swipe-item" onclick="this.classList.toggle('swiped')">
+          <div class="swipe-bg">Delete</div>
+          <div class="swipe-fg">Swipe me (click)</div>
+        </div>
+      </div></div>
+      <div class="card-content"><h3>滑动操作</h3></div>
+      <div class="card-footer"><span class="tag">translateX reveal</span></div>
+    </a>
+    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
+      <div class="card-visual"><div class="stage">
+        <div class="tip-wrap">
+          <div class="tip-trigger">Hover me</div>
+          <div class="tip-bubble">This is a smooth tooltip!</div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>悬浮提示</h3></div>
-      <div class="card-footer"><span class="tag">hover tooltip</span></div>
+      <div class="card-footer"><span class="tag">translateY + opacity</span></div>
     </a>
     <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton" style="width:160px;height:12px;"></div><div class="skeleton" style="width:200px;height:12px;"></div><div class="skeleton" style="width:140px;height:12px;"></div></div>
-      <div class="card-content"><h3>骨架屏加载</h3></div>
-      <div class="card-footer"><span class="tag">shimmer gradient</span></div>
-    </a>
-    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="drag-handle"><span></span><span></span><span></span></div></div>
-      <div class="card-content"><h3>拖拽手柄</h3></div>
-      <div class="card-footer"><span class="tag">grab handle</span></div>
-    </a>
-    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="pill-toggle"><span class="pill-opt active" onclick="pillToggle(this)">Monthly</span><span class="pill-opt" onclick="pillToggle(this)">Yearly</span></div></div>
-      <div class="card-content"><h3>胶囊切换</h3></div>
-      <div class="card-footer"><span class="tag">pill toggle</span></div>
-    </a>
-    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="badge-wrap"><span class="badge-icon">&#128276;</span><span class="badge-count">3</span></div></div>
-      <div class="card-content"><h3>数字徽章</h3></div>
-      <div class="card-footer"><span class="tag">badge pop</span></div>
-    </a>
-    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="slider-track"><div class="slider-fill"></div><div class="slider-thumb"></div></div>
-      <div class="card-content"><h3>滑块轨道</h3></div>
-      <div class="card-footer"><span class="tag">range slider</span></div>
-    </a>
-    <a class="card" data-cat="13-micro-interactions" href="13-micro-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><button class="confetti-btn" onclick="this.style.transform='scale(.95)';setTimeout(()=>this.style.transform='',150)">Celebrate!</button></div></div>
-      <div class="card-content"><h3>庆祝按钮</h3></div>
-      <div class="card-footer"><span class="tag">confetti 彩纸</span></div>
+      <div class="card-visual"><div class="stage">
+        <div class="steps" id="progressSteps">
+          <div class="step-dot done" onclick="setStep(0)">&#10003;</div>
+          <div class="step-line filled"><div class="fill"></div></div>
+          <div class="step-dot active" onclick="setStep(1)">2</div>
+          <div class="step-line"><div class="fill"></div></div>
+          <div class="step-dot" onclick="setStep(2)">3</div>
+          <div class="step-line"><div class="fill"></div></div>
+          <div class="step-dot" onclick="setStep(3)">4</div>
+        </div>
+      </div></div>
+      <div class="card-content"><h3>步骤进度</h3></div>
+      <div class="card-footer"><span class="tag">step dots + line fill</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="liquid-text">Liquid</div></div>
+      <div class="card-visual"><div class="stage"><div class="liquid-text">Liquid</div></div></div>
       <div class="card-content"><h3>液体文字</h3></div>
       <div class="card-footer"><span class="tag">filter + scaleX wobble</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="extrude-text">3D</div></div>
+      <div class="card-visual"><div class="stage"><div class="extrude-text">3D</div></div></div>
       <div class="card-content"><h3>3D 挤出文字</h3></div>
       <div class="card-footer"><span class="tag">多层 text-shadow</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="typewriter-adv">Hello, World!&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></div>
+      <div class="card-visual"><div class="stage"><div class="typewriter-adv">Hello, World!&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></div></div>
       <div class="card-content"><h3>打字机光标</h3></div>
       <div class="card-footer"><span class="tag">steps + border-right</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="marquee-text-wrap"><div class="marquee-text">This text scrolls infinitely across the container</div></div>
+      <div class="card-visual"><div class="stage"><div class="marquee-text-wrap"><div class="marquee-text">This text scrolls infinitely across the container</div></div></div></div>
       <div class="card-content"><h3>跑马灯文字</h3></div>
       <div class="card-footer"><span class="tag">translateX infinite</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="mask-text">Gradient</div></div>
+      <div class="card-visual"><div class="stage"><div class="mask-text">Gradient</div></div></div>
       <div class="card-content"><h3>渐变流动遮罩</h3></div>
       <div class="card-footer"><span class="tag">background-clip text</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="bounce-letters"><span style="animation-delay:0s">B</span><span style="animation-delay:.1s">o</span><span style="animation-delay:.2s">u</span><span style="animation-delay:.3s">n</span><span style="animation-delay:.4s">c</span><span style="animation-delay:.5s">e</span></div></div>
+      <div class="card-visual"><div class="stage"><div class="bounce-letters"><span style="animation-delay:0s">B</span><span style="animation-delay:.1s">o</span><span style="animation-delay:.2s">u</span><span style="animation-delay:.3s">n</span><span style="animation-delay:.4s">c</span><span style="animation-delay:.5s">e</span></div></div></div>
       <div class="card-content"><h3>弹跳字母</h3></div>
       <div class="card-footer"><span class="tag">translateY stagger</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="underline-text">Underline</div></div>
+      <div class="card-visual"><div class="stage"><div class="underline-text">Underline</div></div></div>
       <div class="card-content"><h3>下划线展开</h3></div>
       <div class="card-footer"><span class="tag">::after width 动画</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="vertical-text">竖排</div></div>
+      <div class="card-visual"><div class="stage"><div class="vertical-text">竖排</div></div></div>
       <div class="card-content"><h3>竖排文字</h3></div>
       <div class="card-footer"><span class="tag">writing-mode vertical</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="outline-anim">Stroke</div></div>
+      <div class="card-visual"><div class="stage"><div class="outline-anim">Stroke</div></div></div>
       <div class="card-content"><h3>描边闪烁</h3></div>
       <div class="card-footer"><span class="tag">-webkit-text-stroke</span></div>
     </a>
     <a class="card" data-cat="14-text-advanced" href="14-text-advanced.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="split-text" data-text="SPLIT">SPLIT</div></div>
+      <div class="card-visual"><div class="stage"><div class="split-text" data-text="SPLIT">SPLIT</div></div></div>
       <div class="card-content"><h3>半色分割</h3></div>
       <div class="card-footer"><span class="tag">::before clip</span></div>
     </a>
@@ -2988,74 +3193,79 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
       <div class="card-footer"><span class="tag">hover padding + arrow</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-sepia" style="cursor:pointer"></div></div>
+      <div class="card-visual"><div class="stage"><div class="img-sepia" style="cursor:pointer"></div></div></div>
       <div class="card-content"><h3>复古棕褐</h3></div>
       <div class="card-footer"><span class="tag">filter: sepia</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-zoom-wrap"><div class="img-zoom-inner"></div></div>
+      <div class="card-visual"><div class="stage"><div class="img-zoom-wrap"><div class="img-zoom-inner"></div></div></div></div>
       <div class="card-content"><h3>悬浮放大</h3></div>
       <div class="card-footer"><span class="tag">overflow hidden + scale</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-duotone" style="cursor:pointer"></div></div>
+      <div class="card-visual"><div class="stage"><div class="img-duotone" style="cursor:pointer"></div></div></div>
       <div class="card-content"><h3>双色调滤镜</h3></div>
       <div class="card-footer"><span class="tag">mix-blend-mode multiply</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-tilt" onmousemove="let r=this.getBoundingClientRect(),x=(event.clientX-r.left)/r.width-.5,y=(event.clientY-r.top)/r.height-.5;this.style.transform='perspective(500px) rotateY('+(x*20)+'deg) rotateX('+(-y*20)+'deg)'" onmouseleave="this.style.transform=''"></div></div>
+      <div class="card-visual"><div class="stage"><div class="img-tilt" onmousemove="let r=this.getBoundingClientRect(),x=(event.clientX-r.left)/r.width-.5,y=(event.clientY-r.top)/r.height-.5;this.style.transform='perspective(500px) rotateY('+(x*20)+'deg) rotateX('+(-y*20)+'deg)'" onmouseleave="this.style.transform=''"></div></div></div>
       <div class="card-content"><h3>3D 倾斜</h3></div>
       <div class="card-footer"><span class="tag">perspective + rotateY</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-mask" style="cursor:pointer"></div></div>
+      <div class="card-visual"><div class="stage"><div class="img-mask" style="cursor:pointer"></div></div></div>
       <div class="card-content"><h3>圆形揭示</h3></div>
       <div class="card-footer"><span class="tag">clip-path circle hover</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-skew" style="cursor:pointer"></div></div>
+      <div class="card-visual"><div class="stage"><div class="img-skew" style="cursor:pointer"></div></div></div>
       <div class="card-content"><h3>倾斜扭曲</h3></div>
       <div class="card-footer"><span class="tag">skewY + rotateY</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-border-anim"></div></div>
+      <div class="card-visual"><div class="stage"><div class="img-border-anim"></div></div></div>
       <div class="card-content"><h3>旋转边框</h3></div>
       <div class="card-footer"><span class="tag">conic-gradient rotate</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-glitch" style="cursor:pointer"></div></div>
+      <div class="card-visual"><div class="stage"><div class="img-glitch" style="cursor:pointer"></div></div></div>
       <div class="card-content"><h3>故障图片</h3></div>
       <div class="card-footer"><span class="tag">clip-path glitch</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-kenburns"><div class="img-kenburns-inner"></div></div>
+      <div class="card-visual"><div class="stage"><div class="img-kenburns"><div class="img-kenburns-inner"></div></div></div></div>
       <div class="card-content"><h3>Ken Burns 效果</h3></div>
       <div class="card-footer"><span class="tag">scale + translate loop</span></div>
     </a>
     <a class="card" data-cat="17-image-effects" href="17-image-effects.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="img-frost"><div class="img-frost-overlay">View</div></div>
+      <div class="card-visual"><div class="stage"><div class="img-frost"><div class="img-frost-overlay">View</div></div></div></div>
       <div class="card-content"><h3>磨砂覆盖</h3></div>
       <div class="card-footer"><span class="tag">backdrop-filter blur</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage" style="gap:48px;"><div class="hamburger" onclick="this.classList.toggle('open')"><span></span><span></span><span></span></div>
-        <div class="hamburger" onclick="this.classList.toggle('open')" style="width:48px;height:36px"><span style="border-radius:0;height:3px"></span><span style="border-radius:0;height:3px;width:70%;top:16px"></span><span style="border-radius:0;height:3px;top:32px"></span></div></div></div>
+      <div class="card-visual"><div class="stage" style="gap:48px;">
+        <div class="hamburger" onclick="this.classList.toggle('open')"><span></span><span></span><span></span></div>
+        <div class="hamburger" onclick="this.classList.toggle('open')" style="width:48px;height:36px"><span style="border-radius:0;height:3px"></span><span style="border-radius:0;height:3px;width:70%;top:16px"></span><span style="border-radius:0;height:3px;top:32px"></span></div>
+      </div></div>
       <div class="card-content"><h3>汉堡菜单变形</h3></div>
       <div class="card-footer"><span class="tag">rotate + opacity</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="tabbar" id="tabbar1">
+      <div class="card-visual"><div class="stage">
+        <div class="tabbar" id="tabbar1">
           <button class="tabbar-item active" onclick="switchTab(this,0)">Home</button>
           <button class="tabbar-item" onclick="switchTab(this,1)">About</button>
           <button class="tabbar-item" onclick="switchTab(this,2)">Work</button>
           <button class="tabbar-item" onclick="switchTab(this,3)">Contact</button>
           <div class="tabbar-indicator" id="tabInd"></div>
-        </div></div></div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>Tab 滑动指示器</h3></div>
       <div class="card-footer"><span class="tag">indicator slide transition</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="sidebar-demo">
+      <div class="card-visual"><div class="stage">
+        <div class="sidebar-demo">
           <div class="sidebar-panel" id="sidePanel">
             <ul><li>Dashboard</li><li>Analytics</li><li>Settings</li><li>Profile</li><li>Help</li></ul>
           </div>
@@ -3063,12 +3273,14 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
             <button class="sidebar-toggle" onclick="document.getElementById('sidePanel').classList.toggle('open')">&#9776;</button>
             <div style="color:#555;font-size:.75rem;">Main Content Area</div>
           </div>
-        </div></div></div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>侧边栏推入</h3></div>
       <div class="card-footer"><span class="tag">width transition push</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="dropdown-wrap" onclick="this.classList.toggle('open')">
+      <div class="card-visual"><div class="stage">
+        <div class="dropdown-wrap" onclick="this.classList.toggle('open')">
           <div class="dropdown-trigger">Menu</div>
           <div class="dropdown-menu">
             <a href="#">Dashboard</a>
@@ -3076,22 +3288,26 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
             <a href="#">Profile</a>
             <a href="#">Logout</a>
           </div>
-        </div></div></div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>下拉菜单淡入</h3></div>
       <div class="card-footer"><span class="tag">opacity + translateY</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="pill-nav">
+      <div class="card-visual"><div class="stage">
+        <div class="pill-nav">
           <button class="pill-item active" onclick="switchPill(this)">All</button>
           <button class="pill-item" onclick="switchPill(this)">Design</button>
           <button class="pill-item" onclick="switchPill(this)">Code</button>
           <button class="pill-item" onclick="switchPill(this)">Art</button>
-        </div></div></div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>胶囊导航</h3></div>
       <div class="card-footer"><span class="tag">pill background transition</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="breadcrumb">
+      <div class="card-visual"><div class="stage">
+        <div class="breadcrumb">
           <span class="breadcrumb-item">Home</span>
           <span class="breadcrumb-sep">/</span>
           <span class="breadcrumb-item">Projects</span>
@@ -3099,12 +3315,14 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
           <span class="breadcrumb-item">Design</span>
           <span class="breadcrumb-sep">/</span>
           <span class="breadcrumb-item current">Detail</span>
-        </div></div></div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>面包屑导航</h3></div>
       <div class="card-footer"><span class="tag">hover highlight + separator</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="bottom-nav" id="bottomNav">
+      <div class="card-visual"><div class="stage">
+        <div class="bottom-nav" id="bottomNav">
           <div class="bottom-nav-item active" onclick="switchBottom(this)">
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home
           </div>
@@ -3117,12 +3335,14 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
           <div class="bottom-nav-item" onclick="switchBottom(this)">
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
           </div>
-        </div></div></div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>底部导航凸起</h3></div>
       <div class="card-footer"><span class="tag">translateY active bulge</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="circular-wrap" id="circMenu" onclick="this.classList.toggle('open');this.querySelector('.circular-center').classList.toggle('open')">
+      <div class="card-visual"><div class="stage">
+        <div class="circular-wrap" id="circMenu" onclick="this.classList.toggle('open');this.querySelector('.circular-center').classList.toggle('open')">
           <button class="circular-center">+</button>
           <div class="circular-item ci-1">A</div>
           <div class="circular-item ci-2">B</div>
@@ -3130,24 +3350,28 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
           <div class="circular-item ci-4">D</div>
           <div class="circular-item ci-5">E</div>
           <div class="circular-item ci-6">F</div>
-        </div></div></div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>圆形展开菜单</h3></div>
       <div class="card-footer"><span class="tag">radial position + scale</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="accordion">
+      <div class="card-visual"><div class="stage">
+        <div class="accordion">
           <div class="acc-header" onclick="toggleAcc(this)">Products</div>
           <div class="acc-body"><a href="#">Software</a><a href="#">Hardware</a><a href="#">Services</a></div>
           <div class="acc-header" onclick="toggleAcc(this)">Company</div>
           <div class="acc-body"><a href="#">About</a><a href="#">Team</a><a href="#">Careers</a></div>
           <div class="acc-header" onclick="toggleAcc(this)">Support</div>
           <div class="acc-body"><a href="#">FAQ</a><a href="#">Contact</a><a href="#">Docs</a></div>
-        </div></div></div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>手风琴菜单</h3></div>
       <div class="card-footer"><span class="tag">max-height collapse</span></div>
     </a>
     <a class="card" data-cat="18-navigation-menus" href="18-navigation-menus.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="marquee-nav">
+      <div class="card-visual"><div class="stage">
+        <div class="marquee-nav">
           <div class="marquee-track">
             <span class="marquee-item">JavaScript</span>
             <span class="marquee-item">TypeScript</span>
@@ -3166,7 +3390,8 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
             <span class="marquee-item">Canvas</span>
             <span class="marquee-item">SVG</span>
           </div>
-        </div></div></div>
+        </div>
+      </div></div>
       <div class="card-content"><h3>滚动跑马灯导航</h3></div>
       <div class="card-footer"><span class="tag">translateX infinite loop</span></div>
     </a>
@@ -3221,82 +3446,82 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
       <div class="card-footer"><span class="tag">scale hover dock</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="float-field"><input placeholder=" " type="text"><label>Your Name</label></div></div>
+      <div class="card-visual"><div class="stage"><div class="float-field"><input placeholder=" " type="text"><label>Your Name</label></div></div></div>
       <div class="card-content"><h3>浮动标签</h3></div>
       <div class="card-footer"><span class="tag">:focus + label position</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="otp-group"><input class="otp-input" maxlength="1" value="4"><input class="otp-input" maxlength="1" value="2"><input class="otp-input" maxlength="1"><input class="otp-input" maxlength="1"></div></div>
+      <div class="card-visual"><div class="stage"><div class="otp-group"><input class="otp-input" maxlength="1" value="4"><input class="otp-input" maxlength="1" value="2"><input class="otp-input" maxlength="1"><input class="otp-input" maxlength="1"></div></div></div>
       <div class="card-content"><h3>OTP 验证码</h3></div>
       <div class="card-footer"><span class="tag">单字符 input 组</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="star-rating"><input type="radio" id="s5" name="star"><label for="s5">★</label><input type="radio" id="s4" name="star"><label for="s4">★</label><input type="radio" id="s3" name="star" checked><label for="s3">★</label><input type="radio" id="s2" name="star"><label for="s2">★</label><input type="radio" id="s1" name="star"><label for="s1">★</label></div></div>
+      <div class="card-visual"><div class="stage"><div class="star-rating"><input type="radio" id="s5" name="star"><label for="s5">★</label><input type="radio" id="s4" name="star"><label for="s4">★</label><input type="radio" id="s3" name="star" checked><label for="s3">★</label><input type="radio" id="s2" name="star"><label for="s2">★</label><input type="radio" id="s1" name="star"><label for="s1">★</label></div></div></div>
       <div class="card-content"><h3>星级评分</h3></div>
       <div class="card-footer"><span class="tag">radio + :checked ~</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="chip-group"><span class="chip">React <span class="chip-x">×</span></span><span class="chip">Vue <span class="chip-x">×</span></span><span class="chip">CSS <span class="chip-x">×</span></span></div></div>
+      <div class="card-visual"><div class="stage"><div class="chip-group"><span class="chip">React <span class="chip-x">×</span></span><span class="chip">Vue <span class="chip-x">×</span></span><span class="chip">CSS <span class="chip-x">×</span></span></div></div></div>
       <div class="card-content"><h3>标签输入</h3></div>
       <div class="card-footer"><span class="tag">chip flex-wrap</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="seg-ctrl"><span class="seg-opt active" onclick="this.parentElement.querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('active'));this.classList.add('active')">Day</span><span class="seg-opt" onclick="this.parentElement.querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('active'));this.classList.add('active')">Week</span><span class="seg-opt" onclick="this.parentElement.querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('active'));this.classList.add('active')">Month</span></div></div>
+      <div class="card-visual"><div class="stage"><div class="seg-ctrl"><span class="seg-opt active" onclick="this.parentElement.querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('active'));this.classList.add('active')">Day</span><span class="seg-opt" onclick="this.parentElement.querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('active'));this.classList.add('active')">Week</span><span class="seg-opt" onclick="this.parentElement.querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('active'));this.classList.add('active')">Month</span></div></div></div>
       <div class="card-content"><h3>分段控制器</h3></div>
       <div class="card-footer"><span class="tag">segmented control</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="date-field"><span class="date-icon">📅</span><span>2024-12-25</span></div></div>
+      <div class="card-visual"><div class="stage"><div class="date-field"><span class="date-icon">📅</span><span>2024-12-25</span></div></div></div>
       <div class="card-content"><h3>日期选择样式</h3></div>
       <div class="card-footer"><span class="tag">icon + text</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="slider-group"><div class="slider-val">60</div><input type="range" class="slider-bar" value="60" oninput="this.previousElementSibling.textContent=this.value"></div></div>
+      <div class="card-visual"><div class="stage"><div class="slider-group"><div class="slider-val">60</div><input type="range" class="slider-bar" value="60" oninput="this.previousElementSibling.textContent=this.value"></div></div></div>
       <div class="card-content"><h3>数值滑块</h3></div>
       <div class="card-footer"><span class="tag">range + value display</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="color-pick"><div class="color-swatch" style="background:#667eea"></div><div class="color-swatch" style="background:#f093fb"></div><div class="color-swatch" style="background:#43e97b"></div><div class="color-swatch" style="background:#f5576c"></div><div class="color-swatch" style="background:#ffa500"></div></div>
+      <div class="card-visual"><div class="stage"><div class="color-pick"><div class="color-swatch" style="background:#667eea"></div><div class="color-swatch" style="background:#f093fb"></div><div class="color-swatch" style="background:#43e97b"></div><div class="color-swatch" style="background:#f5576c"></div><div class="color-swatch" style="background:#ffa500"></div></div></div></div>
       <div class="card-content"><h3>色彩选择器</h3></div>
       <div class="card-footer"><span class="tag">swatch preview</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="ta-wrap"><textarea placeholder="Write something..." oninput="this.nextElementSibling.textContent=this.value.length+'/200'"></textarea><div class="ta-count">0/200</div></div>
+      <div class="card-visual"><div class="stage"><div class="ta-wrap"><textarea placeholder="Write something..." oninput="this.nextElementSibling.textContent=this.value.length+'/200'"></textarea><div class="ta-count">0/200</div></div></div></div>
       <div class="card-content"><h3>字数统计</h3></div>
       <div class="card-footer"><span class="tag">textarea counter</span></div>
     </a>
     <a class="card" data-cat="19-form-interactions" href="19-form-interactions.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="ms-steps"><div class="ms-dot active" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div><div class="ms-dot" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div><div class="ms-dot" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div><div class="ms-dot" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div></div>
+      <div class="card-visual"><div class="stage"><div class="ms-steps"><div class="ms-dot active" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div><div class="ms-dot" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div><div class="ms-dot" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div><div class="ms-dot" onclick="this.parentElement.querySelectorAll('.ms-dot').forEach(d=>d.classList.remove('active'));this.classList.add('active')"></div></div></div></div>
       <div class="card-content"><h3>多步指示器</h3></div>
       <div class="card-footer"><span class="tag">dot 胶囊切换</span></div>
     </a>
     <a class="card" data-cat="20-data-visualization" href="20-data-visualization.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="donut"></div></div>
+      <div class="card-visual"><div class="stage"><div class="donut"></div></div></div>
       <div class="card-content"><h3>环形图</h3></div>
       <div class="card-footer"><span class="tag">conic-gradient donut</span></div>
     </a>
     <a class="card" data-cat="20-data-visualization" href="20-data-visualization.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="gauge"><div class="gauge-needle"></div><div class="gauge-center"></div></div>
+      <div class="card-visual"><div class="stage"><div class="gauge"><div class="gauge-needle"></div><div class="gauge-center"></div></div></div></div>
       <div class="card-content"><h3>仪表盘</h3></div>
       <div class="card-footer"><span class="tag">conic-gradient gauge</span></div>
     </a>
     <a class="card" data-cat="20-data-visualization" href="20-data-visualization.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="sparkline"><div class="spark-bar" style="height:20px;animation-delay:0s"></div><div class="spark-bar" style="height:32px;animation-delay:.05s"></div><div class="spark-bar" style="height:18px;animation-delay:.1s"></div><div class="spark-bar" style="height:36px;animation-delay:.15s"></div><div class="spark-bar" style="height:24px;animation-delay:.2s"></div><div class="spark-bar" style="height:40px;animation-delay:.25s"></div><div class="spark-bar" style="height:28px;animation-delay:.3s"></div><div class="spark-bar" style="height:22px;animation-delay:.35s"></div><div class="spark-bar" style="height:34px;animation-delay:.4s"></div><div class="spark-bar" style="height:16px;animation-delay:.45s"></div></div>
+      <div class="card-visual"><div class="stage"><div class="sparkline"><div class="spark-bar" style="height:20px;animation-delay:0s"></div><div class="spark-bar" style="height:32px;animation-delay:.05s"></div><div class="spark-bar" style="height:18px;animation-delay:.1s"></div><div class="spark-bar" style="height:36px;animation-delay:.15s"></div><div class="spark-bar" style="height:24px;animation-delay:.2s"></div><div class="spark-bar" style="height:40px;animation-delay:.25s"></div><div class="spark-bar" style="height:28px;animation-delay:.3s"></div><div class="spark-bar" style="height:22px;animation-delay:.35s"></div><div class="spark-bar" style="height:34px;animation-delay:.4s"></div><div class="spark-bar" style="height:16px;animation-delay:.45s"></div></div></div></div>
       <div class="card-content"><h3>迷你折线</h3></div>
       <div class="card-footer"><span class="tag">sparkline bars</span></div>
     </a>
     <a class="card" data-cat="20-data-visualization" href="20-data-visualization.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="h-bars"><div class="h-bar"><span class="h-bar-label">JS</span><div class="h-bar-track"><div class="h-bar-fill" style="width:85%;background:#667eea"></div></div>
+      <div class="card-visual"><div class="stage"><div class="h-bars"><div class="h-bar"><span class="h-bar-label">JS</span><div class="h-bar-track"><div class="h-bar-fill" style="width:85%;background:#667eea"></div></div></div><div class="h-bar"><span class="h-bar-label">CSS</span><div class="h-bar-track"><div class="h-bar-fill" style="width:70%;background:#f093fb;animation-delay:.2s"></div></div></div><div class="h-bar"><span class="h-bar-label">SVG</span><div class="h-bar-track"><div class="h-bar-fill" style="width:50%;background:#43e97b;animation-delay:.4s"></div></div></div></div></div></div>
       <div class="card-content"><h3>水平条形图</h3></div>
       <div class="card-footer"><span class="tag">scaleX grow animation</span></div>
     </a>
     <a class="card" data-cat="20-data-visualization" href="20-data-visualization.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="stat-card"><div class="stat-num">2.4K</div><div class="stat-label">Active Users</div><div class="stat-change">↑ 12.5%</div></div>
+      <div class="card-visual"><div class="stage"><div class="stat-card"><div class="stat-num">2.4K</div><div class="stat-label">Active Users</div><div class="stat-change">↑ 12.5%</div></div></div></div>
       <div class="card-content"><h3>数据卡片</h3></div>
       <div class="card-footer"><span class="tag">stat number + trend</span></div>
     </a>
     <a class="card" data-cat="20-data-visualization" href="20-data-visualization.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="treemap"><div>45%</div><div>20%</div><div>15%</div><div>12%</div><div>8%</div></div>
+      <div class="card-visual"><div class="stage"><div class="treemap"><div>45%</div><div>20%</div><div>15%</div><div>12%</div><div>8%</div></div></div></div>
       <div class="card-content"><h3>矩形树图</h3></div>
       <div class="card-footer"><span class="tag">grid treemap</span></div>
     </a>
@@ -3306,17 +3531,17 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
       <div class="card-footer"><span class="tag">SVG polygon</span></div>
     </a>
     <a class="card" data-cat="20-data-visualization" href="20-data-visualization.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="bubbles"><div class="bubble" style="width:50px;height:50px;background:rgba(102,126,234,.4);top:10px;left:10px;">50</div><div class="bubble" style="width:35px;height:35px;background:rgba(240,147,251,.4);top:40px;left:80px;animation-delay:.5s;">35</div><div class="bubble" style="width:45px;height:45px;background:rgba(67,233,123,.4);top:60px;left:40px;animation-delay:1s;">45</div><div class="bubble" style="width:25px;height:25px;background:rgba(245,87,108,.4);top:20px;left:130px;animation-delay:1.5s;">25</div></div>
+      <div class="card-visual"><div class="stage"><div class="bubbles"><div class="bubble" style="width:50px;height:50px;background:rgba(102,126,234,.4);top:10px;left:10px;">50</div><div class="bubble" style="width:35px;height:35px;background:rgba(240,147,251,.4);top:40px;left:80px;animation-delay:.5s;">35</div><div class="bubble" style="width:45px;height:45px;background:rgba(67,233,123,.4);top:60px;left:40px;animation-delay:1s;">45</div><div class="bubble" style="width:25px;height:25px;background:rgba(245,87,108,.4);top:20px;left:130px;animation-delay:1.5s;">25</div></div></div></div>
       <div class="card-content"><h3>气泡图</h3></div>
       <div class="card-footer"><span class="tag">absolute position circles</span></div>
     </a>
     <a class="card" data-cat="20-data-visualization" href="20-data-visualization.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="funnel"><div class="funnel-step" style="width:180px;background:rgba(102,126,234,.6);">Visits 1000</div><div class="funnel-step" style="width:140px;background:rgba(240,147,251,.5);">Leads 600</div><div class="funnel-step" style="width:100px;background:rgba(67,233,123,.5);">Trials 300</div><div class="funnel-step" style="width:60px;background:rgba(245,87,108,.5);">Sales 120</div></div>
+      <div class="card-visual"><div class="stage"><div class="funnel"><div class="funnel-step" style="width:180px;background:rgba(102,126,234,.6);">Visits 1000</div><div class="funnel-step" style="width:140px;background:rgba(240,147,251,.5);">Leads 600</div><div class="funnel-step" style="width:100px;background:rgba(67,233,123,.5);">Trials 300</div><div class="funnel-step" style="width:60px;background:rgba(245,87,108,.5);">Sales 120</div></div></div></div>
       <div class="card-content"><h3>漏斗图</h3></div>
       <div class="card-footer"><span class="tag">width 递减</span></div>
     </a>
     <a class="card" data-cat="20-data-visualization" href="20-data-visualization.html" target="_blank">
-      <div class="card-visual"><div class="stage"><div class="metric-tiles"><div class="metric-tile"><div class="val" style="color:#667eea">99.9%</div><div class="lbl">Uptime</div></div>
+      <div class="card-visual"><div class="stage"><div class="metric-tiles"><div class="metric-tile"><div class="val" style="color:#667eea">99.9%</div><div class="lbl">Uptime</div></div><div class="metric-tile"><div class="val" style="color:#43e97b">42ms</div><div class="lbl">Latency</div></div><div class="metric-tile"><div class="val" style="color:#f093fb">8.2K</div><div class="lbl">RPM</div></div><div class="metric-tile"><div class="val" style="color:#ffa500">3.1GB</div><div class="lbl">Memory</div></div></div></div></div>
       <div class="card-content"><h3>指标磁贴</h3></div>
       <div class="card-footer"><span class="tag">grid metric tiles</span></div>
     </a>
@@ -3537,14 +3762,14 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
     </a>
     <a class="card card-iframe" data-cat="58-scroll-3d-carousel" href="58-scroll-3d-carousel.html" target="_blank">
       <div class="card-visual"><iframe src="58-scroll-3d-carousel.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
-      <div class="card-content"><h3>Scroll-Driven 3D Carousel</h3></div>
+      <div class="card-content"><h3>Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
   </div>
 </section>
 
 <footer class="footer">
-  <p class="footer-note">Bの宝库 — 256 Effects · Zero Dependencies</p>
+  <p class="footer-note">Bの宝库 — 275 Effects · Zero Dependencies</p>
 </footer>
 </main>
 </div>

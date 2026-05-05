@@ -55,6 +55,21 @@
   .tag{font-size:.68rem;padding:4px 12px;border-radius:980px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);letter-spacing:.01em}
   .count{font-size:.72rem;color:rgba(255,255,255,.3);font-weight:500;margin-left:auto}
 
+  /* Favorite button */
+  .fav-btn{position:absolute;top:12px;right:12px;z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .3s,transform .25s,background .25s}
+  .card:hover .fav-btn{opacity:1}
+  .fav-btn:hover{background:rgba(255,255,255,.12);transform:scale(1.1)}
+  .fav-btn.active{opacity:1;background:rgba(255,59,48,.15);border-color:rgba(255,59,48,.3)}
+  .fav-btn svg{width:16px;height:16px;fill:none;stroke:rgba(255,255,255,.5);stroke-width:2;transition:fill .25s,stroke .25s}
+  .fav-btn.active svg{fill:#ff3b30;stroke:#ff3b30}
+  .fav-btn:hover svg{stroke:rgba(255,255,255,.8)}
+  .fav-btn.active:hover svg{fill:#ff6961;stroke:#ff6961}
+
+  /* Source link */
+  .source-link{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;padding:3px 10px;border-radius:980px;background:rgba(41,151,255,.08);color:rgba(41,151,255,.7);border:1px solid rgba(41,151,255,.15);transition:all .3s;text-decoration:none;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .source-link:hover{background:rgba(41,151,255,.15);color:#2997ff;border-color:rgba(41,151,255,.3)}
+  .source-link svg{width:10px;height:10px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+
   /* Category accents */
   [data-cat="anim"]{--accent:#2997ff}
   [data-cat="text"]{--accent:#bf5af2}
@@ -214,6 +229,7 @@
 <div class="filter-bar">
   <div class="filter-inner">
     <button class="filter-btn active" data-cat="all">All</button>
+    <button class="filter-btn" data-cat="fav" id="favFilterBtn">⭐ 收藏</button>
     <button class="filter-btn" data-cat="anim">CSS 动画</button>
     <button class="filter-btn" data-cat="text">文字特效</button>
     <button class="filter-btn" data-cat="hover">悬停交互</button>
@@ -267,14 +283,14 @@
   <div class="card-grid">
 
 <!-- holographic-rainbow-card (置顶) -->
-<a class="card" data-cat="holo" href="54-holographic-rainbow-card.html">
+<a class="card" data-cat="holo" href="54-holographic-rainbow-card.html" data-source="https://www.framer.com/motion/">
 <div class="card-visual" id="holoPreviewWrap" style="background:#080810;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px"></div>
 <div class="card-content"><h3>全息彩虹卡片</h3><p>灵感来自 Framer Holo Shader。模拟真实全息贴纸的光学衍射效果，鼠标悬停时彩虹光谱随视角流动偏移，同时卡片有 3D 倾斜跟随。6 种主题变体：宇宙、极光、太阳、深海、合成波、棱镜。</p></div>
 <div class="card-footer"><span class="tag">holo</span><span class="tag">3d-tilt</span><span class="count">6 种效果</span></div>
 </a>
 
 <!-- diamond-icon-grid-spotlight (置顶) -->
-<a class="card" data-cat="spotlight" href="53-diamond-icon-grid-spotlight.html">
+<a class="card" data-cat="spotlight" href="53-diamond-icon-grid-spotlight.html" data-source="https://linear.app/features">
       <div class="card-visual" id="spotlightPreviewWrap" style="background:#0a0a0f;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center">
         <div id="spotlightPreviewGrid" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:5px;padding:6px 4px"></div>
         <div style="position:relative;z-index:2;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(124,106,247,.8);text-shadow:0 0 12px rgba(124,106,247,.6)">SPOTLIGHT</div>
@@ -284,7 +300,7 @@
     </a>
 
     <!-- terminal-text-scramble (置顶) -->
-    <a class="card" data-cat="terminal" href="51-terminal-text-scramble.html">
+    <a class="card" data-cat="terminal" href="51-terminal-text-scramble.html" data-source="https://tympanus.net/codrops">
       <div class="card-visual" style="background:#050e08;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;padding:14px 10px;font-family:'Courier New',monospace">
         <div id="termPreview" style="width:100%;font-size:9px;letter-spacing:.04em;line-height:1.6;color:#00e676;text-transform:uppercase"></div>
       </div>
@@ -293,7 +309,7 @@
     </a>
 
     <!-- particle-ray-burst (置顶) -->
-    <a class="card" data-cat="particle" href="50-particle-ray-burst.html">
+    <a class="card" data-cat="particle" href="50-particle-ray-burst.html" data-source="https://stripe.com">
       <div class="card-visual" style="background:#020510;overflow:hidden;display:flex;align-items:center;justify-content:center">
         <canvas id="miniRayBurst" width="200" height="100" style="width:200px;height:100px"></canvas>
       </div>
@@ -302,7 +318,7 @@
     </a>
 
     <!-- keyboard-shortcuts (置顶) -->
-    <a class="card" data-cat="kbd" href="49-keyboard-shortcuts.html">
+    <a class="card" data-cat="kbd" href="49-keyboard-shortcuts.html" data-source="https://www.raycast.com">
       <div class="card-visual" style="background:#0a0a0f;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:5px;padding:16px">
         <div style="display:flex;align-items:center;justify-content:center;min-width:36px;height:36px;border-radius:8px;background:#252535;border:1px solid rgba(255,255,255,0.12);box-shadow:0 1px 0 rgba(255,255,255,0.08) inset,0 3px 0 #0d0d18,0 4px 8px rgba(0,0,0,0.5);font-size:0.85rem;color:rgba(255,255,255,0.7);">⌘</div>
         <div style="color:rgba(255,255,255,0.3);font-size:0.75rem;">+</div>
@@ -315,7 +331,7 @@
     </a>
 
     <!-- colorful-quote-cards (置顶) -->
-    <a class="card" data-cat="quote" href="48-colorful-quote-cards.html">
+    <a class="card" data-cat="quote" href="48-colorful-quote-cards.html" data-source="https://linear.app">
       <div class="card-visual" style="background:#080910;overflow:hidden;display:flex;gap:6px;align-items:center;justify-content:center;padding:12px">
         <div style="width:52px;height:64px;border-radius:6px;background:#e4f222;flex-shrink:0"></div>
         <div style="width:52px;height:64px;border-radius:6px;background:#1c85e8;flex-shrink:0"></div>
@@ -326,21 +342,21 @@
     </a>
 
     <!-- collect (置顶) -->
-    <a class="card" data-cat="collect" href="46-collect.html">
+    <a class="card" data-cat="collect" href="46-collect.html" data-source="https://diabrowser.com">
       <div class="card-visual" style="background:#000;overflow:hidden;position:relative"><div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,transparent 40%,rgb(255,172,227) 55%,rgba(255,241,172,.5) 60%,rgb(121,201,255) 70%,rgb(74,96,209) 85%,transparent 100%);filter:blur(8px);opacity:.8"></div></div>
       <div class="card-content"><h3>Collect 灵感收集</h3><p>Dia 风格彩虹渐变弹性拉伸效果。滚动到底部，彩虹光晕从底部弹性浮现，停止后柔和消散。</p></div>
       <div class="card-footer"><span class="tag">radial-gradient</span><span class="tag">elastic</span><span class="count">1 种效果</span></div>
     </a>
 
     <!-- collect-text (置顶) -->
-    <a class="card" data-cat="collect" href="47-collect-text.html">
+    <a class="card" data-cat="collect" href="47-collect-text.html" data-source="https://diabrowser.com">
       <div class="card-visual" style="background:#000;overflow:hidden;position:relative"><div id="cardTextPreview" style="font-family:Inter,-apple-system,sans-serif;font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.03em;display:flex;gap:1px"></div></div>
       <div class="card-content"><h3>Collect 文本变化</h3><p>Dia 风格文本动画效果集。可变字体字重波浪、文字轮播切换、逐字模糊揭示、打字机效果。</p></div>
       <div class="card-footer"><span class="tag">variable-font</span><span class="tag">text-swap</span><span class="count">4 种效果</span></div>
     </a>
 
     <!-- glassmorphism-floating-ui (置顶) -->
-    <a class="card" data-cat="glass" href="52-glassmorphism-floating-ui-cards.html">
+    <a class="card" data-cat="glass" href="52-glassmorphism-floating-ui-cards.html" data-source="https://diabrowser.com">
       <div class="card-visual" style="background:radial-gradient(circle at 30% 20%, rgba(94,92,230,.35), transparent 38%), radial-gradient(circle at 72% 30%, rgba(191,90,242,.28), transparent 34%), linear-gradient(180deg,#060816,#0a0f23 60%,#05070d);overflow:hidden;position:relative">
         <div id="glassPreviewScene" style="position:relative;width:190px;height:110px">
           <div class="glass-preview-orb orb-a"></div>
@@ -745,15 +761,71 @@
 </footer>
 
 <script>
-  // Filter
+  // Favorites: localStorage persistence
+  const FAV_KEY='effects_favorites';
+  function getFavs(){try{return JSON.parse(localStorage.getItem(FAV_KEY))||[];}catch(e){return[];}}
+  function setFavs(arr){localStorage.setItem(FAV_KEY,JSON.stringify(arr));}
+  function toggleFav(href){
+    const favs=getFavs();
+    const idx=favs.indexOf(href);
+    if(idx>-1)favs.splice(idx,1);else favs.push(href);
+    setFavs(favs);
+    return idx===-1;
+  }
+
+  // Inject fav buttons + source links into all cards
+  document.querySelectorAll('.card').forEach(card=>{
+    const href=card.getAttribute('href');
+    // Fav button
+    const btn=document.createElement('div');
+    btn.className='fav-btn'+(getFavs().includes(href)?' active':'');
+    btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+    btn.addEventListener('click',e=>{
+      e.preventDefault();e.stopPropagation();
+      const isNowFav=toggleFav(href);
+      btn.classList.toggle('active',isNowFav);
+      // If currently filtering by fav, hide unfavorited cards
+      if(document.getElementById('favFilterBtn').classList.contains('active')&&!isNowFav){
+        card.style.display='none';
+      }
+    });
+    card.appendChild(btn);
+
+    // Source link
+    const source=card.dataset.source;
+    if(source){
+      const footer=card.querySelector('.card-footer');
+      if(footer){
+        const link=document.createElement('a');
+        link.className='source-link';
+        link.href=source;
+        link.target='_blank';
+        link.rel='noopener noreferrer';
+        link.addEventListener('click',e=>e.stopPropagation());
+        const domain=source.replace(/^https?:\/\/(www\.)?/,'').replace(/\/.*$/,'');
+        link.innerHTML='<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'+domain;
+        link.title='来源: '+source;
+        footer.appendChild(link);
+      }
+    }
+  });
+
+  // Filter (enhanced with fav support)
   document.querySelectorAll('.filter-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
       document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       const cat=btn.dataset.cat;
-      document.querySelectorAll('.card').forEach(card=>{
-        card.style.display=cat==='all'||card.dataset.cat===cat?'':'none';
-      });
+      if(cat==='fav'){
+        const favs=getFavs();
+        document.querySelectorAll('.card').forEach(card=>{
+          card.style.display=favs.includes(card.getAttribute('href'))?'':'none';
+        });
+      }else{
+        document.querySelectorAll('.card').forEach(card=>{
+          card.style.display=cat==='all'||card.dataset.cat===cat?'':'none';
+        });
+      }
     });
   });
 

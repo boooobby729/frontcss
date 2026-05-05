@@ -41,3 +41,9 @@
 - 效果描述：模拟真实全息贴纸/卡片的光学效果。卡片表面覆盖一层随鼠标角度变化的彩虹渐变层，当鼠标移动时，彩虹光谱会随视角改变而流动偏移，模拟光线在全息薄膜上的衍射效果。同时卡片有轻微的 3D 倾斜跟随鼠标，增强立体感。静止时卡片有微弱的彩虹光泽，移动时彩虹效果变得鲜艳。
 - 实现原理：CSS perspective + rotateX/rotateY 实现 3D 倾斜跟随，CSS conic-gradient 或 linear-gradient 多层叠加模拟彩虹光谱，JS mousemove 计算鼠标相对卡片的角度，用 CSS 变量 --rx --ry --bgx --bgy 控制倾斜角度和渐变偏移，mix-blend-mode: color-dodge 或 screen 叠加彩虹层，CSS filter: brightness/saturate 增强光泽感
 - 状态：已实现 → 54-holographic-rainbow-card.html
+
+## 2026-05-05 vercel.com (homepage hero)
+- 效果名称：等高线地形波纹背景 (Contour Terrain Map)
+- 效果描述：密集的等高线/波纹线条覆盖整个背景，配合彩色渐变区域（红色热区、绿色冷区、黄色中间区），形成地形图般的视觉效果。鼠标移动时，以鼠标为中心的区域波纹会动态扰动，形成涟漪扩散效果。整体呈现出科技感十足的地形数据可视化风格，中央可放置主体内容。
+- 实现原理：Canvas 2D API，用 marching squares 算法或直接绘制等值线，基于 Perlin noise / simplex noise 生成地形高度场，不同高度区间映射不同颜色（热力图配色），mousemove 事件在鼠标位置叠加扰动函数，requestAnimationFrame 驱动动画，等高线用 canvas.stroke() 绘制密集路径
+- 状态：待实现

@@ -32,7 +32,7 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
 .hero h1{font-size:2rem;font-weight:800;letter-spacing:-.03em}
 .hero h1 em{font-style:normal;background:linear-gradient(135deg,#a78bfa 0%,#f472b6 50%,#fb923c 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hero-sub{color:rgba(255,255,255,.35);font-size:.82rem;margin-top:6px}
-.grid-section{padding:0 24px 60px}
+.grid-section{padding:0 24px 32px}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1600px;margin:0 auto}
 
 /* === Cards === */
@@ -58,6 +58,16 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
 /* === Mobile === */
 .mobile-toggle{position:fixed;top:14px;left:14px;z-index:1100;width:36px;height:36px;border-radius:10px;background:rgba(30,30,34,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);align-items:center;justify-content:center;cursor:pointer;display:none}
 .mobile-toggle svg{width:18px;height:18px;stroke:#f5f5f7;fill:none;stroke-width:2}
+/* === Fullscreen Section === */
+.fullscreen-section{padding:0 24px 0;max-width:1648px;margin:0 auto}
+.fullscreen-toggle{display:flex;align-items:center;gap:8px;width:100%;padding:14px 20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;color:rgba(255,255,255,.45);font-size:.78rem;font-family:inherit;cursor:pointer;transition:all .2s;text-align:left;margin-bottom:0}
+.fullscreen-toggle:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.7)}
+.fullscreen-toggle span{flex:1}
+.fullscreen-toggle svg{transition:transform .3s;flex-shrink:0}
+.fullscreen-grid{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1)}
+.fullscreen-grid.open{max-height:9999px}
+.fullscreen-grid .card-grid{padding-top:16px;padding-bottom:24px}
+
 .footer{text-align:center;padding:30px 20px 24px;border-top:1px solid rgba(255,255,255,.04)}
 .footer-note{font-size:.7rem;color:rgba(255,255,255,.18)}
 
@@ -1998,27 +2008,7 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
   .metric-tile .val { font-size: 1.2rem; font-weight: 700; }
   .metric-tile .lbl { font-size: .65rem; color: #888; margin-top: 2px; }
 
-  /* ===== 磁力吸附按钮 (59-magnetic-button.html) ===== */
-  .prev-mag-btn { border:none; cursor:pointer; font-family:inherit; font-weight:600; letter-spacing:.02em; transition: transform .5s cubic-bezier(.23,1,.32,1), box-shadow .3s ease; }
-  .prev-mag-solid { background:#fff; color:#000; padding:12px 28px; border-radius:100px; font-size:.85rem; box-shadow:0 2px 8px rgba(0,0,0,.3); animation: mag-float 3s ease-in-out infinite; }
-  @keyframes mag-float {
-    0%,100% { transform: translate(0,0) scale(1); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
-    30%  { transform: translate(6px,-4px) scale(1.04); box-shadow: 0 10px 28px rgba(255,255,255,.2); }
-    60%  { transform: translate(-5px,3px) scale(.97); box-shadow: 0 4px 12px rgba(0,0,0,.2); }
-    80%  { transform: translate(3px,-2px) scale(1.02); box-shadow: 0 8px 22px rgba(255,255,255,.15); }
-  }
 
-  /* ===== 彩色等高线光晕 (60-conic-contour.html) ===== */
-  .prev-conic-wrap { position:relative; width:100%; height:100%; overflow:hidden; background:#fff; }
-  .prev-conic-glow { position:absolute; inset:0; animation: conic-shift 6s linear infinite; }
-  .prev-conic-svg  { position:absolute; inset:0; width:100%; height:100%; }
-  @keyframes conic-shift {
-    0%   { background: conic-gradient(from 180deg at 50% 72%, rgba(250,250,250,0) 0deg, #f5c842 72deg, #e84b4b 144deg, #6fa0c0 216deg, #4dffc0 288deg, rgba(250,250,250,0) 360deg); }
-    25%  { background: conic-gradient(from 180deg at 60% 60%, rgba(250,250,250,0) 0deg, #f5c842 72deg, #e84b4b 144deg, #6fa0c0 216deg, #4dffc0 288deg, rgba(250,250,250,0) 360deg); }
-    50%  { background: conic-gradient(from 180deg at 50% 72%, rgba(250,250,250,0) 0deg, #4dffc0 72deg, #f5c842 144deg, #e84b4b 216deg, #6fa0c0 288deg, rgba(250,250,250,0) 360deg); }
-    75%  { background: conic-gradient(from 180deg at 40% 60%, rgba(250,250,250,0) 0deg, #f5c842 72deg, #e84b4b 144deg, #6fa0c0 216deg, #4dffc0 288deg, rgba(250,250,250,0) 360deg); }
-    100% { background: conic-gradient(from 180deg at 50% 72%, rgba(250,250,250,0) 0deg, #f5c842 72deg, #e84b4b 144deg, #6fa0c0 216deg, #4dffc0 288deg, rgba(250,250,250,0) 360deg); }
-  }
 
 </style>
 </head>
@@ -2039,63 +2029,17 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
     <button class="filter-item active" data-cat="01-css-animations"><div class="dot" style="background:#2997ff"></div>CSS 动画<span class="filter-count">35</span></button>
     <button class="filter-item" data-cat="02-text-effects"><div class="dot" style="background:#bf5af2"></div>文字特效<span class="filter-count">25</span></button>
     <button class="filter-item" data-cat="03-hover-interactions"><div class="dot" style="background:#30d158"></div>悬停交互<span class="filter-count">25</span></button>
-    <button class="filter-item" data-cat="04-scroll-effects"><div class="dot" style="background:#ff453a"></div>滚动交互<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="05-background-effects"><div class="dot" style="background:#ff6482"></div>背景特效<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="06-svg-animations"><div class="dot" style="background:#64d2ff"></div>SVG 动画<span class="filter-count">14</span></button>
-    <button class="filter-item" data-cat="07-3d-effects"><div class="dot" style="background:#5e5ce6"></div>3D<span class="filter-count">14</span></button>
-    <button class="filter-item" data-cat="08-loading-animations"><div class="dot" style="background:#fb923c"></div>加载动画<span class="filter-count">20</span></button>
-    <button class="filter-item" data-cat="09-creative-layouts"><div class="dot" style="background:#ffd60a"></div>创意布局<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="10-canvas-effects"><div class="dot" style="background:#ac8e68"></div>Canvas / JS 特效<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="11-cursor-effects"><div class="dot" style="background:#2997ff"></div>光标特效<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="12-page-transitions"><div class="dot" style="background:#bf5af2"></div>页面过渡<span class="filter-count">20</span></button>
-    <button class="filter-item" data-cat="13-micro-interactions"><div class="dot" style="background:#30d158"></div>微交互<span class="filter-count">10</span></button>
-    <button class="filter-item" data-cat="14-text-advanced"><div class="dot" style="background:#ff453a"></div>高级文字<span class="filter-count">10</span></button>
-    <button class="filter-item" data-cat="15-morphism-styles"><div class="dot" style="background:#ff6482"></div>设计风格<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="16-creative-buttons"><div class="dot" style="background:#64d2ff"></div>创意按钮<span class="filter-count">8</span></button>
-    <button class="filter-item" data-cat="17-image-effects"><div class="dot" style="background:#5e5ce6"></div>图片特效<span class="filter-count">10</span></button>
-    <button class="filter-item" data-cat="18-navigation-menus"><div class="dot" style="background:#fb923c"></div>导航菜单动画<span class="filter-count">20</span></button>
-    <button class="filter-item" data-cat="19-form-interactions"><div class="dot" style="background:#ffd60a"></div>表单交互动画<span class="filter-count">10</span></button>
-    <button class="filter-item" data-cat="20-data-visualization"><div class="dot" style="background:#ac8e68"></div>数据可视化动画<span class="filter-count">10</span></button>
-    <button class="filter-item" data-cat="21-liquid-metal"><div class="dot" style="background:#2997ff"></div>液态金属<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="22-aurora-effects"><div class="dot" style="background:#bf5af2"></div>极光<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="23-glitch-effects"><div class="dot" style="background:#30d158"></div>故障<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="24-particle-effects"><div class="dot" style="background:#ff453a"></div>粒子<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="25-parallax-effects"><div class="dot" style="background:#ff6482"></div>视差与滚动<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="26-noise-grain"><div class="dot" style="background:#64d2ff"></div>噪声与纹理<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="27-light-effects"><div class="dot" style="background:#5e5ce6"></div>光效<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="28-morphing-effects"><div class="dot" style="background:#fb923c"></div>形变 Morphing<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="29-audio-visualizer"><div class="dot" style="background:#ffd60a"></div>音频可视化<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="30-text-effects"><div class="dot" style="background:#ac8e68"></div>创意文字动效<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="31-cursor-interactions"><div class="dot" style="background:#2997ff"></div>鼠标交互<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="32-3d-cards"><div class="dot" style="background:#bf5af2"></div>3D 卡片与翻转<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="33-gradient-animations"><div class="dot" style="background:#30d158"></div>渐变与色彩动画<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="34-spring-physics"><div class="dot" style="background:#ff453a"></div>弹性物理动画<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="35-scroll-storytelling"><div class="dot" style="background:#ff6482"></div>滚动驱动叙事<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="36-liquid-backgrounds"><div class="dot" style="background:#64d2ff"></div>液态流体背景<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="37-page-transitions"><div class="dot" style="background:#5e5ce6"></div>页面过渡动画<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="38-data-visualization"><div class="dot" style="background:#fb923c"></div>数据可视化动画<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="39-hover-effects"><div class="dot" style="background:#ffd60a"></div>高级悬停<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="40-generative-art"><div class="dot" style="background:#ac8e68"></div>生成艺术<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="41-typography-animations"><div class="dot" style="background:#2997ff"></div>排版动画<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="42-dark-mode-effects"><div class="dot" style="background:#bf5af2"></div>暗黑模式特效<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="43-glassmorphism-cards"><div class="dot" style="background:#30d158"></div>毛玻璃卡片<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="44-infinite-scrollers"><div class="dot" style="background:#ff453a"></div>无限滚动动画<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="45-clip-path-animations"><div class="dot" style="background:#ff6482"></div>裁剪路径动画<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="46-collect"><div class="dot" style="background:#64d2ff"></div>Collect 灵感收<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="47-collect-text"><div class="dot" style="background:#5e5ce6"></div>Collect 文本变化<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="48-colorful-quote-cards"><div class="dot" style="background:#fb923c"></div>Colorful Quote Cards<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="49-keyboard-shortcuts"><div class="dot" style="background:#ffd60a"></div>Keyboard Shortcut Visualizer<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="50-particle-ray-burst"><div class="dot" style="background:#ac8e68"></div>Particle Ray Burst 粒子光线放射<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="51-terminal-text-scramble"><div class="dot" style="background:#2997ff"></div>Terminal Text Scramble Hover<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="52-glassmorphism-floating-ui-cards"><div class="dot" style="background:#bf5af2"></div>毛玻璃浮动通知卡片 Glassmorphism Floating UI Cards<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="53-diamond-icon-grid-spotlight"><div class="dot" style="background:#30d158"></div>Diamond Icon Grid Spotlight · 菱形图标网格光晕追踪<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="54-holographic-rainbow-card"><div class="dot" style="background:#ff453a"></div>全息彩虹卡片 Holographic Rainbow Card<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="55-contour-terrain-map"><div class="dot" style="background:#ff6482"></div>等高线地形波纹背景 Contour Terrain Map<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="56-clip-path-fullscreen-menu"><div class="dot" style="background:#64d2ff"></div>Clip-Path Fullscreen Menu<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="57-app-icon-galaxy"><div class="dot" style="background:#5e5ce6"></div>App Icon Galaxy Grid<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="58-scroll-3d-carousel"><div class="dot" style="background:#fb923c"></div>Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="59-magnetic-button"><div class="dot" style="background:#30d158"></div>Magnetic Button · 磁力吸附按钮<span class="filter-count">1</span></button>
-    <button class="filter-item" data-cat="60-conic-contour"><div class="dot" style="background:#f5c842"></div>Conic Gradient Contour · 彩色等高线光晕<span class="filter-count">1</span></button>
+    <button class="filter-item" data-cat="06-svg-animations"><div class="dot" style="background:#ff453a"></div>SVG 动画<span class="filter-count">14</span></button>
+    <button class="filter-item" data-cat="07-3d-effects"><div class="dot" style="background:#ff6482"></div>3D<span class="filter-count">14</span></button>
+    <button class="filter-item" data-cat="08-loading-animations"><div class="dot" style="background:#64d2ff"></div>加载动画<span class="filter-count">20</span></button>
+    <button class="filter-item" data-cat="12-page-transitions"><div class="dot" style="background:#5e5ce6"></div>页面过渡<span class="filter-count">20</span></button>
+    <button class="filter-item" data-cat="13-micro-interactions"><div class="dot" style="background:#fb923c"></div>微交互<span class="filter-count">10</span></button>
+    <button class="filter-item" data-cat="14-text-advanced"><div class="dot" style="background:#ffd60a"></div>高级文字<span class="filter-count">10</span></button>
+    <button class="filter-item" data-cat="16-creative-buttons"><div class="dot" style="background:#ac8e68"></div>创意按钮<span class="filter-count">8</span></button>
+    <button class="filter-item" data-cat="17-image-effects"><div class="dot" style="background:#2997ff"></div>图片特效<span class="filter-count">10</span></button>
+    <button class="filter-item" data-cat="18-navigation-menus"><div class="dot" style="background:#bf5af2"></div>导航菜单动画<span class="filter-count">20</span></button>
+    <button class="filter-item" data-cat="19-form-interactions"><div class="dot" style="background:#30d158"></div>表单交互动画<span class="filter-count">10</span></button>
+    <button class="filter-item" data-cat="20-data-visualization"><div class="dot" style="background:#ff453a"></div>数据可视化动画<span class="filter-count">10</span></button>
   </nav>
 </aside>
 
@@ -3567,236 +3511,247 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
       <div class="card-content"><h3>指标磁贴</h3></div>
       <div class="card-footer"><span class="tag">grid metric tiles</span></div>
     </a>
-    <a class="card card-iframe" data-cat="04-scroll-effects" href="04-scroll-effects.html" target="_blank">
+  </div>
+</section>
+
+<section class="fullscreen-section">
+  <button class="fullscreen-toggle" id="fullscreenToggle">
+    <span>全屏效果 · 46 个</span>
+    <svg id="fullscreenArrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="fullscreen-grid" id="fullscreenGrid">
+    <div class="card-grid">
+    <a class="card card-iframe" href="04-scroll-effects.html" target="_blank">
       <div class="card-visual"><iframe src="04-scroll-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>滚动交互</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="05-background-effects" href="05-background-effects.html" target="_blank">
+    <a class="card card-iframe" href="05-background-effects.html" target="_blank">
       <div class="card-visual"><iframe src="05-background-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>背景特效</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="09-creative-layouts" href="09-creative-layouts.html" target="_blank">
+    <a class="card card-iframe" href="09-creative-layouts.html" target="_blank">
       <div class="card-visual"><iframe src="09-creative-layouts.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>创意布局</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="10-canvas-effects" href="10-canvas-effects.html" target="_blank">
+    <a class="card card-iframe" href="10-canvas-effects.html" target="_blank">
       <div class="card-visual"><iframe src="10-canvas-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Canvas / JS 特效</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="11-cursor-effects" href="11-cursor-effects.html" target="_blank">
+    <a class="card card-iframe" href="11-cursor-effects.html" target="_blank">
       <div class="card-visual"><iframe src="11-cursor-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>光标特效</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="15-morphism-styles" href="15-morphism-styles.html" target="_blank">
+    <a class="card card-iframe" href="15-morphism-styles.html" target="_blank">
       <div class="card-visual"><iframe src="15-morphism-styles.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>设计风格</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="21-liquid-metal" href="21-liquid-metal.html" target="_blank">
+    <a class="card card-iframe" href="21-liquid-metal.html" target="_blank">
       <div class="card-visual"><iframe src="21-liquid-metal.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>液态金属</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="22-aurora-effects" href="22-aurora-effects.html" target="_blank">
+    <a class="card card-iframe" href="22-aurora-effects.html" target="_blank">
       <div class="card-visual"><iframe src="22-aurora-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>极光</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="23-glitch-effects" href="23-glitch-effects.html" target="_blank">
+    <a class="card card-iframe" href="23-glitch-effects.html" target="_blank">
       <div class="card-visual"><iframe src="23-glitch-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>故障</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="24-particle-effects" href="24-particle-effects.html" target="_blank">
+    <a class="card card-iframe" href="24-particle-effects.html" target="_blank">
       <div class="card-visual"><iframe src="24-particle-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>粒子</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="25-parallax-effects" href="25-parallax-effects.html" target="_blank">
+    <a class="card card-iframe" href="25-parallax-effects.html" target="_blank">
       <div class="card-visual"><iframe src="25-parallax-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>视差与滚动</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="26-noise-grain" href="26-noise-grain.html" target="_blank">
+    <a class="card card-iframe" href="26-noise-grain.html" target="_blank">
       <div class="card-visual"><iframe src="26-noise-grain.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>噪声与纹理</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="27-light-effects" href="27-light-effects.html" target="_blank">
+    <a class="card card-iframe" href="27-light-effects.html" target="_blank">
       <div class="card-visual"><iframe src="27-light-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>光效</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="28-morphing-effects" href="28-morphing-effects.html" target="_blank">
+    <a class="card card-iframe" href="28-morphing-effects.html" target="_blank">
       <div class="card-visual"><iframe src="28-morphing-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>形变 Morphing</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="29-audio-visualizer" href="29-audio-visualizer.html" target="_blank">
+    <a class="card card-iframe" href="29-audio-visualizer.html" target="_blank">
       <div class="card-visual"><iframe src="29-audio-visualizer.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>音频可视化</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="30-text-effects" href="30-text-effects.html" target="_blank">
+    <a class="card card-iframe" href="30-text-effects.html" target="_blank">
       <div class="card-visual"><iframe src="30-text-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>创意文字动效</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="31-cursor-interactions" href="31-cursor-interactions.html" target="_blank">
+    <a class="card card-iframe" href="31-cursor-interactions.html" target="_blank">
       <div class="card-visual"><iframe src="31-cursor-interactions.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>鼠标交互</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="32-3d-cards" href="32-3d-cards.html" target="_blank">
+    <a class="card card-iframe" href="32-3d-cards.html" target="_blank">
       <div class="card-visual"><iframe src="32-3d-cards.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>3D 卡片与翻转</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="33-gradient-animations" href="33-gradient-animations.html" target="_blank">
+    <a class="card card-iframe" href="33-gradient-animations.html" target="_blank">
       <div class="card-visual"><iframe src="33-gradient-animations.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>渐变与色彩动画</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="34-spring-physics" href="34-spring-physics.html" target="_blank">
+    <a class="card card-iframe" href="34-spring-physics.html" target="_blank">
       <div class="card-visual"><iframe src="34-spring-physics.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>弹性物理动画</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="35-scroll-storytelling" href="35-scroll-storytelling.html" target="_blank">
+    <a class="card card-iframe" href="35-scroll-storytelling.html" target="_blank">
       <div class="card-visual"><iframe src="35-scroll-storytelling.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>滚动驱动叙事</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="36-liquid-backgrounds" href="36-liquid-backgrounds.html" target="_blank">
+    <a class="card card-iframe" href="36-liquid-backgrounds.html" target="_blank">
       <div class="card-visual"><iframe src="36-liquid-backgrounds.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>液态流体背景</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="37-page-transitions" href="37-page-transitions.html" target="_blank">
+    <a class="card card-iframe" href="37-page-transitions.html" target="_blank">
       <div class="card-visual"><iframe src="37-page-transitions.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>页面过渡动画</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="38-data-visualization" href="38-data-visualization.html" target="_blank">
+    <a class="card card-iframe" href="38-data-visualization.html" target="_blank">
       <div class="card-visual"><iframe src="38-data-visualization.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>数据可视化动画</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="39-hover-effects" href="39-hover-effects.html" target="_blank">
+    <a class="card card-iframe" href="39-hover-effects.html" target="_blank">
       <div class="card-visual"><iframe src="39-hover-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>高级悬停</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="40-generative-art" href="40-generative-art.html" target="_blank">
+    <a class="card card-iframe" href="40-generative-art.html" target="_blank">
       <div class="card-visual"><iframe src="40-generative-art.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>生成艺术</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="41-typography-animations" href="41-typography-animations.html" target="_blank">
+    <a class="card card-iframe" href="41-typography-animations.html" target="_blank">
       <div class="card-visual"><iframe src="41-typography-animations.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>排版动画</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="42-dark-mode-effects" href="42-dark-mode-effects.html" target="_blank">
+    <a class="card card-iframe" href="42-dark-mode-effects.html" target="_blank">
       <div class="card-visual"><iframe src="42-dark-mode-effects.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>暗黑模式特效</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="43-glassmorphism-cards" href="43-glassmorphism-cards.html" target="_blank">
+    <a class="card card-iframe" href="43-glassmorphism-cards.html" target="_blank">
       <div class="card-visual"><iframe src="43-glassmorphism-cards.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>毛玻璃卡片</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="44-infinite-scrollers" href="44-infinite-scrollers.html" target="_blank">
+    <a class="card card-iframe" href="44-infinite-scrollers.html" target="_blank">
       <div class="card-visual"><iframe src="44-infinite-scrollers.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>无限滚动动画</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="45-clip-path-animations" href="45-clip-path-animations.html" target="_blank">
+    <a class="card card-iframe" href="45-clip-path-animations.html" target="_blank">
       <div class="card-visual"><iframe src="45-clip-path-animations.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>裁剪路径动画</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="46-collect" href="46-collect.html" target="_blank">
+    <a class="card card-iframe" href="46-collect.html" target="_blank">
       <div class="card-visual"><iframe src="46-collect.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Collect 灵感收</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="47-collect-text" href="47-collect-text.html" target="_blank">
+    <a class="card card-iframe" href="47-collect-text.html" target="_blank">
       <div class="card-visual"><iframe src="47-collect-text.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Collect 文本变化</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="48-colorful-quote-cards" href="48-colorful-quote-cards.html" target="_blank">
+    <a class="card card-iframe" href="48-colorful-quote-cards.html" target="_blank">
       <div class="card-visual"><iframe src="48-colorful-quote-cards.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Colorful Quote Cards</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="49-keyboard-shortcuts" href="49-keyboard-shortcuts.html" target="_blank">
+    <a class="card card-iframe" href="49-keyboard-shortcuts.html" target="_blank">
       <div class="card-visual"><iframe src="49-keyboard-shortcuts.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Keyboard Shortcut Visualizer</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="50-particle-ray-burst" href="50-particle-ray-burst.html" target="_blank">
+    <a class="card card-iframe" href="50-particle-ray-burst.html" target="_blank">
       <div class="card-visual"><iframe src="50-particle-ray-burst.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Particle Ray Burst 粒子光线放射</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="51-terminal-text-scramble" href="51-terminal-text-scramble.html" target="_blank">
+    <a class="card card-iframe" href="51-terminal-text-scramble.html" target="_blank">
       <div class="card-visual"><iframe src="51-terminal-text-scramble.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Terminal Text Scramble Hover</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="52-glassmorphism-floating-ui-cards" href="52-glassmorphism-floating-ui-cards.html" target="_blank">
+    <a class="card card-iframe" href="52-glassmorphism-floating-ui-cards.html" target="_blank">
       <div class="card-visual"><iframe src="52-glassmorphism-floating-ui-cards.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>毛玻璃浮动通知卡片 Glassmorphism Floating UI Cards</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="53-diamond-icon-grid-spotlight" href="53-diamond-icon-grid-spotlight.html" target="_blank">
+    <a class="card card-iframe" href="53-diamond-icon-grid-spotlight.html" target="_blank">
       <div class="card-visual"><iframe src="53-diamond-icon-grid-spotlight.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Diamond Icon Grid Spotlight · 菱形图标网格光晕追踪</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="54-holographic-rainbow-card" href="54-holographic-rainbow-card.html" target="_blank">
+    <a class="card card-iframe" href="54-holographic-rainbow-card.html" target="_blank">
       <div class="card-visual"><iframe src="54-holographic-rainbow-card.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>全息彩虹卡片 Holographic Rainbow Card</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="55-contour-terrain-map" href="55-contour-terrain-map.html" target="_blank">
+    <a class="card card-iframe" href="55-contour-terrain-map.html" target="_blank">
       <div class="card-visual"><iframe src="55-contour-terrain-map.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>等高线地形波纹背景 Contour Terrain Map</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="56-clip-path-fullscreen-menu" href="56-clip-path-fullscreen-menu.html" target="_blank">
+    <a class="card card-iframe" href="56-clip-path-fullscreen-menu.html" target="_blank">
       <div class="card-visual"><iframe src="56-clip-path-fullscreen-menu.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Clip-Path Fullscreen Menu</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="57-app-icon-galaxy" href="57-app-icon-galaxy.html" target="_blank">
+    <a class="card card-iframe" href="57-app-icon-galaxy.html" target="_blank">
       <div class="card-visual"><iframe src="57-app-icon-galaxy.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>App Icon Galaxy Grid</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card card-iframe" data-cat="58-scroll-3d-carousel" href="58-scroll-3d-carousel.html" target="_blank">
+    <a class="card card-iframe" href="58-scroll-3d-carousel.html" target="_blank">
       <div class="card-visual"><iframe src="58-scroll-3d-carousel.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card" data-cat="59-magnetic-button" href="59-magnetic-button.html" target="_blank">
-      <div class="card-visual"><div class="stage" id="mag-preview"><button class="prev-mag-btn prev-mag-solid">Get Started</button></div></div>
-      <div class="card-content"><h3>磁力吸附按钮</h3></div>
-      <div class="card-footer"><span class="tag">mousemove + spring lerp</span></div>
+    <a class="card card-iframe" href="59-magnetic-button.html" target="_blank">
+      <div class="card-visual"><iframe src="59-magnetic-button.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
+      <div class="card-content"><h3>磁力吸附按钮 Magnetic Button</h3></div>
+      <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
-    <a class="card" data-cat="60-conic-contour" href="60-conic-contour.html" target="_blank">
-      <div class="card-visual"><div class="prev-conic-wrap"><div class="prev-conic-glow"></div><svg class="prev-conic-svg" viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" id="prev-conic-svg"></svg></div></div>
-      <div class="card-content"><h3>彩色等高线光晕</h3></div>
-      <div class="card-footer"><span class="tag">conic-gradient + SVG contours</span></div>
+    <a class="card card-iframe" href="60-conic-contour.html" target="_blank">
+      <div class="card-visual"><iframe src="60-conic-contour.html" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
+      <div class="card-content"><h3>Conic Gradient Contour Lines</h3></div>
+      <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
     </a>
+    </div>
   </div>
 </section>
 
@@ -3863,39 +3818,34 @@ document.querySelectorAll('.filter-item').forEach(btn=>{
 // Default: show first category
 filterCards('01-css-animations');
 
-// Mobile toggle
+// Fullscreen section toggle
 (function(){
-const toggle=document.getElementById('mobileToggle');
-const sidebar=document.getElementById('sidebar');
-if(!toggle||!sidebar)return;
-toggle.addEventListener('click',()=>sidebar.classList.toggle('open'));
-document.addEventListener('click',(e)=>{
-if(window.innerWidth<=768&&sidebar.classList.contains('open')&&!sidebar.contains(e.target)&&e.target!==toggle&&!toggle.contains(e.target))sidebar.classList.remove('open');
-});
+  const toggle=document.getElementById('fullscreenToggle');
+  const grid=document.getElementById('fullscreenGrid');
+  const arrow=document.getElementById('fullscreenArrow');
+  if(!toggle||!grid)return;
+  toggle.addEventListener('click',()=>{
+    const open=grid.classList.toggle('open');
+    if(arrow)arrow.style.transform=open?'rotate(180deg)':'';
+    if(open&&!grid.dataset.init){
+      grid.dataset.init='1';
+      grid.querySelectorAll('.card').forEach((c,i)=>{
+        c.classList.add('show');
+        setTimeout(()=>c.classList.add('visible'),Math.min(i*30,1000));
+      });
+    }
+  });
 })();
 
-// ===== 60-conic-contour SVG 等高线预览 =====
+// Mobile toggle
 (function(){
-  const svg = document.getElementById('prev-conic-svg');
-  if (!svg) return;
-  const ns = 'http://www.w3.org/2000/svg';
-  const W = 200, H = 150, lines = 14;
-  for (let i = 0; i < lines; i++) {
-    const y = (i + 0.5) * (H / lines);
-    const amp = 6 + Math.sin(i * 0.9) * 4;
-    const freq = 0.04 + i * 0.002;
-    const pts = [];
-    for (let x = 0; x <= W; x += 4) {
-      const dy = amp * Math.sin(x * freq + i * 0.7);
-      pts.push(`${x},${(y + dy).toFixed(1)}`);
-    }
-    const pl = document.createElementNS(ns, 'polyline');
-    pl.setAttribute('points', pts.join(' '));
-    pl.setAttribute('fill', 'none');
-    pl.setAttribute('stroke', 'rgba(0,0,0,0.18)');
-    pl.setAttribute('stroke-width', '0.8');
-    svg.appendChild(pl);
-  }
+  const toggle=document.getElementById('mobileToggle');
+  const sidebar=document.getElementById('sidebar');
+  if(!toggle||!sidebar)return;
+  toggle.addEventListener('click',()=>sidebar.classList.toggle('open'));
+  document.addEventListener('click',(e)=>{
+    if(window.innerWidth<=768&&sidebar.classList.contains('open')&&!sidebar.contains(e.target)&&e.target!==toggle&&!toggle.contains(e.target))sidebar.classList.remove('open');
+  });
 })();
 </script>
 </body>

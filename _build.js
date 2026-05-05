@@ -248,19 +248,20 @@ if (htmlErrors === 0) console.log(`\n✓ All HTML structures validated (no misma
 else console.log(`\n⚠️ ${htmlErrors} HTML structure issues found`);
 
 // ============================================================
-// 生成侧边栏
+// 生成侧边栏（只含多卡片分类）
 // ============================================================
 const dotColors = ['#2997ff','#bf5af2','#30d158','#ff453a','#ff6482','#64d2ff','#5e5ce6','#fb923c','#ffd60a','#ac8e68'];
 
-let sidebarItems = '';
-let allCats = [...parsedCategories.map(c => ({...c, type: 'parsed'})), ...iframeCategories.map(c => ({...c, type: 'iframe'}))];
-allCats.sort((a, b) => a.file.localeCompare(b.file));
+// 侧边栏只用 parsedCategories，按文件名排序
+const sortedParsed = [...parsedCategories].sort((a, b) => a.file.localeCompare(b.file));
+// iframe 分类按文件名排序，用于底部展示区
+const sortedIframe = [...iframeCategories].sort((a, b) => a.file.localeCompare(b.file));
 
-allCats.forEach((cat, i) => {
+let sidebarItems = '';
+sortedParsed.forEach((cat, i) => {
   const active = i === 0 ? ' active' : '';
   const dot = dotColors[i % dotColors.length];
-  const count = cat.type === 'parsed' ? cat.effects.length : 1;
-  sidebarItems += `    <button class="filter-item${active}" data-cat="${cat.id}"><div class="dot" style="background:${dot}"></div>${cat.title}<span class="filter-count">${count}</span></button>\n`;
+  sidebarItems += `    <button class="filter-item${active}" data-cat="${cat.id}"><div class="dot" style="background:${dot}"></div>${cat.title}<span class="filter-count">${cat.effects.length}</span></button>\n`;
 });
 
 // ============================================================
@@ -280,8 +281,10 @@ for (const cat of parsedCategories) {
   }
 }
 
-for (const cat of iframeCategories) {
-  allCards += `    <a class="card card-iframe" data-cat="${cat.id}" href="${cat.file}" target="_blank">
+// iframe 全屏效果卡片（用于底部展示区，不混入主卡片网格）
+let iframeCards = '';
+for (const cat of sortedIframe) {
+  iframeCards += `    <a class="card card-iframe" href="${cat.file}" target="_blank">
       <div class="card-visual"><iframe src="${cat.file}" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
       <div class="card-content"><h3>${cat.title}</h3></div>
       <div class="card-footer"><span class="tag">全屏展示 · 点击查看</span></div>
@@ -299,7 +302,7 @@ for (const cat of parsedCategories) {
 // ============================================================
 // 输出最终 HTML
 // ============================================================
-const firstCatId = allCats[0]?.id || '';
+const firstCatId = sortedParsed[0]?.id || '';
 
 const finalHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -335,7 +338,7 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
 .hero h1{font-size:2rem;font-weight:800;letter-spacing:-.03em}
 .hero h1 em{font-style:normal;background:linear-gradient(135deg,#a78bfa 0%,#f472b6 50%,#fb923c 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hero-sub{color:rgba(255,255,255,.35);font-size:.82rem;margin-top:6px}
-.grid-section{padding:0 24px 60px}
+.grid-section{padding:0 24px 32px}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1600px;margin:0 auto}
 
 /* === Cards === */
@@ -361,6 +364,16 @@ body{background:#0a0a0f;color:#f5f5f7;font-family:'SF Pro Display','SF Pro Text'
 /* === Mobile === */
 .mobile-toggle{position:fixed;top:14px;left:14px;z-index:1100;width:36px;height:36px;border-radius:10px;background:rgba(30,30,34,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);align-items:center;justify-content:center;cursor:pointer;display:none}
 .mobile-toggle svg{width:18px;height:18px;stroke:#f5f5f7;fill:none;stroke-width:2}
+/* === Fullscreen Section === */
+.fullscreen-section{padding:0 24px 0;max-width:1648px;margin:0 auto}
+.fullscreen-toggle{display:flex;align-items:center;gap:8px;width:100%;padding:14px 20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;color:rgba(255,255,255,.45);font-size:.78rem;font-family:inherit;cursor:pointer;transition:all .2s;text-align:left;margin-bottom:0}
+.fullscreen-toggle:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.7)}
+.fullscreen-toggle span{flex:1}
+.fullscreen-toggle svg{transition:transform .3s;flex-shrink:0}
+.fullscreen-grid{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1)}
+.fullscreen-grid.open{max-height:9999px}
+.fullscreen-grid .card-grid{padding-top:16px;padding-bottom:24px}
+
 .footer{text-align:center;padding:30px 20px 24px;border-top:1px solid rgba(255,255,255,.04)}
 .footer-note{font-size:.7rem;color:rgba(255,255,255,.18)}
 
@@ -408,6 +421,17 @@ ${sidebarItems}  </nav>
 <section class="grid-section">
   <div class="card-grid">
 ${allCards}  </div>
+</section>
+
+<section class="fullscreen-section">
+  <button class="fullscreen-toggle" id="fullscreenToggle">
+    <span>全屏效果 · ${iframeCategories.length} 个</span>
+    <svg id="fullscreenArrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="fullscreen-grid" id="fullscreenGrid">
+    <div class="card-grid">
+${iframeCards}    </div>
+  </div>
 </section>
 
 <footer class="footer">
@@ -472,6 +496,25 @@ document.querySelectorAll('.filter-item').forEach(btn=>{
 
 // Default: show first category
 filterCards('${firstCatId}');
+
+// Fullscreen section toggle
+(function(){
+  const toggle=document.getElementById('fullscreenToggle');
+  const grid=document.getElementById('fullscreenGrid');
+  const arrow=document.getElementById('fullscreenArrow');
+  if(!toggle||!grid)return;
+  toggle.addEventListener('click',()=>{
+    const open=grid.classList.toggle('open');
+    if(arrow)arrow.style.transform=open?'rotate(180deg)':'';
+    if(open&&!grid.dataset.init){
+      grid.dataset.init='1';
+      grid.querySelectorAll('.card').forEach((c,i)=>{
+        c.classList.add('show');
+        setTimeout(()=>c.classList.add('visible'),Math.min(i*30,1000));
+      });
+    }
+  });
+})();
 
 // Mobile toggle
 (function(){

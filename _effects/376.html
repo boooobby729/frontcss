@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>柏林噪声流场 - Bの宝库</title>
+<title>Voronoi 细胞 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -51,7 +51,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 @media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
 
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
-.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#050510}
+.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#000}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
 
   .demo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -73,98 +73,280 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item active" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
 <a href="../_cat/26-noise-grain.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
-<div class="stage">
-    <canvas id="flow-canvas"></canvas>
+<div class="stage" id="voronoi-demo">
+    <canvas id="voronoi-canvas"></canvas>
   </div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">柏林噪声流场</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">Voronoi 细胞</div>
 </div>
 <script>
 (function(){
-  // Minimal 2D Simplex noise
-  const F2 = 0.5*(Math.sqrt(3)-1), G2 = (3-Math.sqrt(3))/6;
-  const perm = new Uint8Array(512);
-  const grad = [[1,1],[-1,1],[1,-1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]];
-  for(let i=0;i<256;i++) perm[i]=i;
-  for(let i=255;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [perm[i],perm[j]]=[perm[j],perm[i]]; }
-  for(let i=0;i<256;i++) perm[i+256]=perm[i];
-
-  function noise2(x,y){
-    const s=(x+y)*F2; const i=Math.floor(x+s), j=Math.floor(y+s);
-    const t=(i+j)*G2; const x0=x-(i-t), y0=y-(j-t);
-    const i1=x0>y0?1:0, j1=x0>y0?0:1;
-    const x1=x0-i1+G2, y1=y0-j1+G2;
-    const x2=x0-1+2*G2, y2=y0-1+2*G2;
-    const ii=i&255, jj=j&255;
-    const gi0=perm[ii+perm[jj]]%8, gi1=perm[ii+i1+perm[jj+j1]]%8, gi2=perm[ii+1+perm[jj+1]]%8;
-    let n0=0,n1=0,n2=0;
-    let t0=0.5-x0*x0-y0*y0; if(t0>0){t0*=t0;n0=t0*t0*(grad[gi0][0]*x0+grad[gi0][1]*y0);}
-    let t1=0.5-x1*x1-y1*y1; if(t1>0){t1*=t1;n1=t1*t1*(grad[gi1][0]*x1+grad[gi1][1]*y1);}
-    let t2=0.5-x2*x2-y2*y2; if(t2>0){t2*=t2;n2=t2*t2*(grad[gi2][0]*x2+grad[gi2][1]*y2);}
-    return 70*(n0+n1+n2);
-  }
-
-  const demo = document.getElementById('flow-demo');
-  const canvas = document.getElementById('flow-canvas');
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
+<script>
+(function(){
+  const demo = document.getElementById('voronoi-demo');
+  const canvas = document.getElementById('voronoi-canvas');
   const ctx = canvas.getContext('2d');
   let w, h;
-  function resize(){ w = canvas.width = demo.clientWidth; h = canvas.height = demo.clientHeight; initParticles(); }
+  let SCALE = (window.__ctrl_SCALE !== undefined ? window.__ctrl_SCALE : 4); // lower res for performance
+
+  function resize(){
+    /* __jsVar_sync__ */ try { NUM_SEEDS = (window.__ctrl_NUM_SEEDS !== undefined ? window.__ctrl_NUM_SEEDS : NUM_SEEDS); SCALE = (window.__ctrl_SCALE !== undefined ? window.__ctrl_SCALE : SCALE); } catch(e) {}
+    w = Math.ceil(demo.clientWidth / SCALE);
+    h = Math.ceil(demo.clientHeight / SCALE);
+    canvas.width = w; canvas.height = h;
+    canvas.style.width = demo.clientWidth+'px';
+    canvas.style.height = demo.clientHeight+'px';
+  }
   resize();
   window.addEventListener('resize', resize);
 
-  const NUM = 2000;
-  let particles = [];
-  let zOff = 0;
-
-  function initParticles(){
-    particles = [];
-    for(let i=0;i<NUM;i++){
-      particles.push({ x:Math.random()*w, y:Math.random()*h, prevX:0, prevY:0 });
-    }
+  let NUM_SEEDS = (window.__ctrl_NUM_SEEDS !== undefined ? window.__ctrl_NUM_SEEDS : 30);
+  const seeds = [];
+  for(let i=0;i<NUM_SEEDS;i++){
+    seeds.push({
+      x: Math.random(), y: Math.random(),
+      vx: (Math.random()-0.5)*0.002,
+      vy: (Math.random()-0.5)*0.002,
+      hue: Math.random()*360
+    });
   }
-  initParticles();
-
-  const SCALE = 0.003;
 
   function render(){
-    // Fade trail
-    ctx.fillStyle = 'rgba(5,5,16,0.03)';
-    ctx.fillRect(0,0,w,h);
-
-    zOff += 0.002;
-
-    particles.forEach(p=>{
-      p.prevX = p.x;
-      p.prevY = p.y;
-
-      const angle = noise2(p.x*SCALE, p.y*SCALE + zOff) * Math.PI * 4;
-      p.x += Math.cos(angle) * 1.5;
-      p.y += Math.sin(angle) * 1.5;
-
-      // Wrap
-      if(p.x<0||p.x>w||p.y<0||p.y>h){
-        p.x=Math.random()*w; p.y=Math.random()*h;
-        p.prevX=p.x; p.prevY=p.y;
-      }
-
-      // Color based on angle
-      const hue = (angle/Math.PI/4*360 + 200) % 360;
-      ctx.beginPath();
-      ctx.moveTo(p.prevX, p.prevY);
-      ctx.lineTo(p.x, p.y);
-      ctx.strokeStyle=`hsla(${hue},70%,60%,0.3)`;
-      ctx.lineWidth=0.8;
-      ctx.stroke();
+    /* __jsVar_sync__ */ try { NUM_SEEDS = (window.__ctrl_NUM_SEEDS !== undefined ? window.__ctrl_NUM_SEEDS : NUM_SEEDS); SCALE = (window.__ctrl_SCALE !== undefined ? window.__ctrl_SCALE : SCALE); } catch(e) {}
+    // Move seeds
+    seeds.forEach(s=>{
+      s.x+=s.vx; s.y+=s.vy;
+      if(s.x<0||s.x>1) s.vx*=-1;
+      if(s.y<0||s.y>1) s.vy*=-1;
+      s.x = Math.max(0, Math.min(1, s.x));
+      s.y = Math.max(0, Math.min(1, s.y));
     });
 
+    const imageData = ctx.createImageData(w, h);
+    const data = imageData.data;
+
+    for(let py=0;py<h;py++){
+      for(let px=0;px<w;px++){
+        const nx = px/w, ny = py/h;
+        let minDist = Infinity, minDist2 = Infinity;
+        let closestIdx = 0;
+
+        for(let i=0;i<NUM_SEEDS;i++){
+          const dx = nx-seeds[i].x, dy = ny-seeds[i].y;
+          const dist = dx*dx+dy*dy;
+          if(dist < minDist){
+            minDist2 = minDist;
+            minDist = dist;
+            closestIdx = i;
+          } else if(dist < minDist2){
+            minDist2 = dist;
+          }
+        }
+
+        const d1 = Math.sqrt(minDist);
+        const d2 = Math.sqrt(minDist2);
+        const edge = d2 - d1; // thin at cell borders
+
+        const idx = (py*w+px)*4;
+        const hue = seeds[closestIdx].hue;
+
+        if(edge < 0.015){
+          // Edge glow
+          const edgeAlpha = 1-edge/0.015;
+          data[idx] = 180+edgeAlpha*75;
+          data[idx+1] = 200+edgeAlpha*55;
+          data[idx+2] = 255;
+          data[idx+3] = 255;
+        } else {
+          // Cell interior with distance gradient
+          const brightness = 0.1 + d1*3;
+          const h2 = (hue%360)/60;
+          const sector = Math.floor(h2);
+          const f = h2 - sector;
+          let r=0,g=0,b=0;
+          switch(sector%6){
+            case 0: r=1;g=f;b=0;break;
+            case 1: r=1-f;g=1;b=0;break;
+            case 2: r=0;g=1;b=f;break;
+            case 3: r=0;g=1-f;b=1;break;
+            case 4: r=f;g=0;b=1;break;
+            case 5: r=1;g=0;b=1-f;break;
+          }
+          data[idx] = r*brightness*255;
+          data[idx+1] = g*brightness*255;
+          data[idx+2] = b*brightness*255;
+          data[idx+3] = 255;
+        }
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
     requestAnimationFrame(render);
   }
   render();
 })();
 </script>
 <script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"js-NUM_SEEDS","label":"数量","min":3,"max":90,"step":1,"value":30,"unit":"","action":"jsVar","varName":"NUM_SEEDS"},{"type":"range","id":"js-SCALE","label":"缩放","min":0.4,"max":16,"step":0.01,"value":4,"unit":"","action":"jsVar","varName":"SCALE"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

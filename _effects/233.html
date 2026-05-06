@@ -55,6 +55,140 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
 
 
+  /* Progress Bar */
+  .scroll-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #f093fb, #f5576c); width: 0%; z-index: 999; transition: width .1s; }
+
+  /* Hero */
+  .hero { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .hero h1 { font-size: 3.5rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { color: #666; margin-top: 16px; font-size: 1.1rem; }
+  .scroll-hint { position: absolute; bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #555; font-size: .85rem; }
+  .scroll-arrow { width: 24px; height: 24px; border-right: 2px solid #555; border-bottom: 2px solid #555; transform: rotate(45deg); animation: scrollArrow 2s ease infinite; }
+  @keyframes scrollArrow { 0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: .3; } 50% { transform: rotate(45deg) translate(5px, 5px); opacity: 1; } }
+
+  /* Section Common */
+  .section { min-height: 100vh; padding: 100px 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+  .section-title { font-size: 2rem; font-weight: 700; margin-bottom: 40px; text-align: center; }
+
+  /* 1. Fade In Up on Scroll */
+  .fade-in-up { opacity: 0; transform: translateY(40px); transition: opacity .8s ease, transform .8s ease; }
+  .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+  .fade-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 900px; }
+  .fade-item { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; text-align: center; }
+  .fade-item .icon { font-size: 2.5rem; margin-bottom: 16px; }
+  .fade-item h4 { color: #ccc; margin-bottom: 8px; }
+  .fade-item p { color: #666; font-size: .85rem; line-height: 1.5; }
+
+  /* 2. Parallax */
+  .parallax-section { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .parallax-bg { position: absolute; inset: -100px; background: linear-gradient(135deg, #0a0a2e 0%, #1a0a3e 50%, #0a1a2e 100%); z-index: 0; }
+  .parallax-content { position: relative; z-index: 1; text-align: center; }
+  .parallax-content h2 { font-size: 3rem; font-weight: 800; color: #fff; }
+  .parallax-content p { color: #888; margin-top: 16px; font-size: 1.1rem; }
+  .float-shape { position: absolute; border-radius: 50%; z-index: 0; opacity: .3; }
+  .float-shape:nth-child(1) { width: 200px; height: 200px; background: #667eea; top: 10%; left: 10%; }
+  .float-shape:nth-child(2) { width: 150px; height: 150px; background: #f093fb; top: 60%; right: 15%; }
+  .float-shape:nth-child(3) { width: 100px; height: 100px; background: #43e97b; bottom: 20%; left: 30%; }
+
+  /* 3. Horizontal Scroll */
+  .h-scroll-wrap { height: 100vh; position: relative; overflow: hidden; }
+  .h-scroll-track { display: flex; gap: 32px; height: 100%; align-items: center; padding: 0 60px; transition: transform .1s; }
+  .h-card { min-width: 300px; height: 400px; background: linear-gradient(145deg, #13131a, #1a1a2e); border: 1px solid #1e1e2e; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; flex-shrink: 0; }
+  .h-card .num { font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .h-card p { color: #666; padding: 0 32px; text-align: center; font-size: .9rem; }
+
+  /* 4. Reveal on Scroll */
+  .reveal-section { perspective: 1000px; }
+  .reveal-card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 20px; padding: 60px; max-width: 700px; text-align: center; opacity: 0; transform: rotateX(20deg) translateY(60px); transition: all 1s ease; }
+  .reveal-card.visible { opacity: 1; transform: rotateX(0) translateY(0); }
+  .reveal-card h2 { font-size: 2rem; color: #fff; margin-bottom: 16px; }
+  .reveal-card p { color: #888; line-height: 1.8; }
+
+  /* 5. Counter */
+  .counter-row { display: flex; gap: 60px; flex-wrap: wrap; justify-content: center; }
+  .counter-item { text-align: center; }
+  .counter-num { font-size: 3.5rem; font-weight: 900; background: linear-gradient(135deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .counter-label { color: #666; margin-top: 8px; font-size: .9rem; }
+
+  /* 6. Sticky Scroll */
+  .sticky-wrap { display: flex; min-height: 300vh; position: relative; }
+  .sticky-left { position: sticky; top: 0; height: 100vh; width: 50%; display: flex; align-items: center; justify-content: center; }
+  .sticky-left h2 { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #43e97b, #38f9d7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sticky-right { width: 50%; padding: 20vh 40px; display: flex; flex-direction: column; gap: 30vh; }
+  .sticky-right .s-card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; opacity: 0; transform: translateX(30px); transition: all .6s ease; }
+  .sticky-right .s-card.visible { opacity: 1; transform: translateX(0); }
+  .sticky-right .s-card h3 { color: #fff; margin-bottom: 12px; }
+  .sticky-right .s-card p { color: #888; line-height: 1.6; font-size: .9rem; }
+
+  /* 7. Horizontal Scroll Progress */
+  .h-progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #f093fb); width: 0; z-index: 100; transition: width .1s; }
+
+  /* 8. Zoom In Scroll */
+  .zoom-in-demo { width: 120px; height: 80px; background: linear-gradient(135deg, #764ba2, #667eea); border-radius: 12px; transition: transform .6s, opacity .6s; opacity: .3; transform: scale(.8); }
+  .zoom-in-demo.vis { opacity: 1; transform: scale(1); }
+
+  /* 9. Rotate In */
+  .rotate-in-demo { width: 80px; height: 80px; background: linear-gradient(135deg, #f5576c, #ffa500); border-radius: 16px; transition: transform .8s cubic-bezier(.34,1.56,.64,1), opacity .8s; opacity: .3; transform: rotate(-90deg) scale(.5); }
+  .rotate-in-demo.vis { opacity: 1; transform: rotate(0) scale(1); }
+
+  /* 10. Slide From Left */
+  .slide-left-demo { width: 160px; height: 50px; background: linear-gradient(90deg, #43e97b, #38f9d7); border-radius: 8px; transition: transform .6s, opacity .6s; opacity: 0; transform: translateX(-80px); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 600; font-size: .85rem; }
+  .slide-left-demo.vis { opacity: 1; transform: translateX(0); }
+
+  /* 11. Stagger Cards */
+  .stagger-cards { display: flex; gap: 8px; }
+  .stagger-card { width: 50px; height: 70px; background: #1a1a2e; border-radius: 8px; border: 1px solid #ffffff10; transition: transform .5s, opacity .5s; opacity: 0; transform: translateY(30px); }
+  .stagger-card.vis { opacity: 1; transform: translateY(0); }
+
+  /* 12. Blur Fade In */
+  .blur-fade { font-size: 1.4rem; font-weight: 700; color: #667eea; transition: filter .8s, opacity .8s; filter: blur(10px); opacity: 0; }
+  .blur-fade.vis { filter: blur(0); opacity: 1; }
+
+  /* 13. Scale Rotate */
+  .scale-rotate-demo { width: 60px; height: 60px; background: linear-gradient(135deg, #f093fb, #f5576c); transition: transform 1s cubic-bezier(.34,1.56,.64,1), opacity .8s; opacity: 0; transform: scale(0) rotate(-180deg); }
+  .scale-rotate-demo.vis { opacity: 1; transform: scale(1) rotate(0); border-radius: 12px; }
+
+  /* 14. Clip Reveal Scroll */
+  .clip-scroll { font-size: 1.6rem; font-weight: 700; color: #fff; transition: clip-path .8s ease; clip-path: inset(0 100% 0 0); }
+  .clip-scroll.vis { clip-path: inset(0 0 0 0); }
+
+  /* 15. Flip In X */
+  .flip-in-x { width: 120px; height: 80px; background: linear-gradient(135deg, #ffa500, #ff6b6b); border-radius: 12px; transition: transform .8s, opacity .6s; opacity: 0; transform: perspective(400px) rotateX(90deg); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; }
+  .flip-in-x.vis { opacity: 1; transform: perspective(400px) rotateX(0); }
+
+  /* 16. Typewriter Scroll */
+  .typewriter-box { max-width: 600px; text-align: center; }
+  .tw-line { font-size: 1.4rem; font-weight: 700; color: #fff; overflow: hidden; white-space: nowrap; border-right: 2px solid #667eea; width: 0; transition: none; }
+  .tw-line.vis { animation: twType 2s steps(30,end) forwards, twBlink .6s step-end infinite; }
+  @keyframes twType { to { width: 100%; } }
+  @keyframes twBlink { 50% { border-color: transparent; } }
+
+  /* 17. Scroll Snap Sections */
+  .snap-container { width: 100%; max-width: 700px; height: 300px; overflow-y: auto; scroll-snap-type: y mandatory; border-radius: 16px; border: 1px solid #1e1e2e; }
+  .snap-panel { height: 300px; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 700; }
+
+  /* 18. Morphing Shape Scroll */
+  .morph-shape { width: 120px; height: 120px; background: linear-gradient(135deg, #667eea, #43e97b); transition: border-radius 1s ease, transform 1s ease; border-radius: 50%; }
+  .morph-shape.stage1 { border-radius: 50%; transform: rotate(0); }
+  .morph-shape.stage2 { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; transform: rotate(45deg); }
+  .morph-shape.stage3 { border-radius: 12px; transform: rotate(90deg); }
+
+  /* 19. Scroll-Triggered Drawing */
+  .draw-svg { width: 200px; height: 200px; }
+  .draw-svg path { stroke: #667eea; stroke-width: 2; fill: none; stroke-dasharray: 800; stroke-dashoffset: 800; transition: stroke-dashoffset 2s ease; }
+  .draw-svg.vis path { stroke-dashoffset: 0; }
+
+  /* 20. Scroll Curtain Reveal */
+  .curtain-wrap { position: relative; width: 100%; max-width: 600px; height: 200px; overflow: hidden; border-radius: 16px; }
+  .curtain-content { position: absolute; inset: 0; background: linear-gradient(135deg, #13131a, #1a1a2e); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: #fff; }
+  .curtain-left, .curtain-right { position: absolute; top: 0; width: 50%; height: 100%; background: #0a0a0f; z-index: 2; transition: transform 1s cubic-bezier(.77,0,.18,1); }
+  .curtain-left { left: 0; }
+  .curtain-right { right: 0; }
+  .curtain-wrap.vis .curtain-left { transform: translateX(-100%); }
+  .curtain-wrap.vis .curtain-right { transform: translateX(100%); }
+
+
+
 </style>
 </head>
 <body>
@@ -70,14 +204,182 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item active" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
 <a href="../_cat/04-scroll-effects.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
-<div class="stage"></div>
+<div class="stage"><div style="width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:20px 0;">
+      <div style="display:flex;gap:24px;padding:0 20px;width:max-content;">
+        <div class="h-card"><div class="num">01</div><p>第一张卡片 - 横向滚动是一种打破常规布局的方式</p></div>
+        <div class="h-card"><div class="num">02</div><p>第二张卡片 - 常用于作品展示和案例集</p></div>
+        <div class="h-card"><div class="num">03</div><p>第三张卡片 - 自然的触控板交互体验</p></div>
+        <div class="h-card"><div class="num">04</div><p>第四张卡片 - 配合 scroll-snap 实现吸附效果</p></div>
+        <div class="h-card"><div class="num">05</div><p>第五张卡片 - 适合画廊、Portfolio 场景</p></div>
+      </div>
+    </div></div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">横向滚动卡片</div>
-<div class="ctrl-empty">沉浸式体验</div>
 </div>
+<script>
+(function(){
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
 
 <script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-duration","label":"动画时长","min":0.4,"max":10,"step":0.1,"value":2,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"color","id":"css-color-1","label":"副色","value":"#667eea","action":"cssColor","index":1},{"type":"color","id":"css-color-2","label":"副色","value":"#666666","action":"cssColor","index":2},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":16,"unit":"px","action":"cssBorderRadius"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

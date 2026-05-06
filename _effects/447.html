@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>光标追踪发光边框 - Bの宝库</title>
+<title>RGB 色彩分离悬停 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -57,6 +57,15 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
   .nav a:hover{color:#fff;background:#ffffff10}
 
 
+      .split-text{font-size:4rem;font-weight:900;color:#fff;cursor:pointer;position:relative;transition:all .3s}
+      .split-text::before,.split-text::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%}
+      .split-text::before{color:#ff0000;clip-path:inset(0 0 50% 0);transform:translate(0);transition:transform .2s}
+      .split-text::after{color:#00ffff;clip-path:inset(50% 0 0 0);transform:translate(0);transition:transform .2s}
+      .split-text:hover::before{transform:translate(-4px,-2px)}
+      .split-text:hover::after{transform:translate(4px,2px)}
+      .split-text:hover{text-shadow:-2px 0 #ff0000,2px 0 #00ffff;animation:glitch-shake .3s linear infinite}
+      @keyframes glitch-shake{0%,100%{transform:translate(0)}25%{transform:translate(-2px,1px)}50%{transform:translate(1px,-1px)}75%{transform:translate(-1px,2px)}}
+    
 </style>
 </head>
 <body>
@@ -73,42 +82,185 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <a href="../_cat/39-hover-effects.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
 <div class="stage">
-    <div class="glow-card" style="width:300px;height:200px;position:relative;border-radius:16px;background:#111;overflow:hidden;cursor:pointer">
-      <div class="glow-card-border" style="position:absolute;inset:0;border-radius:16px;padding:1px;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:xor;-webkit-mask-composite:xor"></div>
-      <div style="position:absolute;inset:1px;border-radius:15px;background:#0f0f14;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
-        <span style="font-size:2rem">✨</span>
-        <span style="font-size:.9rem;color:#aaa">悬停查看发光效果</span>
-      </div>
-    </div>
-    <div class="glow-card" style="width:300px;height:200px;position:relative;border-radius:16px;background:#111;overflow:hidden;cursor:pointer">
-      <div class="glow-card-border" style="position:absolute;inset:0;border-radius:16px;padding:1px;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:xor;-webkit-mask-composite:xor"></div>
-      <div style="position:absolute;inset:1px;border-radius:15px;background:#0f0f14;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
-        <span style="font-size:2rem">🎯</span>
-        <span style="font-size:.9rem;color:#aaa">另一张发光卡片</span>
-      </div>
-    </div>
+    <style>
+      .split-text{font-size:4rem;font-weight:900;color:#fff;cursor:pointer;position:relative;transition:all .3s}
+      .split-text::before,.split-text::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%}
+      .split-text::before{color:#ff0000;clip-path:inset(0 0 50% 0);transform:translate(0);transition:transform .2s}
+      .split-text::after{color:#00ffff;clip-path:inset(50% 0 0 0);transform:translate(0);transition:transform .2s}
+      .split-text:hover::before{transform:translate(-4px,-2px)}
+      .split-text:hover::after{transform:translate(4px,2px)}
+      .split-text:hover{text-shadow:-2px 0 #ff0000,2px 0 #00ffff;animation:glitch-shake .3s linear infinite}
+      @keyframes glitch-shake{0%,100%{transform:translate(0)}25%{transform:translate(-2px,1px)}50%{transform:translate(1px,-1px)}75%{transform:translate(-1px,2px)}}
+    </style>
+    <span class="split-text" data-text="GLITCH">GLITCH</span>
   </div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">光标追踪发光边框</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">RGB 色彩分离悬停</div>
 </div>
 <script>
 (function(){
-  document.querySelectorAll('.glow-card').forEach(card=>{
-    const border=card.querySelector('.glow-card-border');
-    card.addEventListener('mousemove',e=>{
-      const r=card.getBoundingClientRect();
-      const x=e.clientX-r.left, y=e.clientY-r.top;
-      border.style.background=`radial-gradient(300px circle at ${x}px ${y}px, rgba(99,102,241,.6), rgba(168,85,247,.3), transparent 70%)`;
-    });
-    card.addEventListener('mouseleave',()=>{
-      border.style.background='transparent';
-    });
-  });
-})();
-</script>
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
+
 <script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-duration","label":"动画时长","min":0.6,"max":15,"step":0.1,"value":3,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#ff0000","action":"cssColor","index":0},{"type":"color","id":"css-color-1","label":"副色","value":"#00ffff","action":"cssColor","index":1},{"type":"color","id":"css-color-2","label":"副色","value":"#ff0000","action":"cssColor","index":2}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

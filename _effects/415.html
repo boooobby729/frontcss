@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>色彩循环动画 - Bの宝库</title>
+<title>弹簧阻尼球 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -51,37 +51,11 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 @media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
 
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
-.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#000;flex-direction:column;gap:40px}
+.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#0d0d1a,#060608);flex-direction:column;gap:30px}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
 
   .nav a:hover{color:#fff;background:#ffffff10}
 
-
-.cycle-text{
-  font-size:clamp(3rem,8vw,6rem);font-weight:900;letter-spacing:-.03em;
-  background:linear-gradient(90deg,#f43f5e,#fbbf24,#10b981,#3b82f6,#a78bfa,#f43f5e);
-  background-size:200% 100%;
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:cycleGrad 3s linear infinite;
-}
-@keyframes cycleGrad{to{background-position:-200% 0}}
-.cycle-bars{display:flex;gap:6px;align-items:flex-end}
-.cycle-bar{
-  width:12px;height:50px;border-radius:6px;
-  background:linear-gradient(180deg,#6366f1,#38bdf8);
-  animation:cycleBar 1.5s ease-in-out infinite,cycleHue 4s linear infinite;
-  animation-delay:var(--d),var(--d);
-}
-@keyframes cycleBar{0%,100%{height:20px;opacity:.4}50%{height:60px;opacity:1}}
-@keyframes cycleHue{to{filter:hue-rotate(360deg)}}
-.cycle-orbs{display:flex;gap:20px}
-.cycle-orb{
-  width:24px;height:24px;border-radius:50%;
-  background:#6366f1;
-  animation:cycleOrbPulse 2s ease-in-out infinite,cycleHue 3s linear infinite;
-  animation-delay:var(--d),var(--d);
-}
-@keyframes cycleOrbPulse{0%,100%{transform:scale(.7);opacity:.4}50%{transform:scale(1.3);opacity:1}}
 
 </style>
 </head>
@@ -90,45 +64,270 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
   <div class="nav-inner">
     <a href="../index.html" class="nav-logo">Bの宝库</a>
     <button class="nav-arrow" id="navLeft"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <div class="nav-scroll-wrap"><div class="nav-scroll"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item active" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div></div>
+    <div class="nav-scroll-wrap"><div class="nav-scroll"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item active" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div></div>
     <button class="nav-arrow" id="navRight"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
     <button class="nav-expand-btn" id="navExpand"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
   </div>
 </nav>
-<div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item active" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
-<a href="../_cat/33-gradient-animations.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item active" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
+<a href="../_cat/34-spring-physics.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
-<div class="stage">
-    <div class="cycle-text">SPECTRUM</div>
-    <div class="cycle-bars">
-      <div class="cycle-bar" style="--d:0s"></div>
-      <div class="cycle-bar" style="--d:.1s"></div>
-      <div class="cycle-bar" style="--d:.2s"></div>
-      <div class="cycle-bar" style="--d:.3s"></div>
-      <div class="cycle-bar" style="--d:.4s"></div>
-      <div class="cycle-bar" style="--d:.5s"></div>
-      <div class="cycle-bar" style="--d:.6s"></div>
-      <div class="cycle-bar" style="--d:.7s"></div>
-      <div class="cycle-bar" style="--d:.8s"></div>
-      <div class="cycle-bar" style="--d:.9s"></div>
-      <div class="cycle-bar" style="--d:1s"></div>
-      <div class="cycle-bar" style="--d:1.1s"></div>
+<div class="stage" id="spring-ball-demo">
+    <canvas id="spring-ball-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+    <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:20px;z-index:10">
+      <label style="font-size:.75rem;color:rgba(255,255,255,.5)">刚度: <input type="range" id="stiffness" min="0.01" max="0.3" step="0.01" value="0.08" style="width:80px;vertical-align:middle"></label>
+      <label style="font-size:.75rem;color:rgba(255,255,255,.5)">阻尼: <input type="range" id="damping" min="0.8" max="0.99" step="0.01" value="0.92" style="width:80px;vertical-align:middle"></label>
     </div>
-    <div class="cycle-orbs">
-      <div class="cycle-orb" style="--d:0s"></div>
-      <div class="cycle-orb" style="--d:.5s"></div>
-      <div class="cycle-orb" style="--d:1s"></div>
-      <div class="cycle-orb" style="--d:1.5s"></div>
-      <div class="cycle-orb" style="--d:2s"></div>
-    </div>
+    <p style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.15);font-size:1rem;letter-spacing:.2em;pointer-events:none;z-index:5">CLICK TO LAUNCH</p>
   </div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">色彩循环动画</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">弹簧阻尼球</div>
 </div>
-
 <script>
+(function(){
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
+<script>
+(function(){
+  const demo=document.getElementById('spring-ball-demo');
+  const canvas=document.getElementById('spring-ball-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const ball={x:0,y:0,vx:0,vy:0,targetX:0,targetY:0,r:20};
+  ball.x=w/2;ball.y=h/2;ball.targetX=w/2;ball.targetY=h/2;
+
+  const trail=[];
+
+  demo.addEventListener('click',e=>{
+    const r=demo.getBoundingClientRect();
+    ball.targetX=e.clientX-r.left;
+    ball.targetY=e.clientY-r.top;
+  });
+
+  function render(){
+    const stiffness=parseFloat(document.getElementById('stiffness').value);
+    const damping=parseFloat(document.getElementById('damping').value);
+
+    const dx=ball.targetX-ball.x;
+    const dy=ball.targetY-ball.y;
+    ball.vx+=dx*stiffness;
+    ball.vy+=dy*stiffness;
+    ball.vx*=damping;
+    ball.vy*=damping;
+    ball.x+=ball.vx;
+    ball.y+=ball.vy;
+
+    trail.push({x:ball.x,y:ball.y,life:1});
+    if(trail.length>60) trail.shift();
+
+    ctx.fillStyle='rgba(13,13,26,0.3)';
+    ctx.fillRect(0,0,w,h);
+
+    // Trail
+    trail.forEach((p,i)=>{
+      p.life-=0.02;
+      if(p.life<=0) return;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,ball.r*p.life*0.6,0,Math.PI*2);
+      ctx.fillStyle=`hsla(260,80%,70%,${p.life*0.3})`;
+      ctx.fill();
+    });
+
+    // Spring line
+    ctx.beginPath();
+    ctx.moveTo(ball.targetX,ball.targetY);
+    ctx.lineTo(ball.x,ball.y);
+    ctx.strokeStyle='rgba(99,102,241,0.3)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+
+    // Target
+    ctx.beginPath();
+    ctx.arc(ball.targetX,ball.targetY,6,0,Math.PI*2);
+    ctx.fillStyle='rgba(99,102,241,0.5)';
+    ctx.fill();
+
+    // Ball
+    const speed=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
+    const hue=260+speed*3;
+    ctx.beginPath();
+    ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);
+    const g=ctx.createRadialGradient(ball.x-5,ball.y-5,0,ball.x,ball.y,ball.r);
+    g.addColorStop(0,`hsla(${hue},80%,75%,1)`);
+    g.addColorStop(1,`hsla(${hue},70%,50%,0.8)`);
+    ctx.fillStyle=g;
+    ctx.shadowColor=`hsla(${hue},90%,60%,0.6)`;
+    ctx.shadowBlur=20;
+    ctx.fill();
+    ctx.shadowBlur=0;
+
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+<script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"mouse-influence","label":"鼠标影响","min":0,"max":3,"step":0.1,"value":1,"unit":"x","action":"mouseScale"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

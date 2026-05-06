@@ -186,8 +186,20 @@ function extractIframeEffects(filePath) {
     return raw.replace(/<[^>]+>/g, '').replace(/^\d+\.\s*/, '').trim();
   }
 
-  // 提取全局 style（在第一个 section 之前的 style）
-  const firstSectionIdx = html.search(/<section[\s>]/i);
+  // 提取全局 style（在第一个效果区域之前的 style）
+  let firstSectionIdx = html.search(/<section[\s>]/i);
+  if (firstSectionIdx === -1) {
+    // 尝试找第一个编号注释 <!-- N. xxx -->
+    const firstCommentMatch = html.match(/<!--\s*\d+\.\s*/);
+    if (firstCommentMatch) {
+      firstSectionIdx = html.indexOf(firstCommentMatch[0]);
+    }
+  }
+  if (firstSectionIdx === -1) {
+    // 尝试找第一个 <div class="section
+    const firstDivSection = html.search(/<div\s+class="section/i);
+    if (firstDivSection !== -1) firstSectionIdx = firstDivSection;
+  }
   let globalCss = '';
   if (firstSectionIdx > 0) {
     const headPart = html.slice(0, firstSectionIdx);
@@ -197,14 +209,24 @@ function extractIframeEffects(filePath) {
     }
   }
 
-  // 按 section 边界拆分：支持 <section> 和 <div class="section...">
+  // 按 section 边界拆分：支持 <section>、<!-- N. xxx --> 注释分隔、<div class="section...">
   const sectionStarts = [];
   const sectionRegex = /<section[^>]*>/gi;
   let sm;
   while ((sm = sectionRegex.exec(html)) !== null) {
     sectionStarts.push(sm.index);
   }
-  // 如果没有 <section>，尝试 <div class="section...">
+  // 如果没有 <section>，尝试按 <!-- N. xxx --> 注释分割（这种格式在很多 iframe 页面中使用）
+  if (sectionStarts.length === 0) {
+    const commentRegex = /<!--\s*\d+\.\s*[^>]+-->/gi;
+    while ((sm = commentRegex.exec(html)) !== null) {
+      // 只取 body 内的注释
+      if (sm.index > firstSectionIdx || firstSectionIdx === -1) {
+        sectionStarts.push(sm.index);
+      }
+    }
+  }
+  // 最后尝试 <div class="section...">
   if (sectionStarts.length === 0) {
     const divSectionRegex = /<div\s+class="section[^"]*"[^>]*>/gi;
     while ((sm = divSectionRegex.exec(html)) !== null) {
@@ -227,9 +249,11 @@ function extractIframeEffects(filePath) {
     const name = h2Match ? cleanH2(h2Match[1]) : `效果 ${i + 1}`;
     const id = idMatch ? idMatch[1] : '';
 
-    // 提取 demo 区域的 style 属性（背景色等）
+    // 提取 demo 区域的 style 属性和 id
     const demoMatch = chunk.match(/<div class="demo"[^>]*style="([^"]*)"[^>]*>/);
     const demoStyle = demoMatch ? demoMatch[1] : '';
+    const demoIdMatch = chunk.match(/<div class="demo"[^>]*id="([^"]*)"[^>]*>/);
+    const demoId = demoIdMatch ? demoIdMatch[1] : '';
 
     // 提取该 chunk 内的所有 <style> 块
     const localStyles = [];
@@ -247,7 +271,7 @@ function extractIframeEffects(filePath) {
       if (scm[2].trim()) localScripts.push(scm[2]);
     }
 
-    // 提取展示区 HTML：优先找 .demo，否则取整个容器的 innerHTML
+    // 提取展示区 HTML：优先找 .demo，否则取容器内容
     let demoHtml = '';
     const demoStartMatch = chunk.match(/<div class="demo"[^>]*>/);
     if (demoStartMatch) {
@@ -257,29 +281,33 @@ function extractIframeEffects(filePath) {
         demoHtml = demoResult.content;
       }
     } else {
-      // 取容器的 innerHTML（移除 script/style 标签后）
-      const containerMatch = chunk.match(/^<(?:section|div)[^>]*>/);
+      // 找 chunk 中第一个顶层 div/section 容器
+      const containerMatch = chunk.match(/<(?:section|div)[^>]*>/);
       if (containerMatch) {
-        const innerStart = containerMatch[0].length;
-        // 找对应的关闭标签
-        const containerResult = extractDivContent(chunk, 0);
+        const containerIdx = chunk.indexOf(containerMatch[0]);
+        const containerResult = extractDivContent(chunk, containerIdx);
         if (containerResult) {
-          demoHtml = containerResult.content
-            .replace(/<script[\s\S]*?<\/script>/gi, '')
-            .replace(/<style[\s\S]*?<\/style>/gi, '');
-        } else {
-          demoHtml = chunk.slice(innerStart)
-            .replace(/<\/(?:section|div)>\s*$/i, '')
-            .replace(/<script[\s\S]*?<\/script>/gi, '')
-            .replace(/<style[\s\S]*?<\/style>/gi, '');
+          demoHtml = containerResult.content;
         }
       }
+      // 如果还是空的，取整个 chunk 去掉 script/style/注释/section-title
+      if (!demoHtml) {
+        demoHtml = chunk;
+      }
+      demoHtml = demoHtml
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/<h2[^>]*>[\s\S]*?<\/h2>/gi, '')
+        .replace(/<p class="desc"[^>]*>[\s\S]*?<\/p>/gi, '')
+        .trim();
     }
 
     effects.push({
       id,
       name,
       demoStyle,
+      demoId,
       demoHtml,
       localCss: localStyles.join('\n'),
       scripts: localScripts
@@ -438,6 +466,176 @@ function isNearBlack(hex) {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return r < 40 && g < 40 && b < 40;
+}
+
+// ============================================================
+// JS/CSS 分析：为 iframe 类型效果提取可控参数
+// ============================================================
+function extractIframeControls(scripts, localCss, demoHtml) {
+  const controls = [];
+  const allJs = scripts.join('\n');
+  const allCode = allJs + '\n' + (localCss || '');
+
+  // --- 1. 动画速度控制（几乎所有效果都适用）---
+  const hasAnimation = /requestAnimationFrame|setInterval|setTimeout|@keyframes|animation/.test(allCode);
+  if (hasAnimation) {
+    controls.push({
+      type: 'range', id: 'time-speed', label: '速度',
+      min: 0.1, max: 5, step: 0.1, value: 1, unit: 'x',
+      action: 'timeScale'
+    });
+  }
+
+  // --- 2. 从 JS 代码中提取数量常量 ---
+  const countPatterns = [
+    { regex: /(?:const|let|var)\s+(num\w*|count\w*|total\w*|NUM_\w+|PARTICLE_?COUNT|MAX_\w+)\s*=\s*(\d+)/gi, label: '数量' },
+    { regex: /(?:const|let|var)\s+(\w*(?:particles|points|stars|dots|circles|lines|spikes|segments|rings|waves)\w*)\s*=\s*(\d+)/gi, label: '数量' },
+  ];
+  const usedIds = new Set();
+  for (const pat of countPatterns) {
+    let m;
+    while ((m = pat.regex.exec(allJs)) !== null) {
+      const varName = m[1];
+      const val = parseInt(m[2]);
+      if (val >= 3 && val <= 10000 && !usedIds.has(varName)) {
+        usedIds.add(varName);
+        controls.push({
+          type: 'range', id: `js-${varName}`, label: pat.label,
+          min: Math.max(1, Math.round(val * 0.1)), max: Math.round(val * 3),
+          step: val > 100 ? 10 : 1, value: val, unit: '',
+          action: 'jsVar', varName
+        });
+      }
+    }
+  }
+
+  // --- 3. 从 JS 代码中提取速度/半径/尺寸常量 ---
+  const sizePatterns = [
+    { regex: /(?:const|let|var)\s+(\w*(?:radius|size|scale|speed|velocity|amplitude|frequency|thickness|blur|opacity|strength|intensity)\w*)\s*=\s*(\d+\.?\d*)/gi, labelMap: {
+      radius: '半径', size: '尺寸', scale: '缩放', speed: '速度',
+      velocity: '速度', amplitude: '振幅', frequency: '频率',
+      thickness: '粗细', blur: '模糊', opacity: '透明度',
+      strength: '强度', intensity: '强度'
+    }},
+  ];
+  for (const pat of sizePatterns) {
+    let m;
+    while ((m = pat.regex.exec(allJs)) !== null) {
+      const varName = m[1];
+      const val = parseFloat(m[2]);
+      if (val > 0 && !usedIds.has(varName)) {
+        usedIds.add(varName);
+        const matchedKey = Object.keys(pat.labelMap).find(k => varName.toLowerCase().includes(k));
+        const label = matchedKey ? pat.labelMap[matchedKey] : '参数';
+        controls.push({
+          type: 'range', id: `js-${varName}`, label,
+          min: Math.round(val * 0.1 * 100) / 100, max: Math.round(val * 4 * 100) / 100,
+          step: val >= 10 ? 1 : 0.01, value: val, unit: '',
+          action: 'jsVar', varName
+        });
+      }
+    }
+  }
+
+  // --- 4. 从 CSS 中提取动画时长 ---
+  const durationMatch = (localCss || '').match(/animation[^:]*:\s*[^;]*?(\d+\.?\d*)s/);
+  if (durationMatch) {
+    const dur = parseFloat(durationMatch[1]);
+    if (dur > 0) {
+      controls.push({
+        type: 'range', id: 'css-duration', label: '动画时长',
+        min: Math.round(dur * 0.2 * 10) / 10, max: Math.round(dur * 5 * 10) / 10,
+        step: 0.1, value: dur, unit: 's',
+        action: 'cssDuration'
+      });
+    }
+  }
+
+  // --- 5. 从 CSS 中提取颜色 ---
+  const colorPatterns = [
+    /(?:background|color|border-color|box-shadow|text-shadow)[^;]*?(#[0-9a-fA-F]{3,8})/g,
+  ];
+  let colorCount = 0;
+  for (const pat of colorPatterns) {
+    let cm;
+    while ((cm = pat.exec(localCss || '')) !== null && colorCount < 3) {
+      let hex = cm[1];
+      if (hex.startsWith('#')) {
+        hex = expandHex(hex);
+        // 只接受 6 位 hex（#RRGGBB），截断 8 位的 alpha 通道
+        if (hex.length > 7) hex = hex.slice(0, 7);
+        if (hex.length === 7 && !isNearBlack(hex) && hex !== '#ffffff' && hex !== '#111111') {
+          controls.push({
+            type: 'color', id: `css-color-${colorCount}`, label: colorCount === 0 ? '主色' : '副色',
+            value: hex, action: 'cssColor', index: colorCount
+          });
+          colorCount++;
+        }
+      }
+    }
+  }
+
+  // --- 6. 从 JS 的 Shader 代码中提取 vec3 颜色值 ---
+  const vec3Regex = /vec3\s*\(\s*(0?\.\d+|1\.0)\s*,\s*(0?\.\d+|1\.0)\s*,\s*(0?\.\d+|1\.0)\s*\)/g;
+  let shaderColorCount = 0;
+  let vm;
+  while ((vm = vec3Regex.exec(allJs)) !== null && shaderColorCount < 3) {
+    const r = Math.round(parseFloat(vm[1]) * 255);
+    const g = Math.round(parseFloat(vm[2]) * 255);
+    const b = Math.round(parseFloat(vm[3]) * 255);
+    // 跳过接近黑色/白色/灰色的
+    if (r + g + b > 60 && r + g + b < 700 && !(Math.abs(r - g) < 20 && Math.abs(g - b) < 20)) {
+      const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+      controls.push({
+        type: 'color', id: `shader-color-${shaderColorCount}`,
+        label: shaderColorCount === 0 ? '主色' : shaderColorCount === 1 ? '副色' : '辅助色',
+        value: hex, action: 'shaderColor', index: shaderColorCount
+      });
+      shaderColorCount++;
+    }
+  }
+
+  // --- 7. 鼠标影响力（如果效果有鼠标交互）---
+  if (/mouse|clientX|clientY|mousemove/.test(allJs)) {
+    controls.push({
+      type: 'range', id: 'mouse-influence', label: '鼠标影响',
+      min: 0, max: 3, step: 0.1, value: 1, unit: 'x',
+      action: 'mouseScale'
+    });
+  }
+
+  // --- 8. CSS transition 速度（如果没有其他动画控制但有 transition）---
+  if (controls.length === 0 || (!controls.find(c => c.action === 'timeScale') && !controls.find(c => c.action === 'cssDuration'))) {
+    const transMatch = (localCss || '').match(/transition[^;]*?(\d+\.?\d*)s/);
+    if (transMatch) {
+      const dur = parseFloat(transMatch[1]);
+      if (dur > 0.05 && dur < 30) {
+        controls.push({
+          type: 'range', id: 'transition-speed', label: '过渡速度',
+          min: Math.round(dur * 0.2 * 10) / 10, max: Math.round(dur * 5 * 10) / 10,
+          step: 0.1, value: dur, unit: 's',
+          action: 'transitionDuration'
+        });
+      }
+    }
+  }
+
+  // --- 9. 从 HTML/CSS 中提取 border-radius ---
+  const brMatch = (localCss || '').match(/border-radius\s*:\s*(\d+)(px|%)/);
+  if (brMatch && controls.length < 8) {
+    const val = parseInt(brMatch[1]);
+    const unit = brMatch[2];
+    if (val > 0 && val < 200) {
+      controls.push({
+        type: 'range', id: 'css-border-radius', label: '圆角',
+        min: 0, max: unit === '%' ? 50 : Math.max(100, val * 3),
+        step: 1, value: val, unit: unit,
+        action: 'cssBorderRadius'
+      });
+    }
+  }
+
+  return controls.slice(0, 10);
 }
 
 // ============================================================
@@ -715,6 +913,174 @@ const ctrlPanelJs = `
 })();`;
 
 // ============================================================
+// iframe 效果的时间缩放前置脚本（必须在效果脚本之前加载）
+// ============================================================
+const timeScalePreludeJs = `
+(function(){
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();`;
+
+// ============================================================
+// iframe 效果的控制面板运行时 JS
+// ============================================================
+const iframeCtrlPanelJs = `
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();`;
+
+// ============================================================
 // 生成独立效果详情页（_effects/） - 带专属控制面板
 // ============================================================
 const effectsDir = path.join(dir, '_effects');
@@ -770,7 +1136,7 @@ ${navJs}
     eff._file = `_effects/${fileName}`;
   }
 }
-// 为 iframe 类型生成独立效果页
+// 为 iframe 类型生成独立效果页（带智能控制面板）
 for (const cat of sortedIframe) {
   for (const eff of cat.effects) {
     effectIndex++;
@@ -789,6 +1155,91 @@ for (const cat of sortedIframe) {
 
     const allCss = iframeCssClean + '\n' + (eff.localCss || '');
     const bgStyle = eff.demoStyle || 'background:#111';
+    const stageId = eff.demoId ? ` id="${eff.demoId}"` : '';
+
+    // 提取该效果的控制项（传入完整 CSS = 全局 + 本地）
+    const iframeControls = extractIframeControls(eff.scripts, allCss, eff.demoHtml);
+
+    // 对效果脚本做代码变换：将被控制的 jsVar 变量改为每次读取时动态获取全局覆盖值
+    const jsVarControls = iframeControls.filter(c => c.action === 'jsVar');
+    const patchedScripts = eff.scripts.map(s => {
+      let patched = s;
+      for (const ctrl of jsVarControls) {
+        const vn = ctrl.varName;
+        const val = ctrl.value;
+        // 将 const/let/var varName = value 替换为 let varName = (window.__ctrl_xxx ?? defaultValue)
+        // 匹配整数和浮点数值
+        const declRegex = new RegExp(
+          `(const|let|var)(\\s+${vn.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*=\\s*)${String(val).replace('.', '\\.')}\\b`,
+          'g'
+        );
+        patched = patched.replace(declRegex, `let$2(window.__ctrl_${vn} !== undefined ? window.__ctrl_${vn} : ${val})`);
+      }
+
+      // 第二步：注入 jsVar 同步机制
+      if (jsVarControls.length > 0) {
+        // 生成重新读取代码（用于注入到函数体内）
+        const rereadLines = jsVarControls.map(ctrl => {
+          const vn = ctrl.varName;
+          return `${vn} = (window.__ctrl_${vn} !== undefined ? window.__ctrl_${vn} : ${vn});`;
+        }).join(' ');
+        const rereadComment = `/* __jsVar_sync__ */ try { ${rereadLines} } catch(e) {}`;
+
+        // 策略 A：在 requestAnimationFrame 动画函数体开头注入重新读取（try-catch 避免 TDZ）
+        const rafMatches = [...patched.matchAll(/requestAnimationFrame\(\s*(\w+)\s*\)/g)];
+        const animFuncNames = [...new Set(rafMatches.map(m => m[1]))];
+
+        for (const fnName of animFuncNames) {
+          const funcStartRegex = new RegExp(
+            `(function\\s+${fnName}\\s*\\([^)]*\\)\\s*\\{)`,
+            'g'
+          );
+          patched = patched.replace(funcStartRegex, `$1\n    ${rereadComment}`);
+
+          const arrowRegex = new RegExp(
+            `((?:const|let|var)\\s+${fnName}\\s*=\\s*(?:\\([^)]*\\)|\\w+)\\s*=>\\s*\\{)`,
+            'g'
+          );
+          patched = patched.replace(arrowRegex, `$1\n    ${rereadComment}`);
+        }
+
+        // 策略 B：在 resize handler 中注入 sync（用 try-catch 包裹避免 TDZ 错误）
+        const rereadSafe = `/* __jsVar_sync__ */ try { ${rereadLines} } catch(e) {}`;
+        patched = patched.replace(
+          /(function\s+resize\s*\([^)]*\)\s*\{)/g,
+          `$1\n    ${rereadSafe}`
+        );
+
+        // 策略 B2：如果有 init 函数，注入 __jsVarChanged listener 来调用它（仅在 jsVar 变化时重建）
+        const initFuncMatch = patched.match(/function\s+(init\w*)\s*\(\s*\)/);
+        if (initFuncMatch) {
+          const initFuncName = initFuncMatch[1];
+          // 在 resize 调用之后注入 __jsVarChanged 监听器
+          const initListenerCode = `\nwindow.addEventListener('__jsVarChanged', function() { ${rereadLines} ${initFuncName}(); });\n`;
+          // 插入到 initFunc 调用之后（通常是 `initParticles();` 后面）
+          const initCallPattern = new RegExp(`(${initFuncName}\\(\\);)`);
+          if (initCallPattern.test(patched)) {
+            patched = patched.replace(initCallPattern, `$1${initListenerCode}`);
+          }
+        }
+
+        // 策略 C：对于没有 rAF 动画循环的效果，注入一个事件监听器
+        // 当 __jsVarChanged 事件触发时重新赋值所有变量
+        if (animFuncNames.length === 0) {
+          const listenerCode = `\nwindow.addEventListener('__jsVarChanged', function() { ${rereadLines} });\n`;
+          // 在最后一个 __ctrl_ 声明之后插入
+          const lastCtrlIdx = patched.lastIndexOf('window.__ctrl_');
+          if (lastCtrlIdx >= 0) {
+            const insertPos = patched.indexOf('\n', lastCtrlIdx);
+            if (insertPos >= 0) {
+              patched = patched.slice(0, insertPos) + listenerCode + patched.slice(insertPos);
+            }
+          }
+        }
+      }
+
+      return patched;
+    });
 
     const iframeEffectHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -811,14 +1262,16 @@ ${allCss}
 ${generateNavBar(cat.id, '../')}
 <a href="../_cat/${cat.id}.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
-<div class="stage">${eff.demoHtml}</div>
+<div class="stage"${stageId}>${eff.demoHtml}</div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">${eff.name}</div>
-<div class="ctrl-empty">沉浸式体验</div>
 </div>
-${eff.scripts.map(s => `<` + `script>${s}<` + `/script>`).join('\n')}
+<` + `script>${timeScalePreludeJs}<` + `/script>
+${patchedScripts.map(s => `<` + `script>${s}<` + `/script>`).join('\n')}
 <` + `script>
+window.__EFFECT_CONTROLS__ = ${JSON.stringify(iframeControls)};
+${iframeCtrlPanelJs}
 ${navJs}
 <` + `/script>
 </body>

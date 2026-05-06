@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>锥形渐变旋转 - Bの宝库</title>
+<title>噪声渐变纹理 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -51,23 +51,11 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 @media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
 
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
-.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#000;gap:60px;flex-wrap:wrap}
+.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#000}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
 
   .nav a:hover{color:#fff;background:#ffffff10}
 
-
-.conic-ring{
-  border-radius:50%;position:relative;
-  background:conic-gradient(from 0deg,var(--c1),var(--c2),var(--c3),transparent);
-  animation:conicSpin 4s linear infinite;
-  display:flex;align-items:center;justify-content:center;
-}
-.conic-inner{width:85%;height:85%;border-radius:50%;background:#000}
-@keyframes conicSpin{to{transform:rotate(360deg)}}
-.radar{background:conic-gradient(from 0deg,var(--c1),transparent 30%,transparent)}
-.radar-dot{position:absolute;width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:radarBlink 2s ease infinite}
-@keyframes radarBlink{0%,80%{opacity:0}90%{opacity:1}100%{opacity:0}}
 
 </style>
 </head>
@@ -85,27 +73,227 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <a href="../_cat/33-gradient-animations.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
 <div class="stage">
-    <div class="conic-ring" style="--c1:#6366f1;--c2:#a78bfa;--c3:#38bdf8;width:180px;height:180px">
-      <div class="conic-inner"></div>
-    </div>
-    <div class="conic-ring radar" style="--c1:#10b981;--c2:transparent;--c3:transparent;width:180px;height:180px">
-      <div class="conic-inner"></div>
-      <!-- Radar dots -->
-      <div class="radar-dot" style="top:25%;left:60%"></div>
-      <div class="radar-dot" style="top:55%;left:30%"></div>
-      <div class="radar-dot" style="top:70%;left:65%"></div>
-    </div>
-    <div class="conic-ring" style="--c1:#f43f5e;--c2:#fbbf24;--c3:#a78bfa;width:180px;height:180px;animation-duration:2s">
-      <div class="conic-inner"></div>
-    </div>
+    <canvas id="noise-grad-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
   </div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">锥形渐变旋转</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">噪声渐变纹理</div>
 </div>
-
 <script>
+(function(){
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
+<script>
+(function(){
+  const section=document.getElementById('noise-grad').querySelector('.demo');
+  const canvas=document.getElementById('noise-grad-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=section.clientWidth/3;h=canvas.height=section.clientHeight/3;}
+  resize();window.addEventListener('resize',resize);
+
+  // Simple noise
+  function hash(n){return Math.sin(n*127.1+n*311.7)*43758.5453%1;}
+  function noise2D(x,y){
+    const ix=Math.floor(x),iy=Math.floor(y);
+    const fx=x-ix,fy=y-iy;
+    const ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);
+    const a=hash(ix+iy*57),b=hash(ix+1+iy*57),c=hash(ix+(iy+1)*57),d=hash(ix+1+(iy+1)*57);
+    return a+(b-a)*ux+(c-a)*uy+(a-b-c+d)*ux*uy;
+  }
+  function fbm(x,y,oct){
+    let v=0,amp=0.5,freq=1;
+    for(let i=0;i<oct;i++){v+=noise2D(x*freq,y*freq)*amp;amp*=0.5;freq*=2;}
+    return v;
+  }
+
+  function hsl2rgb(h,s,l){
+    const c=(1-Math.abs(2*l-1))*s;
+    const x=c*(1-Math.abs((h/60)%2-1));
+    const m=l-c/2;
+    let r=0,g=0,b=0;
+    if(h<60){r=c;g=x;}else if(h<120){r=x;g=c;}else if(h<180){g=c;b=x;}
+    else if(h<240){g=x;b=c;}else if(h<300){r=x;b=c;}else{r=c;b=x;}
+    return[(r+m)*255|0,(g+m)*255|0,(b+m)*255|0];
+  }
+
+  function render(){
+    const t=performance.now()*0.0002;
+    const img=ctx.createImageData(w,h);
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const nx=x/w*4+t;const ny=y/h*4;
+        const n=fbm(nx,ny,4);
+        const hue=(n*360+t*200)%360;
+        const [r,g,b]=hsl2rgb(hue,0.7,0.15+n*0.35);
+        const i=(y*w+x)*4;
+        img.data[i]=r;img.data[i+1]=g;img.data[i+2]=b;img.data[i+3]=255;
+      }
+    }
+    ctx.putImageData(img,0,0);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+<script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

@@ -331,7 +331,7 @@
     h = canvas.height = demo.clientHeight;
     const fontSize = 14;
     columns = Math.floor(w / fontSize);
-    drops = Array(columns).fill(0).map(() => Math.random() * -100);
+    drops = Array(columns).fill(0).map(() => Math.random() * (h / fontSize));
   }
   resize();
   window.addEventListener('resize', resize);

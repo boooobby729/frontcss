@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>悬停文字揭示 - Bの宝库</title>
+<title>百叶窗揭示效果 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -57,13 +57,19 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
   .nav a:hover{color:#fff;background:#ffffff10}
 
 
-      .reveal-card{width:280px;height:360px;border-radius:16px;overflow:hidden;position:relative;cursor:pointer}
-      .reveal-card .reveal-img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease,filter .6s ease;background:linear-gradient(135deg,#1a1a3e,#2a1a4e)}
-      .reveal-card:hover .reveal-img{transform:scale(1.1);filter:blur(3px) brightness(.5)}
-      .reveal-card .reveal-text{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;transform:translateY(60px);opacity:0;transition:all .4s ease}
-      .reveal-card:hover .reveal-text{transform:translateY(0);opacity:1}
-      .reveal-card .reveal-text h3{font-size:1.4rem;color:#fff;margin-bottom:8px}
-      .reveal-card .reveal-text p{color:rgba(255,255,255,.7);font-size:.85rem;line-height:1.5}
+      .shutter-card{width:300px;height:220px;position:relative;border-radius:12px;overflow:hidden;cursor:pointer}
+      .shutter-card .shutter-bg{position:absolute;inset:0;background:linear-gradient(135deg,#6366f1,#ec4899);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#fff}
+      .shutter-card .shutter-strips{position:absolute;inset:0;display:flex;flex-direction:column}
+      .shutter-card .strip{flex:1;background:#0f0f14;transform-origin:top;transition:transform .4s cubic-bezier(.4,0,.2,1);border-bottom:.5px solid rgba(255,255,255,.03)}
+      .shutter-card:hover .strip{transform:rotateX(90deg)}
+      .shutter-card:hover .strip:nth-child(1){transition-delay:0s}
+      .shutter-card:hover .strip:nth-child(2){transition-delay:.05s}
+      .shutter-card:hover .strip:nth-child(3){transition-delay:.1s}
+      .shutter-card:hover .strip:nth-child(4){transition-delay:.15s}
+      .shutter-card:hover .strip:nth-child(5){transition-delay:.2s}
+      .shutter-card:hover .strip:nth-child(6){transition-delay:.25s}
+      .shutter-card:hover .strip:nth-child(7){transition-delay:.3s}
+      .shutter-card:hover .strip:nth-child(8){transition-delay:.35s}
     
 </style>
 </head>
@@ -82,36 +88,202 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="effect-main">
 <div class="stage">
     <style>
-      .reveal-card{width:280px;height:360px;border-radius:16px;overflow:hidden;position:relative;cursor:pointer}
-      .reveal-card .reveal-img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease,filter .6s ease;background:linear-gradient(135deg,#1a1a3e,#2a1a4e)}
-      .reveal-card:hover .reveal-img{transform:scale(1.1);filter:blur(3px) brightness(.5)}
-      .reveal-card .reveal-text{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;transform:translateY(60px);opacity:0;transition:all .4s ease}
-      .reveal-card:hover .reveal-text{transform:translateY(0);opacity:1}
-      .reveal-card .reveal-text h3{font-size:1.4rem;color:#fff;margin-bottom:8px}
-      .reveal-card .reveal-text p{color:rgba(255,255,255,.7);font-size:.85rem;line-height:1.5}
+      .shutter-card{width:300px;height:220px;position:relative;border-radius:12px;overflow:hidden;cursor:pointer}
+      .shutter-card .shutter-bg{position:absolute;inset:0;background:linear-gradient(135deg,#6366f1,#ec4899);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#fff}
+      .shutter-card .shutter-strips{position:absolute;inset:0;display:flex;flex-direction:column}
+      .shutter-card .strip{flex:1;background:#0f0f14;transform-origin:top;transition:transform .4s cubic-bezier(.4,0,.2,1);border-bottom:.5px solid rgba(255,255,255,.03)}
+      .shutter-card:hover .strip{transform:rotateX(90deg)}
+      .shutter-card:hover .strip:nth-child(1){transition-delay:0s}
+      .shutter-card:hover .strip:nth-child(2){transition-delay:.05s}
+      .shutter-card:hover .strip:nth-child(3){transition-delay:.1s}
+      .shutter-card:hover .strip:nth-child(4){transition-delay:.15s}
+      .shutter-card:hover .strip:nth-child(5){transition-delay:.2s}
+      .shutter-card:hover .strip:nth-child(6){transition-delay:.25s}
+      .shutter-card:hover .strip:nth-child(7){transition-delay:.3s}
+      .shutter-card:hover .strip:nth-child(8){transition-delay:.35s}
     </style>
-    <div class="reveal-card">
-      <div class="reveal-img" style="background:linear-gradient(135deg,#0f2027,#203a43,#2c5364)"></div>
-      <div class="reveal-text">
-        <h3>Mountain View</h3>
-        <p>层叠山峦在晨雾中若隐若现，每一次悬停都是一次发现之旅。</p>
+    <div class="shutter-card">
+      <div class="shutter-bg">REVEALED CONTENT</div>
+      <div class="shutter-strips" style="perspective:400px">
+        <div class="strip"></div><div class="strip"></div><div class="strip"></div><div class="strip"></div>
+        <div class="strip"></div><div class="strip"></div><div class="strip"></div><div class="strip"></div>
       </div>
     </div>
-    <div class="reveal-card">
-      <div class="reveal-img" style="background:linear-gradient(135deg,#1a0030,#4a0072,#8e24aa)"></div>
-      <div class="reveal-text">
-        <h3>Aurora Night</h3>
-        <p>极光划过夜空，紫色与绿色交织出宇宙最壮丽的画卷。</p>
+    <div class="shutter-card">
+      <div class="shutter-bg" style="background:linear-gradient(135deg,#22c55e,#0ea5e9)">HOVER TO OPEN</div>
+      <div class="shutter-strips" style="perspective:400px">
+        <div class="strip"></div><div class="strip"></div><div class="strip"></div><div class="strip"></div>
+        <div class="strip"></div><div class="strip"></div><div class="strip"></div><div class="strip"></div>
       </div>
     </div>
   </div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">悬停文字揭示</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">百叶窗揭示效果</div>
 </div>
+<script>
+(function(){
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
 
 <script>
+window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#6366f1","action":"cssColor","index":0},{"type":"range","id":"transition-speed","label":"过渡速度","min":0.8,"max":20,"step":0.1,"value":4,"unit":"s","action":"transitionDuration"},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":12,"unit":"px","action":"cssBorderRadius"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

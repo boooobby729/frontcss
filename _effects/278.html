@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Magazine 杂志布局 - Bの宝库</title>
+<title>Timeline 时间线 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -54,6 +54,213 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 .stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#111}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
 
+  h1 { text-align: center; font-size: 2.4rem; margin-bottom: 12px; background: linear-gradient(135deg, #a18cd1, #fbc2eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { text-align: center; color: #666; margin-bottom: 60px; font-size: 1rem; }
+  .section { margin-bottom: 80px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+  .section-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; color: #ccc; }
+  .section-tag { font-size: .75rem; color: #a18cd1; background: #a18cd118; padding: 3px 12px; border-radius: 20px; display: inline-block; margin-bottom: 24px; }
+
+  /* 1. Bento Grid */
+  .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 140px); gap: 16px; }
+  .bento-item { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all .3s; cursor: pointer; overflow: hidden; position: relative; }
+  .bento-item:hover { border-color: #a18cd144; transform: scale(1.02); }
+  .bento-item:nth-child(1) { grid-column: 1 / 3; grid-row: 1 / 3; background: linear-gradient(145deg, #13131a, #1a1a2e); }
+  .bento-item:nth-child(2) { grid-column: 3; }
+  .bento-item:nth-child(3) { grid-column: 4; grid-row: 1 / 3; }
+  .bento-item:nth-child(4) { grid-column: 3; }
+  .bento-item:nth-child(5) { grid-column: 1 / 2; }
+  .bento-item:nth-child(6) { grid-column: 2 / 4; }
+  .bento-item:nth-child(7) { grid-column: 4; }
+  .b-label { color: #888; font-size: .85rem; }
+  .b-big { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  /* 2. Masonry */
+  .masonry { columns: 3; gap: 16px; }
+  .masonry-item { break-inside: avoid; margin-bottom: 16px; background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 24px; transition: border-color .3s, transform .3s; cursor: pointer; }
+  .masonry-item:hover { border-color: #f093fb44; transform: translateY(-4px); }
+  .masonry-item h4 { color: #ccc; margin-bottom: 8px; font-size: .9rem; }
+  .masonry-item p { color: #666; font-size: .8rem; line-height: 1.6; }
+  .masonry-item:nth-child(1) { padding-bottom: 60px; }
+  .masonry-item:nth-child(2) { padding-bottom: 100px; }
+  .masonry-item:nth-child(3) { padding-bottom: 40px; }
+  .masonry-item:nth-child(4) { padding-bottom: 80px; }
+  .masonry-item:nth-child(5) { padding-bottom: 50px; }
+  .masonry-item:nth-child(6) { padding-bottom: 120px; }
+
+  /* 3. Accordion Cards */
+  .accordion { display: flex; gap: 12px; height: 300px; }
+  .acc-item { flex: 1; background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; transition: flex .5s ease, border-color .3s; cursor: pointer; overflow: hidden; display: flex; align-items: end; padding: 20px; position: relative; }
+  .acc-item:hover { flex: 4; border-color: #43e97b44; }
+  .acc-item::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .5s; }
+  .acc-item:nth-child(1)::before { background: linear-gradient(to top, #667eea44, transparent); }
+  .acc-item:nth-child(2)::before { background: linear-gradient(to top, #f093fb44, transparent); }
+  .acc-item:nth-child(3)::before { background: linear-gradient(to top, #43e97b44, transparent); }
+  .acc-item:nth-child(4)::before { background: linear-gradient(to top, #f5576c44, transparent); }
+  .acc-item:nth-child(5)::before { background: linear-gradient(to top, #fee14044, transparent); }
+  .acc-item:hover::before { opacity: 1; }
+  .acc-label { color: #fff; font-weight: 600; font-size: .9rem; position: relative; z-index: 1; opacity: 0; transition: opacity .4s; white-space: nowrap; }
+  .acc-item:hover .acc-label { opacity: 1; }
+  .acc-num { position: absolute; top: 16px; left: 16px; color: #555; font-size: .75rem; font-weight: 600; z-index: 1; }
+
+  /* 4. Scroll Snap */
+  .snap-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; border-radius: 16px; -webkit-overflow-scrolling: touch; }
+  .snap-container::-webkit-scrollbar { height: 4px; }
+  .snap-container::-webkit-scrollbar-track { background: #1e1e2e; }
+  .snap-container::-webkit-scrollbar-thumb { background: #667eea; border-radius: 2px; }
+  .snap-item { min-width: 100%; height: 300px; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+  .snap-item:nth-child(1) { background: linear-gradient(145deg, #0a0a2e, #1a0a4e); }
+  .snap-item:nth-child(2) { background: linear-gradient(145deg, #0a2a1e, #0a3a2e); }
+  .snap-item:nth-child(3) { background: linear-gradient(145deg, #2a0a1e, #3a0a2e); }
+  .snap-item h3 { font-size: 2rem; color: #fff; }
+  .snap-item p { color: #888; }
+
+  /* 5. Glassmorphism */
+  .glass-wrap { background: linear-gradient(135deg, #667eea44, #764ba244); border-radius: 20px; padding: 60px; display: flex; justify-content: center; gap: 24px; position: relative; overflow: hidden; }
+  .glass-wrap::before { content: ''; position: absolute; width: 200px; height: 200px; background: #667eea; border-radius: 50%; filter: blur(80px); top: -50px; left: -50px; opacity: .4; }
+  .glass-wrap::after { content: ''; position: absolute; width: 150px; height: 150px; background: #f093fb; border-radius: 50%; filter: blur(80px); bottom: -50px; right: -50px; opacity: .4; }
+  .glass-card { background: rgba(255,255,255,.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 32px; width: 220px; position: relative; z-index: 1; transition: transform .3s; }
+  .glass-card:hover { transform: translateY(-8px); }
+  .glass-card h4 { color: #fff; margin-bottom: 8px; }
+  .glass-card p { color: rgba(255,255,255,.6); font-size: .85rem; line-height: 1.6; }
+
+  /* 6. Marquee */
+  .marquee-wrap { overflow: hidden; border-radius: 12px; background: #13131a; padding: 16px 0; border: 1px solid #1e1e2e; }
+  .marquee-track { display: flex; gap: 24px; animation: marqueeScroll 20s linear infinite; width: max-content; }
+  .marquee-item { padding: 10px 24px; background: #1a1a2e; border-radius: 8px; white-space: nowrap; color: #aaa; font-size: .85rem; border: 1px solid #ffffff08; }
+  @keyframes marqueeScroll { to { transform: translateX(-50%); } }
+
+  /* === EXPANDED === */
+  /* 7. Split Screen */
+  .split-screen { display: flex; height: 300px; border-radius: 16px; overflow: hidden; }
+  .split-left, .split-right { flex: 1; display: flex; align-items: center; justify-content: center; transition: flex .5s; cursor: pointer; }
+  .split-left { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .split-right { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  .split-left:hover { flex: 2; }
+  .split-right:hover { flex: 2; }
+  .split-text { color: #fff; font-size: 1.5rem; font-weight: 700; }
+
+  /* 8. Magazine Layout */
+  .magazine { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: auto auto; gap: 16px; }
+  .mag-hero { grid-column: 1; grid-row: 1 / 3; background: linear-gradient(145deg, #13131a, #1a1a2e); border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; justify-content: end; min-height: 300px; }
+  .mag-side { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 24px; }
+  .mag-hero h3 { color: #fff; font-size: 1.6rem; margin-bottom: 8px; }
+  .mag-hero p, .mag-side p { color: #888; font-size: .85rem; line-height: 1.6; }
+  .mag-side h4 { color: #ccc; margin-bottom: 8px; }
+
+  /* 9. Overlapping Cards */
+  .overlap-cards { display: flex; position: relative; height: 200px; width: 300px; }
+  .o-card { position: absolute; width: 180px; height: 160px; background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 20px; transition: all .4s; cursor: pointer; }
+  .o-card:nth-child(1) { left: 0; z-index: 3; background: linear-gradient(145deg, #13131a, #1a1a2e); }
+  .o-card:nth-child(2) { left: 40px; top: 10px; z-index: 2; }
+  .o-card:nth-child(3) { left: 80px; top: 20px; z-index: 1; }
+  .o-card:hover { z-index: 10; transform: translateY(-10px) scale(1.05); border-color: #667eea44; }
+  .o-card h4 { color: #ccc; font-size: .85rem; margin-bottom: 6px; }
+  .o-card p { color: #666; font-size: .75rem; }
+
+  /* 10. Timeline */
+  .timeline { position: relative; padding-left: 30px; max-width: 500px; }
+  .timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: #1e1e2e; }
+  .tl-item { position: relative; margin-bottom: 24px; padding-left: 20px; }
+  .tl-item::before { content: ''; position: absolute; left: -24px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #667eea; border: 2px solid #0a0a0f; }
+  .tl-item h4 { color: #ccc; font-size: .9rem; margin-bottom: 4px; }
+  .tl-item p { color: #666; font-size: .8rem; line-height: 1.5; }
+  .tl-item .tl-date { font-size: .7rem; color: #667eea; margin-bottom: 4px; }
+
+  /* 11. Dashboard Grid */
+  .dash-grid { display: grid; grid-template-columns: 1fr 1fr 2fr; grid-template-rows: auto auto; gap: 12px; max-width: 600px; }
+  .dash-card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; }
+  .dash-card.wide { grid-column: 1 / 3; }
+  .dash-card.tall { grid-row: 1 / 3; }
+  .dash-card h4 { color: #ccc; font-size: .85rem; margin-bottom: 4px; }
+  .dash-card .val { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg,#667eea,#f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  /* 12. Kanban */
+  .kanban { display: flex; gap: 12px; }
+  .kanban-col { width: 160px; background: #13131a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 12px; }
+  .kanban-col h5 { color: #888; font-size: .75rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .05em; }
+  .kanban-card { background: #0a0a0f; border: 1px solid #ffffff08; border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: .75rem; color: #ccc; cursor: grab; transition: border-color .2s; }
+  .kanban-card:hover { border-color: #667eea44; }
+
+  /* 13. Zigzag Layout */
+  .zigzag-layout { display: flex; flex-direction: column; gap: 24px; }
+  .zigzag-row { display: flex; gap: 16px; align-items: center; }
+  .zigzag-row:nth-child(even) { flex-direction: row-reverse; }
+  .zigzag-visual { flex: 1; height: 140px; background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+  .zigzag-text { flex: 1; padding: 20px; }
+  .zigzag-text h4 { color: #ccc; margin-bottom: 6px; }
+  .zigzag-text p { color: #666; font-size: .85rem; line-height: 1.6; }
+
+  /* 14. Card Grid + Sidebar */
+  .sidebar-layout { display: grid; grid-template-columns: 200px 1fr; gap: 16px; }
+  .sidebar-nav { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 20px; }
+  .sidebar-nav-item { padding: 10px 14px; border-radius: 8px; color: #888; font-size: .8rem; cursor: pointer; transition: all .2s; margin-bottom: 4px; }
+  .sidebar-nav-item:hover, .sidebar-nav-item.active { background: #667eea22; color: #667eea; }
+  .sidebar-content { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .sidebar-card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; }
+  .sidebar-card h4 { color: #ccc; font-size: .85rem; margin-bottom: 4px; }
+  .sidebar-card p { color: #555; font-size: .75rem; }
+
+  /* 15. Hero + Grid */
+  .hero-grid-layout { display: flex; flex-direction: column; gap: 16px; }
+  .hero-banner { background: linear-gradient(135deg, #667eea22, #764ba222); border: 1px solid #1e1e2e; border-radius: 16px; padding: 48px; text-align: center; }
+  .hero-banner h3 { color: #fff; font-size: 1.6rem; margin-bottom: 8px; }
+  .hero-banner p { color: #888; font-size: .9rem; }
+  .hero-sub-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .hero-sub-card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 20px; text-align: center; }
+  .hero-sub-card h4 { color: #ccc; font-size: .85rem; }
+  .hero-sub-card .val { font-size: 1.4rem; font-weight: 700; color: #667eea; margin-bottom: 4px; }
+
+  /* 16. Stacked List */
+  .stacked-list { display: flex; flex-direction: column; gap: 8px; max-width: 500px; }
+  .stacked-item { display: flex; align-items: center; gap: 16px; background: #13131a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 16px 20px; transition: all .3s; cursor: pointer; }
+  .stacked-item:hover { border-color: #667eea44; transform: translateX(8px); }
+  .stacked-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .stacked-item h4 { color: #ccc; font-size: .85rem; }
+  .stacked-item p { color: #555; font-size: .75rem; }
+
+  /* 17. Holy Grail */
+  .holy-grail { display: grid; grid-template-columns: 120px 1fr 120px; grid-template-rows: 40px 1fr 30px; gap: 8px; height: 260px; }
+  .hg-header { grid-column: 1 / -1; background: #13131a; border: 1px solid #1e1e2e; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #888; font-size: .75rem; }
+  .hg-nav, .hg-aside { background: #13131a; border: 1px solid #1e1e2e; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666; font-size: .7rem; }
+  .hg-main { background: #13131a; border: 1px solid #667eea33; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ccc; font-weight: 600; }
+  .hg-footer { grid-column: 1 / -1; background: #13131a; border: 1px solid #1e1e2e; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #555; font-size: .65rem; }
+
+  /* 18. Mosaic */
+  .mosaic { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 60px; gap: 8px; }
+  .mosaic-item { background: #13131a; border: 1px solid #1e1e2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .75rem; color: #888; transition: all .3s; cursor: pointer; }
+  .mosaic-item:hover { border-color: #f093fb44; }
+  .m1 { grid-column: 1/3; grid-row: 1/3; }
+  .m2 { grid-column: 3/5; }
+  .m3 { grid-column: 5/7; grid-row: 1/2; }
+  .m4 { grid-column: 3/4; }
+  .m5 { grid-column: 4/6; grid-row: 2/4; }
+  .m6 { grid-column: 6; grid-row: 2/4; }
+  .m7 { grid-column: 1/3; }
+  .m8 { grid-column: 3/4; }
+
+  /* 19. Pricing Table */
+  .pricing { display: flex; gap: 16px; justify-content: center; align-items: center; }
+  .price-card { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 32px 24px; width: 180px; text-align: center; transition: all .3s; }
+  .price-card.featured { border-color: #667eea; transform: scale(1.05); background: linear-gradient(145deg, #13131a, #1a1a2e); }
+  .price-card h4 { color: #888; font-size: .85rem; margin-bottom: 12px; }
+  .price-card .price { font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+  .price-card .price small { font-size: .75rem; color: #555; font-weight: 400; }
+  .price-card ul { list-style: none; margin-bottom: 16px; }
+  .price-card li { color: #666; font-size: .75rem; padding: 6px 0; border-bottom: 1px solid #ffffff06; }
+  .price-btn { display: inline-block; padding: 8px 20px; border-radius: 980px; font-size: .8rem; font-weight: 600; border: none; cursor: pointer; }
+
+  /* 20. Feature Showcase */
+  .showcase { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .showcase-big { grid-column: 1 / -1; background: linear-gradient(145deg, #13131a, #1a1a2e); border: 1px solid #1e1e2e; border-radius: 16px; padding: 40px; display: flex; align-items: center; gap: 40px; }
+  .showcase-big .sc-text h3 { color: #fff; font-size: 1.4rem; margin-bottom: 8px; }
+  .showcase-big .sc-text p { color: #888; font-size: .85rem; line-height: 1.6; }
+  .showcase-small { background: #13131a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 24px; transition: border-color .3s; }
+  .showcase-small:hover { border-color: #667eea44; }
+  .showcase-small h4 { color: #ccc; font-size: .9rem; margin-bottom: 6px; }
+  .showcase-small p { color: #666; font-size: .8rem; line-height: 1.5; }
+  .sc-visual { width: 120px; height: 120px; border-radius: 16px; background: linear-gradient(135deg, #667eea22, #764ba222); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+
+
 
 </style>
 </head>
@@ -70,14 +277,179 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item active" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
 <a href="../_cat/09-creative-layouts.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
-<div class="stage"></div>
+<div class="stage"><span class="section-tag">::before 连线 + 圆点</span>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-date">2024.01</div><h4>Project Start</h4><p>启动项目，确定技术方案和设计方向。</p></div>
+      <div class="tl-item"><div class="tl-date">2024.03</div><h4>Alpha Release</h4><p>内测版本发布，收集核心用户反馈。</p></div>
+      <div class="tl-item"><div class="tl-date">2024.06</div><h4>Public Launch</h4><p>正式上线，开放全量用户访问。</p></div>
+    </div></div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">Magazine 杂志布局</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">Timeline 时间线</div>
 </div>
+<script>
+(function(){
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
 
 <script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-duration","label":"动画时长","min":4,"max":100,"step":0.1,"value":20,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#a18cd1","action":"cssColor","index":0},{"type":"color","id":"css-color-1","label":"副色","value":"#666666","action":"cssColor","index":1},{"type":"color","id":"css-color-2","label":"副色","value":"#cccccc","action":"cssColor","index":2},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

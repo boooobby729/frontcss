@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SDF Raymarching Blob - Bの宝库</title>
+<title>粒子极光 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -51,34 +51,11 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 @media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
 
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
-.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#000}
+.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#020208}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
 
-  .section { height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; }
-  .section canvas { position: absolute; inset: 0; }
-  .section h2 { font-size: 2.5rem; font-weight: 800; color: #fff; position: relative; z-index: 2; }
-  .section p { color: rgba(255,255,255,.5); margin-top: 12px; position: relative; z-index: 2; }
-  .tag { font-size: .75rem; color: #c0c0c0; background: rgba(192,192,192,.15); padding: 4px 14px; border-radius: 20px; position: relative; z-index: 2; margin-top: 16px; }
-  .nav a:hover { color: #fff; background: #ffffff10; }
-
-  /* === 1. SVG Filter Liquid Metal === */
-  .svg-metal-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-  .svg-metal-blob { width: 400px; height: 400px; background: linear-gradient(135deg, #b8c6db 0%, #f5f7fa 25%, #8e9eab 50%, #eef2f3 75%, #b8c6db 100%); border-radius: 50%; filter: url(#liquid-metal-filter); animation: blobMorph 6s ease-in-out infinite; }
-  @keyframes blobMorph {
-    0%, 100% { border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%; transform: scale(1) rotate(0deg); }
-    25% { border-radius: 40% 60% 55% 45% / 55% 45% 60% 40%; transform: scale(1.02) rotate(2deg); }
-    50% { border-radius: 50% 50% 40% 60% / 45% 55% 50% 50%; transform: scale(.98) rotate(-1deg); }
-    75% { border-radius: 55% 45% 60% 40% / 60% 40% 45% 55%; transform: scale(1.01) rotate(1deg); }
-  }
-
-  /* === Effect Sections (4-8) === */
   .demo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-
-  /* === 2. Canvas Metaball === */
-  #metaballCanvas { width: 100%; height: 100%; }
-
-  /* === 3. WebGL Shader === */
-  #shaderCanvas { width: 100%; height: 100%; }
+  .nav a:hover { color: #fff; background: #ffffff10; }
 
 
 </style>
@@ -88,223 +65,278 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
   <div class="nav-inner">
     <a href="../index.html" class="nav-logo">Bの宝库</a>
     <button class="nav-arrow" id="navLeft"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <div class="nav-scroll-wrap"><div class="nav-scroll"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item active" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div></div>
+    <div class="nav-scroll-wrap"><div class="nav-scroll"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item active" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div></div>
     <button class="nav-arrow" id="navRight"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
     <button class="nav-expand-btn" id="navExpand"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
   </div>
 </nav>
-<div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item active" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
-<a href="../_cat/21-liquid-metal.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item active" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
+<a href="../_cat/22-aurora-effects.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
-<div class="stage">
-    <canvas id="sdf-canvas"></canvas>
+<div class="stage" id="aurora-particles-demo">
+    <canvas id="aurora-particles-canvas"></canvas>
   </div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">SDF Raymarching Blob</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">粒子极光</div>
 </div>
 <script>
 (function(){
-  const demo = document.getElementById('sdf-demo');
-  const canvas = document.getElementById('sdf-canvas');
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
+<script>
+(function(){
+  const demo = document.getElementById('aurora-particles-demo');
+  const canvas = document.getElementById('aurora-particles-canvas');
+  const ctx = canvas.getContext('2d');
   let w, h;
 
-  function resize() {
+  function resize(){
+    /* __jsVar_sync__ */ try { NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : NUM); speed = (window.__ctrl_speed !== undefined ? window.__ctrl_speed : speed); } catch(e) {}
     w = canvas.width = demo.clientWidth;
     h = canvas.height = demo.clientHeight;
-    if (gl) gl.viewport(0, 0, w, h);
+    initParticles();
+window.addEventListener('__jsVarChanged', function() { NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : NUM); speed = (window.__ctrl_speed !== undefined ? window.__ctrl_speed : speed); initParticles(); });
+
   }
 
-  const gl = canvas.getContext('webgl');
-  if (!gl) return;
+  // Simple noise function
+  function noise(x, y) {
+    const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+    return n - Math.floor(n);
+  }
+
+  function smoothNoise(x, y) {
+    const ix = Math.floor(x), iy = Math.floor(y);
+    const fx = x - ix, fy = y - iy;
+    const a = noise(ix, iy), b = noise(ix + 1, iy);
+    const c = noise(ix, iy + 1), d = noise(ix + 1, iy + 1);
+    const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+    return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+  }
+
+  let particles = [];
+  let NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : 1500);
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < NUM; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: h * (0.2 + Math.random() * 0.5),
+        vx: 0, vy: 0,
+        life: Math.random() * 200 + 100,
+        maxLife: 300,
+        hue: 120 + Math.random() * 180, // green to blue-purple range
+        size: Math.random() * 2 + 0.5,
+      });
+    }
+  }
+
   resize();
   window.addEventListener('resize', resize);
 
-  const mouse = { x: 0.5, y: 0.5 };
-  demo.addEventListener('mousemove', e => {
-    const r = demo.getBoundingClientRect();
-    mouse.x = (e.clientX - r.left) / r.width;
-    mouse.y = 1.0 - (e.clientY - r.top) / r.height;
-  });
-
-  const vsSource = `
-    attribute vec2 aPosition;
-    void main() { gl_Position = vec4(aPosition, 0.0, 1.0); }
-  `;
-
-  const fsSource = `
-    precision highp float;
-    uniform float uTime;
-    uniform vec2 uResolution;
-    uniform vec2 uMouse;
-
-    float sdSphere(vec3 p, float r) { return length(p) - r; }
-
-    float smin(float a, float b, float k) {
-      float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
-      return mix(b, a, h) - k * h * (1.0 - h);
-    }
-
-    float scene(vec3 p) {
-      float t = uTime;
-
-      // Central sphere
-      float d = sdSphere(p, 0.8);
-
-      // Orbiting blobs
-      for (int i = 0; i < 5; i++) {
-        float fi = float(i);
-        float a = t * (0.4 + fi * 0.15) + fi * 1.256;
-        float r = 1.1 + sin(t * 0.3 + fi) * 0.3;
-        vec3 offset = vec3(
-          cos(a) * r,
-          sin(a * 0.7 + fi * 2.0) * 0.6,
-          sin(a) * r
-        );
-        float blobR = 0.3 + sin(t + fi * 1.5) * 0.08;
-        d = smin(d, sdSphere(p - offset, blobR), 0.5);
-      }
-
-      // Mouse-influenced blob
-      vec3 mOff = vec3((uMouse.x - 0.5) * 3.0, (uMouse.y - 0.5) * 3.0, 0.5);
-      d = smin(d, sdSphere(p - mOff, 0.35), 0.6);
-
-      return d;
-    }
-
-    vec3 calcNormal(vec3 p) {
-      vec2 e = vec2(0.001, 0.0);
-      return normalize(vec3(
-        scene(p + e.xyy) - scene(p - e.xyy),
-        scene(p + e.yxy) - scene(p - e.yxy),
-        scene(p + e.yyx) - scene(p - e.yyx)
-      ));
-    }
-
-    vec3 envMap(vec3 dir) {
-      float y = dir.y * 0.5 + 0.5;
-      vec3 sky = mix(vec3(0.15, 0.15, 0.2), vec3(0.5, 0.55, 0.7), y);
-      float sun = pow(max(dot(dir, normalize(vec3(1.0, 0.8, 0.5))), 0.0), 64.0);
-      return sky + vec3(1.0, 0.9, 0.7) * sun;
-    }
-
-    void main() {
-      vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
-
-      // Camera
-      vec3 ro = vec3(0.0, 0.0, 3.5);
-      vec3 rd = normalize(vec3(uv, -1.5));
-
-      // Raymarch
-      float totalDist = 0.0;
-      float minDist = 999.0;
-      bool hit = false;
-      vec3 p;
-      for (int i = 0; i < 80; i++) {
-        p = ro + rd * totalDist;
-        float d = scene(p);
-        minDist = min(minDist, d);
-        if (d < 0.001) { hit = true; break; }
-        if (totalDist > 20.0) break;
-        totalDist += d;
-      }
-
-      vec3 color = vec3(0.03, 0.03, 0.05);
-
-      if (hit) {
-        vec3 n = calcNormal(p);
-        vec3 viewDir = normalize(ro - p);
-
-        // Fresnel
-        float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 4.0);
-
-        // Reflection
-        vec3 refl = reflect(-viewDir, n);
-        vec3 envColor = envMap(refl);
-
-        // Metal base
-        vec3 metalBase = vec3(0.7, 0.72, 0.78);
-
-        // Two specular lights
-        vec3 l1 = normalize(vec3(1.0, 1.0, 1.0));
-        vec3 l2 = normalize(vec3(-0.5, 0.8, 0.3));
-        float spec1 = pow(max(dot(refl, l1), 0.0), 60.0);
-        float spec2 = pow(max(dot(refl, l2), 0.0), 40.0);
-
-        // Diffuse
-        float diff = max(dot(n, l1), 0.0) * 0.3 + 0.15;
-
-        color = metalBase * diff;
-        color += envColor * (0.4 + fresnel * 0.5);
-        color += vec3(1.0, 0.95, 0.9) * spec1 * 0.8;
-        color += vec3(0.7, 0.8, 1.0) * spec2 * 0.3;
-        color = mix(color, envColor, fresnel * 0.5);
-      } else {
-        // Glow for near-misses
-        float glow = exp(-minDist * 5.0) * 0.15;
-        color += vec3(0.4, 0.45, 0.6) * glow;
-      }
-
-      // Tone mapping + gamma
-      color = color / (color + vec3(1.0));
-      color = pow(color, vec3(1.0 / 2.2));
-
-      gl_FragColor = vec4(color, 1.0);
-    }
-  `;
-
-  function compileShader(type, source) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.error('SDF shader error:', gl.getShaderInfoLog(shader));
-      gl.deleteShader(shader);
-      return null;
-    }
-    return shader;
-  }
-
-  const vs = compileShader(gl.VERTEX_SHADER, vsSource);
-  const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
-  if (!vs || !fs) return;
-
-  const program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error('SDF program error:', gl.getProgramInfoLog(program));
-    return;
-  }
-  gl.useProgram(program);
-
-  const verts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(program, 'aPosition');
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-  const uTime = gl.getUniformLocation(program, 'uTime');
-  const uRes = gl.getUniformLocation(program, 'uResolution');
-  const uMouse = gl.getUniformLocation(program, 'uMouse');
-
-  const startTime = performance.now();
   function render() {
-    const t = (performance.now() - startTime) * 0.001;
-    gl.uniform1f(uTime, t);
-    gl.uniform2f(uRes, w, h);
-    gl.uniform2f(uMouse, mouse.x, mouse.y);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    /* __jsVar_sync__ */ try { NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : NUM); speed = (window.__ctrl_speed !== undefined ? window.__ctrl_speed : speed); } catch(e) {}
+    const t = performance.now() * 0.001;
+    // Fade trail
+    ctx.fillStyle = 'rgba(2,2,8,0.06)';
+    ctx.fillRect(0, 0, w, h);
+
+    particles.forEach(p => {
+      // Noise-based flow field
+      const nx = p.x * 0.003 + t * 0.1;
+      const ny = p.y * 0.005;
+      const angle = smoothNoise(nx, ny) * Math.PI * 4;
+      let speed = (window.__ctrl_speed !== undefined ? window.__ctrl_speed : 0.8) + smoothNoise(nx + 100, ny + 100) * 1.5;
+
+      p.vx += Math.cos(angle) * speed * 0.1;
+      p.vy += Math.sin(angle) * speed * 0.05 - 0.02; // slight upward bias
+      p.vx *= 0.95;
+      p.vy *= 0.95;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life--;
+
+      // Reset if out of bounds or dead
+      if (p.life <= 0 || p.x < -50 || p.x > w + 50 || p.y < -50 || p.y > h + 50) {
+        p.x = Math.random() * w;
+        p.y = h * (0.25 + Math.random() * 0.4);
+        p.vx = 0; p.vy = 0;
+        p.life = Math.random() * 200 + 100;
+        p.hue = 120 + Math.random() * 180;
+      }
+
+      const alpha = Math.min(1, p.life / 50) * Math.min(1, (p.maxLife - p.life) / 30) * 0.6;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue}, 80%, 60%, ${alpha})`;
+      ctx.fill();
+    });
+
     requestAnimationFrame(render);
   }
   render();
 })();
 </script>
 <script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"js-NUM","label":"数量","min":150,"max":4500,"step":10,"value":1500,"unit":"","action":"jsVar","varName":"NUM"},{"type":"range","id":"js-speed","label":"速度","min":0.08,"max":3.2,"step":0.01,"value":0.8,"unit":"","action":"jsVar","varName":"speed"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

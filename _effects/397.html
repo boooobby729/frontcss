@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>字符分裂动效 - Bの宝库</title>
+<title>SVG 描边绘制动画 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -51,36 +51,11 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 @media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
 
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
-.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#0d0d1a,#060608);flex-direction:column;gap:40px}
+.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#0a0a1a,#000);flex-direction:column;gap:20px}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
 
   .nav a:hover{color:#fff;background:#ffffff10}
 
-
-.split-char{
-  display:inline-block;
-  font-size:clamp(3rem,8vw,7rem);
-  font-weight:900;
-  color:#fff;
-  transition:transform .6s cubic-bezier(.34,1.56,.64,1), color .3s;
-  transform-origin:center center;
-  cursor:pointer;
-  background:linear-gradient(135deg,#6366f1,#a78bfa,#38bdf8);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-.split-char:hover{
-  transform:translateY(-20px) rotateX(30deg) scale(1.3) !important;
-}
-#split-container:hover .split-char{
-  transform:translate(var(--tx),var(--ty)) rotate(var(--tr)) scale(0.5);
-  opacity:0.3;
-}
-#split-container:hover .split-char:hover{
-  transform:translateY(-20px) rotateX(30deg) scale(1.3) !important;
-  opacity:1;
-}
 
 </style>
 </head>
@@ -98,46 +73,220 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <a href="../_cat/30-text-effects.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
 <div class="stage">
-    <div id="split-container" style="display:flex;gap:4px;cursor:default;perspective:800px"></div>
-    <p style="color:rgba(255,255,255,.3);font-size:.8rem">悬停文字触发爆炸</p>
+    <svg id="stroke-svg" viewBox="0 0 800 200" style="width:min(90vw,800px);height:auto;overflow:visible">
+      <defs>
+        <filter id="stroke-glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="stroke-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#6366f1"/>
+          <stop offset="50%" stop-color="#a78bfa"/>
+          <stop offset="100%" stop-color="#38bdf8"/>
+        </linearGradient>
+      </defs>
+      <text id="stroke-text-el" x="400" y="150" text-anchor="middle"
+        font-family="'SF Pro Display',-apple-system,sans-serif"
+        font-size="140" font-weight="900" letter-spacing="-4"
+        fill="none" stroke="url(#stroke-grad)" stroke-width="2"
+        filter="url(#stroke-glow)">DRAW</text>
+    </svg>
+    <p style="color:rgba(255,255,255,.25);font-size:.8rem;letter-spacing:.1em">STROKE ANIMATION</p>
   </div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">字符分裂动效</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">SVG 描边绘制动画</div>
 </div>
 <script>
 (function(){
-  const text='CREATIVE';
-  const container=document.getElementById('split-container');
-  text.split('').forEach((ch,i)=>{
-    const span=document.createElement('span');
-    span.className='split-char';
-    span.textContent=ch;
-    const tx=(Math.random()-0.5)*200;
-    const ty=(Math.random()-0.5)*200;
-    const tr=(Math.random()-0.5)*90;
-    span.style.setProperty('--tx',tx+'px');
-    span.style.setProperty('--ty',ty+'px');
-    span.style.setProperty('--tr',tr+'deg');
-    span.style.animationDelay=i*0.08+'s';
-    container.appendChild(span);
-  });
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
+<script>
+(function(){
+  const el=document.getElementById('stroke-text-el');
+  const words=['DRAW','WRITE','TRACE','CRAFT','SIGN'];
+  let idx=0;
 
-  // Entrance animation
-  const chars=container.querySelectorAll('.split-char');
-  chars.forEach((c,i)=>{
-    c.style.opacity='0';
-    c.style.transform='translateY(60px) rotateX(-90deg)';
-    setTimeout(()=>{
-      c.style.transition='transform .7s cubic-bezier(.34,1.56,.64,1), opacity .5s';
-      c.style.opacity='1';
-      c.style.transform='translateY(0) rotateX(0)';
-    },i*80+100);
-  });
+  function animateStroke(word){
+    el.textContent=word;
+    // Get total length after render
+    requestAnimationFrame(()=>{
+      const len=el.getTotalLength?el.getTotalLength():2000;
+      el.style.strokeDasharray=len;
+      el.style.strokeDashoffset=len;
+      el.style.transition='none';
+      requestAnimationFrame(()=>{
+        el.style.transition='stroke-dashoffset 1.8s cubic-bezier(.4,0,.2,1)';
+        el.style.strokeDashoffset='0';
+      });
+    });
+  }
+
+  animateStroke(words[0]);
+  setInterval(()=>{
+    idx=(idx+1)%words.length;
+    animateStroke(words[idx]);
+  },2800);
 })();
 </script>
 <script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

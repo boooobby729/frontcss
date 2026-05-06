@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>弹簧阻尼球 - Bの宝库</title>
+<title>弹性展开菜单 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -51,7 +51,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 @media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
 
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
-.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#0d0d1a,#060608);flex-direction:column;gap:30px}
+.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#0a0a0f;flex-direction:column;gap:24px}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
 
   .nav a:hover{color:#fff;background:#ffffff10}
@@ -73,101 +73,219 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <a href="../_cat/34-spring-physics.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
 <div class="stage">
-    <canvas id="spring-ball-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
-    <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:20px;z-index:10">
-      <label style="font-size:.75rem;color:rgba(255,255,255,.5)">刚度: <input type="range" id="stiffness" min="0.01" max="0.3" step="0.01" value="0.08" style="width:80px;vertical-align:middle"></label>
-      <label style="font-size:.75rem;color:rgba(255,255,255,.5)">阻尼: <input type="range" id="damping" min="0.8" max="0.99" step="0.01" value="0.92" style="width:80px;vertical-align:middle"></label>
-    </div>
-    <p style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.15);font-size:1rem;letter-spacing:.2em;pointer-events:none;z-index:5">CLICK TO LAUNCH</p>
+    <button id="spring-menu-trigger" style="padding:14px 36px;background:rgba(99,102,241,.15);border:1.5px solid rgba(99,102,241,.5);color:#a78bfa;border-radius:12px;cursor:pointer;font-size:1rem;font-weight:600;font-family:inherit;letter-spacing:.05em;transition:background .2s">Toggle Menu</button>
+    <div id="spring-menu-items" style="display:flex;flex-direction:column;gap:10px;min-width:200px"></div>
   </div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">弹簧阻尼球</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">弹性展开菜单</div>
 </div>
 <script>
 (function(){
-  const demo=document.getElementById('spring-ball-demo');
-  const canvas=document.getElementById('spring-ball-canvas');
-  const ctx=canvas.getContext('2d');
-  let w,h;
-  function resize(){w=canvas.width=demo.clientWidth;h=canvas.height=demo.clientHeight;}
-  resize();window.addEventListener('resize',resize);
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
+<script>
+(function(){
+  const trigger=document.getElementById('spring-menu-trigger');
+  const container=document.getElementById('spring-menu-items');
+  const labels=['Dashboard','Projects','Analytics','Settings','Profile'];
+  const items=[];
+  let open=false;
 
-  const ball={x:0,y:0,vx:0,vy:0,targetX:0,targetY:0,r:20};
-  ball.x=w/2;ball.y=h/2;ball.targetX=w/2;ball.targetY=h/2;
-
-  const trail=[];
-
-  demo.addEventListener('click',e=>{
-    const r=demo.getBoundingClientRect();
-    ball.targetX=e.clientX-r.left;
-    ball.targetY=e.clientY-r.top;
+  labels.forEach((label,i)=>{
+    const div=document.createElement('div');
+    div.textContent=label;
+    div.style.cssText='padding:14px 24px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#fff;font-weight:500;font-size:.9rem;transform:translateY(30px) scale(0.9);opacity:0;cursor:pointer;transition:background .2s';
+    div.addEventListener('mouseenter',()=>{div.style.background='rgba(99,102,241,.1)';});
+    div.addEventListener('mouseleave',()=>{div.style.background='rgba(255,255,255,.03)';});
+    container.appendChild(div);
+    items.push({el:div,y:30,vy:0,targetY:30,scale:0.9,opacity:0});
   });
 
-  function render(){
-    const stiffness=parseFloat(document.getElementById('stiffness').value);
-    const damping=parseFloat(document.getElementById('damping').value);
-
-    const dx=ball.targetX-ball.x;
-    const dy=ball.targetY-ball.y;
-    ball.vx+=dx*stiffness;
-    ball.vy+=dy*stiffness;
-    ball.vx*=damping;
-    ball.vy*=damping;
-    ball.x+=ball.vx;
-    ball.y+=ball.vy;
-
-    trail.push({x:ball.x,y:ball.y,life:1});
-    if(trail.length>60) trail.shift();
-
-    ctx.fillStyle='rgba(13,13,26,0.3)';
-    ctx.fillRect(0,0,w,h);
-
-    // Trail
-    trail.forEach((p,i)=>{
-      p.life-=0.02;
-      if(p.life<=0) return;
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,ball.r*p.life*0.6,0,Math.PI*2);
-      ctx.fillStyle=`hsla(260,80%,70%,${p.life*0.3})`;
-      ctx.fill();
+  trigger.addEventListener('click',()=>{
+    open=!open;
+    items.forEach((item,i)=>{
+      item.targetY=open?0:30;
+      // Stagger by resetting velocity
+      setTimeout(()=>{item.vy=open?-8:5;},i*60);
     });
+  });
 
-    // Spring line
-    ctx.beginPath();
-    ctx.moveTo(ball.targetX,ball.targetY);
-    ctx.lineTo(ball.x,ball.y);
-    ctx.strokeStyle='rgba(99,102,241,0.3)';
-    ctx.lineWidth=1;
-    ctx.stroke();
-
-    // Target
-    ctx.beginPath();
-    ctx.arc(ball.targetX,ball.targetY,6,0,Math.PI*2);
-    ctx.fillStyle='rgba(99,102,241,0.5)';
-    ctx.fill();
-
-    // Ball
-    const speed=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
-    const hue=260+speed*3;
-    ctx.beginPath();
-    ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);
-    const g=ctx.createRadialGradient(ball.x-5,ball.y-5,0,ball.x,ball.y,ball.r);
-    g.addColorStop(0,`hsla(${hue},80%,75%,1)`);
-    g.addColorStop(1,`hsla(${hue},70%,50%,0.8)`);
-    ctx.fillStyle=g;
-    ctx.shadowColor=`hsla(${hue},90%,60%,0.6)`;
-    ctx.shadowBlur=20;
-    ctx.fill();
-    ctx.shadowBlur=0;
-
-    requestAnimationFrame(render);
+  function animate(){
+    items.forEach(item=>{
+      item.vy+=(item.targetY-item.y)*0.1;
+      item.vy*=0.75;
+      item.y+=item.vy;
+      item.opacity=open?Math.min(1,1-item.y/30):Math.max(0,1-item.y/30);
+      item.el.style.transform=`translateY(${item.y}px) scale(${0.9+item.opacity*0.1})`;
+      item.el.style.opacity=item.opacity;
+    });
+    requestAnimationFrame(animate);
   }
-  render();
+  animate();
+
+  // Auto demo
+  setTimeout(()=>trigger.click(),800);
 })();
 </script>
 <script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"mouse-influence","label":"鼠标影响","min":0,"max":3,"step":0.1,"value":1,"unit":"x","action":"mouseScale"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

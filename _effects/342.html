@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Neon Noir 霓虹暗黑 - Bの宝库</title>
+<title>Candy / Pastel 糖果柔彩 - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
@@ -54,6 +54,195 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 .stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#111}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
 
+  h1 { text-align: center; font-size: 2.4rem; margin-bottom: 12px; background: linear-gradient(135deg, #fee140, #fa709a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { text-align: center; color: #666; margin-bottom: 60px; }
+
+  .section { margin-bottom: 80px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+  .section-title { font-size: 1.5rem; color: #fff; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+  .section-tag { font-size: .7rem; padding: 3px 12px; border-radius: 20px; display: inline-block; }
+  .section-desc { color: #666; font-size: .85rem; margin-bottom: 32px; }
+  .neu-bg, .clay-bg, .brut-bg { box-shadow: 0 0 40px rgba(0,0,0,.5); }
+
+  .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+
+  /* ========= NEUMORPHISM ========= */
+  .neu-bg { background: #e0e5ec; border-radius: 20px; padding: 40px; }
+  .neu-card { background: #e0e5ec; border-radius: 16px; padding: 24px; box-shadow: 8px 8px 16px #b8bec7, -8px -8px 16px #ffffff; text-align: center; }
+  .neu-card h4 { color: #5a6175; margin-bottom: 8px; font-size: .9rem; }
+  .neu-card p { color: #8a94a6; font-size: .75rem; }
+  .neu-btn { display: inline-block; margin-top: 16px; padding: 12px 32px; background: #e0e5ec; border-radius: 12px; box-shadow: 6px 6px 12px #b8bec7, -6px -6px 12px #ffffff; color: #5a6175; font-weight: 600; font-size: .85rem; cursor: pointer; transition: all .2s; border: none; }
+  .neu-btn:active { box-shadow: inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff; }
+  .neu-toggle { width: 60px; height: 32px; background: #e0e5ec; border-radius: 16px; box-shadow: inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff; position: relative; cursor: pointer; margin: 16px auto 0; }
+  .neu-toggle-dot { width: 24px; height: 24px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; position: absolute; top: 4px; left: 4px; transition: transform .3s cubic-bezier(.68,-.55,.27,1.55); }
+  .neu-toggle.on .neu-toggle-dot { transform: translateX(28px); }
+  .neu-progress { height: 8px; background: #e0e5ec; border-radius: 4px; box-shadow: inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff; margin-top: 16px; overflow: hidden; }
+  .neu-progress-fill { height: 100%; width: 65%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px; }
+
+  /* ========= GLASSMORPHISM ========= */
+  .glass-bg { background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; }
+  .glass-blob { position: absolute; border-radius: 50%; filter: blur(40px); opacity: .6; }
+  .glass-blob-1 { width: 200px; height: 200px; background: #f093fb; top: -50px; right: -30px; }
+  .glass-blob-2 { width: 150px; height: 150px; background: #43e97b; bottom: -40px; left: 20px; }
+  .glass-card { background: rgba(255,255,255,.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.2); border-radius: 16px; padding: 24px; text-align: center; position: relative; z-index: 1; }
+  .glass-card h4 { color: #fff; margin-bottom: 8px; font-size: .9rem; }
+  .glass-card p { color: rgba(255,255,255,.7); font-size: .75rem; }
+  .glass-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #f093fb, #f5576c); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+  /* ========= CLAYMORPHISM ========= */
+  .clay-bg { background: #f0f0f3; border-radius: 20px; padding: 40px; }
+  .clay-card { background: #f0f0f3; border-radius: 24px; padding: 24px; border: 2px solid rgba(255,255,255,.8); box-shadow: 8px 8px 20px rgba(0,0,0,.08), inset -4px -4px 8px rgba(0,0,0,.04), inset 4px 4px 8px rgba(255,255,255,.9); text-align: center; transition: transform .3s; }
+  .clay-card:hover { transform: translateY(-4px); }
+  .clay-card h4 { color: #444; margin-bottom: 8px; font-size: .9rem; }
+  .clay-card p { color: #999; font-size: .75rem; }
+  .clay-icon { width: 56px; height: 56px; border-radius: 18px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 4px 4px 10px rgba(0,0,0,.06), inset -2px -2px 4px rgba(0,0,0,.03), inset 2px 2px 4px rgba(255,255,255,.8); }
+  .clay-icon-1 { background: linear-gradient(135deg, #ff9a9e, #fad0c4); }
+  .clay-icon-2 { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+  .clay-icon-3 { background: linear-gradient(135deg, #84fab0, #8fd3f4); }
+
+  /* ========= BRUTALISM ========= */
+  .brut-bg { background: #fffbe6; border-radius: 20px; padding: 40px; }
+  .brut-card { background: #fff; border: 3px solid #000; box-shadow: 8px 8px 0 #000; padding: 24px; text-align: center; transition: transform .2s, box-shadow .2s; cursor: pointer; }
+  .brut-card:hover { transform: translate(-3px, -3px); box-shadow: 11px 11px 0 #000; }
+  .brut-card:active { transform: translate(2px, 2px); box-shadow: 5px 5px 0 #000; }
+  .brut-card h4 { color: #000; font-size: 1.1rem; font-weight: 900; text-transform: uppercase; margin-bottom: 6px; }
+  .brut-card p { color: #555; font-size: .75rem; }
+  .brut-btn { display: inline-block; margin-top: 12px; padding: 10px 24px; background: #ff5733; color: #fff; font-weight: 900; border: 3px solid #000; box-shadow: 4px 4px 0 #000; cursor: pointer; text-transform: uppercase; font-size: .8rem; transition: all .15s; }
+  .brut-btn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 #000; }
+  .brut-badge { display: inline-block; background: #ffd700; border: 2px solid #000; padding: 4px 12px; font-weight: 900; font-size: .7rem; text-transform: uppercase; }
+
+  /* ========= AURORA UI ========= */
+  .aurora-bg { background: #0f0f1a; border-radius: 20px; padding: 40px; position: relative; overflow: hidden; }
+  .aurora-glow { position: absolute; filter: blur(80px); opacity: .5; border-radius: 50%; }
+  .aurora-g1 { width: 300px; height: 300px; background: #667eea; top: -100px; left: -50px; animation: auroraFloat 6s ease-in-out infinite alternate; }
+  .aurora-g2 { width: 250px; height: 250px; background: #f093fb; bottom: -80px; right: -30px; animation: auroraFloat 8s ease-in-out infinite alternate-reverse; }
+  .aurora-g3 { width: 200px; height: 200px; background: #43e97b; top: 50%; left: 50%; transform: translate(-50%,-50%); animation: auroraFloat 7s ease-in-out infinite alternate; }
+  @keyframes auroraFloat { 0%{ transform: translate(0,0);} 100%{ transform: translate(30px,-20px);} }
+  .aurora-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 24px; text-align: center; position: relative; z-index: 1; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  .aurora-card h4 { color: #fff; margin-bottom: 8px; font-size: .9rem; }
+  .aurora-card p { color: rgba(255,255,255,.5); font-size: .75rem; }
+
+  /* ========= RETRO / PIXEL ========= */
+  .retro-bg { background: #1a0a3e; border-radius: 20px; padding: 40px; background-image: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.03) 39px, rgba(255,255,255,.03) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.03) 39px, rgba(255,255,255,.03) 40px); }
+  .retro-card { background: #0d0d2b; border: 2px solid #667eea; padding: 20px; text-align: center; position: relative; }
+  .retro-card::before { content: ''; position: absolute; inset: -4px; border: 1px solid #667eea55; }
+  .retro-card h4 { color: #667eea; font-family: 'Courier New', monospace; font-size: .9rem; margin-bottom: 6px; text-shadow: 0 0 10px #667eea66; }
+  .retro-card p { color: #8a94a6; font-size: .7rem; font-family: 'Courier New', monospace; }
+  .retro-scanline { position: absolute; inset: 0; background: repeating-linear-gradient(transparent, transparent 2px, rgba(0,0,0,.15) 2px, rgba(0,0,0,.15) 4px); pointer-events: none; }
+  .retro-glow-text { color: #43e97b; text-shadow: 0 0 10px #43e97b88, 0 0 20px #43e97b44; font-family: 'Courier New', monospace; font-weight: 700; }
+
+  /* === EXPANDED === */
+  /* Frosted Metal */
+  .metal-bg { background: linear-gradient(145deg, #1a1a2e, #2a2a3e); border-radius: 20px; padding: 40px; }
+  .metal-card { background: linear-gradient(145deg, #2a2a3e, #1e1e30); border: 1px solid rgba(255,255,255,.05); border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.05); transition: transform .3s; }
+  .metal-card:hover { transform: translateY(-4px); }
+  .metal-card h4 { color: #ccc; margin-bottom: 8px; }
+  .metal-card p { color: #888; font-size: .75rem; }
+
+  /* Holographic */
+  .holo-bg { background: #0a0a0f; border-radius: 20px; padding: 40px; position: relative; overflow: hidden; }
+  .holo-card { background: linear-gradient(135deg, rgba(102,126,234,.1), rgba(240,147,251,.1), rgba(67,233,123,.1)); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 24px; text-align: center; position: relative; z-index: 1; transition: all .3s; }
+  .holo-card::before { content: ''; position: absolute; inset: 0; border-radius: 16px; background: linear-gradient(135deg, #667eea22, #f093fb22, #43e97b22, #f5576c22); background-size: 300% 300%; animation: holoShift 6s ease infinite; opacity: 0; transition: opacity .3s; }
+  .holo-card:hover::before { opacity: 1; }
+  @keyframes holoShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  .holo-card h4 { color: #fff; margin-bottom: 8px; position: relative; z-index: 1; }
+  .holo-card p { color: rgba(255,255,255,.5); font-size: .75rem; position: relative; z-index: 1; }
+
+  /* Cyberpunk */
+  .cyber-bg { background: #0a0a1a; border-radius: 20px; padding: 40px; border: 1px solid #ff005522; background-image: repeating-linear-gradient(0deg, transparent, transparent 39px, #ff005508 39px, #ff005508 40px); }
+  .cyber-card { background: #0d0d1a; border: 1px solid #ff0055; clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px)); padding: 24px; text-align: center; position: relative; }
+  .cyber-card h4 { color: #ff0055; font-family: 'Courier New', monospace; text-transform: uppercase; font-size: .9rem; margin-bottom: 6px; text-shadow: 0 0 10px #ff005566; }
+  .cyber-card p { color: #888; font-size: .75rem; font-family: 'Courier New', monospace; }
+  .cyber-badge { display: inline-block; padding: 2px 10px; background: #ff005522; border: 1px solid #ff0055; color: #ff0055; font-size: .65rem; font-family: 'Courier New', monospace; }
+
+  /* ========= GRADIENT MESH ========= */
+  .mesh-bg { background: #0f0f1a; border-radius: 20px; padding: 40px; position: relative; overflow: hidden; }
+  .mesh-bg::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 50%, rgba(102,126,234,.15), transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(240,147,251,.12), transparent 50%), radial-gradient(ellipse at 50% 80%, rgba(67,233,123,.1), transparent 50%); animation: meshPulse 8s ease-in-out infinite alternate; }
+  @keyframes meshPulse { 0% { opacity: .6; } 100% { opacity: 1; } }
+  .mesh-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 16px; padding: 24px; text-align: center; position: relative; z-index: 1; }
+  .mesh-card h4 { color: #ddd; margin-bottom: 8px; font-size: .9rem; }
+  .mesh-card p { color: rgba(255,255,255,.4); font-size: .75rem; }
+
+  /* ========= PAPER CUT ========= */
+  .paper-bg { background: #f5f0e8; border-radius: 20px; padding: 40px; box-shadow: 0 0 40px rgba(0,0,0,.5); }
+  .paper-card { background: #fffdf7; border-radius: 4px; padding: 24px; text-align: center; position: relative; box-shadow: 2px 3px 6px rgba(0,0,0,.08), 0 0 1px rgba(0,0,0,.1); }
+  .paper-card::before { content: ''; position: absolute; bottom: -6px; right: 8px; width: 80%; height: 12px; background: rgba(0,0,0,.05); border-radius: 50%; filter: blur(4px); }
+  .paper-card h4 { color: #333; margin-bottom: 8px; font-size: .9rem; font-weight: 700; }
+  .paper-card p { color: #888; font-size: .75rem; }
+
+  /* ========= NEON NOIR ========= */
+  .noir-bg { background: #050510; border-radius: 20px; padding: 40px; }
+  .noir-card { background: #0a0a18; border: 1px solid #1a1a2e; border-radius: 12px; padding: 24px; text-align: center; transition: all .3s; }
+  .noir-card:hover { border-color: var(--neon-c, #ff00ff); box-shadow: 0 0 20px color-mix(in srgb, var(--neon-c, #ff00ff) 30%, transparent), inset 0 0 20px color-mix(in srgb, var(--neon-c, #ff00ff) 5%, transparent); }
+  .noir-card h4 { color: #eee; margin-bottom: 8px; font-size: .9rem; }
+  .noir-card p { color: #555; font-size: .75rem; }
+
+  /* ========= LIQUID GRADIENT ========= */
+  .liquid-bg { background: #0a0a0f; border-radius: 20px; padding: 40px; }
+  .liquid-card { border-radius: 24px; padding: 24px; text-align: center; position: relative; overflow: hidden; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .liquid-card::before { content: ''; position: absolute; inset: -20%; border-radius: 40%; animation: liquidSpin 8s linear infinite; z-index: 0; }
+  .liquid-card::after { content: ''; position: absolute; inset: 3px; border-radius: 21px; background: #13131a; z-index: 0; }
+  .lq1::before { background: conic-gradient(#667eea, #f093fb, #667eea); }
+  .lq2::before { background: conic-gradient(#43e97b, #38f9d7, #43e97b); }
+  .lq3::before { background: conic-gradient(#f5576c, #ffd700, #f5576c); }
+  @keyframes liquidSpin { to { transform: rotate(360deg); } }
+  .liquid-card h4 { color: #fff; margin-bottom: 8px; font-size: .9rem; position: relative; z-index: 1; }
+  .liquid-card p { color: rgba(255,255,255,.5); font-size: .75rem; position: relative; z-index: 1; }
+
+  /* ========= ISOMETRIC ========= */
+  .iso-bg { background: #0f0f1a; border-radius: 20px; padding: 40px; }
+  .iso-card { background: #1a1a2e; padding: 24px; text-align: center; transform: rotateX(50deg) rotateZ(-45deg) scale(.85); transform-style: preserve-3d; box-shadow: 20px 20px 0 #0a0a14, 40px 40px 0 #050510; transition: transform .4s, box-shadow .4s; }
+  .iso-card:hover { transform: rotateX(50deg) rotateZ(-45deg) scale(.85) translateZ(20px); box-shadow: 30px 30px 0 #0a0a14, 60px 60px 0 #050510; }
+  .iso-card h4 { color: #ddd; margin-bottom: 8px; font-size: .9rem; }
+  .iso-card p { color: #666; font-size: .75rem; }
+
+  /* ========= GRAIN / FILM ========= */
+  .grain-bg { background: #1a1a1a; border-radius: 20px; padding: 40px; position: relative; overflow: hidden; }
+  .grain-bg::after { content: ''; position: absolute; inset: -50%; width: 200%; height: 200%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E"); pointer-events: none; opacity: .6; }
+  .grain-card { background: #222; border-radius: 12px; padding: 24px; text-align: center; position: relative; z-index: 1; border: 1px solid #333; }
+  .grain-card h4 { color: #e0d5c1; margin-bottom: 8px; font-size: .9rem; font-weight: 700; }
+  .grain-card p { color: #8a8070; font-size: .75rem; }
+
+  /* ========= CANDY / PASTEL ========= */
+  .candy-bg { background: linear-gradient(135deg, #ffecd2, #fcb69f); border-radius: 20px; padding: 40px; box-shadow: 0 0 40px rgba(0,0,0,.5); }
+  .candy-card { background: #fff; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,.06); border: 2px solid transparent; transition: border-color .3s, transform .3s; }
+  .candy-card:hover { border-color: #ff9a9e; transform: translateY(-4px); }
+  .candy-card h4 { color: #333; margin-bottom: 8px; font-size: .9rem; }
+  .candy-card p { color: #999; font-size: .75rem; }
+  .candy-pill { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: .7rem; font-weight: 600; }
+
+  /* ========= MONOCHROME ========= */
+  .mono-bg { background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 0 40px rgba(0,0,0,.5); }
+  .mono-card { background: #fff; border: 1px solid #e0e0e0; padding: 24px; text-align: center; transition: all .3s; }
+  .mono-card:hover { background: #000; border-color: #000; }
+  .mono-card h4 { color: #000; margin-bottom: 8px; font-size: .9rem; font-weight: 700; transition: color .3s; }
+  .mono-card:hover h4 { color: #fff; }
+  .mono-card p { color: #666; font-size: .75rem; transition: color .3s; }
+  .mono-card:hover p { color: #aaa; }
+
+  /* ========= DUOTONE ========= */
+  .duo-bg { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); border-radius: 20px; padding: 40px; }
+  .duo-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 24px; text-align: center; }
+  .duo-card h4 { margin-bottom: 8px; font-size: .9rem; }
+  .duo-card p { font-size: .75rem; }
+
+  /* ========= OUTLINE / WIREFRAME ========= */
+  .wire-bg { background: #0a0a0f; border-radius: 20px; padding: 40px; }
+  .wire-card { background: transparent; border: 1px solid rgba(255,255,255,.15); border-radius: 16px; padding: 24px; text-align: center; transition: all .4s; position: relative; overflow: hidden; }
+  .wire-card::before { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,.02); transform: translateX(-100%); transition: transform .4s; }
+  .wire-card:hover::before { transform: translateX(0); }
+  .wire-card:hover { border-color: rgba(255,255,255,.4); }
+  .wire-card h4 { color: #ccc; margin-bottom: 8px; font-size: .9rem; }
+  .wire-card p { color: #555; font-size: .75rem; }
+
+  /* ========= DARK LUXURY ========= */
+  .luxury-bg { background: linear-gradient(135deg, #0c0c0c, #1a1a1a); border-radius: 20px; padding: 40px; border: 1px solid #2a2a2a; }
+  .luxury-card { background: linear-gradient(145deg, #1a1a1a, #111); border: 1px solid #333; border-radius: 12px; padding: 24px; text-align: center; position: relative; overflow: hidden; }
+  .luxury-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,215,0,.03), transparent); animation: luxurySweep 4s ease-in-out infinite; }
+  @keyframes luxurySweep { 0% { left: -50%; } 100% { left: 150%; } }
+  .luxury-card h4 { color: #d4af37; margin-bottom: 8px; font-size: .9rem; font-weight: 600; }
+  .luxury-card p { color: #666; font-size: .75rem; }
+
+
 
 </style>
 </head>
@@ -70,14 +259,181 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item active" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
 <a href="../_cat/15-morphism-styles.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
 <div class="effect-main">
-<div class="stage"></div>
+<div class="stage"><p class="section-desc">柔和马卡龙配色、圆润卡片、轻盈阴影</p>
+    <div class="candy-bg">
+      <div class="demo-grid">
+        <div class="candy-card"><span class="candy-pill" style="background:#ff9a9e22;color:#ff9a9e;">Sweet</span><h4>Rose</h4><p>Soft pastel pink accent</p></div>
+        <div class="candy-card"><span class="candy-pill" style="background:#a18cd122;color:#a18cd1;">Dreamy</span><h4>Lavender</h4><p>Gentle purple pastel card</p></div>
+        <div class="candy-card"><span class="candy-pill" style="background:#84fab022;color:#84fab0;">Fresh</span><h4>Mint</h4><p>Cool mint green soft feel</p></div>
+      </div>
+    </div></div>
 </div>
 <div class="ctrl-sidebar" id="ctrlSidebar">
-<div class="ctrl-title">Neon Noir 霓虹暗黑</div>
-<div class="ctrl-empty">沉浸式体验</div>
+<div class="ctrl-title">Candy / Pastel 糖果柔彩</div>
 </div>
+<script>
+(function(){
+  // Hook performance.now for time scaling
+  var _origNow = performance.now.bind(performance);
+  var _timeScale = 1;
+  var _timeBase = _origNow();
+  var _virtualTime = _timeBase;
+  var _lastReal = _timeBase;
+  window.__getTimeScale = function(){ return _timeScale; };
+  window.__setTimeScale = function(v){ _timeScale = v; };
+  Object.defineProperty(performance, 'now', { value: function() {
+    var real = _origNow();
+    var delta = real - _lastReal;
+    _lastReal = real;
+    _virtualTime += delta * _timeScale;
+    return _virtualTime;
+  }, writable: true, configurable: true });
+  // Also hook Date.now for setInterval-based effects
+  var _origDateNow = Date.now;
+  var _dateBase = _origDateNow();
+  var _virtualDate = _dateBase;
+  var _lastRealDate = _dateBase;
+  Date.now = function() {
+    var real = _origDateNow();
+    var delta = real - _lastRealDate;
+    _lastRealDate = real;
+    _virtualDate += delta * _timeScale;
+    return Math.floor(_virtualDate);
+  };
+})();</script>
 
 <script>
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-duration","label":"动画时长","min":1.2,"max":30,"step":0.1,"value":6,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#fee140","action":"cssColor","index":0},{"type":"color","id":"css-color-1","label":"副色","value":"#666666","action":"cssColor","index":1},{"type":"color","id":"css-color-2","label":"副色","value":"#666666","action":"cssColor","index":2},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+
+  // CSS duration control
+  var _origDurations = null;
+  function getAllAnimatedEls() {
+    var stage = document.querySelector('.stage');
+    if (!stage) return [];
+    return [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+  }
+  function cacheDurations() {
+    if (_origDurations) return;
+    _origDurations = new Map();
+    getAllAnimatedEls().forEach(function(el) {
+      var cs = getComputedStyle(el);
+      if (cs.animationDuration && cs.animationDuration !== '0s') {
+        _origDurations.set(el, parseFloat(cs.animationDuration));
+      }
+    });
+  }
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'timeScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__setTimeScale(v);
+            // Also scale CSS animations
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = (origDur / v) + 's';
+            });
+          } else if (c.action === 'cssDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            cacheDurations();
+            _origDurations.forEach(function(origDur, el) {
+              el.style.animationDuration = v + 's';
+            });
+          } else if (c.action === 'mouseScale') {
+            vs.textContent = v.toFixed(1) + 'x';
+            window.__MOUSE_SCALE__ = v;
+          } else if (c.action === 'jsVar') {
+            vs.textContent = v + (c.unit || '');
+            window['__ctrl_' + c.varName] = v;
+            // Trigger resize to recalc layout-dependent vars (e.g. columns/drops for fontSize)
+            window.dispatchEvent(new Event('resize'));
+            // Also trigger custom event for effects without rAF loop
+            window.dispatchEvent(new Event('__jsVarChanged'));
+          } else if (c.action === 'transitionDuration') {
+            vs.textContent = v.toFixed(1) + 's';
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.transitionDuration && cs.transitionDuration !== '0s') {
+                  el.style.transitionDuration = v + 's';
+                }
+              });
+            }
+          } else if (c.action === 'cssBorderRadius') {
+            vs.textContent = v + (c.unit || 'px');
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = Array.prototype.slice.call(stage.querySelectorAll('*'));
+              allEls.forEach(function(el) {
+                var cs = getComputedStyle(el);
+                if (cs.borderRadius && cs.borderRadius !== '0px') {
+                  el.style.borderRadius = v + (c.unit || 'px');
+                }
+              });
+            }
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value.slice(0,7) + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          if (c.action === 'cssColor') {
+            var stage = document.querySelector('.stage');
+            if (stage) {
+              var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+              allEls.forEach(function(el) {
+                if (c.index === 0) {
+                  el.style.setProperty('--ctrl-color-0', inp.value);
+                  if (el.style.color && el.style.color !== 'inherit') el.style.color = inp.value;
+                }
+              });
+            }
+            document.documentElement.style.setProperty('--ctrl-color-' + c.index, inp.value);
+          } else if (c.action === 'shaderColor') {
+            window['__shaderColor' + c.index] = inp.value;
+          }
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();
 
 (function(){
   var scroll=document.querySelector('.nav-scroll');

@@ -157,13 +157,9 @@ function cleanCss(css) {
     .replace(/\s*\.card-info h3\s*\{[^}]*\}/g, '')
     .replace(/\s*\.card-info \.tag\s*\{[^}]*\}/g, '')
     .replace(/\s*\.card-info p\s*\{[^}]*\}/g, '')
-    // 清除 stage 自带的背景色
     .replace(/(\.stage[^{]*\{[^}]*)background\s*:[^;]+;/g, '$1')
-    // 清除子页面 html 背景
     .replace(/\s*html\s*\{[^}]*\}/g, '')
-    // 清除所有深色纯色背景（#0xx #1xx 系列，如 #0a0a0f #13131a #111 #000 等）
     .replace(/background(?:-color)?\s*:\s*#[0-1][0-9a-fA-F][0-9a-fA-F](?:[0-9a-fA-F]{3})?\s*(?:!important)?\s*;/gi, '')
-    // 清除 rgb/rgba 三通道都极低的深色
     .replace(/background(?:-color)?\s*:\s*rgba?\(\s*(?:\d|[01]\d|2[0-9]|30)\s*,\s*(?:\d|[01]\d|2[0-9]|30)\s*,\s*(?:\d|[01]\d|2[0-9]|30)[^)]*\)\s*(?:!important)?\s*;/gi, '');
 }
 
@@ -179,7 +175,7 @@ console.log(`Found ${files.length} sub-pages\n`);
 
 const parsedCategories = [];
 const iframeCategories = [];
-const collectFiles = []; // collect 合集：46+ 的文件
+const collectFiles = [];
 let totalEffects = 0;
 
 for (const file of files) {
@@ -195,7 +191,6 @@ for (const file of files) {
     .replace(/\s*\|.*$/, '')
     .trim();
 
-  // 46+ 的文件都归入 Collect 合集
   if (num >= 46) {
     collectFiles.push({ id: catId, file, title: cleanTitle, num });
     totalEffects += 1;
@@ -219,8 +214,7 @@ for (const file of files) {
   }
 }
 
-console.log(`\n✅ Total: ${totalEffects} effects from ${parsedCategories.length + iframeCategories.length} categories`);
-console.log(`   Parsed: ${parsedCategories.length} | Iframe: ${iframeCategories.length}`);
+console.log(`\n✅ Total: ${totalEffects} effects from ${parsedCategories.length + iframeCategories.length + (collectFiles.length > 0 ? 1 : 0)} categories`);
 
 // ============================================================
 // 验证 HTML 完整性
@@ -243,21 +237,15 @@ if (htmlErrors === 0) console.log(`✓ All HTML structures validated`);
 // ============================================================
 const sortedParsed = [...parsedCategories].sort((a, b) => a.file.localeCompare(b.file));
 const sortedIframe = [...iframeCategories].sort((a, b) => a.file.localeCompare(b.file));
+const sortedCollect = [...collectFiles].sort((a, b) => a.file.localeCompare(b.file));
 
-// ============================================================
-// 侧边栏导航（纯文字，无数字，无 dot）
-// ============================================================
-let sidebarItems = '';
-sortedParsed.forEach((cat, i) => {
-  const active = i === 0 ? ' active' : '';
-  sidebarItems += `      <button class="filter-item${active}" data-cat="${cat.id}">${cat.title}</button>\n`;
-});
-sortedIframe.forEach(cat => {
-  sidebarItems += `      <button class="filter-item" data-cat="${cat.id}">${cat.title}</button>\n`;
-});
-// Collect 合集作为一个分类
-if (collectFiles.length > 0) {
-  sidebarItems += `      <button class="filter-item" data-cat="collect">Collect</button>\n`;
+// 所有分类合并（用于首页展示）
+const allCategories = [
+  ...sortedParsed.map(c => ({ id: c.id, file: c.file, title: c.title, count: c.effects.length, type: 'parsed' })),
+  ...sortedIframe.map(c => ({ id: c.id, file: c.file, title: c.title, count: 1, type: 'iframe' })),
+];
+if (sortedCollect.length > 0) {
+  allCategories.push({ id: 'collect', file: null, title: 'Collect', count: sortedCollect.length, type: 'collect' });
 }
 
 // ============================================================
@@ -296,269 +284,246 @@ ${cat.scripts.map(s => `<script>${s}<\/script>`).join('\n')}
     eff._file = `_effects/${fileName}`;
   }
 }
-
-// iframe 类效果直接用原文件
-for (const cat of sortedIframe) {
-  cat._file = cat.file;
-}
-
 console.log(`📁 Generated ${effectIndex} standalone effect files in _effects/`);
 
 // ============================================================
-// 卡片 HTML（点击全屏展示单个效果）
+// 生成每个 parsed 分类的集合页面（二级页面，卡片网格 + overlay）
 // ============================================================
-let allCards = '';
+const catPagesDir = path.join(dir, '_cat');
+if (fs.existsSync(catPagesDir)) fs.rmSync(catPagesDir, { recursive: true });
+fs.mkdirSync(catPagesDir);
+
 for (const cat of sortedParsed) {
+  let cards = '';
   for (const eff of cat.effects) {
     const stageAttrs = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
     const stageClass = eff.stageClass ? ` ${eff.stageClass}` : '';
-    allCards += `      <div class="card" data-cat="${cat.id}" data-src="${eff._file}">
-        <div class="card-visual"><div class="stage${stageClass}"${stageAttrs}>${eff.stageHtml}</div></div>
-        <div class="card-info"><h3>${eff.name}</h3>${eff.tag ? `<span class="tag">${eff.tag}</span>` : ''}</div>
-      </div>\n`;
+    cards += `    <div class="card" data-src="../${eff._file}">
+      <div class="card-visual"><div class="stage${stageClass}"${stageAttrs}>${eff.stageHtml}</div></div>
+      <div class="card-info"><h3>${eff.name}</h3>${eff.tag ? `<span class="tag">${eff.tag}</span>` : ''}</div>
+    </div>\n`;
   }
-}
 
-let iframeCards = '';
-for (const cat of sortedIframe) {
-  iframeCards += `      <div class="card card-iframe" data-cat="${cat.id}" data-src="${cat._file}">
-        <div class="card-visual"><iframe src="${cat.file}" loading="lazy" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe></div>
-        <div class="card-info"><h3>${cat.title}</h3></div>
-      </div>\n`;
-}
-
-// Collect 合集卡片
-let collectCards = '';
-const sortedCollect = [...collectFiles].sort((a, b) => a.file.localeCompare(b.file));
-for (const item of sortedCollect) {
-  collectCards += `      <div class="card card-iframe" data-cat="collect" data-src="${item.file}">
-        <div class="card-visual"><iframe src="${item.file}" loading="lazy" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe></div>
-        <div class="card-info"><h3>${item.title}</h3></div>
-      </div>\n`;
-}
-
-// ============================================================
-// 合并 CSS
-// ============================================================
-let allCss = '';
-for (const cat of sortedParsed) {
-  allCss += `\n/* ${cat.title} */\n${cat.css}\n`;
-}
-
-// ============================================================
-// 输出 HTML
-// ============================================================
-const firstCatId = sortedParsed[0]?.id || '';
-
-const finalHtml = `<!DOCTYPE html>
+  const catHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bの宝库</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${cat.title} - Bの宝库</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;min-height:100vh;overflow-x:hidden}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
 a{text-decoration:none;color:inherit}
-
-/* ── Layout ── */
-.app-layout{display:flex;min-height:100vh}
-
-/* ── Sidebar ── */
-.sidebar{position:fixed;top:0;left:0;bottom:0;width:230px;background:rgba(6,6,6,.95);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-right:1px solid rgba(255,255,255,.06);z-index:100;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:none}
-.sidebar::-webkit-scrollbar{display:none}
-.sidebar-header{padding:36px 20px 20px}
-.sidebar-logo{font-size:1rem;font-weight:600;letter-spacing:-.02em;color:rgba(255,255,255,.9)}
-.sidebar-nav{padding:4px 10px 40px;flex:1}
-.nav-group{margin-bottom:20px}
-.nav-label{font-size:.6rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:0 10px;margin-bottom:1px;display:block}
-.filter-item{display:block;width:100%;padding:5px 10px;border:none;background:transparent;color:rgba(255,255,255,.42);font-size:.75rem;font-weight:400;border-radius:5px;cursor:pointer;transition:color .12s,background .12s;text-align:left;font-family:inherit;letter-spacing:-.01em;line-height:1.4}
-.filter-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.88)}
-.filter-item.active{background:rgba(255,255,255,.1);color:#fff;font-weight:500}
-
-/* ── Main ── */
-.main-content{margin-left:230px;flex:1;min-width:0}
-.page-header{padding:40px 32px 16px}
-.page-title{font-size:1.75rem;font-weight:600;letter-spacing:-.03em;line-height:1;color:rgba(255,255,255,.9)}
-
-/* ── Grid ── */
-.grid-section{padding:0 0 80px}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:rgba(255,255,255,.07)}
-
-/* ── Card ── */
-.card{position:relative;background:#111;color:inherit;opacity:0;transform:translateY(8px);display:none;flex-direction:column;transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1);cursor:pointer}
-.card.visible{opacity:1;transform:none}
-.card.show{display:flex}
-.card:hover{background:#161616;z-index:1}
-.card:hover .card-visual{background:#161616 !important}
-.card:hover .card-visual .stage{background:#161616 !important}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;gap:12px;background:rgba(17,17,17,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.back-btn{color:rgba(255,255,255,.5);font-size:.8rem;padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);transition:all .15s}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.page-title{font-size:1rem;font-weight:600;color:rgba(255,255,255,.9);letter-spacing:-.02em}
+.page-count{font-size:.7rem;color:rgba(255,255,255,.3);margin-left:4px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:57px}
+.card{background:#111;cursor:pointer;transition:background .15s}
+.card:hover{background:#161616}
+.card:hover .card-visual,.card:hover .card-visual .stage{background:#161616 !important}
 .card:hover .card-info{background:#161616}
 .card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
-.card-visual *{--bg-override:none}
-.card-visual iframe{width:300%;height:300%;border:none;pointer-events:none;transform:scale(.3333);transform-origin:top left}
-.card-info{padding:8px 12px 12px;background:#111}
-.card-info h3{font-size:.72rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.2);margin-top:1px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* ── Fullscreen Overlay ── */
-.effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:column;align-items:center;justify-content:center}
+.card-info{padding:10px 14px 14px;background:#111}
+.card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
+.effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:column}
 .effect-overlay.open{display:flex}
 .effect-overlay iframe{width:100%;height:100%;border:none}
-.effect-overlay-close{position:fixed;top:20px;right:24px;z-index:10000;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.effect-overlay-close{position:fixed;top:16px;right:20px;z-index:10000;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
 .effect-overlay-close:hover{background:rgba(255,255,255,.2)}
 .effect-overlay-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2}
-
-/* ── Fav ── */
-.fav-btn{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .15s;z-index:5;opacity:0;border:none;padding:0}
-.card:hover .fav-btn{opacity:1}
-.fav-btn svg{width:12px;height:12px;fill:none;stroke:rgba(255,255,255,.55);stroke-width:2}
-.fav-btn.active{opacity:1}
-.fav-btn.active svg{fill:#ff3b30;stroke:#ff3b30}
-
-
-/* ── Mobile ── */
-.mobile-toggle{position:fixed;top:16px;left:16px;z-index:200;width:34px;height:34px;border-radius:8px;background:rgba(28,28,30,.85);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);align-items:center;justify-content:center;cursor:pointer;display:none;padding:0}
-.mobile-toggle svg{width:15px;height:15px;stroke:#f5f5f7;fill:none;stroke-width:1.5}
-
-@media(max-width:768px){
-  .sidebar{left:-230px;transition:transform .3s cubic-bezier(.4,0,.2,1)}
-  .sidebar.open{transform:translateX(230px)}
-  .main-content{margin-left:0}
-  .mobile-toggle{display:flex}
-  .page-header{padding:56px 16px 20px}
-  .page-title{font-size:1.5rem}
-  .grid-section{padding:0 0 60px}
-  .card-grid{grid-template-columns:repeat(2,1fr)}
-}
-
-/* ── Effect styles ── */
-${allCss}
+@media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+${cat.css}
 </style>
 </head>
 <body>
-<div class="app-layout">
-
-<button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
-  <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-</button>
-
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">Bの宝库</div>
-  </div>
-  <nav class="sidebar-nav">
-    <div class="nav-group">
-      <span class="nav-label">收藏</span>
-      <button class="filter-item" data-cat="fav">我的收藏</button>
-    </div>
-    <div class="nav-group">
-      <span class="nav-label">分类</span>
-${sidebarItems}    </div>
-  </nav>
-</aside>
-
-<main class="main-content">
-  <header class="page-header">
-    <h1 class="page-title">Bの宝库</h1>
-  </header>
-
-  <section class="grid-section">
-    <div class="card-grid">
-${allCards}${iframeCards}${collectCards}    </div>
-  </section>
-</main>
+<div class="top-bar">
+  <a href="../index.html" class="back-btn">← 返回</a>
+  <span class="page-title">${cat.title}</span>
+  <span class="page-count">${cat.effects.length} 个效果</span>
 </div>
-
-<div class="effect-overlay" id="effectOverlay">
-  <button class="effect-overlay-close" id="overlayClose">
-    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
+<div class="card-grid">
+${cards}</div>
+<div class="effect-overlay" id="overlay">
+  <button class="effect-overlay-close" id="overlayClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   <iframe id="overlayIframe" src="about:blank"></iframe>
 </div>
-
 <` + `script>
-const FAV_KEY='bno_fav';
-function getFavs(){try{return JSON.parse(localStorage.getItem(FAV_KEY))||[];}catch(e){return[];}}
-function setFavs(a){localStorage.setItem(FAV_KEY,JSON.stringify(a));}
-function toggleFav(id){const f=getFavs();const i=f.indexOf(id);if(i>-1)f.splice(i,1);else f.push(id);setFavs(f);return i===-1;}
-
-// Overlay logic
-const overlay=document.getElementById('effectOverlay');
-const overlayIframe=document.getElementById('overlayIframe');
-const overlayClose=document.getElementById('overlayClose');
-function openOverlay(src){overlayIframe.src=src;overlay.classList.add('open');document.body.style.overflow='hidden';}
-function closeOverlay(){overlay.classList.remove('open');overlayIframe.src='about:blank';document.body.style.overflow='';}
-overlayClose.addEventListener('click',closeOverlay);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))closeOverlay();});
-
-// Fav buttons + card click
+const overlay=document.getElementById('overlay');
+const iframe=document.getElementById('overlayIframe');
+document.getElementById('overlayClose').addEventListener('click',()=>{overlay.classList.remove('open');iframe.src='about:blank';});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('open'),iframe.src='about:blank';});
 document.querySelectorAll('.card').forEach(card=>{
-  const h3=card.querySelector('.card-info h3');
-  if(!h3)return;
-  const id=(card.dataset.cat||'fs')+'::'+h3.textContent;
-  card.dataset.favId=id;
-  const btn=document.createElement('button');
-  btn.className='fav-btn'+(getFavs().includes(id)?' active':'');
-  btn.setAttribute('aria-label','收藏');
-  btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-  btn.addEventListener('click',e=>{
-    e.preventDefault();e.stopPropagation();
-    const on=toggleFav(id);
-    btn.classList.toggle('active',on);
-    if(!on&&document.querySelector('.filter-item[data-cat="fav"].active')){
-      card.classList.remove('show','visible');
-    }
-  });
-  card.appendChild(btn);
-  // Click card -> open overlay
-  card.addEventListener('click',e=>{
-    if(e.target.closest('.fav-btn'))return;
+  card.addEventListener('click',()=>{
     const src=card.dataset.src;
-    if(src)openOverlay(src);
+    if(src){iframe.src=src;overlay.classList.add('open');}
   });
 });
-
-// Filter
-function filterCards(cat){
-  const cards=document.querySelectorAll('.card[data-cat]');
-  const visible=[];
-  cards.forEach(c=>{
-    const show=cat==='fav'?getFavs().includes(c.dataset.favId):c.dataset.cat===cat;
-    c.classList.toggle('show',show);
-    c.classList.remove('visible');
-    if(show)visible.push(c);
-  });
-  visible.forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),Math.min(i*20,600)));
-}
-
-document.querySelectorAll('.filter-item').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.filter-item').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    filterCards(btn.dataset.cat);
-    if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
-  });
-});
-
-filterCards('${firstCatId}');
-
-
-// Mobile
-(function(){
-  const btn=document.getElementById('mobileToggle');
-  const sb=document.getElementById('sidebar');
-  if(!btn||!sb)return;
-  btn.addEventListener('click',()=>sb.classList.toggle('open'));
-  document.addEventListener('click',e=>{
-    if(window.innerWidth<=768&&sb.classList.contains('open')&&!sb.contains(e.target)&&!btn.contains(e.target))
-      sb.classList.remove('open');
-  });
-})();
+${cat.scripts.map(s => s).join('\n')}
 <` + `/script>
 </body>
 </html>`;
+  fs.writeFileSync(path.join(catPagesDir, `${cat.id}.html`), catHtml);
+}
 
-fs.writeFileSync('index.html', finalHtml);
-console.log(`\n📄 index.html: ${(Buffer.byteLength(finalHtml)/1024).toFixed(1)} KB`);
+// iframe 分类的集合页面（直接跳转原文件，不需要生成）
+// collect 分类的集合页面
+if (sortedCollect.length > 0) {
+  let collectCardsHtml = '';
+  for (const item of sortedCollect) {
+    const thumbFile = item.file.replace('.html', '.png');
+    const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
+    const visual = thumbExists
+      ? `<img src="../_thumbs/${thumbFile}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover">`
+      : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${item.title.charAt(0)}</div>`;
+    collectCardsHtml += `    <div class="card" data-src="../${item.file}">
+      <div class="card-visual">${visual}</div>
+      <div class="card-info"><h3>${item.title}</h3></div>
+    </div>\n`;
+  }
+
+  const collectHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Collect - Bの宝库</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;gap:12px;background:rgba(17,17,17,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.back-btn{color:rgba(255,255,255,.5);font-size:.8rem;padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);transition:all .15s}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.page-title{font-size:1rem;font-weight:600;color:rgba(255,255,255,.9);letter-spacing:-.02em}
+.page-count{font-size:.7rem;color:rgba(255,255,255,.3);margin-left:4px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:57px}
+.card{background:#111;cursor:pointer;transition:background .15s}
+.card:hover{background:#161616}
+.card:hover .card-visual{background:#161616 !important}
+.card:hover .card-info{background:#161616}
+.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
+.card-info{padding:10px 14px 14px;background:#111}
+.card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:column}
+.effect-overlay.open{display:flex}
+.effect-overlay iframe{width:100%;height:100%;border:none}
+.effect-overlay-close{position:fixed;top:16px;right:20px;z-index:10000;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.effect-overlay-close:hover{background:rgba(255,255,255,.2)}
+.effect-overlay-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2}
+@media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="../index.html" class="back-btn">← 返回</a>
+  <span class="page-title">Collect</span>
+  <span class="page-count">${sortedCollect.length} 个效果</span>
+</div>
+<div class="card-grid">
+${collectCardsHtml}</div>
+<div class="effect-overlay" id="overlay">
+  <button class="effect-overlay-close" id="overlayClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <iframe id="overlayIframe" src="about:blank"></iframe>
+</div>
+<` + `script>
+const overlay=document.getElementById('overlay');
+const iframe=document.getElementById('overlayIframe');
+document.getElementById('overlayClose').addEventListener('click',()=>{overlay.classList.remove('open');iframe.src='about:blank';});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('open'),iframe.src='about:blank';});
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    const src=card.dataset.src;
+    if(src){iframe.src=src;overlay.classList.add('open');}
+  });
+});
+<` + `/script>
+</body>
+</html>`;
+  fs.writeFileSync(path.join(catPagesDir, 'collect.html'), collectHtml);
+}
+
+console.log(`📁 Generated ${sortedParsed.length + (sortedCollect.length > 0 ? 1 : 0)} category pages in _cat/`);
+
+// ============================================================
+// 生成首页 index.html（轻量：只有分类卡片 + 截图）
+// ============================================================
+let catCards = '';
+for (const cat of allCategories) {
+  const thumbFile = cat.type === 'collect' ? '46-collect.png' : `${cat.file?.replace('.html', '.png')}`;
+  const thumbPath = path.join(dir, '_thumbs', thumbFile);
+  const thumbExists = fs.existsSync(thumbPath);
+  const href = cat.type === 'iframe' ? cat.file : `_cat/${cat.id}.html`;
+
+  let visual;
+  if (thumbExists) {
+    visual = `<img src="_thumbs/${thumbFile}" alt="${cat.title}" loading="lazy">`;
+  } else {
+    // parsed 分类：用第一个效果的 stage 作为预览
+    const parsed = sortedParsed.find(p => p.id === cat.id);
+    if (parsed && parsed.effects.length > 0) {
+      const eff = parsed.effects[0];
+      const sc = eff.stageClass ? ` ${eff.stageClass}` : '';
+      const sa = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
+      visual = `<div class="stage${sc}"${sa}>${eff.stageHtml}</div>`;
+    } else {
+      visual = `<div class="placeholder">${cat.title.charAt(0)}</div>`;
+    }
+  }
+
+  catCards += `    <a href="${href}" class="cat-card">
+      <div class="cat-visual">${visual}</div>
+      <div class="cat-info"><h3>${cat.title}</h3><span class="cat-count">${cat.count}</span></div>
+    </a>\n`;
+}
+
+// 合并 parsed 分类的 CSS（首页预览用）
+let previewCss = '';
+for (const cat of sortedParsed) {
+  previewCss += `\n/* ${cat.title} */\n${cat.css}\n`;
+}
+
+const indexHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bの宝库</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+.page-header{padding:60px 32px 32px;text-align:center}
+.page-title{font-size:2rem;font-weight:700;letter-spacing:-.03em;color:rgba(255,255,255,.9)}
+.page-sub{font-size:.8rem;color:rgba(255,255,255,.3);margin-top:8px}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.07);margin:0}
+.cat-card{background:#111;display:flex;flex-direction:column;transition:background .15s}
+.cat-card:hover{background:#161616}
+.cat-card:hover .cat-visual,.cat-card:hover .cat-visual .stage{background:#161616 !important}
+.cat-card:hover .cat-info{background:#161616}
+.cat-visual{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
+.cat-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
+.cat-visual img{width:100%;height:100%;object-fit:cover}
+.cat-visual .placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.2);font-size:2rem;font-weight:700}
+.cat-info{padding:12px 16px 16px;background:#111;display:flex;align-items:baseline;gap:8px}
+.cat-info h3{font-size:.85rem;font-weight:500;color:rgba(255,255,255,.7);letter-spacing:-.01em}
+.cat-count{font-size:.65rem;color:rgba(255,255,255,.25)}
+@media(max-width:768px){.cat-grid{grid-template-columns:repeat(2,1fr)}}
+${previewCss}
+</style>
+</head>
+<body>
+<header class="page-header">
+  <h1 class="page-title">Bの宝库</h1>
+  <p class="page-sub">${totalEffects} 个前端效果 · ${allCategories.length} 个分类</p>
+</header>
+<div class="cat-grid">
+${catCards}</div>
+</body>
+</html>`;
+
+fs.writeFileSync('index.html', indexHtml);
+console.log(`\n📄 index.html: ${(Buffer.byteLength(indexHtml)/1024).toFixed(1)} KB`);

@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-06 linear.app (Feature Cards)
+- 效果名称：等轴测线框几何体 (Isometric Wireframe Geometry)
+- 效果描述：三组精美的等轴测线框图（FIG 0.2/0.3/0.4），分别展示层叠圆盘体、积木方块组合、扇形层叠板。纯 SVG path 绘制，深色背景 #08090A，细线描边（0.5px），亮色轮廓线 #D0D6E0 与暗色内部线 #3E3E44 形成层次感，feGaussianBlur 阴影滤镜增加深度。鼠标悬停时几何体有发光描边动画，整体有缓慢浮动效果。
+- 实现原理：SVG path 手工绘制等轴测几何体（菱形顶面 + 平行四边形侧面），stroke 描边控制线条粗细，feDropShadow/feGaussianBlur 滤镜增加发光感，CSS animation 驱动 translateY 浮动，hover 时 filter: drop-shadow 增强发光，多个变体展示不同几何形态
+- 状态：待实现
+
 ## 2026-04-28 diabrowser.com
 - 效果名称：文字粒子爆炸 (Text Particle Explosion)
 - 效果描述：点击文字时，文字碎裂成粒子向四周飞散，然后重新聚合

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>磁性流体（Ferrofluid） - Bの宝库</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
+
+.site-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(17,17,17,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-inner{display:flex;align-items:center;height:48px;padding:0 16px;gap:8px}
+.nav-logo{font-size:.85rem;font-weight:700;color:rgba(255,255,255,.9);white-space:nowrap;letter-spacing:-.02em;flex-shrink:0;text-decoration:none}
+.nav-scroll-wrap{position:relative;flex:1;overflow:hidden;margin:0 4px}
+.nav-scroll{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;scroll-behavior:smooth;padding:6px 0}
+.nav-scroll::-webkit-scrollbar{display:none}
+.nav-item{padding:5px 12px;border-radius:6px;font-size:.72rem;color:rgba(255,255,255,.45);white-space:nowrap;transition:all .15s;text-decoration:none;flex-shrink:0}
+.nav-item:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.06)}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.1)}
+.nav-arrow{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;color:rgba(255,255,255,.4)}
+.nav-arrow:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-arrow svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none}
+.nav-expand-btn{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;color:rgba(255,255,255,.4)}
+.nav-expand-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-expand-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;transition:transform .2s}
+.nav-expand-btn.open svg{transform:rotate(180deg)}
+.nav-dropdown{position:fixed;top:48px;left:0;right:0;z-index:199;background:rgba(17,17,17,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06);padding:16px 20px;display:none;flex-wrap:wrap;gap:6px;max-height:60vh;overflow-y:auto}
+.nav-dropdown.open{display:flex}
+.nav-dropdown .nav-item{padding:8px 16px;font-size:.75rem}
+
+
+.ctrl-sidebar{width:260px;flex-shrink:0;background:rgba(17,17,17,.97);border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:6px;padding:56px 14px 14px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
+.ctrl-sidebar::-webkit-scrollbar{width:4px}
+.ctrl-sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.ctrl-sidebar .ctrl-title{font-size:.7rem;color:rgba(255,255,255,.6);font-weight:600;padding:0 4px 4px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:2px}
+.ctrl-sidebar .ctrl-empty{font-size:.65rem;color:rgba(255,255,255,.25);text-align:center;padding:20px 0}
+.ctrl-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.ctrl-card .ctrl-prop{display:flex;align-items:center;gap:8px;padding:3px 0}
+.ctrl-card .ctrl-prop-label{font-size:.6rem;color:rgba(255,255,255,.35);min-width:52px;flex-shrink:0}
+.ctrl-card .ctrl-prop input[type="range"]{flex:1;height:3px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.1);border-radius:2px;outline:none}
+.ctrl-card .ctrl-prop input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#667eea;cursor:pointer;border:2px solid rgba(255,255,255,.2)}
+.ctrl-card .ctrl-prop input[type="color"]{width:28px;height:28px;border:2px solid rgba(255,255,255,.08);border-radius:6px;cursor:pointer;padding:0;background:none;-webkit-appearance:none;flex-shrink:0}
+.ctrl-card .ctrl-prop input[type="color"]::-webkit-color-swatch-wrapper{padding:2px}
+.ctrl-card .ctrl-prop input[type="color"]::-webkit-color-swatch{border-radius:3px;border:none}
+.ctrl-card .ctrl-prop-val{font-size:.58rem;color:rgba(255,255,255,.3);min-width:32px;text-align:right;flex-shrink:0}
+.ctrl-reset-btn{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:.65rem;cursor:pointer;transition:all .15s;text-align:center;margin-top:4px}
+.ctrl-reset-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+.back-btn{position:fixed;top:56px;left:16px;z-index:201;padding:6px 14px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);font-size:.7rem;cursor:pointer;transition:all .15s;text-decoration:none;display:flex;align-items:center;gap:4px}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.back-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none}
+@media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
+
+.effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
+.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#080810;cursor:none}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%}
+
+  .section { height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; }
+  .section canvas { position: absolute; inset: 0; }
+  .section h2 { font-size: 2.5rem; font-weight: 800; color: #fff; position: relative; z-index: 2; }
+  .section p { color: rgba(255,255,255,.5); margin-top: 12px; position: relative; z-index: 2; }
+  .tag { font-size: .75rem; color: #c0c0c0; background: rgba(192,192,192,.15); padding: 4px 14px; border-radius: 20px; position: relative; z-index: 2; margin-top: 16px; }
+  .nav a:hover { color: #fff; background: #ffffff10; }
+
+  /* === 1. SVG Filter Liquid Metal === */
+  .svg-metal-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .svg-metal-blob { width: 400px; height: 400px; background: linear-gradient(135deg, #b8c6db 0%, #f5f7fa 25%, #8e9eab 50%, #eef2f3 75%, #b8c6db 100%); border-radius: 50%; filter: url(#liquid-metal-filter); animation: blobMorph 6s ease-in-out infinite; }
+  @keyframes blobMorph {
+    0%, 100% { border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%; transform: scale(1) rotate(0deg); }
+    25% { border-radius: 40% 60% 55% 45% / 55% 45% 60% 40%; transform: scale(1.02) rotate(2deg); }
+    50% { border-radius: 50% 50% 40% 60% / 45% 55% 50% 50%; transform: scale(.98) rotate(-1deg); }
+    75% { border-radius: 55% 45% 60% 40% / 60% 40% 45% 55%; transform: scale(1.01) rotate(1deg); }
+  }
+
+  /* === Effect Sections (4-8) === */
+  .demo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* === 2. Canvas Metaball === */
+  #metaballCanvas { width: 100%; height: 100%; }
+
+  /* === 3. WebGL Shader === */
+  #shaderCanvas { width: 100%; height: 100%; }
+
+
+</style>
+</head>
+<body>
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">Bの宝库</a>
+    <button class="nav-arrow" id="navLeft"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="nav-scroll-wrap"><div class="nav-scroll"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item active" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div></div>
+    <button class="nav-arrow" id="navRight"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+    <button class="nav-expand-btn" id="navExpand"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+  </div>
+</nav>
+<div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item active" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
+<a href="../_cat/21-liquid-metal.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<div class="effect-main">
+<div class="stage">
+    <canvas id="ferro-canvas"></canvas>
+  </div>
+</div>
+<div class="ctrl-sidebar" id="ctrlSidebar">
+<div class="ctrl-title">磁性流体（Ferrofluid）</div>
+<div class="ctrl-empty">沉浸式体验</div>
+</div>
+<script>
+(function(){
+  const demo = document.getElementById('ferro-demo');
+  const canvas = document.getElementById('ferro-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize() {
+    w = canvas.width = demo.clientWidth;
+    h = canvas.height = demo.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const mouse = { x: w / 2, y: h / 2 };
+  demo.addEventListener('mousemove', e => {
+    const r = demo.getBoundingClientRect();
+    mouse.x = e.clientX - r.left;
+    mouse.y = e.clientY - r.top;
+  });
+
+  // Spike base points arranged in a circle
+  const numSpikes = 64;
+  const baseRadius = Math.min(w, h) * 0.28;
+
+  function drawFerrofluid(t) {
+    ctx.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2;
+
+    // Base puddle glow
+    const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, baseRadius * 1.8);
+    glowGrad.addColorStop(0, 'rgba(60,65,80,0.3)');
+    glowGrad.addColorStop(1, 'rgba(60,65,80,0)');
+    ctx.fillStyle = glowGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Calculate spike lengths based on mouse proximity
+    const spikeData = [];
+    for (let i = 0; i < numSpikes; i++) {
+      const angle = (i / numSpikes) * Math.PI * 2;
+      const bx = cx + Math.cos(angle) * baseRadius;
+      const by = cy + Math.sin(angle) * baseRadius;
+
+      // Distance from this spike base to mouse
+      const dx = mouse.x - bx;
+      const dy = mouse.y - by;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Spike grows toward mouse
+      const attraction = Math.max(0, 1 - dist / (baseRadius * 2.5));
+      const waveLen = Math.sin(angle * 5 + t * 2) * 8 + Math.sin(angle * 11 + t * 3.7) * 4;
+      const spikeLen = 10 + attraction * baseRadius * 1.2 + waveLen;
+
+      // Direction: blend between radial outward and toward mouse
+      const radDirX = Math.cos(angle);
+      const radDirY = Math.sin(angle);
+      const toDirX = dist > 0 ? dx / dist : 0;
+      const toDirY = dist > 0 ? dy / dist : 0;
+      const blend = attraction * 0.6;
+      const dirX = radDirX * (1 - blend) + toDirX * blend;
+      const dirY = radDirY * (1 - blend) + toDirY * blend;
+      const dirLen = Math.sqrt(dirX * dirX + dirY * dirY) || 1;
+
+      spikeData.push({
+        bx, by, angle,
+        tx: bx + (dirX / dirLen) * spikeLen,
+        ty: by + (dirY / dirLen) * spikeLen,
+        len: spikeLen, attraction
+      });
+    }
+
+    // Draw base blob shape
+    ctx.beginPath();
+    for (let i = 0; i <= numSpikes; i++) {
+      const s = spikeData[i % numSpikes];
+      const r2 = baseRadius + Math.sin(s.angle * 7 + t * 1.5) * 3;
+      const px = cx + Math.cos(s.angle) * r2;
+      const py = cy + Math.sin(s.angle) * r2;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    const blobGrad = ctx.createRadialGradient(cx - baseRadius * 0.3, cy - baseRadius * 0.3, 0, cx, cy, baseRadius * 1.1);
+    blobGrad.addColorStop(0, '#5a5e6e');
+    blobGrad.addColorStop(0.5, '#2a2d3a');
+    blobGrad.addColorStop(1, '#15161e');
+    ctx.fillStyle = blobGrad;
+    ctx.fill();
+
+    // Specular on blob
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const specGrad = ctx.createRadialGradient(cx - baseRadius * 0.25, cy - baseRadius * 0.3, 0, cx, cy, baseRadius);
+    specGrad.addColorStop(0, 'rgba(200,210,230,0.25)');
+    specGrad.addColorStop(0.4, 'rgba(200,210,230,0.05)');
+    specGrad.addColorStop(1, 'rgba(200,210,230,0)');
+    ctx.fill();
+    ctx.fillStyle = specGrad;
+    ctx.fill();
+    ctx.restore();
+
+    // Draw spikes
+    for (const s of spikeData) {
+      if (s.len < 15) continue;
+      const perpX = -Math.sin(s.angle);
+      const perpY = Math.cos(s.angle);
+      const baseW = 6 + s.attraction * 4;
+
+      ctx.beginPath();
+      ctx.moveTo(s.bx + perpX * baseW, s.by + perpY * baseW);
+      ctx.quadraticCurveTo(
+        (s.bx + s.tx) / 2 + perpX * baseW * 0.3,
+        (s.by + s.ty) / 2 + perpY * baseW * 0.3,
+        s.tx, s.ty
+      );
+      ctx.quadraticCurveTo(
+        (s.bx + s.tx) / 2 - perpX * baseW * 0.3,
+        (s.by + s.ty) / 2 - perpY * baseW * 0.3,
+        s.bx - perpX * baseW, s.by - perpY * baseW
+      );
+      ctx.closePath();
+
+      // Metallic gradient on spike
+      const grad = ctx.createLinearGradient(s.bx, s.by, s.tx, s.ty);
+      grad.addColorStop(0, '#3a3d4a');
+      grad.addColorStop(0.3, '#6a6e7e');
+      grad.addColorStop(0.6, '#9a9eae');
+      grad.addColorStop(0.85, '#ccd0dd');
+      grad.addColorStop(1, '#eef0f5');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    // Mouse cursor glow (magnetic field)
+    const cursorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 60);
+    cursorGrad.addColorStop(0, 'rgba(160,180,255,0.15)');
+    cursorGrad.addColorStop(1, 'rgba(160,180,255,0)');
+    ctx.fillStyle = cursorGrad;
+    ctx.fillRect(mouse.x - 60, mouse.y - 60, 120, 120);
+  }
+
+  function loop() {
+    drawFerrofluid(performance.now() * 0.001);
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+<script>
+
+(function(){
+  var scroll=document.querySelector('.nav-scroll');
+  var leftBtn=document.getElementById('navLeft');
+  var rightBtn=document.getElementById('navRight');
+  var expandBtn=document.getElementById('navExpand');
+  var dropdown=document.getElementById('navDropdown');
+  if(leftBtn)leftBtn.addEventListener('click',function(){scroll.scrollBy({left:-200,behavior:'smooth'})});
+  if(rightBtn)rightBtn.addEventListener('click',function(){scroll.scrollBy({left:200,behavior:'smooth'})});
+  if(expandBtn&&dropdown){
+    expandBtn.addEventListener('click',function(){expandBtn.classList.toggle('open');dropdown.classList.toggle('open')});
+    document.addEventListener('click',function(e){if(!expandBtn.contains(e.target)&&!dropdown.contains(e.target)){expandBtn.classList.remove('open');dropdown.classList.remove('open')}});
+  }
+  var active=scroll.querySelector('.nav-item.active');
+  if(active)setTimeout(function(){active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})},100);
+})();
+</script>
+</body>
+</html>

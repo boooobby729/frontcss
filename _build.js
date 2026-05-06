@@ -163,43 +163,281 @@ function cleanCss(css) {
     .replace(/background(?:-color)?\s*:\s*rgba?\(\s*(?:\d|[01]\d|2[0-9]|30)\s*,\s*(?:\d|[01]\d|2[0-9]|30)\s*,\s*(?:\d|[01]\d|2[0-9]|30)[^)]*\)\s*(?:!important)?\s*;/gi, '');
 }
 
+// 为效果详情页清理 CSS：移除 .stage 的 width/height/display 等布局属性（由详情页自行定义）
+function cleanCssForEffectPage(css) {
+  return css
+    .replace(/\.stage\s*\{[^}]*\}/g, '')
+    .replace(/\.stage\s*\.[^{]*\{([^}]*)\}/g, function(match, block) {
+      // 保留 .stage.xxx 变体，但移除其中的 width/height/display 属性
+      const cleaned = block
+        .replace(/\b(?:width|height|display|align-items|justify-content|position|overflow)\s*:[^;]+;?/g, '');
+      return cleaned.trim() ? match.replace(block, cleaned) : '';
+    });
+}
+
 // ============================================================
-// 提取 iframe 分类中的子效果列表
+// 提取 iframe 分类中的子效果（完整拆分：HTML + CSS + JS）
 // ============================================================
 function extractIframeEffects(filePath) {
   const html = fs.readFileSync(filePath, 'utf8');
   const effects = [];
 
-  // 辅助：从 h2 内容中提取纯文本（去掉 span 等子标签）
   function cleanH2(raw) {
     return raw.replace(/<[^>]+>/g, '').replace(/^\d+\.\s*/, '').trim();
   }
 
-  // 模式1: <section ... id="xxx" ...> ... <h2>标题</h2>
-  const sectionRegex = /<section[^>]*id="([^"]*)"[^>]*>[\s\S]*?<h2[^>]*>([\s\S]*?)<\/h2>/g;
-  let m;
-  while ((m = sectionRegex.exec(html)) !== null) {
-    const name = cleanH2(m[2]);
-    if (name) effects.push({ id: m[1], name });
-  }
-  if (effects.length > 0) return effects;
-
-  // 模式2: <div class="section ..." ...> ... <h2 ...>标题</h2>（允许换行，class可含额外类名）
-  const divSectionRegex = /<div class="section[^"]*"[^>]*>[\s\S]*?<h2[^>]*>([\s\S]*?)<\/h2>/g;
-  while ((m = divSectionRegex.exec(html)) !== null) {
-    const name = cleanH2(m[1]);
-    if (name) effects.push({ id: '', name });
-  }
-  if (effects.length > 0) return effects;
-
-  // 模式3: class="section" id="xxx" 带 id
-  const sectionIdRegex = /<(?:div|section)[^>]*class="[^"]*section[^"]*"[^>]*id="([^"]*)"[^>]*>[\s\S]*?<h2[^>]*>([\s\S]*?)<\/h2>/g;
-  while ((m = sectionIdRegex.exec(html)) !== null) {
-    const name = cleanH2(m[2]);
-    if (name) effects.push({ id: m[1], name });
+  // 提取全局 style（在第一个 section 之前的 style）
+  const firstSectionIdx = html.search(/<section[\s>]/i);
+  let globalCss = '';
+  if (firstSectionIdx > 0) {
+    const headPart = html.slice(0, firstSectionIdx);
+    const styleMatches = headPart.match(/<style>([\s\S]*?)<\/style>/g);
+    if (styleMatches) {
+      globalCss = styleMatches.map(s => s.replace(/<\/?style>/g, '')).join('\n');
+    }
   }
 
-  return effects;
+  // 按 section 边界拆分：支持 <section> 和 <div class="section...">
+  const sectionStarts = [];
+  const sectionRegex = /<section[^>]*>/gi;
+  let sm;
+  while ((sm = sectionRegex.exec(html)) !== null) {
+    sectionStarts.push(sm.index);
+  }
+  // 如果没有 <section>，尝试 <div class="section...">
+  if (sectionStarts.length === 0) {
+    const divSectionRegex = /<div\s+class="section[^"]*"[^>]*>/gi;
+    while ((sm = divSectionRegex.exec(html)) !== null) {
+      sectionStarts.push(sm.index);
+    }
+  }
+
+  for (let i = 0; i < sectionStarts.length; i++) {
+    const start = sectionStarts[i];
+    const end = i < sectionStarts.length - 1 ? sectionStarts[i + 1] : html.length;
+    let chunk = html.slice(start, end);
+
+    // 移除末尾的 copy-effect.js 引用和 </body></html>
+    chunk = chunk.replace(/<script\s+src="copy-effect\.js"[^>]*><\/script>/g, '');
+    chunk = chunk.replace(/<\/body>\s*<\/html>\s*$/i, '');
+
+    // 提取 id（支持 <section id="..."> 和 <div class="section" id="...">）
+    const idMatch = chunk.match(/<(?:section|div)[^>]*id="([^"]*)"/);
+    const h2Match = chunk.match(/<h2[^>]*>([\s\S]*?)<\/h2>/);
+    const name = h2Match ? cleanH2(h2Match[1]) : `效果 ${i + 1}`;
+    const id = idMatch ? idMatch[1] : '';
+
+    // 提取 demo 区域的 style 属性（背景色等）
+    const demoMatch = chunk.match(/<div class="demo"[^>]*style="([^"]*)"[^>]*>/);
+    const demoStyle = demoMatch ? demoMatch[1] : '';
+
+    // 提取该 chunk 内的所有 <style> 块
+    const localStyles = [];
+    const styleBlockRegex = /<style>([\s\S]*?)<\/style>/g;
+    let stm;
+    while ((stm = styleBlockRegex.exec(chunk)) !== null) {
+      localStyles.push(stm[1]);
+    }
+
+    // 提取该 chunk 内的所有 <script> 块（非 src 引用）
+    const localScripts = [];
+    const scriptBlockRegex = /<script(?![^>]*src=)([^>]*)>([\s\S]*?)<\/script>/g;
+    let scm;
+    while ((scm = scriptBlockRegex.exec(chunk)) !== null) {
+      if (scm[2].trim()) localScripts.push(scm[2]);
+    }
+
+    // 提取展示区 HTML：优先找 .demo，否则取整个容器的 innerHTML
+    let demoHtml = '';
+    const demoStartMatch = chunk.match(/<div class="demo"[^>]*>/);
+    if (demoStartMatch) {
+      const demoStartIdx = chunk.indexOf(demoStartMatch[0]);
+      const demoResult = extractDivContent(chunk, demoStartIdx);
+      if (demoResult) {
+        demoHtml = demoResult.content;
+      }
+    } else {
+      // 取容器的 innerHTML（移除 script/style 标签后）
+      const containerMatch = chunk.match(/^<(?:section|div)[^>]*>/);
+      if (containerMatch) {
+        const innerStart = containerMatch[0].length;
+        // 找对应的关闭标签
+        const containerResult = extractDivContent(chunk, 0);
+        if (containerResult) {
+          demoHtml = containerResult.content
+            .replace(/<script[\s\S]*?<\/script>/gi, '')
+            .replace(/<style[\s\S]*?<\/style>/gi, '');
+        } else {
+          demoHtml = chunk.slice(innerStart)
+            .replace(/<\/(?:section|div)>\s*$/i, '')
+            .replace(/<script[\s\S]*?<\/script>/gi, '')
+            .replace(/<style[\s\S]*?<\/style>/gi, '');
+        }
+      }
+    }
+
+    effects.push({
+      id,
+      name,
+      demoStyle,
+      demoHtml,
+      localCss: localStyles.join('\n'),
+      scripts: localScripts
+    });
+  }
+
+  return { effects, globalCss };
+}
+
+// ============================================================
+// CSS 分析：提取动效专属控制属性
+// ============================================================
+function extractEffectControls(css, stageHtml) {
+  const controls = [];
+
+  // 提取所有 @keyframes 名称
+  const keyframeNames = [];
+  const kfRegex = /@keyframes\s+([\w-]+)/g;
+  let kfm;
+  while ((kfm = kfRegex.exec(css)) !== null) {
+    keyframeNames.push(kfm[1]);
+  }
+
+  // 从 stageHtml 中提取动效相关的 class
+  const classesInStage = [];
+  const classRegex = /class="([^"]+)"/g;
+  let cm;
+  while ((cm = classRegex.exec(stageHtml)) !== null) {
+    cm[1].split(/\s+/).forEach(c => {
+      if (c && c !== 'stage') classesInStage.push(c);
+    });
+  }
+
+  // 分析有动画的元素
+  let hasAnimation = false;
+  for (const cls of classesInStage) {
+    const escapedCls = cls.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const clsRegex = new RegExp(`\\.${escapedCls}[^{]*\\{[^}]*animation[^}]*\\}`, 'g');
+    if (clsRegex.test(css)) {
+      hasAnimation = true;
+      break;
+    }
+  }
+
+  // 如果有动画，添加动画速度控制
+  if (hasAnimation || keyframeNames.length > 0) {
+    controls.push({
+      type: 'range', id: 'anim-speed', label: '动画速度',
+      min: 0.1, max: 5, step: 0.1, value: 1, unit: 'x',
+      action: 'speed'
+    });
+  }
+
+  // 从 CSS 中提取各 class 的属性
+  for (const cls of classesInStage) {
+    const escapedCls = cls.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const clsBlockRegex = new RegExp(`\\.${escapedCls}\\s*\\{([^}]*)\\}`, 'g');
+    let clsMatch;
+    while ((clsMatch = clsBlockRegex.exec(css)) !== null) {
+      const block = clsMatch[1];
+
+      // 提取 width（动效元素尺寸）
+      const widthMatch = block.match(/(?:^|;\s*)width\s*:\s*(\d+)px/);
+      if (widthMatch && !controls.find(c => c.id === `${cls}-size`)) {
+        const val = parseInt(widthMatch[1]);
+        if (val > 0 && val <= 400) {
+          controls.push({
+            type: 'range', id: `${cls}-size`, label: '尺寸',
+            min: Math.max(4, Math.round(val * 0.2)), max: Math.round(val * 3),
+            step: 1, value: val, unit: 'px',
+            action: 'css', target: `.${cls}`, props: ['width', 'height']
+          });
+        }
+      }
+
+      // 提取 border-radius
+      const brMatch = block.match(/border-radius\s*:\s*(\d+)px/);
+      if (brMatch && !controls.find(c => c.id === `${cls}-radius`)) {
+        const val = parseInt(brMatch[1]);
+        if (val > 0) {
+          controls.push({
+            type: 'range', id: `${cls}-radius`, label: '圆角',
+            min: 0, max: Math.max(100, val * 3), step: 1, value: val, unit: 'px',
+            action: 'css', target: `.${cls}`, props: ['borderRadius']
+          });
+        }
+      }
+
+      // 提取 font-size
+      const fsMatch = block.match(/font-size\s*:\s*(\d+\.?\d*)(rem|px|em)/);
+      if (fsMatch && !controls.find(c => c.id === `${cls}-fontsize`)) {
+        const val = parseFloat(fsMatch[1]);
+        const unit = fsMatch[2];
+        controls.push({
+          type: 'range', id: `${cls}-fontsize`, label: '字号',
+          min: unit === 'px' ? 8 : 0.5, max: unit === 'px' ? 120 : 8,
+          step: unit === 'px' ? 1 : 0.1, value: val, unit: unit,
+          action: 'css', target: `.${cls}`, props: ['fontSize']
+        });
+      }
+
+      // 提取渐变颜色
+      const gradMatch = block.match(/linear-gradient\(\s*[^,]+,\s*(#[0-9a-fA-F]{3,8})\s*(?:,\s*|\)\s*)(#[0-9a-fA-F]{3,8})?/);
+      if (gradMatch && !controls.find(c => c.id === `${cls}-color1`)) {
+        const c1 = expandHex(gradMatch[1]);
+        controls.push({
+          type: 'color', id: `${cls}-color1`, label: '主色',
+          value: c1, action: 'gradient', target: `.${cls}`, index: 0
+        });
+        if (gradMatch[2]) {
+          controls.push({
+            type: 'color', id: `${cls}-color2`, label: '副色',
+            value: expandHex(gradMatch[2]), action: 'gradient', target: `.${cls}`, index: 1
+          });
+        }
+      }
+
+      // 纯色 background
+      if (!gradMatch) {
+        const bgMatch = block.match(/background\s*:\s*(#[0-9a-fA-F]{3,8})/);
+        if (bgMatch && !controls.find(c => c.id === `${cls}-bgcolor`)) {
+          const hex = expandHex(bgMatch[1]);
+          if (!isNearBlack(hex)) {
+            controls.push({
+              type: 'color', id: `${cls}-bgcolor`, label: '颜色',
+              value: hex, action: 'css', target: `.${cls}`, props: ['background']
+            });
+          }
+        }
+      }
+
+      // gap
+      const gapMatch = block.match(/gap\s*:\s*(\d+)px/);
+      if (gapMatch && !controls.find(c => c.id === `${cls}-gap`)) {
+        const val = parseInt(gapMatch[1]);
+        controls.push({
+          type: 'range', id: `${cls}-gap`, label: '间距',
+          min: 0, max: Math.max(40, val * 4), step: 1, value: val, unit: 'px',
+          action: 'css', target: `.${cls}`, props: ['gap']
+        });
+      }
+    }
+  }
+
+  return controls.slice(0, 8);
+}
+
+function expandHex(hex) {
+  if (hex.length === 4) return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+  return hex;
+}
+
+function isNearBlack(hex) {
+  if (hex.length < 7) return false;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return r < 40 && g < 40 && b < 40;
 }
 
 // ============================================================
@@ -236,9 +474,7 @@ for (const file of files) {
     console.log(`★ ${file}: collect (${cleanTitle})`);
   } else if (result.effects.length > 0) {
     parsedCategories.push({
-      id: catId,
-      file,
-      title: cleanTitle,
+      id: catId, file, title: cleanTitle,
       css: cleanCss(result.css),
       effects: result.effects,
       scripts: result.scripts,
@@ -247,11 +483,10 @@ for (const file of files) {
     totalEffects += result.effects.length;
     console.log(`✓ ${file}: ${result.effects.length} effects (${result.structure})`);
   } else {
-    // iframe 分类：提取内部效果列表（section id + h2 标题）
-    const iframeEffects = extractIframeEffects(path.join(dir, file));
-    iframeCategories.push({ id: catId, file, title: cleanTitle, effects: iframeEffects });
-    totalEffects += Math.max(iframeEffects.length, 1);
-    console.log(`◆ ${file}: iframe mode (${cleanTitle}) - ${iframeEffects.length} sub-effects`);
+    const iframeResult = extractIframeEffects(path.join(dir, file));
+    iframeCategories.push({ id: catId, file, title: cleanTitle, effects: iframeResult.effects, globalCss: iframeResult.globalCss });
+    totalEffects += Math.max(iframeResult.effects.length, 1);
+    console.log(`◆ ${file}: iframe mode (${cleanTitle}) - ${iframeResult.effects.length} sub-effects`);
   }
 }
 
@@ -280,7 +515,6 @@ const sortedParsed = [...parsedCategories].sort((a, b) => a.file.localeCompare(b
 const sortedIframe = [...iframeCategories].sort((a, b) => a.file.localeCompare(b.file));
 const sortedCollect = [...collectFiles].sort((a, b) => a.file.localeCompare(b.file));
 
-// 所有分类合并（用于首页展示）
 const allCategories = [
   ...sortedParsed.map(c => ({ id: c.id, file: c.file, title: c.title, count: c.effects.length, type: 'parsed' })),
   ...sortedIframe.map(c => ({ id: c.id, file: c.file, title: c.title, count: c.effects.length, type: 'iframe' })),
@@ -288,44 +522,6 @@ const allCategories = [
 if (sortedCollect.length > 0) {
   allCategories.push({ id: 'collect', file: null, title: 'Collect', count: sortedCollect.length, type: 'collect' });
 }
-
-// ============================================================
-// 为每个 parsed 效果生成独立 HTML（放在 _effects/ 目录）
-// ============================================================
-const effectsDir = path.join(dir, '_effects');
-if (fs.existsSync(effectsDir)) fs.rmSync(effectsDir, { recursive: true });
-fs.mkdirSync(effectsDir);
-
-let effectIndex = 0;
-for (const cat of sortedParsed) {
-  for (const eff of cat.effects) {
-    effectIndex++;
-    const fileName = `${String(effectIndex).padStart(3, '0')}.html`;
-    const stageAttrs = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
-    const stageClass = eff.stageClass ? ` stage${eff.stageClass}` : ' stage';
-    const effectHtml = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${eff.name}</title>
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-${cat.css}
-</style>
-</head>
-<body>
-<div class="${stageClass.trim()}"${stageAttrs}>${eff.stageHtml}</div>
-${cat.scripts.map(s => `<script>${s}<\/script>`).join('\n')}
-</body>
-</html>`;
-    fs.writeFileSync(path.join(effectsDir, fileName), effectHtml);
-    eff._file = `_effects/${fileName}`;
-  }
-}
-console.log(`📁 Generated ${effectIndex} standalone effect files in _effects/`);
 
 // ============================================================
 // 生成导航栏 HTML/CSS/JS（所有页面共用）
@@ -394,30 +590,17 @@ function generateNavBar(activeCatId, pathPrefix) {
 }
 
 // ============================================================
-// 共享 overlay 样式和脚本（调节面板 + 收藏功能）
+// 控制面板样式
 // ============================================================
-const overlayCss = `
-.effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:row}
-.effect-overlay.open{display:flex}
-.effect-overlay iframe{flex:1;height:100%;border:none}
-.overlay-toolbar{position:fixed;top:16px;right:16px;z-index:10001;display:flex;gap:8px;align-items:center}
-.overlay-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;color:rgba(255,255,255,.7)}
-.overlay-btn:hover{background:rgba(255,255,255,.2);color:#fff}
-.overlay-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
-.overlay-btn.fav-active{color:#f5576c;background:rgba(245,87,108,.15);border-color:rgba(245,87,108,.3)}
-.overlay-btn.fav-active svg{fill:#f5576c;stroke:#f5576c}
-.card.is-fav .card-info::after{content:'\\2665';position:absolute;top:8px;right:10px;color:#f5576c;font-size:.7rem}
-.card-info{position:relative}
-.ctrl-sidebar{width:240px;flex-shrink:0;background:rgba(17,17,17,.97);border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:6px;padding:56px 14px 14px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
+const ctrlCss = `
+.ctrl-sidebar{width:260px;flex-shrink:0;background:rgba(17,17,17,.97);border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:6px;padding:56px 14px 14px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
 .ctrl-sidebar::-webkit-scrollbar{width:4px}
 .ctrl-sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
 .ctrl-sidebar .ctrl-title{font-size:.7rem;color:rgba(255,255,255,.6);font-weight:600;padding:0 4px 4px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:2px}
 .ctrl-sidebar .ctrl-empty{font-size:.65rem;color:rgba(255,255,255,.25);text-align:center;padding:20px 0}
 .ctrl-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
-.ctrl-card .ctrl-el-name{font-size:.6rem;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.02em;display:flex;align-items:center;gap:6px}
-.ctrl-card .ctrl-el-name .ctrl-el-tag{font-size:.55rem;color:rgba(255,255,255,.25);font-weight:400}
 .ctrl-card .ctrl-prop{display:flex;align-items:center;gap:8px;padding:3px 0}
-.ctrl-card .ctrl-prop-label{font-size:.6rem;color:rgba(255,255,255,.35);min-width:44px;flex-shrink:0}
+.ctrl-card .ctrl-prop-label{font-size:.6rem;color:rgba(255,255,255,.35);min-width:52px;flex-shrink:0}
 .ctrl-card .ctrl-prop input[type="range"]{flex:1;height:3px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.1);border-radius:2px;outline:none}
 .ctrl-card .ctrl-prop input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#667eea;cursor:pointer;border:2px solid rgba(255,255,255,.2)}
 .ctrl-card .ctrl-prop input[type="color"]{width:28px;height:28px;border:2px solid rgba(255,255,255,.08);border-radius:6px;cursor:pointer;padding:0;background:none;-webkit-appearance:none;flex-shrink:0}
@@ -426,300 +609,246 @@ const overlayCss = `
 .ctrl-card .ctrl-prop-val{font-size:.58rem;color:rgba(255,255,255,.3);min-width:32px;text-align:right;flex-shrink:0}
 .ctrl-reset-btn{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:.65rem;cursor:pointer;transition:all .15s;text-align:center;margin-top:4px}
 .ctrl-reset-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
-@media(max-width:640px){.ctrl-sidebar{width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;overflow-y:auto}.effect-overlay{flex-direction:column}.effect-overlay iframe{flex:1;width:100%;height:auto}}
-`;
-
-const overlayHtml = `<div class="effect-overlay" id="overlay">
-  <div class="overlay-toolbar">
-    <button class="overlay-btn" id="favBtn" title="收藏"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-    <button class="overlay-btn" id="overlayClose" title="关闭"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-  </div>
-  <iframe id="overlayIframe" src="about:blank"></iframe>
-  <div class="ctrl-sidebar" id="ctrlSidebar">
-    <div class="ctrl-title">属性控制</div>
-    <div class="ctrl-empty" id="ctrlLoading">加载中...</div>
-  </div>
-</div>`;
-
-const overlayJs = `
-// === 收藏功能 ===
-var favorites = JSON.parse(localStorage.getItem('bfx_favorites') || '[]');
-var currentEffectSrc = '';
-
-function updateFavBtn() {
-  var btn = document.getElementById('favBtn');
-  if (!btn) return;
-  if (favorites.indexOf(currentEffectSrc) !== -1) {
-    btn.classList.add('fav-active');
-  } else {
-    btn.classList.remove('fav-active');
-  }
-}
-
-function updateCardFavStates() {
-  document.querySelectorAll('.card-grid .card').forEach(function(card) {
-    var src = card.dataset.src;
-    if (favorites.indexOf(src) !== -1) {
-      card.classList.add('is-fav');
-    } else {
-      card.classList.remove('is-fav');
-    }
-  });
-}
-
-document.getElementById('favBtn').addEventListener('click', function() {
-  if (!currentEffectSrc) return;
-  var idx = favorites.indexOf(currentEffectSrc);
-  if (idx === -1) {
-    favorites.push(currentEffectSrc);
-  } else {
-    favorites.splice(idx, 1);
-  }
-  localStorage.setItem('bfx_favorites', JSON.stringify(favorites));
-  updateFavBtn();
-  updateCardFavStates();
-});
-
-// === 动态属性控制面板 ===
-// 定义哪些 CSS 属性值得暴露为控制项
-var CTRL_PROPS = [
-  { prop: 'width', label: '宽度', type: 'range', unit: 'px', min: 4, max: 400, step: 2 },
-  { prop: 'height', label: '高度', type: 'range', unit: 'px', min: 4, max: 400, step: 2 },
-  { prop: 'borderRadius', label: '圆角', type: 'range', unit: 'px', min: 0, max: 200, step: 1 },
-  { prop: 'fontSize', label: '字号', type: 'range', unit: 'px', min: 8, max: 120, step: 1 },
-  { prop: 'letterSpacing', label: '字距', type: 'range', unit: 'px', min: -5, max: 40, step: 0.5 },
-  { prop: 'opacity', label: '透明度', type: 'range', unit: '', min: 0, max: 1, step: 0.05 },
-  { prop: 'gap', label: '间距', type: 'range', unit: 'px', min: 0, max: 40, step: 1 },
-];
-var COLOR_PROPS = [
-  { prop: 'color', label: '颜色' },
-  { prop: 'backgroundColor', label: '背景色' },
-  { prop: 'borderColor', label: '边框色' },
-];
-
-function rgbToHex(rgb) {
-  if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return '';
-  var m = rgb.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
-  if (!m) return '';
-  return '#' + [m[1],m[2],m[3]].map(function(x){ return parseInt(x).toString(16).padStart(2,'0'); }).join('');
-}
-
-function getAnimDuration(el) {
-  var cs = getComputedStyle(el);
-  var dur = parseFloat(cs.animationDuration) || 0;
-  return dur;
-}
-
-function analyzeElement(el, doc) {
-  var cs = doc.defaultView.getComputedStyle(el);
-  var controls = [];
-  // 数值属性
-  CTRL_PROPS.forEach(function(def) {
-    var raw = cs[def.prop];
-    if (!raw || raw === 'auto' || raw === 'normal' || raw === 'none') return;
-    var val = parseFloat(raw);
-    if (isNaN(val)) return;
-    // 跳过无意义的值
-    if (def.prop === 'borderRadius' && val === 0) return;
-    if (def.prop === 'letterSpacing' && val === 0) return;
-    if (def.prop === 'opacity' && val === 1) return;
-    controls.push({ type: 'range', prop: def.prop, label: def.label, value: val, min: def.min, max: Math.max(def.max, val * 2.5), step: def.step, unit: def.unit });
-  });
-  // 颜色属性
-  COLOR_PROPS.forEach(function(def) {
-    var raw = cs[def.prop];
-    var hex = rgbToHex(raw);
-    if (!hex) return;
-    if (def.prop === 'backgroundColor' && (hex === '#000000' || hex === '#111111' || hex === '#0a0a0f')) return;
-    controls.push({ type: 'color', prop: def.prop, label: def.label, value: hex });
-  });
-  // 动画速度
-  var dur = getAnimDuration(el);
-  if (dur > 0) {
-    controls.push({ type: 'speed', prop: '__speed', label: '速度', value: 1, min: 0.1, max: 5, step: 0.1 });
-  }
-  return controls;
-}
-
-function getElementLabel(el) {
-  var cls = el.className || '';
-  if (typeof cls === 'string' && cls.trim()) {
-    var main = cls.trim().split(/\\s+/)[0];
-    if (main !== 'stage') return '.' + main;
-  }
-  var tag = el.tagName.toLowerCase();
-  return tag;
-}
-
-// 不应该出现在控制面板中的标签
-var SKIP_TAGS = ['H1','H2','H3','H4','H5','H6','P','A','NAV','SCRIPT','STYLE','LINK','META','TITLE','BR','HR','HEADER','FOOTER','LABEL','SPAN','SVG'];
-
-function findEffectRoot(doc, iframeSrc) {
-  // 1. 如果有 .stage，直接用（parsed 类型的独立效果页）
-  var stage = doc.querySelector('.stage');
-  if (stage) return { container: stage, elements: Array.prototype.slice.call(stage.children) };
-  // 2. 如果 URL 有 hash，定位到对应 section 的 .demo 容器
-  var hash = '';
-  try { hash = new URL(iframeSrc, location.href).hash.slice(1); } catch(e){}
-  if (hash) {
-    var section = doc.getElementById(hash);
-    if (section) {
-      // 在 section 内找 .demo 容器（实际效果区域）
-      var demo = section.querySelector('.demo');
-      if (demo) return { container: demo, elements: collectEffectElements(demo) };
-      // 没有 .demo 就用 section 本身，但过滤掉文档元素
-      return { container: section, elements: collectEffectElements(section) };
-    }
-  }
-  // 3. 没有 hash 也没有 .stage，尝试找第一个 .demo
-  var firstDemo = doc.querySelector('.demo');
-  if (firstDemo) return { container: firstDemo, elements: collectEffectElements(firstDemo) };
-  // 4. fallback: body 的子元素，但过滤
-  return { container: doc.body, elements: collectEffectElements(doc.body) };
-}
-
-function collectEffectElements(container) {
-  var result = [];
-  var children = Array.prototype.slice.call(container.children);
-  var win = container.ownerDocument.defaultView || window;
-  children.forEach(function(el) {
-    if (SKIP_TAGS.indexOf(el.tagName) !== -1) return;
-    // 跳过隐藏的或纯布局的元素
-    try {
-      var cs = win.getComputedStyle(el);
-      if (cs.display === 'none' || cs.visibility === 'hidden') return;
-    } catch(e) {}
-    result.push(el);
-  });
-  return result;
-}
-
-function buildCtrlPanel() {
-  var sidebar = document.getElementById('ctrlSidebar');
-  var ifr = document.getElementById('overlayIframe');
-  // 清空旧内容（保留标题）
-  sidebar.innerHTML = '<div class="ctrl-title">属性控制</div>';
-  try {
-    var doc = ifr.contentDocument || ifr.contentWindow.document;
-    var root = findEffectRoot(doc, ifr.src);
-    var elements = root.elements;
-    if (elements.length === 0) {
-      sidebar.innerHTML += '<div class="ctrl-empty">无可控元素</div>';
-      return;
-    }
-    var hasControls = false;
-    elements.forEach(function(el, idx) {
-      var controls = analyzeElement(el, doc);
-      if (controls.length === 0) return;
-      hasControls = true;
-      var card = document.createElement('div');
-      card.className = 'ctrl-card';
-      var label = getElementLabel(el);
-      card.innerHTML = '<div class="ctrl-el-name">' + label + ' <span class="ctrl-el-tag">' + el.tagName.toLowerCase() + '</span></div>';
-      controls.forEach(function(ctrl) {
-        var row = document.createElement('div');
-        row.className = 'ctrl-prop';
-        if (ctrl.type === 'range' || ctrl.type === 'speed') {
-          var displayVal = ctrl.type === 'speed' ? ctrl.value + 'x' : Math.round(ctrl.value) + (ctrl.unit || '');
-          row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span>' +
-            '<input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '">' +
-            '<span class="ctrl-prop-val">' + displayVal + '</span>';
-          var input = row.querySelector('input');
-          var valSpan = row.querySelector('.ctrl-prop-val');
-          (function(c, element, inp, vs) {
-            inp.addEventListener('input', function() {
-              var v = parseFloat(inp.value);
-              if (c.type === 'speed') {
-                vs.textContent = v + 'x';
-                try {
-                  var anims = doc.getAnimations ? doc.getAnimations() : [];
-                  anims.forEach(function(a) {
-                    if (a.effect && a.effect.target === element) {
-                      try { a.playbackRate = v; } catch(ex){}
-                    }
-                  });
-                } catch(ex){}
-              } else {
-                vs.textContent = Math.round(v) + (c.unit || '');
-                element.style[c.prop] = v + (c.unit || '');
-              }
-            });
-          })(ctrl, el, input, valSpan);
-        } else if (ctrl.type === 'color') {
-          row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span>' +
-            '<input type="color" value="' + ctrl.value + '">' +
-            '<span class="ctrl-prop-val">' + ctrl.value + '</span>';
-          var input = row.querySelector('input');
-          var valSpan = row.querySelector('.ctrl-prop-val');
-          (function(c, element, inp, vs) {
-            inp.addEventListener('input', function() {
-              element.style[c.prop] = inp.value;
-              vs.textContent = inp.value;
-            });
-          })(ctrl, el, input, valSpan);
-        }
-        card.appendChild(row);
-      });
-      sidebar.appendChild(card);
-    });
-    if (!hasControls) {
-      sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
-    } else {
-      var resetBtn = document.createElement('button');
-      resetBtn.className = 'ctrl-reset-btn';
-      resetBtn.textContent = '重置全部';
-      resetBtn.addEventListener('click', function() {
-        ifr.contentWindow.location.reload();
-        setTimeout(buildCtrlPanel, 500);
-      });
-      sidebar.appendChild(resetBtn);
-    }
-  } catch(e) {
-    sidebar.innerHTML += '<div class="ctrl-empty">无法分析（跨域）</div>';
-  }
-}
-
-// iframe 加载完成后构建控制面板
-document.getElementById('overlayIframe').addEventListener('load', function() {
-  if (this.src !== 'about:blank') {
-    setTimeout(buildCtrlPanel, 300);
-  }
-});
-
-// === Overlay 开关 ===
-var overlay = document.getElementById('overlay');
-var iframe = document.getElementById('overlayIframe');
-
-function closeOverlay() {
-  overlay.classList.remove('open');
-  iframe.src = 'about:blank';
-  currentEffectSrc = '';
-  // 清空控制面板
-  var sidebar = document.getElementById('ctrlSidebar');
-  sidebar.innerHTML = '<div class="ctrl-title">属性控制</div><div class="ctrl-empty">加载中...</div>';
-}
-
-document.getElementById('overlayClose').addEventListener('click', closeOverlay);
-document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeOverlay(); });
-
-document.querySelectorAll('.card-grid .card').forEach(function(card) {
-  card.addEventListener('click', function() {
-    var src = card.dataset.src;
-    if (src) {
-      currentEffectSrc = src;
-      iframe.src = src;
-      overlay.classList.add('open');
-      updateFavBtn();
-    }
-  });
-});
-
-// 初始化卡片收藏状态
-updateCardFavStates();
+.back-btn{position:fixed;top:56px;left:16px;z-index:201;padding:6px 14px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);font-size:.7rem;cursor:pointer;transition:all .15s;text-decoration:none;display:flex;align-items:center;gap:4px}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.back-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none}
+@media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
 `;
 
 // ============================================================
-// 生成每个 parsed 分类的集合页面（二级页面，卡片网格 + overlay）
+// 控制面板 JS（内嵌在效果详情页中）
+// ============================================================
+const ctrlPanelJs = `
+(function(){
+  var controls = window.__EFFECT_CONTROLS__;
+  var sidebar = document.getElementById('ctrlSidebar');
+  if (!controls || controls.length === 0) {
+    sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
+    return;
+  }
+  var card = document.createElement('div');
+  card.className = 'ctrl-card';
+  var origDurations = new Map();
+
+  controls.forEach(function(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'ctrl-prop';
+
+    if (ctrl.type === 'range') {
+      var displayVal = ctrl.unit === 'x' ? ctrl.value + 'x' : ctrl.value + (ctrl.unit || '');
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" step="' + ctrl.step + '" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + displayVal + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          var v = parseFloat(inp.value);
+          if (c.action === 'speed') {
+            vs.textContent = v.toFixed(1) + 'x';
+            var stage = document.querySelector('.stage');
+            if (!stage) return;
+            var allEls = [stage].concat(Array.prototype.slice.call(stage.querySelectorAll('*')));
+            allEls.forEach(function(el) {
+              var cs = getComputedStyle(el);
+              if (cs.animationName && cs.animationName !== 'none') {
+                var key = el.className + '|' + cs.animationName;
+                if (!origDurations.has(key)) {
+                  origDurations.set(key, parseFloat(cs.animationDuration));
+                }
+                var orig = origDurations.get(key);
+                el.style.animationDuration = (orig / v) + 's';
+              }
+            });
+          } else if (c.action === 'css') {
+            vs.textContent = Math.round(v * 10) / 10 + (c.unit || '');
+            var targets = document.querySelectorAll(c.target);
+            targets.forEach(function(el) {
+              c.props.forEach(function(prop) {
+                el.style[prop] = v + (c.unit || '');
+              });
+            });
+          }
+        });
+      })(ctrl, input, valSpan);
+    } else if (ctrl.type === 'color') {
+      row.innerHTML = '<span class="ctrl-prop-label">' + ctrl.label + '</span><input type="color" value="' + ctrl.value + '"><span class="ctrl-prop-val">' + ctrl.value + '</span>';
+      var input = row.querySelector('input');
+      var valSpan = row.querySelector('.ctrl-prop-val');
+
+      (function(c, inp, vs) {
+        inp.addEventListener('input', function() {
+          vs.textContent = inp.value;
+          var targets = document.querySelectorAll(c.target);
+          targets.forEach(function(el) {
+            if (c.action === 'gradient') {
+              var cs = getComputedStyle(el);
+              var bgImg = cs.backgroundImage || '';
+              if (bgImg.includes('linear-gradient')) {
+                var colors = bgImg.match(/rgb[a]?\\([^)]+\\)/g) || [];
+                if (colors.length >= 2) {
+                  colors[c.index] = inp.value;
+                  el.style.background = 'linear-gradient(135deg, ' + colors[0] + ', ' + colors[1] + ')';
+                }
+              } else {
+                el.style.background = inp.value;
+              }
+            } else if (c.action === 'css') {
+              c.props.forEach(function(prop) {
+                el.style[prop] = inp.value;
+              });
+            }
+          });
+        });
+      })(ctrl, input, valSpan);
+    }
+    card.appendChild(row);
+  });
+
+  sidebar.appendChild(card);
+
+  // 重置按钮
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'ctrl-reset-btn';
+  resetBtn.textContent = '重置全部';
+  resetBtn.addEventListener('click', function() { location.reload(); });
+  sidebar.appendChild(resetBtn);
+})();`;
+
+// ============================================================
+// 生成独立效果详情页（_effects/） - 带专属控制面板
+// ============================================================
+const effectsDir = path.join(dir, '_effects');
+if (fs.existsSync(effectsDir)) fs.rmSync(effectsDir, { recursive: true });
+fs.mkdirSync(effectsDir);
+
+let effectIndex = 0;
+for (const cat of sortedParsed) {
+  for (const eff of cat.effects) {
+    effectIndex++;
+    const fileName = `${String(effectIndex).padStart(3, '0')}.html`;
+    const stageAttrs = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
+    const stageClass = eff.stageClass ? ` stage${eff.stageClass}` : ' stage';
+
+    // 提取该效果的专属控制项
+    const controls = extractEffectControls(cat.css, eff.stageHtml);
+    const effectPageCss = cleanCssForEffectPage(cat.css);
+
+    const effectHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${eff.name} - Bの宝库</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
+${navCss}
+${ctrlCss}
+.effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
+.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+${effectPageCss}
+</style>
+</head>
+<body>
+${generateNavBar(cat.id, '../')}
+<a href="../_cat/${cat.id}.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<div class="effect-main">
+<div class="${stageClass.trim()}"${stageAttrs}>${eff.stageHtml}</div>
+</div>
+<div class="ctrl-sidebar" id="ctrlSidebar">
+<div class="ctrl-title">${eff.name}</div>
+</div>
+${cat.scripts.map(s => `<script>${s}<\/script>`).join('\n')}
+<` + `script>
+window.__EFFECT_CONTROLS__ = ${JSON.stringify(controls)};
+${ctrlPanelJs}
+${navJs}
+<` + `/script>
+</body>
+</html>`;
+    fs.writeFileSync(path.join(effectsDir, fileName), effectHtml);
+    eff._file = `_effects/${fileName}`;
+  }
+}
+// 为 iframe 类型生成独立效果页
+for (const cat of sortedIframe) {
+  for (const eff of cat.effects) {
+    effectIndex++;
+    const fileName = `${String(effectIndex).padStart(3, '0')}.html`;
+
+    // 清理全局 CSS（移除 body/通配符/布局相关）
+    const iframeCssClean = (cat.globalCss || '')
+      .replace(/\s*\*[\s,]*\*::before[\s\S]*?\}/g, '')
+      .replace(/\s*body\s*\{[^}]*\}/g, '')
+      .replace(/\s*\.nav\s*\{[^}]*\}/g, '')
+      .replace(/\s*\.nav\s+a\s*\{[^}]*\}/g, '')
+      .replace(/\s*\.effect-section\s*\{[^}]*\}/g, '')
+      .replace(/\s*\.effect-section\s+h2\s*\{[^}]*\}/g, '')
+      .replace(/\s*\.effect-section\s+\.desc\s*\{[^}]*\}/g, '')
+      .replace(/\s*\.demo\s*\{[^}]*\}/g, '');
+
+    const allCss = iframeCssClean + '\n' + (eff.localCss || '');
+    const bgStyle = eff.demoStyle || 'background:#111';
+
+    const iframeEffectHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${eff.name} - Bの宝库</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
+${navCss}
+${ctrlCss}
+.effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
+.stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;${bgStyle}}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%}
+${allCss}
+</style>
+</head>
+<body>
+${generateNavBar(cat.id, '../')}
+<a href="../_cat/${cat.id}.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<div class="effect-main">
+<div class="stage">${eff.demoHtml}</div>
+</div>
+<div class="ctrl-sidebar" id="ctrlSidebar">
+<div class="ctrl-title">${eff.name}</div>
+<div class="ctrl-empty">沉浸式体验</div>
+</div>
+${eff.scripts.map(s => `<` + `script>${s}<` + `/script>`).join('\n')}
+<` + `script>
+${navJs}
+<` + `/script>
+</body>
+</html>`;
+    fs.writeFileSync(path.join(effectsDir, fileName), iframeEffectHtml);
+    eff._file = `_effects/${fileName}`;
+  }
+}
+
+console.log(`📁 Generated ${effectIndex} standalone effect files in _effects/`);
+
+// ============================================================
+// 分类页面共用样式（卡片网格，点击跳转到效果详情页）
+// ============================================================
+const cardGridCss = `
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
+.card{background:#111;cursor:pointer;transition:background .15s;text-decoration:none;display:block}
+.card:hover{background:#161616}
+.card:hover .card-visual,.card:hover .card-visual .stage{background:#161616 !important}
+.card:hover .card-info{background:#161616}
+.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
+.card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
+.card-info{padding:10px 14px 14px;background:#111}
+.card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
+@media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+`;
+
+// ============================================================
+// 生成每个 parsed 分类的集合页面（点击卡片跳转到效果详情页）
 // ============================================================
 const catPagesDir = path.join(dir, '_cat');
 if (fs.existsSync(catPagesDir)) fs.rmSync(catPagesDir, { recursive: true });
@@ -730,10 +859,10 @@ for (const cat of sortedParsed) {
   for (const eff of cat.effects) {
     const stageAttrs = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
     const stageClass = eff.stageClass ? ` ${eff.stageClass}` : '';
-    cards += `    <div class="card" data-src="../${eff._file}">
+    cards += `    <a href="../${eff._file}" class="card">
       <div class="card-visual"><div class="stage${stageClass}"${stageAttrs}>${eff.stageHtml}</div></div>
       <div class="card-info"><h3>${eff.name}</h3>${eff.tag ? `<span class="tag">${eff.tag}</span>` : ''}</div>
-    </div>\n`;
+    </a>\n`;
   }
 
   const catHtml = `<!DOCTYPE html>
@@ -747,18 +876,7 @@ for (const cat of sortedParsed) {
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
 a{text-decoration:none;color:inherit}
 ${navCss}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
-.card{background:#111;cursor:pointer;transition:background .15s}
-.card:hover{background:#161616}
-.card:hover .card-visual,.card:hover .card-visual .stage{background:#161616 !important}
-.card:hover .card-info{background:#161616}
-.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
-.card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
-.card-info{padding:10px 14px 14px;background:#111}
-.card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
-${overlayCss}
-@media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+${cardGridCss}
 ${cat.css}
 </style>
 </head>
@@ -766,10 +884,8 @@ ${cat.css}
 ${generateNavBar(cat.id, '../')}
 <div class="card-grid">
 ${cards}</div>
-${overlayHtml}
 <` + `script>
 ${navJs}
-${overlayJs}
 ${cat.scripts.map(s => s).join('\n')}
 <` + `/script>
 </body>
@@ -777,34 +893,32 @@ ${cat.scripts.map(s => s).join('\n')}
   fs.writeFileSync(path.join(catPagesDir, `${cat.id}.html`), catHtml);
 }
 
-// iframe 分类的集合页面（截图卡片 + overlay 加载原文件）
+// iframe 分类的集合页面（卡片点击跳转到独立效果页）
 for (const cat of sortedIframe) {
   let cards = '';
   if (cat.effects.length > 0) {
     for (let i = 0; i < cat.effects.length; i++) {
       const eff = cat.effects[i];
-      const anchor = eff.id ? `#${eff.id}` : '';
       const thumbFile = `${cat.id}_${i}.png`;
       const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
       const visual = thumbExists
         ? `<img src="../_thumbs/${thumbFile}" alt="${eff.name}" style="width:100%;height:100%;object-fit:cover">`
         : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;padding:8px">${eff.name}</div>`;
-      cards += `    <div class="card" data-src="../${cat.file}${anchor}">
+      cards += `    <a href="../${eff._file}" class="card">
       <div class="card-visual">${visual}</div>
       <div class="card-info"><h3>${eff.name}</h3></div>
-    </div>\n`;
+    </a>\n`;
     }
   } else {
-    // 没有解析出子效果，整个文件作为一个卡片
     const thumbFile = `${cat.file.replace('.html', '.png')}`;
     const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
     const visual = thumbExists
       ? `<img src="../_thumbs/${thumbFile}" alt="${cat.title}" style="width:100%;height:100%;object-fit:cover">`
       : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${cat.title.charAt(0)}</div>`;
-    cards += `    <div class="card" data-src="../${cat.file}">
+    cards += `    <a href="../${cat.file}" class="card">
       <div class="card-visual">${visual}</div>
       <div class="card-info"><h3>${cat.title}</h3></div>
-    </div>\n`;
+    </a>\n`;
   }
 
   const iframeCatHtml = `<!DOCTYPE html>
@@ -818,26 +932,15 @@ for (const cat of sortedIframe) {
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
 a{text-decoration:none;color:inherit}
 ${navCss}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
-.card{background:#111;cursor:pointer;transition:background .15s}
-.card:hover{background:#161616}
-.card:hover .card-visual{background:#161616 !important}
-.card:hover .card-info{background:#161616}
-.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
-.card-info{padding:10px 14px 14px;background:#111}
-.card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-${overlayCss}
-@media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+${cardGridCss}
 </style>
 </head>
 <body>
 ${generateNavBar(cat.id, '../')}
 <div class="card-grid">
 ${cards}</div>
-${overlayHtml}
 <` + `script>
 ${navJs}
-${overlayJs}
 <` + `/script>
 </body>
 </html>`;
@@ -853,10 +956,10 @@ if (sortedCollect.length > 0) {
     const visual = thumbExists
       ? `<img src="../_thumbs/${thumbFile}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover">`
       : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${item.title.charAt(0)}</div>`;
-    collectCardsHtml += `    <div class="card" data-src="../${item.file}">
+    collectCardsHtml += `    <a href="../${item.file}" class="card">
       <div class="card-visual">${visual}</div>
       <div class="card-info"><h3>${item.title}</h3></div>
-    </div>\n`;
+    </a>\n`;
   }
 
   const collectHtml = `<!DOCTYPE html>
@@ -870,26 +973,15 @@ if (sortedCollect.length > 0) {
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
 a{text-decoration:none;color:inherit}
 ${navCss}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
-.card{background:#111;cursor:pointer;transition:background .15s}
-.card:hover{background:#161616}
-.card:hover .card-visual{background:#161616 !important}
-.card:hover .card-info{background:#161616}
-.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
-.card-info{padding:10px 14px 14px;background:#111}
-.card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-${overlayCss}
-@media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+${cardGridCss}
 </style>
 </head>
 <body>
 ${generateNavBar('collect', '../')}
 <div class="card-grid">
 ${collectCardsHtml}</div>
-${overlayHtml}
 <` + `script>
 ${navJs}
-${overlayJs}
 <` + `/script>
 </body>
 </html>`;
@@ -899,7 +991,7 @@ ${overlayJs}
 console.log(`📁 Generated ${sortedParsed.length + sortedIframe.length + (sortedCollect.length > 0 ? 1 : 0)} category pages in _cat/`);
 
 // ============================================================
-// 生成首页 index.html（轻量：只有分类卡片 + 截图）
+// 生成首页 index.html（分类卡片 + 截图）
 // ============================================================
 let catCards = '';
 for (const cat of allCategories) {
@@ -920,8 +1012,6 @@ for (const cat of allCategories) {
       <div class="cat-info"><h3>${cat.title}</h3><span class="cat-count">${cat.count}</span></div>
     </a>\n`;
 }
-
-// 首页不嵌入任何 CSS 动画，全部用截图
 
 const indexHtml = `<!DOCTYPE html>
 <html lang="zh-CN">

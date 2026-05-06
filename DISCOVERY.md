@@ -10,7 +10,19 @@
 - 效果名称：等轴测线框几何体 (Isometric Wireframe Geometry)
 - 效果描述：三组精美的等轴测线框图（FIG 0.2/0.3/0.4），分别展示层叠圆盘体、积木方块组合、扇形层叠板。纯 SVG path 绘制，深色背景 #08090A，细线描边（0.5px），亮色轮廓线 #D0D6E0 与暗色内部线 #3E3E44 形成层次感，feGaussianBlur 阴影滤镜增加深度。鼠标悬停时几何体有发光描边动画，整体有缓慢浮动效果。
 - 实现原理：SVG path 手工绘制等轴测几何体（菱形顶面 + 平行四边形侧面），stroke 描边控制线条粗细，feDropShadow/feGaussianBlur 滤镜增加发光感，CSS animation 驱动 translateY 浮动，hover 时 filter: drop-shadow 增强发光，多个变体展示不同几何形态
-- 状态：待实现
+- 状态：已实现 → 63-isometric-wireframe.html，已集成到首页
+
+## 2026-05-06 framer.com (Holo Shader)
+- 效果名称：全息液态光泽背景 (Holographic Liquid Shader)
+- 效果描述：流动的全息彩虹渐变背景，青色/紫色/绿色/粉色的液态光泽感，像光线在全息膜上折射产生的彩虹效果。颜色随时间缓慢流动变化，鼠标移动时光泽跟随偏移，产生真实的全息材质感。可作为卡片背景、hero 背景、按钮背景等多种用途。
+- 实现原理：Canvas 2D + 多层 sin/cos 函数叠加生成流动噪声场，将噪声值映射到 HSL 色相（hue 0-360 循环），叠加产生液态流动感，requestAnimationFrame 驱动 time 动画，鼠标位置影响扭曲中心偏移
+- 状态：已实现 → 65-holographic-liquid.html，已集成到首页
+
+## 2026-05-06 vercel.com (Hero Section)
+- 效果名称：嵌套三角形光晕背景 (Nested Triangle Glow Hero)
+- 效果描述：页面 hero 区域中央有一个由 15 条三角形路径叠加而成的嵌套三角形，底边固定，顶点 Y 坐标逐步上移，opacity 从 1 渐变到 0.07，形成向内收缩的深度感。背景是多色 radial-gradient 光晕（橙/红/绿/蓝），浅色主题，底层有细线网格。整体呈现出科技感十足的几何美学。支持暗色/亮色主题切换，鼠标移动时光晕跟随偏移。
+- 实现原理：SVG 绘制 15 条三角形 path（底边固定 485,650→715,650，顶点 Y 从 451 递增到 578），每条 opacity 按等差递减；背景用多个 radial-gradient 叠加（橙/红/绿/蓝各一个光晕），CSS grid 网格线用 background-image: linear-gradient 绘制；mousemove 事件驱动光晕中心偏移，CSS transition 平滑跟随
+- 状态：已实现 → 65-nested-triangle-glow.html，已集成到 collect.html
 
 ## 2026-04-28 diabrowser.com
 - 效果名称：文字粒子爆炸 (Text Particle Explosion)

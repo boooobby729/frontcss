@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holographic Liquid Shader</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    text-align: center;
+    padding: 60px 20px 40px;
+  }
+  .page-header h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+  }
+  .page-header p {
+    font-size: 16px;
+    color: #666;
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── Section ── */
+  .section {
+    padding: 60px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 32px;
+  }
+  .section-title {
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: #e0e0e0;
+  }
+  .section-desc {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  /* ── Variant 1: Full-bleed hero canvas ── */
+  .hero-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  .hero-canvas-wrap canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .hero-overlay h2 {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: rgba(255,255,255,0.92);
+    text-shadow: 0 2px 40px rgba(0,0,0,0.4);
+    mix-blend-mode: overlay;
+  }
+  .hero-overlay p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 12px;
+    text-shadow: 0 1px 12px rgba(0,0,0,0.5);
+    mix-blend-mode: overlay;
+  }
+
+  /* ── Variant 2: Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .holo-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    height: 200px;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .holo-card:hover {
+    transform: scale(1.03) translateY(-4px);
+  }
+  .holo-card canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .holo-card-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .holo-card-content h3 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #fff;
+  }
+  .holo-card-content span {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+  }
+
+  /* ── Variant 3: Button ── */
+  .button-showcase {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+  }
+  .holo-btn {
+    position: relative;
+    padding: 14px 32px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #fff;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .holo-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(100,200,255,0.3);
+  }
+  .holo-btn canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .holo-btn span {
+    position: relative;
+    z-index: 1;
+    mix-blend-mode: overlay;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+  }
+
+  /* ── Variant 4: Avatar / profile card ── */
+  .profile-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .profile-card {
+    position: relative;
+    width: 160px;
+    height: 200px;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .profile-card:hover {
+    transform: scale(1.06) rotate(-1deg);
+  }
+  .profile-card canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .profile-card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 14px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    pointer-events: none;
+  }
+  .profile-card-info .name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .profile-card-info .role {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 2px;
+  }
+  .profile-avatar {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    pointer-events: none;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    border: none;
+    border-top: 1px solid #111;
+    margin: 0 40px;
+  }
+
+  /* ── Footer ── */
+  .page-footer {
+    text-align: center;
+    padding: 60px 20px;
+    color: #333;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Holographic Liquid Shader</h1>
+  <p>全息液态光泽背景 — 多层正弦波叠加生成流动彩虹光泽，灵感来自 Framer Holo Shader</p>
+</div>
+
+<!-- ── Variant 1: Hero ── -->
+<div class="section">
+  <div class="section-label">Variant 01 — Full Hero</div>
+  <div class="section-title">全屏全息背景</div>
+  <div class="section-desc">鼠标移动改变光泽中心，产生真实全息膜折射感</div>
+  <div class="hero-canvas-wrap" id="hero-wrap">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-overlay">
+      <h2>Holo Shader</h2>
+      <p>Move your cursor to shift the light</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ── Variant 2: Cards ── -->
+<div class="section">
+  <div class="section-label">Variant 02 — Card Backgrounds</div>
+  <div class="section-title">全息卡片背景</div>
+  <div class="section-desc">每张卡片独立的全息着色器，不同色调偏移</div>
+  <div class="card-grid" id="card-grid"></div>
+</div>
+
+<hr class="divider">
+
+<!-- ── Variant 3: Buttons ── -->
+<div class="section">
+  <div class="section-label">Variant 03 — Holographic Buttons</div>
+  <div class="section-title">全息按钮</div>
+  <div class="section-desc">按钮背景使用全息着色器，悬停时光泽流动加速</div>
+  <div class="button-showcase" id="btn-showcase"></div>
+</div>
+
+<hr class="divider">
+
+<!-- ── Variant 4: Profile Cards ── -->
+<div class="section">
+  <div class="section-label">Variant 04 — Profile Cards</div>
+  <div class="section-title">全息人物卡片</div>
+  <div class="section-desc">竖版卡片，不同色调的全息背景，悬停时轻微旋转</div>
+  <div class="profile-grid" id="profile-grid"></div>
+</div>
+
+<div class="page-footer">Holographic Liquid Shader · Pure Canvas 2D · Zero Dependencies</div>
+
+<script>
+// ─────────────────────────────────────────────
+// Core: Holographic Shader Engine
+// Uses layered sin/cos waves mapped to HSL hue
+// ─────────────────────────────────────────────
+
+class HoloShader {
+  constructor(canvas, options = {}) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.time = 0;
+    this.mouseX = 0.5;
+    this.mouseY = 0.5;
+    this.targetMouseX = 0.5;
+    this.targetMouseY = 0.5;
+    this.speed = options.speed || 1.0;
+    this.hueOffset = options.hueOffset || 0;       // 0-360, shifts overall color
+    this.hueRange = options.hueRange || 180;        // how wide the hue sweep is
+    this.saturation = options.saturation || 90;
+    this.lightness = options.lightness || 65;
+    this.noiseScale = options.noiseScale || 1.0;
+    this.mouseInfluence = options.mouseInfluence || 0.4;
+    this.running = true;
+    this.raf = null;
+    this.tmpCanvas = document.createElement('canvas');
+    this.tmpCtx = this.tmpCanvas.getContext('2d');
+    this._resize();
+    this._bindMouse();
+    this._loop();
+  }
+
+  _resize() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.w = rect.width;
+    this.h = rect.height;
+  }
+
+  _bindMouse() {
+    const el = this.canvas.parentElement;
+    el.addEventListener('mousemove', (e) => {
+      const rect = el.getBoundingClientRect();
+      this.targetMouseX = (e.clientX - rect.left) / rect.width;
+      this.targetMouseY = (e.clientY - rect.top) / rect.height;
+    });
+    el.addEventListener('mouseleave', () => {
+      this.targetMouseX = 0.5;
+      this.targetMouseY = 0.5;
+    });
+  }
+
+  // Core noise: layered sin/cos producing smooth organic flow
+  _noise(x, y, t) {
+    const mx = this.mouseX * this.mouseInfluence;
+    const my = this.mouseY * this.mouseInfluence;
+    const s = this.noiseScale;
+
+    // Layer 1: large slow wave
+    const n1 = Math.sin(x * 2.0 * s + t * 0.6 + mx * 4.0) *
+               Math.cos(y * 1.8 * s + t * 0.4 + my * 3.5);
+
+    // Layer 2: medium diagonal wave
+    const n2 = Math.sin((x + y) * 2.5 * s + t * 1.0 + mx * 3.0) *
+               Math.cos((x - y) * 2.2 * s + t * 0.8 + my * 2.5);
+
+    // Layer 3: fine detail
+    const n3 = Math.sin(x * 4.5 * s + y * 3.8 * s + t * 1.4 + mx * 2.0);
+
+    // Layer 4: radial from mouse
+    const dx = x - this.mouseX;
+    const dy = y - this.mouseY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const n4 = Math.sin(dist * 8.0 * s - t * 2.5) * 0.6;
+
+    return (n1 * 0.30 + n2 * 0.28 + n3 * 0.24 + n4 * 0.18);
+  }
+
+  // HSL to RGB conversion
+  _hslToRgb(h, s, l) {
+    h = ((h % 360) + 360) % 360;
+    s /= 100; l /= 100;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+    let r = 0, g = 0, b = 0;
+    if (h < 60)       { r = c; g = x; b = 0; }
+    else if (h < 120) { r = x; g = c; b = 0; }
+    else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; }
+    else if (h < 300) { r = x; g = 0; b = c; }
+    else              { r = c; g = 0; b = x; }
+    return [(r + m) * 255, (g + m) * 255, (b + m) * 255];
+  }
+
+  _render() {
+    const { ctx, w, h, time } = this;
+    // Smooth mouse lerp
+    this.mouseX += (this.targetMouseX - this.mouseX) * 0.06;
+    this.mouseY += (this.targetMouseY - this.mouseY) * 0.06;
+
+    // Use ImageData for smooth pixel-level rendering (no grid artifacts)
+    // Downsample for performance: render at 1/3 resolution, then scale up
+    const SCALE = 3;
+    const sw = Math.ceil(w / SCALE);
+    const sh = Math.ceil(h / SCALE);
+
+    const imgData = ctx.createImageData(sw, sh);
+    const data = imgData.data;
+
+    for (let row = 0; row < sh; row++) {
+      for (let col = 0; col < sw; col++) {
+        const nx = col / sw;
+        const ny = row / sh;
+
+        const n = this._noise(nx, ny, time);
+        // Second noise layer at different phase for color richness
+        const n2 = this._noise(nx + 0.7, ny + 0.5, time * 0.55 + 2.3);
+        // Third layer for fine hue variation
+        const n3 = this._noise(nx * 1.5 + 0.3, ny * 1.5 + 0.8, time * 1.3 + 4.1);
+
+        // Map to hue: combine layers so full 0-360 range is reachable
+        const rawHue = (n * 0.5 + n2 * 0.35 + n3 * 0.15); // -1..1
+        const hue = (((rawHue + 1) * 0.5) * this.hueRange + this.hueOffset + time * 22) % 360;
+        const sat = Math.min(100, this.saturation + n * 6 + n2 * 4);
+        const lit = Math.max(35, Math.min(78, this.lightness + n * 20 + n2 * 10));
+
+        const [r, g, b] = this._hslToRgb(hue, sat, lit);
+        const idx = (row * sw + col) * 4;
+        data[idx]     = r;
+        data[idx + 1] = g;
+        data[idx + 2] = b;
+        data[idx + 3] = 255;
+      }
+    }
+
+    // Draw downsampled image scaled up (browser bilinear interpolation = smooth)
+    ctx.clearRect(0, 0, w, h);
+    if (this.tmpCanvas.width !== sw || this.tmpCanvas.height !== sh) {
+      this.tmpCanvas.width = sw;
+      this.tmpCanvas.height = sh;
+    }
+    this.tmpCtx.putImageData(imgData, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(this.tmpCanvas, 0, 0, w, h);
+
+    // Overlay: soft radial highlight at mouse position
+    const gx = this.mouseX * w;
+    const gy = this.mouseY * h;
+    const grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, Math.max(w, h) * 0.5);
+    grad.addColorStop(0, 'rgba(255,255,255,0.18)');
+    grad.addColorStop(0.4, 'rgba(255,255,255,0.04)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  _loop() {
+    if (!this.running) return;
+    this.time += 0.008 * this.speed;
+    this._render();
+    this.raf = requestAnimationFrame(() => this._loop());
+  }
+
+  setSpeed(s) { this.speed = s; }
+  destroy() {
+    this.running = false;
+    if (this.raf) cancelAnimationFrame(this.raf);
+  }
+}
+
+// ─────────────────────────────────────────────
+// Variant 1: Hero
+// ─────────────────────────────────────────────
+const heroCanvas = document.getElementById('hero-canvas');
+new HoloShader(heroCanvas, {
+  speed: 0.8,
+  hueOffset: 150,   // start from cyan
+  hueRange: 360,    // full spectrum
+  saturation: 92,
+  lightness: 62,
+  noiseScale: 0.85,
+  mouseInfluence: 0.55,
+});
+
+// ─────────────────────────────────────────────
+// Variant 2: Cards
+// ─────────────────────────────────────────────
+const cardData = [
+  { title: 'Aurora', sub: 'Northern lights palette', hueOffset: 140, hueRange: 160, speed: 0.7 },
+  { title: 'Prism',  sub: 'Full spectrum refraction', hueOffset: 0,   hueRange: 360, speed: 1.0 },
+  { title: 'Ocean',  sub: 'Deep sea bioluminescence', hueOffset: 180, hueRange: 120, speed: 0.6 },
+  { title: 'Sunset', sub: 'Golden hour chromatics',   hueOffset: 10,  hueRange: 80,  speed: 0.9 },
+  { title: 'Nebula', sub: 'Cosmic dust diffraction',  hueOffset: 260, hueRange: 140, speed: 0.75 },
+  { title: 'Holo',   sub: 'Pure holographic foil',    hueOffset: 200, hueRange: 220, speed: 1.2 },
+];
+
+const cardGrid = document.getElementById('card-grid');
+cardData.forEach(d => {
+  const card = document.createElement('div');
+  card.className = 'holo-card';
+
+  const cv = document.createElement('canvas');
+  card.appendChild(cv);
+
+  const content = document.createElement('div');
+  content.className = 'holo-card-content';
+  content.innerHTML = `<h3>${d.title}</h3><span>${d.sub}</span>`;
+  card.appendChild(content);
+
+  cardGrid.appendChild(card);
+
+  const shader = new HoloShader(cv, {
+    speed: d.speed,
+    hueOffset: d.hueOffset,
+    hueRange: d.hueRange,
+    saturation: 88,
+    lightness: 62,
+    noiseScale: 1.1,
+    mouseInfluence: 0.35,
+  });
+
+  // Speed up on hover
+  card.addEventListener('mouseenter', () => shader.setSpeed(d.speed * 2.5));
+  card.addEventListener('mouseleave', () => shader.setSpeed(d.speed));
+});
+
+// ─────────────────────────────────────────────
+// Variant 3: Buttons
+// ─────────────────────────────────────────────
+const btnData = [
+  { label: 'Get Started',   hueOffset: 160, hueRange: 180, speed: 0.8 },
+  { label: 'Learn More',    hueOffset: 260, hueRange: 120, speed: 0.7 },
+  { label: 'Try for Free',  hueOffset: 20,  hueRange: 100, speed: 0.9 },
+  { label: 'Watch Demo',    hueOffset: 200, hueRange: 200, speed: 1.0 },
+];
+
+const btnShowcase = document.getElementById('btn-showcase');
+btnData.forEach(d => {
+  const btn = document.createElement('button');
+  btn.className = 'holo-btn';
+
+  const cv = document.createElement('canvas');
+  btn.appendChild(cv);
+
+  const label = document.createElement('span');
+  label.textContent = d.label;
+  btn.appendChild(label);
+
+  btnShowcase.appendChild(btn);
+
+  const shader = new HoloShader(cv, {
+    speed: d.speed,
+    hueOffset: d.hueOffset,
+    hueRange: d.hueRange,
+    saturation: 90,
+    lightness: 58,
+    noiseScale: 1.4,
+    mouseInfluence: 0.6,
+  });
+
+  btn.addEventListener('mouseenter', () => shader.setSpeed(d.speed * 3));
+  btn.addEventListener('mouseleave', () => shader.setSpeed(d.speed));
+});
+
+// ─────────────────────────────────────────────
+// Variant 4: Profile Cards
+// ─────────────────────────────────────────────
+const profileData = [
+  { name: 'Alex Chen',    role: 'Design Lead',    emoji: '🎨', hueOffset: 160, hueRange: 140 },
+  { name: 'Sam Rivera',   role: 'Frontend Dev',   emoji: '⚡', hueOffset: 260, hueRange: 120 },
+  { name: 'Jordan Kim',   role: 'Motion Artist',  emoji: '✨', hueOffset: 30,  hueRange: 100 },
+  { name: 'Taylor Moss',  role: 'Creative Dir',   emoji: '🌊', hueOffset: 190, hueRange: 160 },
+  { name: 'Morgan Lee',   role: 'UX Researcher',  emoji: '🔮', hueOffset: 280, hueRange: 130 },
+];
+
+const profileGrid = document.getElementById('profile-grid');
+profileData.forEach(d => {
+  const card = document.createElement('div');
+  card.className = 'profile-card';
+
+  const cv = document.createElement('canvas');
+  card.appendChild(cv);
+
+  const avatar = document.createElement('div');
+  avatar.className = 'profile-avatar';
+  avatar.textContent = d.emoji;
+  card.appendChild(avatar);
+
+  const info = document.createElement('div');
+  info.className = 'profile-card-info';
+  info.innerHTML = `<div class="name">${d.name}</div><div class="role">${d.role}</div>`;
+  card.appendChild(info);
+
+  profileGrid.appendChild(card);
+
+  const shader = new HoloShader(cv, {
+    speed: 0.7 + Math.random() * 0.4,
+    hueOffset: d.hueOffset,
+    hueRange: d.hueRange,
+    saturation: 85,
+    lightness: 60,
+    noiseScale: 1.2,
+    mouseInfluence: 0.45,
+  });
+
+  card.addEventListener('mouseenter', () => shader.setSpeed(2.0));
+  card.addEventListener('mouseleave', () => shader.setSpeed(0.8));
+});
+
+// ─────────────────────────────────────────────
+// Resize handler
+// ─────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  // Canvases auto-resize on next render via _resize check
+  // For simplicity, reload shaders on significant resize
+});
+</script>
+</body>
+</html>

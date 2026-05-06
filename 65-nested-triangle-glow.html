@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>65 · Nested Triangle Glow — 嵌套三角形光晕</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0a0a0f;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px 80px;
+}
+
+.page-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #444;
+  margin-bottom: 14px;
+}
+
+.page-title {
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.page-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 60px;
+  text-align: center;
+}
+
+/* ── Section ── */
+.section {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 80px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* ── Variant 1: Light Hero (Vercel-style) ── */
+.hero-light {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 12/7;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: crosshair;
+  background: #f5f5f0;
+}
+
+.hero-light .grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+.hero-light .orbs {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hero-light .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.7;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hero-light .orb-orange {
+  width: 45%; height: 70%;
+  background: radial-gradient(circle, #f5a623 0%, transparent 70%);
+  left: 5%; top: 10%;
+}
+.hero-light .orb-red {
+  width: 35%; height: 55%;
+  background: radial-gradient(circle, #e8445a 0%, transparent 70%);
+  left: 30%; top: 20%;
+}
+.hero-light .orb-teal {
+  width: 45%; height: 65%;
+  background: radial-gradient(circle, #00c9a7 0%, transparent 70%);
+  right: 5%; top: 5%;
+}
+.hero-light .orb-blue {
+  width: 30%; height: 50%;
+  background: radial-gradient(circle, #4a90e2 0%, transparent 70%);
+  right: 20%; bottom: 10%;
+}
+
+.hero-light .triangle-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.hero-light svg.tri {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-light .hero-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-light .hero-text h2 {
+  font-size: clamp(20px, 3.5vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #111;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.hero-light .hero-text p {
+  font-size: clamp(11px, 1.5vw, 15px);
+  color: rgba(0,0,0,0.45);
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+/* ── Variant 2: Dark Neon ── */
+.hero-dark {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 12/7;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: crosshair;
+  background: #050508;
+}
+
+.hero-dark .grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+.hero-dark .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.5;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hero-dark .orb-purple {
+  width: 50%; height: 70%;
+  background: radial-gradient(circle, #7c3aed 0%, transparent 70%);
+  left: 0%; top: 0%;
+}
+.hero-dark .orb-cyan {
+  width: 40%; height: 60%;
+  background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
+  right: 5%; top: 10%;
+}
+.hero-dark .orb-pink {
+  width: 35%; height: 50%;
+  background: radial-gradient(circle, #ec4899 0%, transparent 70%);
+  left: 25%; bottom: 0%;
+}
+
+.hero-dark .triangle-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.hero-dark svg.tri {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-dark .hero-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-dark .hero-text h2 {
+  font-size: clamp(20px, 3.5vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.hero-dark .hero-text p {
+  font-size: clamp(11px, 1.5vw, 15px);
+  color: rgba(255,255,255,0.4);
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+/* ── Variant 3: Animated Float ── */
+.hero-anim {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 12/7;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #08090c;
+}
+
+.hero-anim .grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.hero-anim .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+
+.hero-anim .orb-1 {
+  width: 60%; height: 80%;
+  background: radial-gradient(circle, #ff6b35 0%, transparent 70%);
+  left: -10%; top: -10%;
+  animation: orbFloat1 8s ease-in-out infinite;
+}
+.hero-anim .orb-2 {
+  width: 50%; height: 70%;
+  background: radial-gradient(circle, #00d4aa 0%, transparent 70%);
+  right: -10%; top: 0%;
+  animation: orbFloat2 10s ease-in-out infinite;
+}
+.hero-anim .orb-3 {
+  width: 40%; height: 60%;
+  background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+  left: 30%; bottom: -10%;
+  animation: orbFloat3 12s ease-in-out infinite;
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
+  33% { transform: translate(8%, 5%) scale(1.1); opacity: 0.55; }
+  66% { transform: translate(-5%, 8%) scale(0.95); opacity: 0.4; }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  40% { transform: translate(-6%, 6%) scale(1.08); opacity: 0.5; }
+  70% { transform: translate(4%, -4%) scale(0.92); opacity: 0.35; }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.35; }
+  50% { transform: translate(5%, -8%) scale(1.12); opacity: 0.5; }
+}
+
+.hero-anim .triangle-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.hero-anim svg.tri {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-anim .hero-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-anim .hero-text h2 {
+  font-size: clamp(20px, 3.5vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.hero-anim .hero-text p {
+  font-size: clamp(11px, 1.5vw, 15px);
+  color: rgba(255,255,255,0.4);
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+/* ── Variant 4: Hexagon ── */
+.hero-hex {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 12/7;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: crosshair;
+  background: #f8f7f2;
+}
+
+.hero-hex .grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 70px 70px;
+}
+
+.hero-hex .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(65px);
+  opacity: 0.65;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hero-hex .orb-yellow {
+  width: 50%; height: 70%;
+  background: radial-gradient(circle, #fbbf24 0%, transparent 70%);
+  left: 0%; top: 0%;
+}
+.hero-hex .orb-rose {
+  width: 40%; height: 60%;
+  background: radial-gradient(circle, #f43f5e 0%, transparent 70%);
+  left: 20%; top: 15%;
+}
+.hero-hex .orb-emerald {
+  width: 45%; height: 65%;
+  background: radial-gradient(circle, #10b981 0%, transparent 70%);
+  right: 0%; top: 5%;
+}
+
+.hero-hex .triangle-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.hero-hex svg.hex {
+  width: 55%;
+  height: 80%;
+}
+
+.hero-hex .hero-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-hex .hero-text h2 {
+  font-size: clamp(18px, 3vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #111;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+
+.hero-hex .hero-text p {
+  font-size: clamp(10px, 1.4vw, 14px);
+  color: rgba(0,0,0,0.4);
+  max-width: 320px;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<p class="page-label">Frontend Effects · 65</p>
+<h1 class="page-title">Nested Triangle Glow</h1>
+<p class="page-sub">嵌套三角形光晕 · SVG 多层路径 + 彩色 Radial Gradient</p>
+
+<!-- ── Variant 1: Light Hero ── -->
+<div class="section">
+  <p class="section-label">01 · Light Hero — Vercel Style</p>
+  <div class="hero-light" id="heroLight">
+    <div class="grid-bg"></div>
+    <div class="orbs" id="orbsLight">
+      <div class="orb orb-orange" id="orbOrange"></div>
+      <div class="orb orb-red" id="orbRed"></div>
+      <div class="orb orb-teal" id="orbTeal"></div>
+      <div class="orb orb-blue" id="orbBlue"></div>
+    </div>
+    <div class="triangle-wrap">
+      <svg class="tri" viewBox="0 0 1200 700" fill="none" aria-hidden="true" id="triLight">
+        <!-- fill mask -->
+        <path fill="#f5f5f0" d="M485 650.4h230L600 451.21z"/>
+        <!-- 15 nested triangle strokes -->
+      </svg>
+    </div>
+    <div class="hero-text">
+      <h2>Build and deploy<br>on the AI Cloud.</h2>
+      <p>The developer platform trusted by the world's best teams. Build fast, scale effortlessly.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Variant 2: Dark Neon ── -->
+<div class="section">
+  <p class="section-label">02 · Dark Neon</p>
+  <div class="hero-dark" id="heroDark">
+    <div class="grid-bg"></div>
+    <div class="orb orb-purple" id="orbPurple"></div>
+    <div class="orb orb-cyan" id="orbCyan"></div>
+    <div class="orb orb-pink" id="orbPink"></div>
+    <div class="triangle-wrap">
+      <svg class="tri" viewBox="0 0 1200 700" fill="none" aria-hidden="true" id="triDark">
+        <path fill="#050508" d="M485 650.4h230L600 451.21z"/>
+      </svg>
+    </div>
+    <div class="hero-text">
+      <h2>Ship at the<br>speed of thought.</h2>
+      <p>Zero-config deployments. Instant rollbacks. Global edge network.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Variant 3: Animated Float ── -->
+<div class="section">
+  <p class="section-label">03 · Animated Floating Orbs</p>
+  <div class="hero-anim">
+    <div class="grid-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="triangle-wrap">
+      <svg class="tri" viewBox="0 0 1200 700" fill="none" aria-hidden="true" id="triAnim">
+        <path fill="#08090c" d="M485 650.4h230L600 451.21z"/>
+      </svg>
+    </div>
+    <div class="hero-text">
+      <h2>Create without<br>limits.</h2>
+      <p>From idea to production in minutes. No compromises on performance.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Variant 4: Hexagon ── -->
+<div class="section">
+  <p class="section-label">04 · Hexagon Variant</p>
+  <div class="hero-hex" id="heroHex">
+    <div class="grid-bg"></div>
+    <div class="orb orb-yellow" id="orbYellow"></div>
+    <div class="orb orb-rose" id="orbRose"></div>
+    <div class="orb orb-emerald" id="orbEmerald"></div>
+    <div class="triangle-wrap">
+      <svg class="hex" viewBox="0 0 400 400" fill="none" aria-hidden="true" id="hexSvg">
+      </svg>
+    </div>
+    <div class="hero-text">
+      <h2>Design systems<br>at scale.</h2>
+      <p>Consistent, beautiful, and accessible components for every team.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+
+  // ── Build triangle paths ──
+  // Vercel original: base fixed at (485,650.4)→(715,650.4), apex Y from 451.21 to 578.82
+  // 15 strokes, opacity 1 → 0.07 (step ~0.067)
+  function buildTrianglePaths(svgEl, strokeColor, fillBg, count) {
+    count = count || 15;
+    var baseL = 485, baseR = 715, baseY = 650.4;
+    var apexXc = 600;
+    var apexYstart = 451.21;
+    var apexYend = 578.82;
+    var step = (apexYend - apexYstart) / (count - 1);
+    var opacityStart = 1, opacityEnd = 0.07;
+    var opacityStep = (opacityStart - opacityEnd) / (count - 1);
+
+    for (var i = 0; i < count; i++) {
+      var apexY = apexYstart + step * i;
+      var opacity = (opacityStart - opacityStep * i).toFixed(2);
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('stroke', strokeColor);
+      path.setAttribute('stroke-width', '1');
+      path.setAttribute('opacity', opacity);
+      path.setAttribute('d',
+        'M' + baseR + ' ' + baseY +
+        ' L' + apexXc + ' ' + apexY.toFixed(2) +
+        ' L' + baseL + ' ' + baseY
+      );
+      svgEl.appendChild(path);
+    }
+  }
+
+  // ── Build hexagon paths ──
+  function buildHexPaths(svgEl, strokeColor, count) {
+    count = count || 14;
+    var cx = 200, cy = 200;
+    var rStart = 140, rEnd = 30;
+    var step = (rStart - rEnd) / (count - 1);
+
+    for (var i = 0; i < count; i++) {
+      var r = rStart - step * i;
+      var opacity = (1 - (i / (count - 1)) * 0.93).toFixed(2);
+      var pts = [];
+      for (var a = 0; a < 6; a++) {
+        var angle = (Math.PI / 3) * a - Math.PI / 2;
+        pts.push((cx + r * Math.cos(angle)).toFixed(2) + ' ' + (cy + r * Math.sin(angle)).toFixed(2));
+      }
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('stroke', strokeColor);
+      path.setAttribute('stroke-width', '1');
+      path.setAttribute('opacity', opacity);
+      path.setAttribute('d', 'M' + pts.join(' L') + ' Z');
+      svgEl.appendChild(path);
+    }
+  }
+
+  // Build all SVGs
+  buildTrianglePaths(document.getElementById('triLight'), '#111111', '#f5f5f0');
+  buildTrianglePaths(document.getElementById('triDark'), '#ffffff', '#050508');
+  buildTrianglePaths(document.getElementById('triAnim'), '#ffffff', '#08090c');
+  buildHexPaths(document.getElementById('hexSvg'), '#111111');
+
+  // ── Mouse parallax for light hero ──
+  var heroLight = document.getElementById('heroLight');
+  heroLight.addEventListener('mousemove', function(e) {
+    var rect = heroLight.getBoundingClientRect();
+    var mx = (e.clientX - rect.left) / rect.width - 0.5;  // -0.5 to 0.5
+    var my = (e.clientY - rect.top) / rect.height - 0.5;
+
+    document.getElementById('orbOrange').style.transform = 'translate(' + (mx * 30) + 'px,' + (my * 20) + 'px)';
+    document.getElementById('orbRed').style.transform    = 'translate(' + (mx * 20) + 'px,' + (my * 30) + 'px)';
+    document.getElementById('orbTeal').style.transform   = 'translate(' + (-mx * 25) + 'px,' + (my * 15) + 'px)';
+    document.getElementById('orbBlue').style.transform   = 'translate(' + (-mx * 15) + 'px,' + (-my * 25) + 'px)';
+  });
+  heroLight.addEventListener('mouseleave', function() {
+    ['orbOrange','orbRed','orbTeal','orbBlue'].forEach(function(id) {
+      document.getElementById(id).style.transform = '';
+    });
+  });
+
+  // ── Mouse parallax for dark hero ──
+  var heroDark = document.getElementById('heroDark');
+  heroDark.addEventListener('mousemove', function(e) {
+    var rect = heroDark.getBoundingClientRect();
+    var mx = (e.clientX - rect.left) / rect.width - 0.5;
+    var my = (e.clientY - rect.top) / rect.height - 0.5;
+
+    document.getElementById('orbPurple').style.transform  = 'translate(' + (mx * 35) + 'px,' + (my * 25) + 'px)';
+    document.getElementById('orbCyan').style.transform    = 'translate(' + (-mx * 28) + 'px,' + (my * 20) + 'px)';
+    document.getElementById('orbPink').style.transform    = 'translate(' + (mx * 20) + 'px,' + (-my * 30) + 'px)';
+  });
+  heroDark.addEventListener('mouseleave', function() {
+    ['orbPurple','orbCyan','orbPink'].forEach(function(id) {
+      document.getElementById(id).style.transform = '';
+    });
+  });
+
+  // ── Mouse parallax for hex hero ──
+  var heroHex = document.getElementById('heroHex');
+  heroHex.addEventListener('mousemove', function(e) {
+    var rect = heroHex.getBoundingClientRect();
+    var mx = (e.clientX - rect.left) / rect.width - 0.5;
+    var my = (e.clientY - rect.top) / rect.height - 0.5;
+
+    document.getElementById('orbYellow').style.transform  = 'translate(' + (mx * 30) + 'px,' + (my * 20) + 'px)';
+    document.getElementById('orbRose').style.transform    = 'translate(' + (mx * 15) + 'px,' + (my * 25) + 'px)';
+    document.getElementById('orbEmerald').style.transform = 'translate(' + (-mx * 25) + 'px,' + (my * 15) + 'px)';
+  });
+  heroHex.addEventListener('mouseleave', function() {
+    ['orbYellow','orbRose','orbEmerald'].forEach(function(id) {
+      document.getElementById(id).style.transform = '';
+    });
+  });
+
+  // ── Animated triangle apex float ──
+  var triAnim = document.getElementById('triAnim');
+  var animPaths = triAnim.querySelectorAll('path[stroke]');
+  var t = 0;
+  var baseApexYstart = 451.21;
+  var baseApexYend = 578.82;
+  var count = 15;
+  var baseStep = (baseApexYend - baseApexYstart) / (count - 1);
+  var baseL = 485, baseR = 715, baseY = 650.4, apexXc = 600;
+
+  function animateTriangle() {
+    t += 0.008;
+    var floatOffset = Math.sin(t) * 18;  // apex floats ±18px
+
+    animPaths.forEach(function(path, i) {
+      var apexY = baseApexYstart + baseStep * i + floatOffset * (1 - i / (count - 1));
+      path.setAttribute('d',
+        'M' + baseR + ' ' + baseY +
+        ' L' + apexXc + ' ' + apexY.toFixed(2) +
+        ' L' + baseL + ' ' + baseY
+      );
+    });
+
+    requestAnimationFrame(animateTriangle);
+  }
+  animateTriangle();
+
+})();
+</script>
+</body>
+</html>

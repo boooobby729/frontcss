@@ -299,6 +299,49 @@ function getElementLabel(el) {
   return tag;
 }
 
+// 不应该出现在控制面板中的标签
+var SKIP_TAGS = ['H1','H2','H3','H4','H5','H6','P','A','NAV','SCRIPT','STYLE','LINK','META','TITLE','BR','HR','HEADER','FOOTER','LABEL','SPAN','SVG'];
+
+function findEffectRoot(doc, iframeSrc) {
+  // 1. 如果有 .stage，直接用（parsed 类型的独立效果页）
+  var stage = doc.querySelector('.stage');
+  if (stage) return { container: stage, elements: Array.prototype.slice.call(stage.children) };
+  // 2. 如果 URL 有 hash，定位到对应 section 的 .demo 容器
+  var hash = '';
+  try { hash = new URL(iframeSrc, location.href).hash.slice(1); } catch(e){}
+  if (hash) {
+    var section = doc.getElementById(hash);
+    if (section) {
+      // 在 section 内找 .demo 容器（实际效果区域）
+      var demo = section.querySelector('.demo');
+      if (demo) return { container: demo, elements: collectEffectElements(demo) };
+      // 没有 .demo 就用 section 本身，但过滤掉文档元素
+      return { container: section, elements: collectEffectElements(section) };
+    }
+  }
+  // 3. 没有 hash 也没有 .stage，尝试找第一个 .demo
+  var firstDemo = doc.querySelector('.demo');
+  if (firstDemo) return { container: firstDemo, elements: collectEffectElements(firstDemo) };
+  // 4. fallback: body 的子元素，但过滤
+  return { container: doc.body, elements: collectEffectElements(doc.body) };
+}
+
+function collectEffectElements(container) {
+  var result = [];
+  var children = Array.prototype.slice.call(container.children);
+  var win = container.ownerDocument.defaultView || window;
+  children.forEach(function(el) {
+    if (SKIP_TAGS.indexOf(el.tagName) !== -1) return;
+    // 跳过隐藏的或纯布局的元素
+    try {
+      var cs = win.getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return;
+    } catch(e) {}
+    result.push(el);
+  });
+  return result;
+}
+
 function buildCtrlPanel() {
   var sidebar = document.getElementById('ctrlSidebar');
   var ifr = document.getElementById('overlayIframe');
@@ -306,15 +349,14 @@ function buildCtrlPanel() {
   sidebar.innerHTML = '<div class="ctrl-title">属性控制</div>';
   try {
     var doc = ifr.contentDocument || ifr.contentWindow.document;
-    var stage = doc.querySelector('.stage') || doc.body;
-    // 获取 stage 的直接子元素（核心效果元素）
-    var children = Array.prototype.slice.call(stage.children);
-    if (children.length === 0) {
+    var root = findEffectRoot(doc, ifr.src);
+    var elements = root.elements;
+    if (elements.length === 0) {
       sidebar.innerHTML += '<div class="ctrl-empty">无可控元素</div>';
       return;
     }
     var hasControls = false;
-    children.forEach(function(el, idx) {
+    elements.forEach(function(el, idx) {
       var controls = analyzeElement(el, doc);
       if (controls.length === 0) return;
       hasControls = true;
@@ -337,7 +379,6 @@ function buildCtrlPanel() {
               var v = parseFloat(inp.value);
               if (c.type === 'speed') {
                 vs.textContent = v + 'x';
-                // 通过 Web Animations API 调速
                 try {
                   var anims = doc.getAnimations ? doc.getAnimations() : [];
                   anims.forEach(function(a) {
@@ -372,7 +413,6 @@ function buildCtrlPanel() {
     if (!hasControls) {
       sidebar.innerHTML += '<div class="ctrl-empty">该效果无可调属性</div>';
     } else {
-      // 添加重置按钮
       var resetBtn = document.createElement('button');
       resetBtn.className = 'ctrl-reset-btn';
       resetBtn.textContent = '重置全部';

@@ -179,6 +179,7 @@ console.log(`Found ${files.length} sub-pages\n`);
 
 const parsedCategories = [];
 const iframeCategories = [];
+const collectFiles = []; // collect 合集：46+ 的文件
 let totalEffects = 0;
 
 for (const file of files) {
@@ -186,6 +187,7 @@ for (const file of files) {
   if (!result) continue;
 
   const catId = file.replace('.html', '');
+  const num = parseInt(file.slice(0, 2), 10);
   const cleanTitle = result.title
     .replace(/集$/, '')
     .replace(/效果$/, '')
@@ -193,7 +195,12 @@ for (const file of files) {
     .replace(/\s*\|.*$/, '')
     .trim();
 
-  if (result.effects.length > 0) {
+  // 46+ 的文件都归入 Collect 合集
+  if (num >= 46) {
+    collectFiles.push({ id: catId, file, title: cleanTitle, num });
+    totalEffects += 1;
+    console.log(`★ ${file}: collect (${cleanTitle})`);
+  } else if (result.effects.length > 0) {
     parsedCategories.push({
       id: catId,
       file,
@@ -248,6 +255,10 @@ sortedParsed.forEach((cat, i) => {
 sortedIframe.forEach(cat => {
   sidebarItems += `      <button class="filter-item" data-cat="${cat.id}">${cat.title}</button>\n`;
 });
+// Collect 合集作为一个分类
+if (collectFiles.length > 0) {
+  sidebarItems += `      <button class="filter-item" data-cat="collect">Collect</button>\n`;
+}
 
 // ============================================================
 // 为每个 parsed 效果生成独立 HTML（放在 _effects/ 目录）
@@ -311,8 +322,18 @@ for (const cat of sortedParsed) {
 let iframeCards = '';
 for (const cat of sortedIframe) {
   iframeCards += `      <div class="card card-iframe" data-cat="${cat.id}" data-src="${cat._file}">
-        <div class="card-visual"><iframe src="${cat.file}" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
+        <div class="card-visual"><iframe src="${cat.file}" loading="lazy" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe></div>
         <div class="card-info"><h3>${cat.title}</h3></div>
+      </div>\n`;
+}
+
+// Collect 合集卡片
+let collectCards = '';
+const sortedCollect = [...collectFiles].sort((a, b) => a.file.localeCompare(b.file));
+for (const item of sortedCollect) {
+  collectCards += `      <div class="card card-iframe" data-cat="collect" data-src="${item.file}">
+        <div class="card-visual"><iframe src="${item.file}" loading="lazy" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe></div>
+        <div class="card-info"><h3>${item.title}</h3></div>
       </div>\n`;
 }
 
@@ -445,7 +466,7 @@ ${sidebarItems}    </div>
 
   <section class="grid-section">
     <div class="card-grid">
-${allCards}${iframeCards}    </div>
+${allCards}${iframeCards}${collectCards}    </div>
   </section>
 </main>
 </div>

@@ -245,6 +245,9 @@ sortedParsed.forEach((cat, i) => {
   const active = i === 0 ? ' active' : '';
   sidebarItems += `      <button class="filter-item${active}" data-cat="${cat.id}">${cat.title}</button>\n`;
 });
+sortedIframe.forEach(cat => {
+  sidebarItems += `      <button class="filter-item" data-cat="${cat.id}">${cat.title}</button>\n`;
+});
 
 // ============================================================
 // 为每个 parsed 效果生成独立 HTML（放在 _effects/ 目录）
@@ -307,7 +310,7 @@ for (const cat of sortedParsed) {
 
 let iframeCards = '';
 for (const cat of sortedIframe) {
-  iframeCards += `      <div class="card card-iframe" data-src="${cat._file}">
+  iframeCards += `      <div class="card card-iframe" data-cat="${cat.id}" data-src="${cat._file}">
         <div class="card-visual"><iframe src="${cat.file}" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
         <div class="card-info"><h3>${cat.title}</h3></div>
       </div>\n`;
@@ -393,16 +396,6 @@ a{text-decoration:none;color:inherit}
 .fav-btn.active{opacity:1}
 .fav-btn.active svg{fill:#ff3b30;stroke:#ff3b30}
 
-/* ── Fullscreen section ── */
-.fullscreen-section{padding:0 0 80px}
-.section-rule{display:flex;align-items:center;gap:14px;margin-bottom:0;cursor:pointer;user-select:none;padding:12px 32px}
-.section-rule-line{flex:1;height:1px;background:rgba(255,255,255,.07)}
-.section-rule-text{font-size:.65rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.25);white-space:nowrap;display:flex;align-items:center;gap:5px;transition:color .15s}
-.section-rule:hover .section-rule-text{color:rgba(255,255,255,.5)}
-.section-rule-text svg{transition:transform .3s cubic-bezier(.4,0,.2,1)}
-.fullscreen-grid{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1)}
-.fullscreen-grid.open{max-height:9999px}
-.fullscreen-grid .card-grid{margin-top:1px}
 
 /* ── Mobile ── */
 .mobile-toggle{position:fixed;top:16px;left:16px;z-index:200;width:34px;height:34px;border-radius:8px;background:rgba(28,28,30,.85);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);align-items:center;justify-content:center;cursor:pointer;display:none;padding:0}
@@ -415,7 +408,7 @@ a{text-decoration:none;color:inherit}
   .mobile-toggle{display:flex}
   .page-header{padding:56px 16px 20px}
   .page-title{font-size:1.5rem}
-  .grid-section,.fullscreen-section{padding:0 0 60px}
+  .grid-section{padding:0 0 60px}
   .card-grid{grid-template-columns:repeat(2,1fr)}
 }
 
@@ -452,22 +445,7 @@ ${sidebarItems}    </div>
 
   <section class="grid-section">
     <div class="card-grid">
-${allCards}    </div>
-  </section>
-
-  <section class="fullscreen-section">
-    <div class="section-rule" id="fullscreenToggle">
-      <div class="section-rule-line"></div>
-      <div class="section-rule-text">
-        全屏效果
-        <svg id="fullscreenArrow" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
-      <div class="section-rule-line"></div>
-    </div>
-    <div class="fullscreen-grid" id="fullscreenGrid">
-      <div class="card-grid">
-${iframeCards}      </div>
-    </div>
+${allCards}${iframeCards}    </div>
   </section>
 </main>
 </div>
@@ -545,24 +523,6 @@ document.querySelectorAll('.filter-item').forEach(btn=>{
 
 filterCards('${firstCatId}');
 
-// Fullscreen toggle
-(function(){
-  const toggle=document.getElementById('fullscreenToggle');
-  const grid=document.getElementById('fullscreenGrid');
-  const arrow=document.getElementById('fullscreenArrow');
-  if(!toggle||!grid)return;
-  toggle.addEventListener('click',()=>{
-    const open=grid.classList.toggle('open');
-    if(arrow)arrow.style.transform=open?'rotate(180deg)':'rotate(0deg)';
-    if(open&&!grid.dataset.init){
-      grid.dataset.init='1';
-      grid.querySelectorAll('.card').forEach((c,i)=>{
-        c.classList.add('show');
-        setTimeout(()=>c.classList.add('visible'),Math.min(i*25,800));
-      });
-    }
-  });
-})();
 
 // Mobile
 (function(){

@@ -40,28 +40,27 @@ a{text-decoration:none;color:inherit}
 
 .effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:column}
 .effect-overlay.open{display:flex}
-.effect-overlay iframe{width:100%;height:100%;border:none}
+.effect-overlay iframe{flex:1;width:100%;border:none}
 .overlay-toolbar{position:fixed;top:16px;right:20px;z-index:10000;display:flex;gap:8px;align-items:center}
 .overlay-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;color:rgba(255,255,255,.7)}
 .overlay-btn:hover{background:rgba(255,255,255,.2);color:#fff}
 .overlay-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
 .overlay-btn.fav-active{color:#f5576c;background:rgba(245,87,108,.15);border-color:rgba(245,87,108,.3)}
 .overlay-btn.fav-active svg{fill:#f5576c;stroke:#f5576c}
-.card.is-fav .card-info::after{content:'♥';position:absolute;top:8px;right:10px;color:#f5576c;font-size:.7rem}
+.card.is-fav .card-info::after{content:'\2665';position:absolute;top:8px;right:10px;color:#f5576c;font-size:.7rem}
 .card-info{position:relative}
-.ctrl-panel{position:fixed;top:60px;right:16px;z-index:10000;width:240px;background:rgba(20,20,20,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;display:none;flex-direction:column;gap:12px}
-.ctrl-panel.open{display:flex}
-.ctrl-panel h4{font-size:.7rem;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.05em;margin:0}
-.ctrl-row{display:flex;align-items:center;gap:10px}
-.ctrl-row label{font-size:.68rem;color:rgba(255,255,255,.5);width:42px;flex-shrink:0}
-.ctrl-row input[type="range"]{flex:1;height:4px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.1);border-radius:2px;outline:none}
-.ctrl-row input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#667eea;cursor:pointer;border:2px solid rgba(255,255,255,.2)}
-.ctrl-row input[type="color"]{width:28px;height:28px;border:2px solid rgba(255,255,255,.1);border-radius:6px;cursor:pointer;padding:0;background:none;-webkit-appearance:none}
-.ctrl-row input[type="color"]::-webkit-color-swatch-wrapper{padding:2px}
-.ctrl-row input[type="color"]::-webkit-color-swatch{border-radius:3px;border:none}
-.ctrl-row .val{font-size:.62rem;color:rgba(255,255,255,.35);width:32px;text-align:right;flex-shrink:0}
-.ctrl-reset{margin-top:4px;padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);font-size:.65rem;cursor:pointer;transition:all .15s;text-align:center}
-.ctrl-reset:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
+.ctrl-bar{flex-shrink:0;background:rgba(17,17,17,.96);border-top:1px solid rgba(255,255,255,.06);padding:12px 20px;display:flex;align-items:center;gap:16px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.ctrl-bar::-webkit-scrollbar{display:none}
+.ctrl-item{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ctrl-item label{font-size:.65rem;color:rgba(255,255,255,.4);white-space:nowrap}
+.ctrl-item input[type="range"]{width:80px;height:3px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.1);border-radius:2px;outline:none}
+.ctrl-item input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#667eea;cursor:pointer;border:2px solid rgba(255,255,255,.2)}
+.ctrl-item input[type="color"]{width:22px;height:22px;border:2px solid rgba(255,255,255,.1);border-radius:5px;cursor:pointer;padding:0;background:none;-webkit-appearance:none}
+.ctrl-item input[type="color"]::-webkit-color-swatch-wrapper{padding:1px}
+.ctrl-item input[type="color"]::-webkit-color-swatch{border-radius:3px;border:none}
+.ctrl-item .val{font-size:.6rem;color:rgba(255,255,255,.3);min-width:24px}
+.ctrl-reset-btn{padding:4px 10px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:.6rem;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.ctrl-reset-btn:hover{background:rgba(255,255,255,.12);color:rgba(255,255,255,.7)}
 
 @media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -162,21 +161,19 @@ a{text-decoration:none;color:inherit}
 <div class="effect-overlay" id="overlay">
   <div class="overlay-toolbar">
     <button class="overlay-btn" id="favBtn" title="收藏"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-    <button class="overlay-btn" id="ctrlToggle" title="调节"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     <button class="overlay-btn" id="overlayClose" title="关闭"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
-  <div class="ctrl-panel" id="ctrlPanel">
-    <h4>效果调节</h4>
-    <div class="ctrl-row"><label>速度</label><input type="range" id="ctrlSpeed" min="0.1" max="3" step="0.1" value="1"><span class="val" id="ctrlSpeedVal">1x</span></div>
-    <div class="ctrl-row"><label>缩放</label><input type="range" id="ctrlScale" min="0.3" max="2.5" step="0.1" value="1"><span class="val" id="ctrlScaleVal">1x</span></div>
-    <div class="ctrl-row"><label>色相</label><input type="range" id="ctrlHue" min="0" max="360" step="1" value="0"><span class="val" id="ctrlHueVal">0°</span></div>
-    <div class="ctrl-row"><label>饱和</label><input type="range" id="ctrlSat" min="0" max="200" step="5" value="100"><span class="val" id="ctrlSatVal">100%</span></div>
-    <div class="ctrl-row"><label>亮度</label><input type="range" id="ctrlBright" min="50" max="200" step="5" value="100"><span class="val" id="ctrlBrightVal">100%</span></div>
-    <div class="ctrl-row"><label>模糊</label><input type="range" id="ctrlBlur" min="0" max="10" step="0.5" value="0"><span class="val" id="ctrlBlurVal">0</span></div>
-    <div class="ctrl-row"><label>背景</label><input type="color" id="ctrlBg" value="#111111"></div>
-    <button class="ctrl-reset" id="ctrlReset">重置</button>
-  </div>
   <iframe id="overlayIframe" src="about:blank"></iframe>
+  <div class="ctrl-bar" id="ctrlBar">
+    <div class="ctrl-item"><label>速度</label><input type="range" id="ctrlSpeed" min="0.1" max="3" step="0.1" value="1"><span class="val" id="ctrlSpeedVal">1x</span></div>
+    <div class="ctrl-item"><label>缩放</label><input type="range" id="ctrlScale" min="0.3" max="2.5" step="0.1" value="1"><span class="val" id="ctrlScaleVal">1x</span></div>
+    <div class="ctrl-item"><label>色相</label><input type="range" id="ctrlHue" min="0" max="360" step="1" value="0"><span class="val" id="ctrlHueVal">0°</span></div>
+    <div class="ctrl-item"><label>饱和</label><input type="range" id="ctrlSat" min="0" max="200" step="5" value="100"><span class="val" id="ctrlSatVal">100%</span></div>
+    <div class="ctrl-item"><label>亮度</label><input type="range" id="ctrlBright" min="50" max="200" step="5" value="100"><span class="val" id="ctrlBrightVal">100%</span></div>
+    <div class="ctrl-item"><label>模糊</label><input type="range" id="ctrlBlur" min="0" max="10" step="0.5" value="0"><span class="val" id="ctrlBlurVal">0</span></div>
+    <div class="ctrl-item"><label>背景</label><input type="color" id="ctrlBg" value="#111111"></div>
+    <button class="ctrl-reset-btn" id="ctrlReset">重置</button>
+  </div>
 </div>
 <script>
 
@@ -235,11 +232,6 @@ document.getElementById('favBtn').addEventListener('click', function() {
 });
 
 // === 调节面板 ===
-var ctrlPanel = document.getElementById('ctrlPanel');
-document.getElementById('ctrlToggle').addEventListener('click', function() {
-  ctrlPanel.classList.toggle('open');
-});
-
 var ctrlDefaults = { speed: 1, scale: 1, hue: 0, sat: 100, bright: 100, blur: 0, bg: '#111111' };
 var ctrlState = Object.assign({}, ctrlDefaults);
 
@@ -317,7 +309,6 @@ var iframe = document.getElementById('overlayIframe');
 
 function closeOverlay() {
   overlay.classList.remove('open');
-  ctrlPanel.classList.remove('open');
   iframe.src = 'about:blank';
   currentEffectSrc = '';
 }

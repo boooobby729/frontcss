@@ -37,12 +37,32 @@ a{text-decoration:none;color:inherit}
 .card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .card-info{padding:10px 14px 14px;background:#111}
 .card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 .effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:column}
 .effect-overlay.open{display:flex}
 .effect-overlay iframe{width:100%;height:100%;border:none}
-.effect-overlay-close{position:fixed;top:16px;right:20px;z-index:10000;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
-.effect-overlay-close:hover{background:rgba(255,255,255,.2)}
-.effect-overlay-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2}
+.overlay-toolbar{position:fixed;top:16px;right:20px;z-index:10000;display:flex;gap:8px;align-items:center}
+.overlay-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;color:rgba(255,255,255,.7)}
+.overlay-btn:hover{background:rgba(255,255,255,.2);color:#fff}
+.overlay-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+.overlay-btn.fav-active{color:#f5576c;background:rgba(245,87,108,.15);border-color:rgba(245,87,108,.3)}
+.overlay-btn.fav-active svg{fill:#f5576c;stroke:#f5576c}
+.card.is-fav .card-info::after{content:'♥';position:absolute;top:8px;right:10px;color:#f5576c;font-size:.7rem}
+.card-info{position:relative}
+.ctrl-panel{position:fixed;top:60px;right:16px;z-index:10000;width:240px;background:rgba(20,20,20,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;display:none;flex-direction:column;gap:12px}
+.ctrl-panel.open{display:flex}
+.ctrl-panel h4{font-size:.7rem;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.05em;margin:0}
+.ctrl-row{display:flex;align-items:center;gap:10px}
+.ctrl-row label{font-size:.68rem;color:rgba(255,255,255,.5);width:42px;flex-shrink:0}
+.ctrl-row input[type="range"]{flex:1;height:4px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.1);border-radius:2px;outline:none}
+.ctrl-row input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#667eea;cursor:pointer;border:2px solid rgba(255,255,255,.2)}
+.ctrl-row input[type="color"]{width:28px;height:28px;border:2px solid rgba(255,255,255,.1);border-radius:6px;cursor:pointer;padding:0;background:none;-webkit-appearance:none}
+.ctrl-row input[type="color"]::-webkit-color-swatch-wrapper{padding:2px}
+.ctrl-row input[type="color"]::-webkit-color-swatch{border-radius:3px;border:none}
+.ctrl-row .val{font-size:.62rem;color:rgba(255,255,255,.35);width:32px;text-align:right;flex-shrink:0}
+.ctrl-reset{margin-top:4px;padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);font-size:.65rem;cursor:pointer;transition:all .15s;text-align:center}
+.ctrl-reset:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
+
 @media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -140,7 +160,22 @@ a{text-decoration:none;color:inherit}
     </div>
 </div>
 <div class="effect-overlay" id="overlay">
-  <button class="effect-overlay-close" id="overlayClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div class="overlay-toolbar">
+    <button class="overlay-btn" id="favBtn" title="收藏"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+    <button class="overlay-btn" id="ctrlToggle" title="调节"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    <button class="overlay-btn" id="overlayClose" title="关闭"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="ctrl-panel" id="ctrlPanel">
+    <h4>效果调节</h4>
+    <div class="ctrl-row"><label>速度</label><input type="range" id="ctrlSpeed" min="0.1" max="3" step="0.1" value="1"><span class="val" id="ctrlSpeedVal">1x</span></div>
+    <div class="ctrl-row"><label>缩放</label><input type="range" id="ctrlScale" min="0.3" max="2.5" step="0.1" value="1"><span class="val" id="ctrlScaleVal">1x</span></div>
+    <div class="ctrl-row"><label>色相</label><input type="range" id="ctrlHue" min="0" max="360" step="1" value="0"><span class="val" id="ctrlHueVal">0°</span></div>
+    <div class="ctrl-row"><label>饱和</label><input type="range" id="ctrlSat" min="0" max="200" step="5" value="100"><span class="val" id="ctrlSatVal">100%</span></div>
+    <div class="ctrl-row"><label>亮度</label><input type="range" id="ctrlBright" min="50" max="200" step="5" value="100"><span class="val" id="ctrlBrightVal">100%</span></div>
+    <div class="ctrl-row"><label>模糊</label><input type="range" id="ctrlBlur" min="0" max="10" step="0.5" value="0"><span class="val" id="ctrlBlurVal">0</span></div>
+    <div class="ctrl-row"><label>背景</label><input type="color" id="ctrlBg" value="#111111"></div>
+    <button class="ctrl-reset" id="ctrlReset">重置</button>
+  </div>
   <iframe id="overlayIframe" src="about:blank"></iframe>
 </div>
 <script>
@@ -160,16 +195,151 @@ a{text-decoration:none;color:inherit}
   var active=scroll.querySelector('.nav-item.active');
   if(active)setTimeout(function(){active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})},100);
 })();
-const overlay=document.getElementById('overlay');
-const iframe=document.getElementById('overlayIframe');
-document.getElementById('overlayClose').addEventListener('click',()=>{overlay.classList.remove('open');iframe.src='about:blank';});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('open'),iframe.src='about:blank';});
-document.querySelectorAll('.card-grid .card').forEach(card=>{
-  card.addEventListener('click',()=>{
-    const src=card.dataset.src;
-    if(src){iframe.src=src;overlay.classList.add('open');}
+
+// === 收藏功能 ===
+var favorites = JSON.parse(localStorage.getItem('bfx_favorites') || '[]');
+var currentEffectSrc = '';
+
+function updateFavBtn() {
+  var btn = document.getElementById('favBtn');
+  if (!btn) return;
+  if (favorites.indexOf(currentEffectSrc) !== -1) {
+    btn.classList.add('fav-active');
+  } else {
+    btn.classList.remove('fav-active');
+  }
+}
+
+function updateCardFavStates() {
+  document.querySelectorAll('.card-grid .card').forEach(function(card) {
+    var src = card.dataset.src;
+    if (favorites.indexOf(src) !== -1) {
+      card.classList.add('is-fav');
+    } else {
+      card.classList.remove('is-fav');
+    }
+  });
+}
+
+document.getElementById('favBtn').addEventListener('click', function() {
+  if (!currentEffectSrc) return;
+  var idx = favorites.indexOf(currentEffectSrc);
+  if (idx === -1) {
+    favorites.push(currentEffectSrc);
+  } else {
+    favorites.splice(idx, 1);
+  }
+  localStorage.setItem('bfx_favorites', JSON.stringify(favorites));
+  updateFavBtn();
+  updateCardFavStates();
+});
+
+// === 调节面板 ===
+var ctrlPanel = document.getElementById('ctrlPanel');
+document.getElementById('ctrlToggle').addEventListener('click', function() {
+  ctrlPanel.classList.toggle('open');
+});
+
+var ctrlDefaults = { speed: 1, scale: 1, hue: 0, sat: 100, bright: 100, blur: 0, bg: '#111111' };
+var ctrlState = Object.assign({}, ctrlDefaults);
+
+function applyCtrl() {
+  var ifr = document.getElementById('overlayIframe');
+  try {
+    var doc = ifr.contentDocument || ifr.contentWindow.document;
+    var body = doc.body;
+    if (!body) return;
+    // 速度：通过 CSS 自定义属性控制 animation-duration 倍率
+    body.style.setProperty('--fx-speed', ctrlState.speed);
+    // 注入全局样式覆盖动画速度
+    var styleId = '__fx_ctrl_style';
+    var existing = doc.getElementById(styleId);
+    if (!existing) {
+      existing = doc.createElement('style');
+      existing.id = styleId;
+      doc.head.appendChild(existing);
+    }
+    existing.textContent = 'body { transform: scale(' + ctrlState.scale + '); transform-origin: center center; overflow: hidden; ' +
+      'filter: hue-rotate(' + ctrlState.hue + 'deg) saturate(' + ctrlState.sat + '%) brightness(' + ctrlState.bright + '%) blur(' + ctrlState.blur + 'px); ' +
+      'background-color: ' + ctrlState.bg + ' !important; }';
+    // 速度通过 Web Animations API playbackRate 实现（保持各动画相对时序）
+    try {
+      var anims = doc.getAnimations ? doc.getAnimations() : [];
+      anims.forEach(function(a) { try { a.playbackRate = ctrlState.speed; } catch(ex){} });
+    } catch(ex) {}
+  } catch(e) {}
+}
+
+function bindCtrl(id, key, valId, suffix, parser) {
+  var el = document.getElementById(id);
+  var valEl = document.getElementById(valId);
+  el.addEventListener('input', function() {
+    ctrlState[key] = parser ? parser(el.value) : parseFloat(el.value);
+    valEl.textContent = el.value + suffix;
+    applyCtrl();
+  });
+}
+
+bindCtrl('ctrlSpeed', 'speed', 'ctrlSpeedVal', 'x');
+bindCtrl('ctrlScale', 'scale', 'ctrlScaleVal', 'x');
+bindCtrl('ctrlHue', 'hue', 'ctrlHueVal', '°');
+bindCtrl('ctrlSat', 'sat', 'ctrlSatVal', '%');
+bindCtrl('ctrlBright', 'bright', 'ctrlBrightVal', '%');
+bindCtrl('ctrlBlur', 'blur', 'ctrlBlurVal', '');
+
+document.getElementById('ctrlBg').addEventListener('input', function(e) {
+  ctrlState.bg = e.target.value;
+  applyCtrl();
+});
+
+document.getElementById('ctrlReset').addEventListener('click', function() {
+  ctrlState = Object.assign({}, ctrlDefaults);
+  document.getElementById('ctrlSpeed').value = 1;  document.getElementById('ctrlSpeedVal').textContent = '1x';
+  document.getElementById('ctrlScale').value = 1;  document.getElementById('ctrlScaleVal').textContent = '1x';
+  document.getElementById('ctrlHue').value = 0;    document.getElementById('ctrlHueVal').textContent = '0°';
+  document.getElementById('ctrlSat').value = 100;  document.getElementById('ctrlSatVal').textContent = '100%';
+  document.getElementById('ctrlBright').value = 100; document.getElementById('ctrlBrightVal').textContent = '100%';
+  document.getElementById('ctrlBlur').value = 0;   document.getElementById('ctrlBlurVal').textContent = '0';
+  document.getElementById('ctrlBg').value = '#111111';
+  applyCtrl();
+});
+
+// iframe 加载完成后应用调节
+document.getElementById('overlayIframe').addEventListener('load', function() {
+  if (this.src !== 'about:blank') {
+    setTimeout(applyCtrl, 200);
+  }
+});
+
+// === Overlay 开关 ===
+var overlay = document.getElementById('overlay');
+var iframe = document.getElementById('overlayIframe');
+
+function closeOverlay() {
+  overlay.classList.remove('open');
+  ctrlPanel.classList.remove('open');
+  iframe.src = 'about:blank';
+  currentEffectSrc = '';
+}
+
+document.getElementById('overlayClose').addEventListener('click', closeOverlay);
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeOverlay(); });
+
+document.querySelectorAll('.card-grid .card').forEach(function(card) {
+  card.addEventListener('click', function() {
+    var src = card.dataset.src;
+    if (src) {
+      currentEffectSrc = src;
+      iframe.src = src;
+      overlay.classList.add('open');
+      updateFavBtn();
+    }
   });
 });
+
+// 初始化卡片收藏状态
+updateCardFavStates();
+
 </script>
 </body>
 </html>

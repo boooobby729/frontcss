@@ -314,6 +314,61 @@ function extractIframeEffects(filePath) {
     });
   }
 
+  // 如果有效果缺少 script，尝试从文件的共享 script 块中按 IIFE 分配
+  const effectsWithoutScripts = effects.filter(e => e.scripts.length === 0);
+  if (effectsWithoutScripts.length > 0) {
+    // 提取文件中所有非 src 的 script 内容
+    const allScriptRegex = /<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/g;
+    let allJs = '';
+    let scriptMatch;
+    while ((scriptMatch = allScriptRegex.exec(html)) !== null) {
+      if (scriptMatch[1].trim()) allJs += scriptMatch[1] + '\n';
+    }
+
+    if (allJs) {
+      // 按 IIFE 边界拆分：(function(){ ... })(); 或 (function(){ ... }())
+      const iifes = [];
+      const iifeRegex = /\(function\s*\([^)]*\)\s*\{/g;
+      let iifeMatch;
+      const iifeStarts = [];
+      while ((iifeMatch = iifeRegex.exec(allJs)) !== null) {
+        iifeStarts.push(iifeMatch.index);
+      }
+      for (let i = 0; i < iifeStarts.length; i++) {
+        const start = iifeStarts[i];
+        const end = i < iifeStarts.length - 1 ? iifeStarts[i + 1] : allJs.length;
+        let block = allJs.slice(start, end).trim();
+        // 去除尾部的 // === 注释行
+        block = block.replace(/\n\/\/\s*===.*$/s, '').trim();
+        iifes.push(block);
+      }
+
+      // 为每个没有 script 的效果，通过 HTML 中的元素 ID 匹配对应 IIFE
+      for (const eff of effectsWithoutScripts) {
+        // 从 demoHtml 中提取所有 id
+        const idMatches = eff.demoHtml.match(/id="([^"]+)"/g);
+        const ids = idMatches ? idMatches.map(m => m.match(/id="([^"]+)"/)[1]) : [];
+        // 也包含 demoId
+        if (eff.demoId) ids.push(eff.demoId);
+
+        for (const iife of iifes) {
+          for (const elemId of ids) {
+            if (iife.includes(`'${elemId}'`) || iife.includes(`"${elemId}"`)) {
+              eff.scripts.push(iife);
+              break;
+            }
+          }
+          if (eff.scripts.length > 0) break;
+        }
+
+        // 如果 IIFE 匹配失败，将整个 script 块分配给该效果（非 IIFE 结构或 ID 不匹配）
+        if (eff.scripts.length === 0) {
+          eff.scripts.push(allJs.trim());
+        }
+      }
+    }
+  }
+
   return { effects, globalCss };
 }
 

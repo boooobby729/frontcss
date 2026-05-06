@@ -246,7 +246,80 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>// Scroll progress
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    document.getElementById('progressBar').style.width = (window.scrollY / h * 100) + '%';
+  });
 
+  // IntersectionObserver for fade-in-up
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-in-up, .reveal-card, .s-card').forEach(el => observer.observe(el));
+
+  // Parallax
+  window.addEventListener('scroll', () => {
+    const section = document.getElementById('parallaxSection');
+    const rect = section.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      const progress = -rect.top / window.innerHeight;
+      document.getElementById('parallaxBg').style.transform = `translateY(${progress * 50}px)`;
+      document.getElementById('shape1').style.transform = `translate(${progress * 30}px, ${progress * -60}px)`;
+      document.getElementById('shape2').style.transform = `translate(${progress * -40}px, ${progress * 40}px)`;
+      document.getElementById('shape3').style.transform = `translate(${progress * 50}px, ${progress * 20}px)`;
+    }
+  });
+
+  // Counter animation
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !e.target.dataset.counted) {
+        e.target.dataset.counted = 'true';
+        const target = +e.target.dataset.target;
+        let current = 0;
+        const step = target / 60;
+        const timer = setInterval(() => {
+          current += step;
+          if (current >= target) { current = target; clearInterval(timer); }
+          e.target.textContent = Math.floor(current).toLocaleString();
+        }, 16);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.counter-num').forEach(el => counterObserver.observe(el));
+
+  // Typewriter observer
+  const twObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.tw-line').forEach(el => twObs.observe(el));
+
+  // Morph shape scroll progress
+  const morphEl = document.getElementById('morphShape');
+  if (morphEl) {
+    const morphObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const r = e.intersectionRatio;
+          morphEl.className = 'morph-shape ' + (r > .6 ? 'stage3' : r > .3 ? 'stage2' : 'stage1');
+        }
+      });
+    }, { threshold: [0, .3, .6, 1] });
+    morphObs.observe(morphEl);
+  }
+
+  // SVG draw observer
+  const drawObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.draw-svg').forEach(el => drawObs.observe(el));
+
+  // Curtain observer
+  const curtainObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('.curtain-wrap').forEach(el => curtainObs.observe(el));</script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-duration","label":"动画时长","min":0.4,"max":10,"step":0.1,"value":2,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"color","id":"css-color-1","label":"副色","value":"#667eea","action":"cssColor","index":1},{"type":"color","id":"css-color-2","label":"副色","value":"#666666","action":"cssColor","index":2},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":16,"unit":"px","action":"cssBorderRadius"}];
 

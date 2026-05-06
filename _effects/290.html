@@ -115,9 +115,39 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function() {
+  const canvas = document.getElementById('matrixCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, columns, drops;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*()';
+  let fontSize = (window.__ctrl_fontSize !== undefined ? window.__ctrl_fontSize : 14);
 
+  function resize() {
+    /* __jsVar_sync__ */ try { fontSize = (window.__ctrl_fontSize !== undefined ? window.__ctrl_fontSize : fontSize); } catch(e) {}
+    const s = canvas.parentElement;
+    w = canvas.width = s.offsetWidth; h = canvas.height = s.offsetHeight;
+    columns = Math.floor(w / fontSize);
+    drops = Array(columns).fill(1);
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  function animate() {
+    /* __jsVar_sync__ */ try { fontSize = (window.__ctrl_fontSize !== undefined ? window.__ctrl_fontSize : fontSize); } catch(e) {}
+    ctx.fillStyle = 'rgba(10,10,15,.05)'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#0f0'; ctx.font = fontSize + 'px monospace';
+    for (let i = 0; i < columns; i++) {
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillStyle = `rgba(0,${150 + Math.random()*105},0,${.5 + Math.random()*.5})`;
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > h && Math.random() > .975) drops[i] = 0;
+      drops[i]++;
+    }
+    setTimeout(() => requestAnimationFrame(animate), 33);
+  }
+  animate();
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"js-fontSize","label":"尺寸","min":1.4,"max":56,"step":1,"value":14,"unit":"","action":"jsVar","varName":"fontSize"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

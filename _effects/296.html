@@ -115,9 +115,79 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function() {
+  const canvas = document.getElementById('clothCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  const COLS = 30, ROWS = 20, SPACING = 15;
+  let points = [], mouse = { x: -1000, y: -1000, down: false };
 
+  function resize() { const s = canvas.parentElement; w = canvas.width = s.offsetWidth; h = canvas.height = s.offsetHeight; initCloth(); }
+
+  function initCloth() {
+    points = [];
+    const offsetX = (w - COLS * SPACING) / 2, offsetY = h * .2;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const x = offsetX + c * SPACING, y = offsetY + r * SPACING;
+        points.push({ x, y, ox: x, oy: y, px: x, py: y, pinned: r === 0 });
+      }
+    }
+  }
+
+  resize(); window.addEventListener('resize', resize);
+  canvas.parentElement.addEventListener('mousemove', e => { const r = canvas.parentElement.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+  canvas.parentElement.addEventListener('mousedown', () => mouse.down = true);
+  canvas.parentElement.addEventListener('mouseup', () => mouse.down = false);
+
+  function animate() {
+    ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0, 0, w, h);
+    // Physics
+    points.forEach(p => {
+      if (p.pinned) return;
+      const vx = (p.x - p.px) * .98, vy = (p.y - p.py) * .98;
+      p.px = p.x; p.py = p.y;
+      p.x += vx; p.y += vy + .5; // gravity
+      // Mouse interaction
+      if (mouse.down) {
+        const dx = p.x - mouse.x, dy = p.y - mouse.y, d = Math.sqrt(dx*dx+dy*dy);
+        if (d < 50) { p.x += dx * .2; p.y += dy * .2; }
+      }
+    });
+    // Constraints
+    for (let iter = 0; iter < 3; iter++) {
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const i = r * COLS + c;
+          if (c < COLS - 1) constrain(points[i], points[i + 1]);
+          if (r < ROWS - 1) constrain(points[i], points[i + COLS]);
+        }
+      }
+    }
+    // Draw
+    ctx.strokeStyle = 'rgba(102,126,234,.5)'; ctx.lineWidth = .8;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const i = r * COLS + c;
+        if (c < COLS - 1) { ctx.beginPath(); ctx.moveTo(points[i].x, points[i].y); ctx.lineTo(points[i+1].x, points[i+1].y); ctx.stroke(); }
+        if (r < ROWS - 1) { ctx.beginPath(); ctx.moveTo(points[i].x, points[i].y); ctx.lineTo(points[i+COLS].x, points[i+COLS].y); ctx.stroke(); }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+
+  function constrain(a, b) {
+    const dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx*dx+dy*dy);
+    const diff = (SPACING - d) / d * .5;
+    const ox = dx * diff, oy = dy * diff;
+    if (!a.pinned) { a.x -= ox; a.y -= oy; }
+    if (!b.pinned) { b.x += ox; b.y += oy; }
+  }
+
+  animate();
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"mouse-influence","label":"鼠标影响","min":0,"max":3,"step":0.1,"value":1,"unit":"x","action":"mouseScale"},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

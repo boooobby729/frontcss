@@ -115,9 +115,59 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function() {
+  const canvas = document.getElementById('connectCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, nodes = [], mouse = { x: -1000, y: -1000 };
 
+  function resize() { const s = canvas.parentElement; w = canvas.width = s.offsetWidth; h = canvas.height = s.offsetHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  canvas.parentElement.addEventListener('mousemove', e => {
+    const r = canvas.parentElement.getBoundingClientRect();
+    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+  });
+
+  class Node {
+    constructor() {
+      this.x = Math.random() * w; this.y = Math.random() * h;
+      this.vx = (Math.random() - .5) * .6; this.vy = (Math.random() - .5) * .6;
+      this.r = 2 + Math.random() * 2;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > w) this.vx *= -1;
+      if (this.y < 0 || this.y > h) this.vy *= -1;
+      const dx = mouse.x - this.x, dy = mouse.y - this.y, d = Math.sqrt(dx*dx+dy*dy);
+      if (d < 200) { this.vx += dx * .0003; this.vy += dy * .0003; }
+    }
+    draw() {
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+      ctx.fillStyle = '#667eea'; ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 80; i++) nodes.push(new Node());
+
+  function animate() {
+    ctx.fillStyle = 'rgba(10,10,15,.2)'; ctx.fillRect(0, 0, w, h);
+    nodes.forEach(n => { n.update(); n.draw(); });
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < 120) {
+          ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(102,126,234,${1 - d/120})`; ctx.lineWidth = .5; ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"mouse-influence","label":"鼠标影响","min":0,"max":3,"step":0.1,"value":1,"unit":"x","action":"mouseScale"},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

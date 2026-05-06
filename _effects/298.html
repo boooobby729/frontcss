@@ -115,9 +115,53 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function() {
+  const canvas = document.getElementById('lightningCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
 
+  function resize() { const s = canvas.parentElement; w = canvas.width = s.offsetWidth; h = canvas.height = s.offsetHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  function drawBolt(x1, y1, x2, y2, depth) {
+    if (depth <= 0) return;
+    const midX = (x1 + x2) / 2 + (Math.random() - .5) * (y2 - y1) * .3;
+    const midY = (y1 + y2) / 2 + (Math.random() - .5) * 20;
+
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(midX, midY); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = `rgba(180,200,255,${depth * .15})`;
+    ctx.lineWidth = depth * .5; ctx.stroke();
+    // Glow
+    ctx.strokeStyle = `rgba(100,140,255,${depth * .08})`;
+    ctx.lineWidth = depth * 2; ctx.stroke();
+
+    drawBolt(x1, y1, midX, midY, depth - 1);
+    drawBolt(midX, midY, x2, y2, depth - 1);
+
+    // Branch
+    if (depth > 2 && Math.random() > .6) {
+      const bx = midX + (Math.random() - .5) * 100;
+      const by = midY + 30 + Math.random() * 80;
+      drawBolt(midX, midY, bx, by, depth - 2);
+    }
+  }
+
+  function flash() {
+    ctx.fillStyle = 'rgba(10,10,15,.9)'; ctx.fillRect(0, 0, w, h);
+    const startX = w * .2 + Math.random() * w * .6;
+    drawBolt(startX, 0, startX + (Math.random() - .5) * 100, h, 8);
+  }
+
+  function animate() {
+    ctx.fillStyle = 'rgba(10,10,15,.05)'; ctx.fillRect(0, 0, w, h);
+    requestAnimationFrame(animate);
+  }
+  animate();
+  flash();
+  setInterval(flash, 2000 + Math.random() * 2000);
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

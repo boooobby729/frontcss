@@ -115,9 +115,54 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function() {
+  const canvas = document.getElementById('voronoiCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  let SCALE = (window.__ctrl_SCALE !== undefined ? window.__ctrl_SCALE : 3);
+  const seeds = [];
+  let NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : 20);
+  const colors = [];
 
+  function resize() {
+    /* __jsVar_sync__ */ try { NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : NUM); SCALE = (window.__ctrl_SCALE !== undefined ? window.__ctrl_SCALE : SCALE); } catch(e) {} const s = canvas.parentElement; w = canvas.width = Math.floor(s.offsetWidth / SCALE); h = canvas.height = Math.floor(s.offsetHeight / SCALE); canvas.style.width = s.offsetWidth + 'px'; canvas.style.height = s.offsetHeight + 'px'; }
+  resize(); window.addEventListener('resize', resize);
+
+  for (let i = 0; i < NUM; i++) {
+    seeds.push({ x: Math.random() * 600, y: Math.random() * 400, vx: (Math.random() - .5) * .8, vy: (Math.random() - .5) * .8 });
+    colors.push([Math.random() * 80 + 20, Math.random() * 80 + 60, Math.random() * 150 + 100]);
+  }
+
+  function animate() {
+    /* __jsVar_sync__ */ try { NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : NUM); SCALE = (window.__ctrl_SCALE !== undefined ? window.__ctrl_SCALE : SCALE); } catch(e) {}
+    const img = ctx.createImageData(w, h);
+    const data = img.data;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let minD = Infinity, minI = 0, secD = Infinity;
+        for (let i = 0; i < NUM; i++) {
+          const dx = x - seeds[i].x, dy = y - seeds[i].y;
+          const d = dx * dx + dy * dy;
+          if (d < minD) { secD = minD; minD = d; minI = i; } else if (d < secD) { secD = d; }
+        }
+        const idx = (y * w + x) * 4;
+        const edge = Math.sqrt(secD) - Math.sqrt(minD);
+        if (edge < 2) {
+          data[idx] = 60; data[idx+1] = 80; data[idx+2] = 180; data[idx+3] = 255;
+        } else {
+          const f = Math.min(1, edge * .03);
+          data[idx] = colors[minI][0] * f; data[idx+1] = colors[minI][1] * f; data[idx+2] = colors[minI][2] * f; data[idx+3] = 200;
+        }
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    seeds.forEach(s => { s.x += s.vx; s.y += s.vy; if (s.x < 0 || s.x > w) s.vx *= -1; if (s.y < 0 || s.y > h) s.vy *= -1; });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"js-NUM","label":"数量","min":2,"max":60,"step":1,"value":20,"unit":"","action":"jsVar","varName":"NUM"},{"type":"range","id":"js-SCALE","label":"缩放","min":0.3,"max":12,"step":0.01,"value":3,"unit":"","action":"jsVar","varName":"SCALE"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

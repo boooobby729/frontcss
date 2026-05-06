@@ -133,7 +133,57 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function(){
+  const section=document.getElementById('noise-grad').querySelector('.demo');
+  const canvas=document.getElementById('noise-grad-canvas');
+  const ctx=canvas.getContext('2d');
+  let w,h;
+  function resize(){w=canvas.width=section.clientWidth/3;h=canvas.height=section.clientHeight/3;}
+  resize();window.addEventListener('resize',resize);
 
+  // Simple noise
+  function hash(n){return Math.sin(n*127.1+n*311.7)*43758.5453%1;}
+  function noise2D(x,y){
+    const ix=Math.floor(x),iy=Math.floor(y);
+    const fx=x-ix,fy=y-iy;
+    const ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);
+    const a=hash(ix+iy*57),b=hash(ix+1+iy*57),c=hash(ix+(iy+1)*57),d=hash(ix+1+(iy+1)*57);
+    return a+(b-a)*ux+(c-a)*uy+(a-b-c+d)*ux*uy;
+  }
+  function fbm(x,y,oct){
+    let v=0,amp=0.5,freq=1;
+    for(let i=0;i<oct;i++){v+=noise2D(x*freq,y*freq)*amp;amp*=0.5;freq*=2;}
+    return v;
+  }
+
+  function hsl2rgb(h,s,l){
+    const c=(1-Math.abs(2*l-1))*s;
+    const x=c*(1-Math.abs((h/60)%2-1));
+    const m=l-c/2;
+    let r=0,g=0,b=0;
+    if(h<60){r=c;g=x;}else if(h<120){r=x;g=c;}else if(h<180){g=c;b=x;}
+    else if(h<240){g=x;b=c;}else if(h<300){r=x;b=c;}else{r=c;b=x;}
+    return[(r+m)*255|0,(g+m)*255|0,(b+m)*255|0];
+  }
+
+  function render(){
+    const t=performance.now()*0.0002;
+    const img=ctx.createImageData(w,h);
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const nx=x/w*4+t;const ny=y/h*4;
+        const n=fbm(nx,ny,4);
+        const hue=(n*360+t*200)%360;
+        const [r,g,b]=hsl2rgb(hue,0.7,0.15+n*0.35);
+        const i=(y*w+x)*4;
+        img.data[i]=r;img.data[i+1]=g;img.data[i+2]=b;img.data[i+3]=255;
+      }
+    }
+    ctx.putImageData(img,0,0);
+    requestAnimationFrame(render);
+  }
+  render();
+})();</script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":50,"step":1,"value":50,"unit":"%","action":"cssBorderRadius"}];
 

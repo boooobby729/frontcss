@@ -115,9 +115,42 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function() {
+  const canvas = document.getElementById('fractalCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, t = 0;
 
+  function resize() { const s = canvas.parentElement; w = canvas.width = s.offsetWidth; h = canvas.height = s.offsetHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  function branch(x, y, len, angle, depth) {
+    if (depth <= 0 || len < 2) return;
+    const wind = Math.sin(t * .02 + depth * .5) * (12 - depth) * .5;
+    const x2 = x + Math.cos(angle + wind * .01) * len;
+    const y2 = y + Math.sin(angle + wind * .01) * len;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x2, y2);
+    const hue = 120 + depth * 15;
+    ctx.strokeStyle = `hsla(${hue},60%,${30 + depth * 5}%,${.3 + depth * .07})`;
+    ctx.lineWidth = depth * .8; ctx.stroke();
+    if (depth < 4) {
+      ctx.beginPath(); ctx.arc(x2, y2, 2 + Math.random() * 2, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${100 + Math.random() * 80},70%,55%,.4)`; ctx.fill();
+    }
+    branch(x2, y2, len * .7, angle - .4 + Math.sin(t * .01) * .1, depth - 1);
+    branch(x2, y2, len * .7, angle + .4 + Math.cos(t * .01) * .1, depth - 1);
+    if (depth > 5 && Math.random() > .6) branch(x2, y2, len * .5, angle + (Math.random() - .5), depth - 2);
+  }
+
+  function animate() {
+    ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0, 0, w, h);
+    branch(w / 2, h * .85, h * .18, -Math.PI / 2, 10);
+    t++;
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

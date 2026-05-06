@@ -115,9 +115,59 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function() {
+  const canvas = document.getElementById('fireworkCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles = [];
 
+  function resize() {
+    /* __jsVar_sync__ */ try { speed = (window.__ctrl_speed !== undefined ? window.__ctrl_speed : speed); } catch(e) {} const s = canvas.parentElement; w = canvas.width = s.offsetWidth; h = canvas.height = s.offsetHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  class Spark {
+    constructor(x, y, color) {
+      this.x = x; this.y = y;
+      const angle = Math.random() * Math.PI * 2;
+      let speed = (window.__ctrl_speed !== undefined ? window.__ctrl_speed : 2) + Math.random() * 4;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.life = 1; this.decay = .01 + Math.random() * .02;
+      this.color = color; this.r = 1.5 + Math.random() * 1.5;
+    }
+    update() { this.x += this.vx; this.y += this.vy; this.vy += .05; this.vx *= .99; this.life -= this.decay; }
+    draw() {
+      ctx.globalAlpha = this.life;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+      ctx.fillStyle = this.color; ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function explode(x, y) {
+    const colors = ['#667eea', '#f093fb', '#43e97b', '#f5576c', '#fee140', '#38f9d7'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    for (let i = 0; i < 60; i++) particles.push(new Spark(x, y, color));
+  }
+
+  canvas.parentElement.addEventListener('click', e => {
+    const r = canvas.parentElement.getBoundingClientRect();
+    explode(e.clientX - r.left, e.clientY - r.top);
+  });
+
+  // Auto fireworks
+  setInterval(() => { explode(Math.random() * w, h * .2 + Math.random() * h * .4); }, 1500);
+
+  function animate() {
+    /* __jsVar_sync__ */ try { speed = (window.__ctrl_speed !== undefined ? window.__ctrl_speed : speed); } catch(e) {}
+    ctx.fillStyle = 'rgba(10,10,15,.15)'; ctx.fillRect(0, 0, w, h);
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"js-speed","label":"速度","min":0.2,"max":8,"step":0.01,"value":2,"unit":"","action":"jsVar","varName":"speed"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"mouse-influence","label":"鼠标影响","min":0,"max":3,"step":0.1,"value":1,"unit":"x","action":"mouseScale"},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

@@ -124,9 +124,28 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
-
+<script>(function(){
+  const demo = document.getElementById('circleDemo');
+  const overlay = document.getElementById('circleOverlay');
+  let active = false;
+  
+  demo.addEventListener('click', (e) => {
+    const rect = demo.getBoundingClientRect();
+    const cx = ((e.clientX - rect.left) / rect.width * 100) + '%';
+    const cy = ((e.clientY - rect.top) / rect.height * 100) + '%';
+    overlay.style.setProperty('--cx', cx);
+    overlay.style.setProperty('--cy', cy);
+    
+    if (!active) {
+      overlay.classList.add('active');
+    } else {
+      overlay.classList.remove('active');
+    }
+    active = !active;
+  });
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-duration","label":"动画时长","min":1,"max":25,"step":0.1,"value":5,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#888888","action":"cssColor","index":0},{"type":"color","id":"css-color-1","label":"副色","value":"#ff0080","action":"cssColor","index":1},{"type":"color","id":"css-color-2","label":"副色","value":"#6366f1","action":"cssColor","index":2},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":8,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-duration","label":"动画时长","min":1,"max":25,"step":0.1,"value":5,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#888888","action":"cssColor","index":0},{"type":"color","id":"css-color-1","label":"副色","value":"#ff0080","action":"cssColor","index":1},{"type":"color","id":"css-color-2","label":"副色","value":"#6366f1","action":"cssColor","index":2},{"type":"range","id":"mouse-influence","label":"鼠标影响","min":0,"max":3,"step":0.1,"value":1,"unit":"x","action":"mouseScale"},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":8,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

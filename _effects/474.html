@@ -128,7 +128,26 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
-
+<script>(function(){
+  const names = ['Alice','Bob','Carol','David','Emma','Frank','Grace','Henry'];
+  const actions = ['completed a task','left a comment','joined the team','uploaded a file','created a project','sent a message','shared a link','updated profile'];
+  const colors = ['#f43f5e','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ec4899','#6366f1','#14b8a6'];
+  
+  function populateTrack(track) {
+    let html = '';
+    for(let r = 0; r < 2; r++) {
+      for(let i = 0; i < 8; i++) {
+        html += `<div class="v-scroll-item">
+          <div class="v-scroll-avatar" style="background:${colors[i]}"></div>
+          <div class="v-scroll-text"><strong>${names[i]}</strong> ${actions[i]}</div>
+        </div>`;
+      }
+    }
+    track.innerHTML = html;
+  }
+  populateTrack(document.getElementById('vTrack1'));
+  populateTrack(document.getElementById('vTrack2'));
+})();</script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-duration","label":"动画时长","min":5,"max":125,"step":0.1,"value":25,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#888888","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":8,"unit":"px","action":"cssBorderRadius"}];
 

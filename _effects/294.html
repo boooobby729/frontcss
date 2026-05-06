@@ -115,9 +115,60 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function() {
+  const canvas = document.getElementById('metaballCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  let SCALE = (window.__ctrl_SCALE !== undefined ? window.__ctrl_SCALE : 4); // render at lower resolution for performance
+  const balls = [];
+  let NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : 6);
 
+  function resize() {
+    /* __jsVar_sync__ */ try { NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : NUM); SCALE = (window.__ctrl_SCALE !== undefined ? window.__ctrl_SCALE : SCALE); } catch(e) {} const s = canvas.parentElement; w = canvas.width = Math.floor(s.offsetWidth / SCALE); h = canvas.height = Math.floor(s.offsetHeight / SCALE); canvas.style.width = s.offsetWidth + 'px'; canvas.style.height = s.offsetHeight + 'px'; }
+  resize(); window.addEventListener('resize', resize);
+
+  for (let i = 0; i < NUM; i++) {
+    balls.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * 2, vy: (Math.random() - .5) * 2, r: 30 + Math.random() * 40,
+      color: [
+        [102, 126, 234], [240, 147, 251], [67, 233, 123], [245, 87, 108], [56, 249, 215], [254, 225, 64]
+      ][i]
+    });
+  }
+
+  function animate() {
+    /* __jsVar_sync__ */ try { NUM = (window.__ctrl_NUM !== undefined ? window.__ctrl_NUM : NUM); SCALE = (window.__ctrl_SCALE !== undefined ? window.__ctrl_SCALE : SCALE); } catch(e) {}
+    const img = ctx.createImageData(w, h);
+    const data = img.data;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let sum = 0; let cr = 0, cg = 0, cb = 0;
+        for (const b of balls) {
+          const dx = x - b.x, dy = y - b.y;
+          const d = b.r * b.r / (dx * dx + dy * dy + 1);
+          sum += d;
+          cr += b.color[0] * d; cg += b.color[1] * d; cb += b.color[2] * d;
+        }
+        const idx = (y * w + x) * 4;
+        if (sum > 1) {
+          data[idx] = Math.min(255, cr / sum);
+          data[idx + 1] = Math.min(255, cg / sum);
+          data[idx + 2] = Math.min(255, cb / sum);
+          data[idx + 3] = Math.min(255, sum * 120);
+        }
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    balls.forEach(b => {
+      b.x += b.vx; b.y += b.vy;
+      if (b.x < 0 || b.x > w) b.vx *= -1;
+      if (b.y < 0 || b.y > h) b.vy *= -1;
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"js-NUM","label":"数量","min":1,"max":18,"step":1,"value":6,"unit":"","action":"jsVar","varName":"NUM"},{"type":"range","id":"js-SCALE","label":"缩放","min":0.4,"max":16,"step":0.01,"value":4,"unit":"","action":"jsVar","varName":"SCALE"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

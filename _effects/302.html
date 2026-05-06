@@ -115,9 +115,62 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
+<script>(function() {
+  const canvas = document.getElementById('neonCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, t = 0;
 
+  function resize() { const s = canvas.parentElement; w = canvas.width = s.offsetWidth; h = canvas.height = s.offsetHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  function animate() {
+    ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0, 0, w, h);
+    const cx = w / 2, horizon = h * .45;
+    const rows = 30, cols = 40;
+    const cellW = w * 2 / cols;
+
+    // Horizontal lines
+    for (let r = 0; r <= rows; r++) {
+      const frac = r / rows;
+      const y = horizon + frac * frac * (h - horizon);
+      const alpha = frac * .6;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y);
+      ctx.strokeStyle = `rgba(102,126,234,${alpha})`;
+      ctx.lineWidth = .8 + frac; ctx.stroke();
+      // Glow
+      ctx.strokeStyle = `rgba(102,126,234,${alpha * .3})`;
+      ctx.lineWidth = 3 + frac * 4; ctx.stroke();
+    }
+
+    // Vertical lines with perspective
+    for (let c = -cols / 2; c <= cols / 2; c++) {
+      const xTop = cx + c * 3;
+      const xBot = cx + c * cellW;
+      ctx.beginPath(); ctx.moveTo(xTop, horizon); ctx.lineTo(xBot, h);
+      const alpha = Math.max(0, .4 - Math.abs(c) / cols * .5);
+      ctx.strokeStyle = `rgba(240,147,251,${alpha})`;
+      ctx.lineWidth = .8; ctx.stroke();
+      ctx.strokeStyle = `rgba(240,147,251,${alpha * .3})`;
+      ctx.lineWidth = 3; ctx.stroke();
+    }
+
+    // Sun/circle at horizon
+    ctx.globalAlpha = .3 + Math.sin(t * .02) * .1;
+    const sunGrd = ctx.createRadialGradient(cx, horizon, 0, cx, horizon, 120);
+    sunGrd.addColorStop(0, 'rgba(245,87,108,.5)');
+    sunGrd.addColorStop(.5, 'rgba(240,147,251,.2)');
+    sunGrd.addColorStop(1, 'transparent');
+    ctx.fillStyle = sunGrd;
+    ctx.beginPath(); ctx.arc(cx, horizon, 120, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+
+    t++;
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

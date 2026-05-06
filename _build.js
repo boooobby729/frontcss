@@ -462,16 +462,7 @@ for (const cat of allCategories) {
   if (thumbExists) {
     visual = `<img src="_thumbs/${thumbFile}" alt="${cat.title}" loading="lazy">`;
   } else {
-    // parsed 分类：用第一个效果的 stage 作为预览
-    const parsed = sortedParsed.find(p => p.id === cat.id);
-    if (parsed && parsed.effects.length > 0) {
-      const eff = parsed.effects[0];
-      const sc = eff.stageClass ? ` ${eff.stageClass}` : '';
-      const sa = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
-      visual = `<div class="stage${sc}"${sa}>${eff.stageHtml}</div>`;
-    } else {
-      visual = `<div class="placeholder">${cat.title.charAt(0)}</div>`;
-    }
+    visual = `<div class="placeholder">${cat.title.charAt(0)}</div>`;
   }
 
   catCards += `    <a href="${href}" class="cat-card">
@@ -480,11 +471,7 @@ for (const cat of allCategories) {
     </a>\n`;
 }
 
-// 合并 parsed 分类的 CSS（首页预览用）
-let previewCss = '';
-for (const cat of sortedParsed) {
-  previewCss += `\n/* ${cat.title} */\n${cat.css}\n`;
-}
+// 首页不嵌入任何 CSS 动画，全部用截图
 
 const indexHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -505,14 +492,12 @@ a{text-decoration:none;color:inherit}
 .cat-card:hover .cat-visual,.cat-card:hover .cat-visual .stage{background:#161616 !important}
 .cat-card:hover .cat-info{background:#161616}
 .cat-visual{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
-.cat-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
 .cat-visual img{width:100%;height:100%;object-fit:cover}
 .cat-visual .placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.2);font-size:2rem;font-weight:700}
 .cat-info{padding:12px 16px 16px;background:#111;display:flex;align-items:baseline;gap:8px}
 .cat-info h3{font-size:.85rem;font-weight:500;color:rgba(255,255,255,.7);letter-spacing:-.01em}
 .cat-count{font-size:.65rem;color:rgba(255,255,255,.25)}
 @media(max-width:768px){.cat-grid{grid-template-columns:repeat(2,1fr)}}
-${previewCss}
 </style>
 </head>
 <body>

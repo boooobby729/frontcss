@@ -164,6 +164,45 @@ function cleanCss(css) {
 }
 
 // ============================================================
+// 提取 iframe 分类中的子效果列表
+// ============================================================
+function extractIframeEffects(filePath) {
+  const html = fs.readFileSync(filePath, 'utf8');
+  const effects = [];
+
+  // 辅助：从 h2 内容中提取纯文本（去掉 span 等子标签）
+  function cleanH2(raw) {
+    return raw.replace(/<[^>]+>/g, '').replace(/^\d+\.\s*/, '').trim();
+  }
+
+  // 模式1: <section ... id="xxx" ...> ... <h2>标题</h2>
+  const sectionRegex = /<section[^>]*id="([^"]*)"[^>]*>[\s\S]*?<h2[^>]*>([\s\S]*?)<\/h2>/g;
+  let m;
+  while ((m = sectionRegex.exec(html)) !== null) {
+    const name = cleanH2(m[2]);
+    if (name) effects.push({ id: m[1], name });
+  }
+  if (effects.length > 0) return effects;
+
+  // 模式2: <div class="section ..." ...> ... <h2 ...>标题</h2>（允许换行，class可含额外类名）
+  const divSectionRegex = /<div class="section[^"]*"[^>]*>[\s\S]*?<h2[^>]*>([\s\S]*?)<\/h2>/g;
+  while ((m = divSectionRegex.exec(html)) !== null) {
+    const name = cleanH2(m[1]);
+    if (name) effects.push({ id: '', name });
+  }
+  if (effects.length > 0) return effects;
+
+  // 模式3: class="section" id="xxx" 带 id
+  const sectionIdRegex = /<(?:div|section)[^>]*class="[^"]*section[^"]*"[^>]*id="([^"]*)"[^>]*>[\s\S]*?<h2[^>]*>([\s\S]*?)<\/h2>/g;
+  while ((m = sectionIdRegex.exec(html)) !== null) {
+    const name = cleanH2(m[2]);
+    if (name) effects.push({ id: m[1], name });
+  }
+
+  return effects;
+}
+
+// ============================================================
 // 扫描所有子页面
 // ============================================================
 const dir = __dirname;
@@ -208,9 +247,11 @@ for (const file of files) {
     totalEffects += result.effects.length;
     console.log(`✓ ${file}: ${result.effects.length} effects (${result.structure})`);
   } else {
-    iframeCategories.push({ id: catId, file, title: cleanTitle });
-    totalEffects += 1;
-    console.log(`◆ ${file}: iframe mode (${cleanTitle})`);
+    // iframe 分类：提取内部效果列表（section id + h2 标题）
+    const iframeEffects = extractIframeEffects(path.join(dir, file));
+    iframeCategories.push({ id: catId, file, title: cleanTitle, effects: iframeEffects });
+    totalEffects += Math.max(iframeEffects.length, 1);
+    console.log(`◆ ${file}: iframe mode (${cleanTitle}) - ${iframeEffects.length} sub-effects`);
   }
 }
 
@@ -242,7 +283,7 @@ const sortedCollect = [...collectFiles].sort((a, b) => a.file.localeCompare(b.fi
 // 所有分类合并（用于首页展示）
 const allCategories = [
   ...sortedParsed.map(c => ({ id: c.id, file: c.file, title: c.title, count: c.effects.length, type: 'parsed' })),
-  ...sortedIframe.map(c => ({ id: c.id, file: c.file, title: c.title, count: 1, type: 'iframe' })),
+  ...sortedIframe.map(c => ({ id: c.id, file: c.file, title: c.title, count: c.effects.length, type: 'iframe' })),
 ];
 if (sortedCollect.length > 0) {
   allCategories.push({ id: 'collect', file: null, title: 'Collect', count: sortedCollect.length, type: 'collect' });
@@ -287,6 +328,72 @@ ${cat.scripts.map(s => `<script>${s}<\/script>`).join('\n')}
 console.log(`📁 Generated ${effectIndex} standalone effect files in _effects/`);
 
 // ============================================================
+// 生成导航栏 HTML/CSS/JS（所有页面共用）
+// ============================================================
+function generateNavItems(activeCatId, pathPrefix) {
+  let items = '';
+  for (const cat of allCategories) {
+    const href = `${pathPrefix}_cat/${cat.id}.html`;
+    const isActive = cat.id === activeCatId ? ' active' : '';
+    items += `<a href="${href}" class="nav-item${isActive}" title="${cat.title}">${cat.title}</a>`;
+  }
+  return items;
+}
+
+const navCss = `
+.site-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(17,17,17,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-inner{display:flex;align-items:center;height:48px;padding:0 16px;gap:8px}
+.nav-logo{font-size:.85rem;font-weight:700;color:rgba(255,255,255,.9);white-space:nowrap;letter-spacing:-.02em;flex-shrink:0;text-decoration:none}
+.nav-scroll-wrap{position:relative;flex:1;overflow:hidden;margin:0 4px}
+.nav-scroll{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;scroll-behavior:smooth;padding:6px 0}
+.nav-scroll::-webkit-scrollbar{display:none}
+.nav-item{padding:5px 12px;border-radius:6px;font-size:.72rem;color:rgba(255,255,255,.45);white-space:nowrap;transition:all .15s;text-decoration:none;flex-shrink:0}
+.nav-item:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.06)}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.1)}
+.nav-arrow{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;color:rgba(255,255,255,.4)}
+.nav-arrow:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-arrow svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none}
+.nav-expand-btn{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;color:rgba(255,255,255,.4)}
+.nav-expand-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-expand-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;transition:transform .2s}
+.nav-expand-btn.open svg{transform:rotate(180deg)}
+.nav-dropdown{position:fixed;top:48px;left:0;right:0;z-index:199;background:rgba(17,17,17,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06);padding:16px 20px;display:none;flex-wrap:wrap;gap:6px;max-height:60vh;overflow-y:auto}
+.nav-dropdown.open{display:flex}
+.nav-dropdown .nav-item{padding:8px 16px;font-size:.75rem}
+`;
+
+const navJs = `
+(function(){
+  var scroll=document.querySelector('.nav-scroll');
+  var leftBtn=document.getElementById('navLeft');
+  var rightBtn=document.getElementById('navRight');
+  var expandBtn=document.getElementById('navExpand');
+  var dropdown=document.getElementById('navDropdown');
+  if(leftBtn)leftBtn.addEventListener('click',function(){scroll.scrollBy({left:-200,behavior:'smooth'})});
+  if(rightBtn)rightBtn.addEventListener('click',function(){scroll.scrollBy({left:200,behavior:'smooth'})});
+  if(expandBtn&&dropdown){
+    expandBtn.addEventListener('click',function(){expandBtn.classList.toggle('open');dropdown.classList.toggle('open')});
+    document.addEventListener('click',function(e){if(!expandBtn.contains(e.target)&&!dropdown.contains(e.target)){expandBtn.classList.remove('open');dropdown.classList.remove('open')}});
+  }
+  var active=scroll.querySelector('.nav-item.active');
+  if(active)setTimeout(function(){active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})},100);
+})();`;
+
+function generateNavBar(activeCatId, pathPrefix) {
+  const items = generateNavItems(activeCatId, pathPrefix);
+  return `<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="${pathPrefix}index.html" class="nav-logo">Bの宝库</a>
+    <button class="nav-arrow" id="navLeft"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="nav-scroll-wrap"><div class="nav-scroll">${items}</div></div>
+    <button class="nav-arrow" id="navRight"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+    <button class="nav-expand-btn" id="navExpand"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+  </div>
+</nav>
+<div class="nav-dropdown" id="navDropdown">${items}</div>`;
+}
+
+// ============================================================
 // 生成每个 parsed 分类的集合页面（二级页面，卡片网格 + overlay）
 // ============================================================
 const catPagesDir = path.join(dir, '_cat');
@@ -314,12 +421,8 @@ for (const cat of sortedParsed) {
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
 a{text-decoration:none;color:inherit}
-.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;gap:12px;background:rgba(17,17,17,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
-.back-btn{color:rgba(255,255,255,.5);font-size:.8rem;padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);transition:all .15s}
-.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
-.page-title{font-size:1rem;font-weight:600;color:rgba(255,255,255,.9);letter-spacing:-.02em}
-.page-count{font-size:.7rem;color:rgba(255,255,255,.3);margin-left:4px}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:57px}
+${navCss}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
 .card{background:#111;cursor:pointer;transition:background .15s}
 .card:hover{background:#161616}
 .card:hover .card-visual,.card:hover .card-visual .stage{background:#161616 !important}
@@ -340,11 +443,7 @@ ${cat.css}
 </style>
 </head>
 <body>
-<div class="top-bar">
-  <a href="../index.html" class="back-btn">← 返回</a>
-  <span class="page-title">${cat.title}</span>
-  <span class="page-count">${cat.effects.length} 个效果</span>
-</div>
+${generateNavBar(cat.id, '../')}
 <div class="card-grid">
 ${cards}</div>
 <div class="effect-overlay" id="overlay">
@@ -352,11 +451,12 @@ ${cards}</div>
   <iframe id="overlayIframe" src="about:blank"></iframe>
 </div>
 <` + `script>
+${navJs}
 const overlay=document.getElementById('overlay');
 const iframe=document.getElementById('overlayIframe');
 document.getElementById('overlayClose').addEventListener('click',()=>{overlay.classList.remove('open');iframe.src='about:blank';});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('open'),iframe.src='about:blank';});
-document.querySelectorAll('.card').forEach(card=>{
+document.querySelectorAll('.card-grid .card').forEach(card=>{
   card.addEventListener('click',()=>{
     const src=card.dataset.src;
     if(src){iframe.src=src;overlay.classList.add('open');}
@@ -369,7 +469,91 @@ ${cat.scripts.map(s => s).join('\n')}
   fs.writeFileSync(path.join(catPagesDir, `${cat.id}.html`), catHtml);
 }
 
-// iframe 分类的集合页面（直接跳转原文件，不需要生成）
+// iframe 分类的集合页面（截图卡片 + overlay 加载原文件）
+for (const cat of sortedIframe) {
+  let cards = '';
+  if (cat.effects.length > 0) {
+    for (let i = 0; i < cat.effects.length; i++) {
+      const eff = cat.effects[i];
+      const anchor = eff.id ? `#${eff.id}` : '';
+      const thumbFile = `${cat.id}_${i}.png`;
+      const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
+      const visual = thumbExists
+        ? `<img src="../_thumbs/${thumbFile}" alt="${eff.name}" style="width:100%;height:100%;object-fit:cover">`
+        : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;padding:8px">${eff.name}</div>`;
+      cards += `    <div class="card" data-src="../${cat.file}${anchor}">
+      <div class="card-visual">${visual}</div>
+      <div class="card-info"><h3>${eff.name}</h3></div>
+    </div>\n`;
+    }
+  } else {
+    // 没有解析出子效果，整个文件作为一个卡片
+    const thumbFile = `${cat.file.replace('.html', '.png')}`;
+    const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
+    const visual = thumbExists
+      ? `<img src="../_thumbs/${thumbFile}" alt="${cat.title}" style="width:100%;height:100%;object-fit:cover">`
+      : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${cat.title.charAt(0)}</div>`;
+    cards += `    <div class="card" data-src="../${cat.file}">
+      <div class="card-visual">${visual}</div>
+      <div class="card-info"><h3>${cat.title}</h3></div>
+    </div>\n`;
+  }
+
+  const navItems = generateNavItems(cat.id, '../');
+  const iframeCatHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${cat.title} - Bの宝库</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+${navCss}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
+.card{background:#111;cursor:pointer;transition:background .15s}
+.card:hover{background:#161616}
+.card:hover .card-visual{background:#161616 !important}
+.card:hover .card-info{background:#161616}
+.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
+.card-info{padding:10px 14px 14px;background:#111}
+.card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:column}
+.effect-overlay.open{display:flex}
+.effect-overlay iframe{width:100%;height:100%;border:none}
+.effect-overlay-close{position:fixed;top:16px;right:20px;z-index:10000;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.effect-overlay-close:hover{background:rgba(255,255,255,.2)}
+.effect-overlay-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2}
+@media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+${generateNavBar(cat.id, '../')}
+<div class="card-grid">
+${cards}</div>
+<div class="effect-overlay" id="overlay">
+  <button class="effect-overlay-close" id="overlayClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <iframe id="overlayIframe" src="about:blank"></iframe>
+</div>
+<` + `script>
+${navJs}
+const overlay=document.getElementById('overlay');
+const iframe=document.getElementById('overlayIframe');
+document.getElementById('overlayClose').addEventListener('click',()=>{overlay.classList.remove('open');iframe.src='about:blank';});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('open'),iframe.src='about:blank';});
+document.querySelectorAll('.card-grid .card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    const src=card.dataset.src;
+    if(src){iframe.src=src;overlay.classList.add('open');}
+  });
+});
+<` + `/script>
+</body>
+</html>`;
+  fs.writeFileSync(path.join(catPagesDir, `${cat.id}.html`), iframeCatHtml);
+}
+
 // collect 分类的集合页面
 if (sortedCollect.length > 0) {
   let collectCardsHtml = '';
@@ -395,12 +579,8 @@ if (sortedCollect.length > 0) {
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
 a{text-decoration:none;color:inherit}
-.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;gap:12px;background:rgba(17,17,17,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
-.back-btn{color:rgba(255,255,255,.5);font-size:.8rem;padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);transition:all .15s}
-.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
-.page-title{font-size:1rem;font-weight:600;color:rgba(255,255,255,.9);letter-spacing:-.02em}
-.page-count{font-size:.7rem;color:rgba(255,255,255,.3);margin-left:4px}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:57px}
+${navCss}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
 .card{background:#111;cursor:pointer;transition:background .15s}
 .card:hover{background:#161616}
 .card:hover .card-visual{background:#161616 !important}
@@ -418,11 +598,7 @@ a{text-decoration:none;color:inherit}
 </style>
 </head>
 <body>
-<div class="top-bar">
-  <a href="../index.html" class="back-btn">← 返回</a>
-  <span class="page-title">Collect</span>
-  <span class="page-count">${sortedCollect.length} 个效果</span>
-</div>
+${generateNavBar('collect', '../')}
 <div class="card-grid">
 ${collectCardsHtml}</div>
 <div class="effect-overlay" id="overlay">
@@ -430,11 +606,12 @@ ${collectCardsHtml}</div>
   <iframe id="overlayIframe" src="about:blank"></iframe>
 </div>
 <` + `script>
+${navJs}
 const overlay=document.getElementById('overlay');
 const iframe=document.getElementById('overlayIframe');
 document.getElementById('overlayClose').addEventListener('click',()=>{overlay.classList.remove('open');iframe.src='about:blank';});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('open'),iframe.src='about:blank';});
-document.querySelectorAll('.card').forEach(card=>{
+document.querySelectorAll('.card-grid .card').forEach(card=>{
   card.addEventListener('click',()=>{
     const src=card.dataset.src;
     if(src){iframe.src=src;overlay.classList.add('open');}
@@ -446,7 +623,7 @@ document.querySelectorAll('.card').forEach(card=>{
   fs.writeFileSync(path.join(catPagesDir, 'collect.html'), collectHtml);
 }
 
-console.log(`📁 Generated ${sortedParsed.length + (sortedCollect.length > 0 ? 1 : 0)} category pages in _cat/`);
+console.log(`📁 Generated ${sortedParsed.length + sortedIframe.length + (sortedCollect.length > 0 ? 1 : 0)} category pages in _cat/`);
 
 // ============================================================
 // 生成首页 index.html（轻量：只有分类卡片 + 截图）
@@ -456,7 +633,7 @@ for (const cat of allCategories) {
   const thumbFile = cat.type === 'collect' ? '46-collect.png' : `${cat.file?.replace('.html', '.png')}`;
   const thumbPath = path.join(dir, '_thumbs', thumbFile);
   const thumbExists = fs.existsSync(thumbPath);
-  const href = cat.type === 'iframe' ? cat.file : `_cat/${cat.id}.html`;
+  const href = `_cat/${cat.id}.html`;
 
   let visual;
   if (thumbExists) {
@@ -483,13 +660,11 @@ const indexHtml = `<!DOCTYPE html>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
 a{text-decoration:none;color:inherit}
-.page-header{padding:60px 32px 32px;text-align:center}
-.page-title{font-size:2rem;font-weight:700;letter-spacing:-.03em;color:rgba(255,255,255,.9)}
-.page-sub{font-size:.8rem;color:rgba(255,255,255,.3);margin-top:8px}
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.07);margin:0}
+${navCss}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
 .cat-card{background:#111;display:flex;flex-direction:column;transition:background .15s}
 .cat-card:hover{background:#161616}
-.cat-card:hover .cat-visual,.cat-card:hover .cat-visual .stage{background:#161616 !important}
+.cat-card:hover .cat-visual{background:#161616 !important}
 .cat-card:hover .cat-info{background:#161616}
 .cat-visual{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .cat-visual img{width:100%;height:100%;object-fit:cover}
@@ -501,12 +676,12 @@ a{text-decoration:none;color:inherit}
 </style>
 </head>
 <body>
-<header class="page-header">
-  <h1 class="page-title">Bの宝库</h1>
-  <p class="page-sub">${totalEffects} 个前端效果 · ${allCategories.length} 个分类</p>
-</header>
+${generateNavBar('', '')}
 <div class="cat-grid">
 ${catCards}</div>
+<` + `script>
+${navJs}
+<` + `/script>
 </body>
 </html>`;
 

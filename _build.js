@@ -397,7 +397,7 @@ a{text-decoration:none;color:inherit}
 .card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
 .card-visual *{--bg-override:none}
-.card-visual iframe{width:166%;height:166%;border:none;pointer-events:none;transform:scale(.6);transform-origin:center center}
+.card-visual iframe{width:300%;height:300%;border:none;pointer-events:none;transform:scale(.3333);transform-origin:top left}
 .card-info{padding:8px 12px 12px;background:#111}
 .card-info h3{font-size:.72rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.2);margin-top:1px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

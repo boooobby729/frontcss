@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>3D 折叠面板</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+
+  /* 1. 3D Card Flip */
+  .card3d-flip { width: 180px; height: 240px; perspective: 800px; cursor: pointer; }
+  .card3d-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.4,0,.2,1); }
+  .card3d-flip:hover .card3d-inner { transform: rotateY(180deg); }
+  .card3d-front, .card3d-back { position: absolute; inset: 0; border-radius: 16px; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; padding: 20px; }
+  .card3d-front { background: linear-gradient(145deg, #1a1a2e, #16213e); border: 1px solid #ffffff10; }
+  .card3d-front .icon { font-size: 3rem; }
+  .card3d-front span { color: #aaa; font-size: .9rem; }
+  .card3d-back { background: linear-gradient(145deg, #667eea, #764ba2); transform: rotateY(180deg); color: #fff; }
+  .card3d-back p { font-size: .85rem; text-align: center; line-height: 1.6; }
+
+  /* 2. 3D Cube */
+  .cube-scene { width: 120px; height: 120px; perspective: 600px; }
+  .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: cubeRotate 8s linear infinite; }
+  .cube-face { position: absolute; width: 120px; height: 120px; border: 2px solid rgba(102,126,234,.3); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700;  backdrop-filter: blur(4px); }
+  .cube-face:nth-child(1) { transform: rotateY(0deg) translateZ(60px); color: #667eea; }
+  .cube-face:nth-child(2) { transform: rotateY(90deg) translateZ(60px); color: #f093fb; }
+  .cube-face:nth-child(3) { transform: rotateY(180deg) translateZ(60px); color: #43e97b; }
+  .cube-face:nth-child(4) { transform: rotateY(-90deg) translateZ(60px); color: #f5576c; }
+  .cube-face:nth-child(5) { transform: rotateX(90deg) translateZ(60px); color: #fee140; }
+  .cube-face:nth-child(6) { transform: rotateX(-90deg) translateZ(60px); color: #38f9d7; }
+  @keyframes cubeRotate { 0% { transform: rotateX(0) rotateY(0); } 100% { transform: rotateX(360deg) rotateY(360deg); } }
+
+  /* 3. 3D Carousel */
+  .carousel-scene { width: 200px; height: 140px; perspective: 800px; }
+  .carousel { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: carouselSpin 12s linear infinite; }
+  .carousel-item { position: absolute; width: 160px; height: 100px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.5rem; left: 20px; top: 20px; }
+  .carousel-item:nth-child(1) { background: linear-gradient(135deg, #667eea88, #764ba288); transform: rotateY(0deg) translateZ(180px); }
+  .carousel-item:nth-child(2) { background: linear-gradient(135deg, #f093fb88, #f5576c88); transform: rotateY(60deg) translateZ(180px); }
+  .carousel-item:nth-child(3) { background: linear-gradient(135deg, #43e97b88, #38f9d788); transform: rotateY(120deg) translateZ(180px); }
+  .carousel-item:nth-child(4) { background: linear-gradient(135deg, #fa709a88, #fee14088); transform: rotateY(180deg) translateZ(180px); }
+  .carousel-item:nth-child(5) { background: linear-gradient(135deg, #a18cd188, #fbc2eb88); transform: rotateY(240deg) translateZ(180px); }
+  .carousel-item:nth-child(6) { background: linear-gradient(135deg, #ffecd288, #fcb69f88); transform: rotateY(300deg) translateZ(180px); }
+  @keyframes carouselSpin { to { transform: rotateY(360deg); } }
+
+  /* 4. 3D Tilt with JS */
+  .tilt-3d { width: 200px; height: 260px; background: linear-gradient(145deg, #1a1a2e, #16213e); border-radius: 20px; border: 1px solid #ffffff10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; cursor: pointer; transition: transform .1s ease, box-shadow .3s ease; transform-style: preserve-3d; }
+  .tilt-3d:hover { box-shadow: 0 20px 60px rgba(102,126,234,.2); }
+  .tilt-3d .t-icon { font-size: 3rem; transform: translateZ(40px); }
+  .tilt-3d .t-text { color: #aaa; font-size: .9rem; transform: translateZ(20px); }
+
+  /* 5. Perspective Grid */
+  .persp-grid { width: 280px; height: 180px; perspective: 400px; overflow: hidden; border-radius: 12px; }
+  .persp-plane { width: 100%; height: 200%; transform: rotateX(60deg); transform-origin: center top; background-image:
+    linear-gradient(rgba(102,126,234,.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(102,126,234,.2) 1px, transparent 1px);
+  background-size: 30px 30px; animation: gridScroll 3s linear infinite; }
+  @keyframes gridScroll { to { background-position: 0 30px; } }
+
+  /* 6. Layered Card */
+  .layer-card { width: 180px; height: 240px; position: relative; perspective: 600px; cursor: pointer; }
+  .layer { position: absolute; inset: 0; border-radius: 16px; transition: transform .6s ease; }
+  .layer:nth-child(1) { background: #667eea33; transform: translateZ(0); }
+  .layer:nth-child(2) { background: #f093fb33; transform: translateZ(0); inset: 8px; }
+  .layer:nth-child(3) { background: #ffffff11; transform: translateZ(0); inset: 16px; display: flex; align-items: center; justify-content: center; }
+  .layer-card:hover .layer:nth-child(1) { transform: translateZ(-30px) rotateY(-5deg); }
+  .layer-card:hover .layer:nth-child(2) { transform: translateZ(-15px) rotateY(-3deg); }
+  .layer-card:hover .layer:nth-child(3) { transform: translateZ(10px) rotateY(2deg); }
+  .layer:nth-child(3) span { color: #fff; font-weight: 600; }
+
+  /* === NEW EFFECTS === */
+  /* 7. 3D Button Press */
+  .btn-3d { padding: 14px 40px; background: #667eea; border: none; border-radius: 10px; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 6px 0 #4a5bc7, 0 8px 20px rgba(0,0,0,.3); transition: all .1s; font-family: inherit; }
+  .btn-3d:active { transform: translateY(4px); box-shadow: 0 2px 0 #4a5bc7, 0 4px 10px rgba(0,0,0,.2); }
+
+  /* 8. 3D Text */
+  .text-3d { font-size: 3rem; font-weight: 900; color: #764ba2; text-shadow: 0 1px 0 #6a4094, 0 2px 0 #603687, 0 3px 0 #562c7a, 0 4px 0 #4c226d, 0 5px 15px rgba(0,0,0,.3); transform: perspective(500px) rotateX(10deg); }
+
+  /* 9. Book Fold */
+  .book-fold { width: 120px; height: 160px; position: relative; perspective: 800px; }
+  .book-cover { width: 100%; height: 100%; background: linear-gradient(135deg, #f5576c, #764ba2); border-radius: 4px; position: absolute; transform-origin: left center; transition: transform .8s ease; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; }
+  .book-page { width: 100%; height: 100%; background: #e8e8ed; border-radius: 0 4px 4px 0; position: absolute; display: flex; align-items: center; justify-content: center; color: #333; font-size: .8rem; }
+  .book-fold:hover .book-cover { transform: rotateY(-160deg); }
+
+  /* 10. Pyramid */
+  .pyramid { width: 80px; height: 80px; transform-style: preserve-3d; animation: pyramidSpin 6s linear infinite; position: relative; }
+  .pyramid-face { position: absolute; width: 0; height: 0; border-left: 40px solid transparent; border-right: 40px solid transparent; border-bottom: 70px solid rgba(102,126,234,.3); transform-origin: bottom center; }
+  .pyramid-face:nth-child(1) { transform: rotateY(0deg) rotateX(30deg) translateZ(0); border-bottom-color: rgba(102,126,234,.4); }
+  .pyramid-face:nth-child(2) { transform: rotateY(90deg) rotateX(30deg) translateZ(0); border-bottom-color: rgba(240,147,251,.3); }
+  .pyramid-face:nth-child(3) { transform: rotateY(180deg) rotateX(30deg) translateZ(0); border-bottom-color: rgba(245,87,108,.3); }
+  .pyramid-face:nth-child(4) { transform: rotateY(270deg) rotateX(30deg) translateZ(0); border-bottom-color: rgba(67,233,123,.3); }
+  @keyframes pyramidSpin { to { transform: rotateY(360deg); } }
+
+  /* 11. Parallax Layers */
+  .parallax-3d { width: 180px; height: 120px; perspective: 300px; position: relative; cursor: pointer; }
+  .parallax-layer { position: absolute; inset: 0; border-radius: 12px; transition: transform .3s ease; }
+  .parallax-layer:nth-child(1) { background: rgba(102,126,234,.1); transform: translateZ(0px); }
+  .parallax-layer:nth-child(2) { background: rgba(240,147,251,.1); inset: 10px; transform: translateZ(20px); }
+  .parallax-layer:nth-child(3) { background: rgba(245,87,108,.15); inset: 20px; transform: translateZ(40px); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: .8rem; }
+  .parallax-3d:hover .parallax-layer:nth-child(1) { transform: translateZ(10px); }
+  .parallax-3d:hover .parallax-layer:nth-child(2) { transform: translateZ(30px); }
+  .parallax-3d:hover .parallax-layer:nth-child(3) { transform: translateZ(60px); }
+
+  /* 12. 3D Ring */
+  .ring-3d { width: 100px; height: 100px; border: 4px solid #667eea; border-radius: 50%; animation: ring3d 4s linear infinite; }
+  @keyframes ring3d { 0% { transform: perspective(200px) rotateX(0deg); } 100% { transform: perspective(200px) rotateX(360deg); } }
+
+  /* 13. 3D Flip Text */
+  .flip-text-3d { perspective: 400px; }
+  .flip-text-3d span { display: inline-block; font-size: 2.5rem; font-weight: 900; color: #f093fb; animation: flipLetter3d 2s ease-in-out infinite; }
+  .flip-text-3d span:nth-child(2) { animation-delay: .15s; }
+  .flip-text-3d span:nth-child(3) { animation-delay: .3s; }
+  .flip-text-3d span:nth-child(4) { animation-delay: .45s; }
+  @keyframes flipLetter3d { 0%,80%,100% { transform: rotateX(0); } 40% { transform: rotateX(360deg); } }
+
+  /* 14. 3D Cylinder */
+  .cylinder { width: 80px; height: 120px; position: relative; transform-style: preserve-3d; animation: cylinderSpin 6s linear infinite; }
+  .cyl-strip { position: absolute; width: 24px; height: 120px; background: rgba(102,126,234,.2); border: 1px solid rgba(102,126,234,.15); left: 28px; transform-origin: center center; }
+  .cyl-strip:nth-child(1) { transform: rotateY(0deg) translateZ(40px); }
+  .cyl-strip:nth-child(2) { transform: rotateY(30deg) translateZ(40px); }
+  .cyl-strip:nth-child(3) { transform: rotateY(60deg) translateZ(40px); }
+  .cyl-strip:nth-child(4) { transform: rotateY(90deg) translateZ(40px); }
+  .cyl-strip:nth-child(5) { transform: rotateY(120deg) translateZ(40px); }
+  .cyl-strip:nth-child(6) { transform: rotateY(150deg) translateZ(40px); }
+  @keyframes cylinderSpin { to { transform: rotateY(360deg); } }
+
+  /* 15. 3D Stacked Cards */
+  .stack-3d { position: relative; width: 140px; height: 90px; perspective: 600px; cursor: pointer; }
+  .stack-item { position: absolute; inset: 0; border-radius: 12px; transition: transform .5s ease; }
+  .stack-item:nth-child(1) { background: #667eea; z-index: 3; }
+  .stack-item:nth-child(2) { background: #f093fb; z-index: 2; }
+  .stack-item:nth-child(3) { background: #43e97b; z-index: 1; }
+  .stack-3d:hover .stack-item:nth-child(1) { transform: translateZ(40px) translateY(-10px) rotateZ(-5deg); }
+  .stack-3d:hover .stack-item:nth-child(2) { transform: translateZ(20px) rotateZ(3deg); }
+  .stack-3d:hover .stack-item:nth-child(3) { transform: translateZ(0) translateY(10px) rotateZ(8deg); }
+
+  /* 16. 3D Floating Badge */
+  .badge-3d { width: 100px; height: 100px; border-radius: 20px; background: linear-gradient(145deg, #1a1a2e, #16213e); border: 1px solid #ffffff10; display: flex; align-items: center; justify-content: center; font-size: 2rem; animation: float3d 4s ease-in-out infinite; transform-style: preserve-3d; }
+  @keyframes float3d { 0%,100% { transform: perspective(400px) rotateX(5deg) rotateY(-5deg) translateY(0); } 50% { transform: perspective(400px) rotateX(-5deg) rotateY(5deg) translateY(-15px); } }
+
+  /* 17. 3D Door */
+  .door-3d { width: 80px; height: 120px; perspective: 600px; position: relative; cursor: pointer; }
+  .door-frame { width: 100%; height: 100%; background: #333; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #667eea; font-size: .8rem; }
+  .door-panel { position: absolute; inset: 0; background: linear-gradient(135deg, #1a1a2e, #2a2a4e); border: 1px solid #667eea33; border-radius: 4px; transform-origin: left center; transition: transform .6s ease; display: flex; align-items: center; justify-content: center; }
+  .door-panel::after { content: ''; position: absolute; right: 10px; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: #667eea; transform: translateY(-50%); }
+  .door-3d:hover .door-panel { transform: perspective(600px) rotateY(-110deg); }
+
+  /* 18. 3D Hexagon */
+  .hex-3d { width: 80px; height: 92px; position: relative; transform-style: preserve-3d; animation: hexSpin 8s linear infinite; }
+  .hex-face { position: absolute; width: 80px; height: 92px; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+  .hex-face:nth-child(1) { background: rgba(102,126,234,.3); transform: rotateY(0deg) translateZ(30px); }
+  .hex-face:nth-child(2) { background: rgba(240,147,251,.3); transform: rotateY(60deg) translateZ(30px); }
+  .hex-face:nth-child(3) { background: rgba(67,233,123,.3); transform: rotateY(120deg) translateZ(30px); }
+  .hex-face:nth-child(4) { background: rgba(245,87,108,.3); transform: rotateY(180deg) translateZ(30px); }
+  .hex-face:nth-child(5) { background: rgba(254,225,64,.3); transform: rotateY(240deg) translateZ(30px); }
+  .hex-face:nth-child(6) { background: rgba(56,249,215,.3); transform: rotateY(300deg) translateZ(30px); }
+  @keyframes hexSpin { to { transform: rotateY(360deg) rotateX(15deg); } }
+
+  /* 19. 3D Fold Panel */
+  .fold-panel { width: 200px; height: 60px; perspective: 600px; display: flex; cursor: pointer; }
+  .fold-seg { flex: 1; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: .8rem; color: #fff; transition: transform .5s; }
+  .fold-seg:nth-child(1) { background: #667eea; transform-origin: right center; }
+  .fold-seg:nth-child(2) { background: #764ba2; }
+  .fold-seg:nth-child(3) { background: #f093fb; transform-origin: left center; }
+  .fold-panel:hover .fold-seg:nth-child(1) { transform: rotateY(-40deg); }
+  .fold-panel:hover .fold-seg:nth-child(3) { transform: rotateY(40deg); }
+
+  /* 20. 3D Sphere Dots */
+  .sphere-3d { width: 100px; height: 100px; position: relative; transform-style: preserve-3d; animation: sphereRot 10s linear infinite; }
+  .sphere-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #667eea; top: 50%; left: 50%; margin: -4px 0 0 -4px; }
+  @keyframes sphereRot { to { transform: rotateY(360deg) rotateX(360deg); } }
+
+
+</style>
+</head>
+<body>
+<div class="stage"><div class="fold-panel"><div class="fold-seg">A</div><div class="fold-seg">B</div><div class="fold-seg">C</div></div></div>
+<script>(function(){
+  const s=document.getElementById('sphere3d');if(!s)return;
+  const n=24,r=45;
+  for(let i=0;i<n;i++){
+    const phi=Math.acos(-1+2*i/n),theta=Math.sqrt(n*Math.PI)*phi;
+    const x=r*Math.cos(theta)*Math.sin(phi),y=r*Math.sin(theta)*Math.sin(phi),z=r*Math.cos(phi);
+    const d=document.createElement('div');d.className='sphere-dot';
+    d.style.transform=`translate3d(${x}px,${y}px,${z}px)`;
+    s.appendChild(d);
+  }
+})();</script>
+</body>
+</html>

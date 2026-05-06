@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>3D 挤出文字</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+  .stage { width: 100%; min-height: 180px; display: flex; align-items: center; justify-content: center; padding: 32px; }
+
+  /* 1. Text Scramble / Decode */
+  .scramble-text { font-family: 'Courier New', monospace; font-size: 1.6rem; font-weight: 700; color: #43e97b; cursor: pointer; letter-spacing: 2px; min-height: 1.8em; }
+
+  /* 2. Split Character Reveal */
+  .split-reveal { font-size: 2rem; font-weight: 800; color: #fff; overflow: hidden; }
+  .split-reveal span { display: inline-block; opacity: 0; transform: translateY(60px) rotateX(-90deg); transition: all .5s cubic-bezier(.4,0,.2,1); }
+  .split-reveal.active span { opacity: 1; transform: translateY(0) rotateX(0); }
+
+  /* 3. Counter Roll */
+  .counter-display { font-size: 3rem; font-weight: 900; font-family: 'Courier New', monospace; color: #667eea; display: flex; gap: 2px; }
+  .digit-slot { width: 42px; height: 50px; overflow: hidden; position: relative; }
+  .digit-roll { display: flex; flex-direction: column; transition: transform .8s cubic-bezier(.4,0,.2,1); }
+  .digit-roll span { height: 50px; display: flex; align-items: center; justify-content: center; }
+
+  /* 4. Liquid Fill Text */
+  .liquid-text { position: relative; font-size: 3.5rem; font-weight: 900; color: transparent; -webkit-text-stroke: 2px #667eea; }
+  .liquid-text::before { content: attr(data-text); position: absolute; inset: 0; color: #667eea; overflow: hidden; animation: liquidFill 3s ease-in-out infinite alternate; }
+  @keyframes liquidFill {
+    0% { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
+    100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  }
+
+  /* 5. Text Hover Clip Reveal */
+  .clip-text { position: relative; font-size: 2.2rem; font-weight: 800; color: #333; cursor: pointer; }
+  .clip-text::after { content: attr(data-text); position: absolute; inset: 0; color: #f093fb; clip-path: circle(0% at 50% 50%); transition: clip-path .5s cubic-bezier(.4,0,.2,1); }
+  .clip-text:hover::after { clip-path: circle(100% at 50% 50%); }
+
+  /* 6. Text Stroke Animation */
+  .stroke-anim { font-size: 3rem; font-weight: 900; }
+  .stroke-anim svg text { fill: none; stroke: #fff; stroke-width: 1; stroke-dasharray: 300; stroke-dashoffset: 300; animation: strokeDraw 3s ease forwards; font-size: 48px; font-weight: 900; font-family: -apple-system, sans-serif; }
+  @keyframes strokeDraw { to { stroke-dashoffset: 0; fill: #fff; } }
+
+  /* 7. Blur Reveal */
+  .blur-text { font-size: 2rem; font-weight: 700; color: #fff; }
+  .blur-text span { display: inline-block; filter: blur(10px); opacity: 0; transition: all .6s ease; }
+  .blur-text.active span { filter: blur(0); opacity: 1; }
+
+  /* 8. Typewriter Delete + Retype */
+  .retype { font-size: 1.4rem; font-family: 'Courier New', monospace; color: #f5576c; border-right: 2px solid #f5576c; padding-right: 2px; white-space: nowrap; overflow: hidden; min-width: 1em; min-height: 1.6em; display: inline-block; animation: blink .7s step-end infinite; }
+  @keyframes blink { 50% { border-color: transparent; } }
+
+  /* 9. Kinetic Text */
+  .kinetic-wrap { display: flex; gap: 8px; }
+  .kinetic-word { font-size: 1.8rem; font-weight: 800; display: inline-block; animation: kineticBounce 2s ease infinite; }
+  @keyframes kineticBounce {
+    0%, 100% { transform: translateY(0) scale(1); color: #667eea; }
+    25% { transform: translateY(-10px) scale(1.1); color: #f093fb; }
+    50% { transform: translateY(0) scale(1); color: #43e97b; }
+    75% { transform: translateY(5px) scale(.95); color: #f5576c; }
+  }
+
+  /* 10. Perspective Tilt Text */
+  .tilt-text { font-size: 2.5rem; font-weight: 900; color: #fff; transition: transform .3s; perspective: 600px; cursor: pointer; }
+  .tilt-text:hover { transform: perspective(600px) rotateX(15deg) rotateY(-10deg); text-shadow: 5px 5px 20px rgba(102,126,234,.5); }
+
+  .replay-btn { margin-top: 12px; background: none; border: 1px solid #333; color: #888; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: .75rem; }
+  .replay-btn:hover { border-color: #667eea; color: #667eea; }
+
+  /* === EXPANDED === */
+
+  /* 11. Liquid Text */
+  .liquid-text { font-size: 3rem; font-weight: 900; color: #667eea; filter: url(#liquid-filter); animation: liquidWobble 3s ease-in-out infinite; }
+  @keyframes liquidWobble { 0%,100% { transform: scaleX(1); } 50% { transform: scaleX(1.05); } }
+
+  /* 12. 3D Extrude */
+  .extrude-text { font-size: 3rem; font-weight: 900; color: #f5576c; text-shadow: 1px 1px 0 #d04050, 2px 2px 0 #b03040, 3px 3px 0 #902030, 4px 4px 0 #701020, 5px 5px 15px rgba(0,0,0,.3); }
+
+  /* 13. Typewriter With Cursor */
+  .typewriter-adv { font-family: 'Courier New', monospace; font-size: 1.2rem; color: #43e97b; border-right: 2px solid #43e97b; white-space: nowrap; overflow: hidden; animation: typeAdv 3s steps(20) infinite, blinkCaret .7s step-end infinite; width: 0; max-width: 250px; }
+  @keyframes typeAdv { 0%,100% { width: 0; } 50%,80% { width: 250px; } }
+  @keyframes blinkCaret { 0%,100% { border-color: #43e97b; } 50% { border-color: transparent; } }
+
+  /* 14. Marquee Text */
+  .marquee-text-wrap { overflow: hidden; width: 280px; }
+  .marquee-text { white-space: nowrap; animation: marqueeText 8s linear infinite; font-size: 1.2rem; font-weight: 700; color: #f093fb; }
+  @keyframes marqueeText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+  /* 15. Text Mask Image */
+  .mask-text { font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #f093fb, #43e97b); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: maskShift 4s ease infinite; }
+  @keyframes maskShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+  /* 16. Bounce Letters */
+  .bounce-letters span { display: inline-block; animation: bounceLetter 1.5s ease infinite; font-size: 2rem; font-weight: 800; color: #ffa500; }
+  @keyframes bounceLetter { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+  /* 17. Underline Expand */
+  .underline-text { font-size: 1.5rem; font-weight: 700; color: #ccc; position: relative; display: inline-block; }
+  .underline-text::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 3px; background: linear-gradient(90deg,#667eea,#f093fb); border-radius: 2px; animation: underlineExpand 2s ease infinite; }
+  @keyframes underlineExpand { 0%,100% { width: 0; } 50% { width: 100%; } }
+
+  /* 18. Vertical Text */
+  .vertical-text { writing-mode: vertical-rl; text-orientation: mixed; font-size: 1.8rem; font-weight: 700; color: #764ba2; letter-spacing: .3em; }
+
+  /* 19. Text Outline Animate */
+  .outline-anim { font-size: 3rem; font-weight: 900; color: transparent; -webkit-text-stroke: 2px #667eea; animation: outlineFlash 2s ease infinite; }
+  @keyframes outlineFlash { 0%,100% { -webkit-text-stroke-color: #667eea; } 50% { -webkit-text-stroke-color: #f093fb; } }
+
+  /* 20. Split Halves */
+  .split-text { position: relative; font-size: 3rem; font-weight: 900; color: #fff; }
+  .split-text::before { content: attr(data-text); position: absolute; top: 0; left: 0; width: 50%; overflow: hidden; color: #667eea; }
+
+
+</style>
+</head>
+<body>
+<div class="stage"><div class="extrude-text">3D</div></div>
+<script>// 1. Scramble
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+  const targetStr = 'FRONTEND MAGIC';
+  function startScramble() {
+    const el = document.getElementById('scramble');
+    let iteration = 0;
+    const interval = setInterval(() => {
+      el.textContent = targetStr.split('').map((c, i) => {
+        if (i < iteration) return targetStr[i];
+        return chars[Math.floor(Math.random() * chars.length)];
+      }).join('');
+      if (iteration >= targetStr.length) clearInterval(interval);
+      iteration += 1/3;
+    }, 30);
+  }
+  startScramble();
+
+  // 2. Split Reveal
+  function playSplit() {
+    const el = document.getElementById('splitReveal');
+    const text = 'CREATIVE';
+    el.innerHTML = text.split('').map((c, i) =>
+      `<span style="transition-delay:${i * .06}s">${c}</span>`
+    ).join('');
+    el.classList.remove('active');
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('active')));
+  }
+  playSplit();
+
+  // 3. Counter Roll
+  function rollCounter() {
+    const target = '28547';
+    const el = document.getElementById('counterRoll');
+    el.innerHTML = '';
+    target.split('').forEach((d, idx) => {
+      const slot = document.createElement('div');
+      slot.className = 'digit-slot';
+      const roll = document.createElement('div');
+      roll.className = 'digit-roll';
+      for (let i = 0; i <= 9; i++) {
+        const s = document.createElement('span');
+        s.textContent = i;
+        roll.appendChild(s);
+      }
+      slot.appendChild(roll);
+      el.appendChild(slot);
+      setTimeout(() => {
+        roll.style.transform = `translateY(-${parseInt(d) * 50}px)`;
+      }, 200 + idx * 150);
+    });
+  }
+  rollCounter();
+
+  // 7. Blur Reveal
+  function playBlur() {
+    const el = document.getElementById('blurText');
+    const text = 'BLUR REVEAL';
+    el.innerHTML = text.split('').map((c, i) =>
+      `<span style="transition-delay:${i * .08}s">${c === ' ' ? '&nbsp;' : c}</span>`
+    ).join('');
+    el.classList.remove('active');
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('active')));
+  }
+  playBlur();
+
+  // 8. Retype
+  const retypePhrases = ['Hello World', 'Creative Code', 'Frontend Magic', 'Design System'];
+  let ri = 0, rj = 0, rDeleting = false;
+  function retypeLoop() {
+    const el = document.getElementById('retypeText');
+    const current = retypePhrases[ri];
+    if (rDeleting) {
+      el.textContent = current.substring(0, rj - 1);
+      rj--;
+      if (rj === 0) { rDeleting = false; ri = (ri + 1) % retypePhrases.length; }
+      setTimeout(retypeLoop, 50);
+    } else {
+      el.textContent = current.substring(0, rj + 1);
+      rj++;
+      if (rj === current.length) { rDeleting = true; setTimeout(retypeLoop, 1500); return; }
+      setTimeout(retypeLoop, 100);
+    }
+  }
+  retypeLoop();
+
+  // 9. Kinetic Text
+  (function() {
+    const words = ['Create', 'Animate', 'Design', 'Build'];
+    const el = document.getElementById('kineticText');
+    words.forEach((w, i) => {
+      const s = document.createElement('span');
+      s.className = 'kinetic-word';
+      s.textContent = w;
+      s.style.animationDelay = (i * .3) + 's';
+      el.appendChild(s);
+    });
+  })();</script>
+</body>
+</html>

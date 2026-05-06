@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>浮动标签</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+  .stage{width:100%;min-height:200px;display:flex;align-items:center;justify-content:center;padding:32px;flex-direction:column;gap:16px}
+
+  /* 1. Floating Label */
+  .float-group{position:relative;width:260px}
+  .float-input{width:100%;padding:14px 0 6px;background:none;border:none;border-bottom:2px solid #333;color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .3s}
+  .float-input:focus{border-color:#667eea}
+  .float-label{position:absolute;top:14px;left:0;color:#666;font-size:1rem;pointer-events:none;transition:all .3s}
+  .float-input:focus~.float-label,.float-input:not(:placeholder-shown)~.float-label{top:-6px;font-size:.72rem;color:#667eea}
+  .float-bar{position:absolute;bottom:0;left:50%;width:0;height:2px;background:#667eea;transition:all .3s}
+  .float-input:focus~.float-bar{left:0;width:100%}
+
+  /* 2. Outlined Input */
+  .outlined-group{position:relative;width:260px}
+  .outlined-input{width:100%;padding:14px 16px;background:none;border:2px solid #333;border-radius:8px;color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .3s}
+  .outlined-input:focus{border-color:#667eea}
+  .outlined-label{position:absolute;top:14px;left:12px;color:#666;font-size:1rem;pointer-events:none;transition:all .3s;padding:0 6px}
+  .outlined-input:focus~.outlined-label,.outlined-input:not(:placeholder-shown)~.outlined-label{top:-10px;font-size:.72rem;color:#667eea}
+
+  /* 3. Underline Expand */
+  .underline-group{position:relative;width:260px}
+  .underline-input{width:100%;padding:12px 0;background:none;border:none;border-bottom:1px solid #333;color:#fff;font-size:1rem;outline:none;font-family:inherit}
+  .underline-group::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:linear-gradient(90deg,#667eea,#f093fb);transition:width .4s}
+  .underline-group:focus-within::after{width:100%}
+
+  /* 4. Search Morph */
+  .search-morph{width:48px;height:48px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);overflow:hidden;position:relative}
+  .search-morph.open{width:260px;border-radius:24px;border-color:#667eea}
+  .search-morph svg{width:20px;height:20px;fill:none;stroke:#888;stroke-width:2;flex-shrink:0;transition:stroke .3s}
+  .search-morph.open svg{stroke:#667eea}
+  .search-morph input{width:0;border:none;background:none;color:#fff;font-size:.9rem;outline:none;padding:0;transition:all .3s;font-family:inherit}
+  .search-morph.open input{width:180px;padding:0 12px}
+
+  /* 5. Password Strength */
+  .pw-group{width:260px}
+  .pw-input{width:100%;padding:12px 16px;border:1px solid #333;border-radius:8px;color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .3s}
+  .pw-input:focus{border-color:#667eea}
+  .pw-bar{height:4px;border-radius:2px;margin-top:8px;overflow:hidden}
+  .pw-fill{height:100%;width:0;border-radius:2px;transition:all .3s}
+  .pw-text{font-size:.72rem;color:#666;margin-top:4px}
+
+  /* 6. Checkbox Animated */
+  .custom-cb{display:flex;align-items:center;gap:12px;cursor:pointer;font-size:.9rem;color:#ccc}
+  .custom-cb input{display:none}
+  .cb-visual{width:24px;height:24px;border:2px solid #444;border-radius:6px;position:relative;transition:all .3s;display:flex;align-items:center;justify-content:center}
+  .custom-cb input:checked~.cb-visual{background:#667eea;border-color:#667eea}
+  .cb-visual svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .1s}
+  .custom-cb input:checked~.cb-visual svg{stroke-dashoffset:0}
+
+  /* 7. Radio Custom */
+  .custom-radio{display:flex;gap:16px}
+  .radio-item{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem;color:#ccc}
+  .radio-item input{display:none}
+  .radio-dot{width:20px;height:20px;border:2px solid #444;border-radius:50%;position:relative;transition:border-color .3s}
+  .radio-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:#667eea;transform:scale(0);transition:transform .3s cubic-bezier(.68,-.55,.27,1.55)}
+  .radio-item input:checked~.radio-dot{border-color:#667eea}
+  .radio-item input:checked~.radio-dot::after{transform:scale(1)}
+
+  /* 8. Range Slider */
+  .range-wrap{width:260px;position:relative}
+  .range-slider{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;outline:none}
+  .range-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;cursor:pointer;box-shadow:0 2px 10px rgba(102,126,234,.4)}
+  .range-value{text-align:center;color:#667eea;font-size:1.2rem;font-weight:700;margin-top:8px}
+
+  /* 9. OTP Input */
+  .otp-group{display:flex;gap:10px}
+  .otp-input{width:44px;height:52px;border:2px solid #333;border-radius:10px;color:#fff;font-size:1.2rem;text-align:center;outline:none;font-family:inherit;caret-color:#667eea;transition:border-color .3s}
+  .otp-input:focus{border-color:#667eea;box-shadow:0 0 0 3px #667eea22}
+
+  /* 10. Textarea Auto-grow */
+  .auto-textarea{width:260px;min-height:48px;max-height:160px;padding:12px 16px;border:1px solid #333;border-radius:10px;color:#fff;font-size:.9rem;outline:none;resize:none;font-family:inherit;transition:border-color .3s;overflow:auto}
+  .auto-textarea:focus{border-color:#667eea}
+  .char-count{font-size:.7rem;color:#555;text-align:right;width:260px}
+
+  /* === EXPANDED === */
+
+  /* 11. Float Label */
+  .float-field { position: relative; width: 220px; }
+  .float-field input { width: 100%; padding: 16px 12px 6px;  border: 1px solid #333; border-radius: 10px; color: #ccc; font-size: .9rem; outline: none; transition: border-color .3s; font-family: inherit; }
+  .float-field input:focus { border-color: #667eea; }
+  .float-field label { position: absolute; top: 50%; left: 12px; transform: translateY(-50%); color: #666; font-size: .85rem; transition: all .3s; pointer-events: none; }
+  .float-field input:focus + label, .float-field input:not(:placeholder-shown) + label { top: 6px; transform: translateY(0); font-size: .65rem; color: #667eea; }
+
+  /* 12. OTP Input */
+  .otp-group { display: flex; gap: 8px; }
+  .otp-input { width: 44px; height: 52px;  border: 1px solid #333; border-radius: 10px; text-align: center; color: #fff; font-size: 1.2rem; font-weight: 700; outline: none; transition: border-color .3s; caret-color: #667eea; font-family: inherit; }
+  .otp-input:focus { border-color: #667eea; box-shadow: 0 0 0 3px #667eea22; }
+
+  /* 13. Star Rating */
+  .star-rating { display: flex; gap: 4px; flex-direction: row-reverse; justify-content: center; }
+  .star-rating input { display: none; }
+  .star-rating label { font-size: 1.8rem; color: #333; cursor: pointer; transition: color .2s; }
+  .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: #ffa500; }
+
+  /* 14. Chip Input */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px;  border: 1px solid #333; border-radius: 10px; padding: 8px 12px; min-width: 220px; }
+  .chip { padding: 4px 12px; background: #667eea22; border: 1px solid #667eea44; border-radius: 20px; font-size: .75rem; color: #667eea; display: flex; align-items: center; gap: 6px; }
+  .chip-x { cursor: pointer; font-size: .6rem; opacity: .6; }
+  .chip-x:hover { opacity: 1; }
+
+  /* 15. Segmented Control */
+  .seg-ctrl { display: flex;  border-radius: 10px; padding: 3px; border: 1px solid #333; }
+  .seg-opt { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: .8rem; color: #888; transition: all .3s; text-align: center; }
+  .seg-opt.active { background: #667eea; color: #fff; }
+
+  /* 16. Date Picker Style */
+  .date-field { display: flex; align-items: center; gap: 8px;  border: 1px solid #333; border-radius: 10px; padding: 12px 16px; width: 220px; }
+  .date-field span { color: #888; font-size: .85rem; }
+  .date-icon { color: #667eea; }
+
+  /* 17. Slider With Value */
+  .slider-group { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .slider-val { font-size: 1.4rem; font-weight: 700; color: #667eea; }
+  .slider-bar { width: 200px; -webkit-appearance: none; height: 6px;  border-radius: 3px; outline: none; }
+  .slider-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #667eea; border-radius: 50%; cursor: pointer; }
+
+  /* 18. Color Picker Preview */
+  .color-pick { display: flex; align-items: center; gap: 12px; }
+  .color-swatch { width: 40px; height: 40px; border-radius: 10px; border: 2px solid #333; cursor: pointer; transition: transform .2s; }
+  .color-swatch:hover { transform: scale(1.1); }
+
+  /* 19. Textarea Counter */
+  .ta-wrap { width: 240px; position: relative; }
+  .ta-wrap textarea { width: 100%; height: 80px;  border: 1px solid #333; border-radius: 10px; padding: 12px; color: #ccc; font-size: .85rem; resize: none; outline: none; font-family: inherit; }
+  .ta-wrap textarea:focus { border-color: #667eea; }
+  .ta-count { position: absolute; bottom: 8px; right: 12px; font-size: .7rem; color: #555; }
+
+  /* 20. Multi Step Indicator */
+  .ms-steps { display: flex; align-items: center; gap: 6px; }
+  .ms-dot { width: 10px; height: 10px; border-radius: 50%; background: #333; transition: all .3s; cursor: pointer; }
+  .ms-dot.active { background: #667eea; width: 30px; border-radius: 5px; }
+
+
+</style>
+</head>
+<body>
+<div class="stage"><div class="float-field"><input placeholder=" " type="text"><label>Your Name</label></div></div>
+<script>// Password strength
+  function checkPw(v){
+    const fill=document.getElementById('pwFill');
+    const text=document.getElementById('pwText');
+    let s=0;
+    if(v.length>4)s++;if(v.length>8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+    const levels=[{w:'0%',c:'#333',t:'Enter a password'},{w:'20%',c:'#f5576c',t:'Very weak'},{w:'40%',c:'#ff6b6b',t:'Weak'},{w:'60%',c:'#fee140',t:'Fair'},{w:'80%',c:'#43e97b',t:'Strong'},{w:'100%',c:'#667eea',t:'Very strong'}];
+    const l=levels[s];
+    fill.style.width=l.w;fill.style.background=l.c;text.textContent=l.t;text.style.color=l.c;
+  }
+
+  // OTP auto-focus
+  function otpNext(el){
+    if(el.value.length===1&&el.nextElementSibling){el.nextElementSibling.focus();}
+  }
+
+  // Auto-grow textarea
+  function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px';}
+  function updateCount(el){document.getElementById('charNum').textContent=el.value.length;}</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>沙漏翻转</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+
+  /* 1. Dots Bounce */
+  .dots-bounce { display: flex; gap: 8px; }
+  .dots-bounce span { width: 14px; height: 14px; border-radius: 50%; background: #667eea; animation: dotBounce 1.4s ease-in-out infinite; }
+  .dots-bounce span:nth-child(1) { animation-delay: 0s; }
+  .dots-bounce span:nth-child(2) { animation-delay: .16s; }
+  .dots-bounce span:nth-child(3) { animation-delay: .32s; }
+  @keyframes dotBounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+  /* 2. Spinner Ring */
+  .spinner-ring { width: 50px; height: 50px; border: 4px solid #1e1e2e; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 3. Pulse Dots */
+  .pulse-dots { display: flex; gap: 6px; }
+  .pulse-dots span { width: 12px; height: 12px; border-radius: 50%; background: #f093fb; animation: pulseDot 1.5s ease-in-out infinite; }
+  .pulse-dots span:nth-child(1) { animation-delay: 0s; }
+  .pulse-dots span:nth-child(2) { animation-delay: .2s; }
+  .pulse-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes pulseDot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.4); opacity: .3; } }
+
+  /* 4. Bars */
+  .bars { display: flex; gap: 4px; align-items: end; height: 40px; }
+  .bars span { width: 6px; background: #43e97b; border-radius: 3px; animation: barPulse 1.2s ease-in-out infinite; }
+  .bars span:nth-child(1) { animation-delay: 0s; }
+  .bars span:nth-child(2) { animation-delay: .1s; }
+  .bars span:nth-child(3) { animation-delay: .2s; }
+  .bars span:nth-child(4) { animation-delay: .3s; }
+  .bars span:nth-child(5) { animation-delay: .4s; }
+  @keyframes barPulse { 0%, 100% { height: 10px; } 50% { height: 40px; } }
+
+  /* 5. Orbit Spinner */
+  .orbit-spin { width: 50px; height: 50px; position: relative; animation: spin 1.5s linear infinite; }
+  .orbit-spin::before, .orbit-spin::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; }
+  .orbit-spin::before { background: #f5576c; top: 0; left: 50%; transform: translateX(-50%); }
+  .orbit-spin::after { background: #667eea; bottom: 0; left: 50%; transform: translateX(-50%); }
+
+  /* 6. Square Spin */
+  .square-spin { width: 40px; height: 40px; background: #fa709a; animation: squareSpin 3s cubic-bezier(.09,.57,.49,.9) infinite; }
+  @keyframes squareSpin { 0% { transform: perspective(100px) rotateX(0) rotateY(0); } 25% { transform: perspective(100px) rotateX(180deg) rotateY(0); } 50% { transform: perspective(100px) rotateX(180deg) rotateY(180deg); } 75% { transform: perspective(100px) rotateX(0) rotateY(180deg); } 100% { transform: perspective(100px) rotateX(0) rotateY(0); } }
+
+  /* 7. Skeleton Screen */
+  .skeleton { width: 220px; padding: 16px;  border-radius: 12px; }
+  .sk-line { height: 12px; background: linear-gradient(90deg, #1e1e3e 25%, #2a2a4e 50%, #1e1e3e 75%); background-size: 200% 100%; border-radius: 6px; margin-bottom: 10px; animation: shimmer 1.5s infinite; }
+  .sk-line:nth-child(1) { width: 60%; }
+  .sk-line:nth-child(2) { width: 100%; }
+  .sk-line:nth-child(3) { width: 80%; }
+  .sk-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(90deg, #1e1e3e 25%, #2a2a4e 50%, #1e1e3e 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; margin-bottom: 12px; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* 8. Progress Bar */
+  .progress-wrap { width: 220px; }
+  .progress-bar { height: 6px;  border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #f093fb); border-radius: 3px; animation: progressFill 2s ease-in-out infinite; }
+  @keyframes progressFill { 0% { width: 0; } 50% { width: 100%; } 100% { width: 0; } }
+  .progress-label { display: flex; justify-content: space-between; margin-top: 6px; font-size: .75rem; color: #555; }
+
+  /* 9. Liquid Loader */
+  .liquid { width: 60px; height: 60px; position: relative; }
+  .liquid-drop { position: absolute; width: 20px; height: 20px; border-radius: 50%; background: #764ba2; }
+  .liquid-drop:nth-child(1) { animation: liquidLeft 1.2s ease-in-out infinite; left: 0; top: 20px; }
+  .liquid-drop:nth-child(2) { animation: liquidRight 1.2s ease-in-out infinite; right: 0; top: 20px; }
+  @keyframes liquidLeft { 0%, 100% { transform: translateX(0) scale(1); } 50% { transform: translateX(20px) scale(1.3); } }
+  @keyframes liquidRight { 0%, 100% { transform: translateX(0) scale(1); } 50% { transform: translateX(-20px) scale(1.3); } }
+
+  /* 10. Circular Progress */
+  .circ-progress { position: relative; width: 70px; height: 70px; }
+  .circ-progress svg { animation: spin 2s linear infinite; }
+  .circ-progress .num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; color: #667eea; }
+
+  /* 11. Cube Grid */
+  .cube-grid { display: grid; grid-template-columns: repeat(3, 16px); gap: 4px; }
+  .cube-grid span { width: 16px; height: 16px; background: #38f9d7; border-radius: 2px; animation: cubeGridScale 1.3s ease-in-out infinite; }
+  .cube-grid span:nth-child(1) { animation-delay: .2s; }
+  .cube-grid span:nth-child(2) { animation-delay: .3s; }
+  .cube-grid span:nth-child(3) { animation-delay: .4s; }
+  .cube-grid span:nth-child(4) { animation-delay: .1s; }
+  .cube-grid span:nth-child(5) { animation-delay: .2s; }
+  .cube-grid span:nth-child(6) { animation-delay: .3s; }
+  .cube-grid span:nth-child(7) { animation-delay: 0s; }
+  .cube-grid span:nth-child(8) { animation-delay: .1s; }
+  .cube-grid span:nth-child(9) { animation-delay: .2s; }
+  @keyframes cubeGridScale { 0%, 70%, 100% { transform: scale3D(1,1,1); } 35% { transform: scale3D(0,0,1); } }
+
+  /* 12. Typing Dots */
+  .typing { display: flex; gap: 6px; padding: 12px 20px;  border-radius: 20px; }
+  .typing span { width: 8px; height: 8px; border-radius: 50%; background: #888; animation: typingDot 1.4s ease-in-out infinite; }
+  .typing span:nth-child(1) { animation-delay: 0s; }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes typingDot { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-8px); opacity: 1; } }
+
+  /* === NEW EFFECTS === */
+  /* 13. Dual Ring */
+  .dual-ring { width: 50px; height: 50px; position: relative; }
+  .dual-ring::before, .dual-ring::after { content: ''; position: absolute; inset: 0; border: 3px solid transparent; border-radius: 50%; }
+  .dual-ring::before { border-top-color: #667eea; animation: dualSpin 1s linear infinite; }
+  .dual-ring::after { border-bottom-color: #f093fb; animation: dualSpin 1.5s linear infinite reverse; inset: 6px; }
+  @keyframes dualSpin { to { transform: rotate(360deg); } }
+
+  /* 14. Cube Flip */
+  .cube-flip { width: 30px; height: 30px; background: #43e97b; animation: cubeFlip 1.2s ease-in-out infinite; }
+  @keyframes cubeFlip { 0% { transform: perspective(120px) rotateX(0) rotateY(0); } 50% { transform: perspective(120px) rotateX(-180deg) rotateY(0); } 100% { transform: perspective(120px) rotateX(-180deg) rotateY(-180deg); } }
+
+  /* 15. Gradient Spinner */
+  .gradient-spinner { width: 50px; height: 50px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, #667eea); animation: gSpin 1s linear infinite; position: relative; }
+  .gradient-spinner::after { content: ''; position: absolute; inset: 5px;  border-radius: 50%; }
+  @keyframes gSpin { to { transform: rotate(360deg); } }
+
+  /* 16. Dot Orbit */
+  .dot-orbit { width: 60px; height: 60px; position: relative; animation: dotOrbitSpin 2s linear infinite; }
+  .dot-orbit span { width: 12px; height: 12px; border-radius: 50%; position: absolute; }
+  .dot-orbit span:nth-child(1) { background: #667eea; top: 0; left: 50%; transform: translateX(-50%); }
+  .dot-orbit span:nth-child(2) { background: #f093fb; bottom: 0; left: 50%; transform: translateX(-50%); }
+  .dot-orbit span:nth-child(3) { background: #43e97b; top: 50%; left: 0; transform: translateY(-50%); }
+  .dot-orbit span:nth-child(4) { background: #f5576c; top: 50%; right: 0; transform: translateY(-50%); }
+  @keyframes dotOrbitSpin { to { transform: rotate(360deg); } }
+
+  /* 17. Text Loading */
+  .text-loading { font-size: 1.2rem; font-weight: 600; color: #888; }
+  .text-loading span { animation: textLoadFade 1.4s ease-in-out infinite; }
+  .text-loading span:nth-child(1) { animation-delay: 0s; }
+  .text-loading span:nth-child(2) { animation-delay: .1s; }
+  .text-loading span:nth-child(3) { animation-delay: .2s; }
+  .text-loading span:nth-child(4) { animation-delay: .3s; }
+  .text-loading span:nth-child(5) { animation-delay: .4s; }
+  .text-loading span:nth-child(6) { animation-delay: .5s; }
+  .text-loading span:nth-child(7) { animation-delay: .6s; }
+  @keyframes textLoadFade { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+
+  /* 18. Hourglass */
+  .hourglass { width: 30px; height: 40px; border: 3px solid #ffa500; border-radius: 50% / 30%; animation: hourglassFlip 2s ease-in-out infinite; }
+  @keyframes hourglassFlip { 0%, 100% { transform: rotateZ(0); } 50% { transform: rotateZ(180deg); } }
+
+  /* 19. Wifi Loading */
+  .wifi-load { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .wifi-load span { border: 3px solid transparent; border-top-color: #667eea; border-radius: 50%; animation: wifiFade 1.5s ease-in-out infinite; }
+  .wifi-load span:nth-child(1) { width: 40px; height: 20px; animation-delay: 0s; }
+  .wifi-load span:nth-child(2) { width: 28px; height: 14px; animation-delay: .2s; }
+  .wifi-load span:nth-child(3) { width: 16px; height: 8px; animation-delay: .4s; }
+  @keyframes wifiFade { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+
+  /* 20. Newton Cradle */
+  .newton { display: flex; gap: 0; height: 80px; position: relative; align-items: flex-start; }
+  .newton span { width: 2px; height: 50px; background: #555; position: relative; transform-origin: top center; }
+  .newton span::after { content: ''; position: absolute; bottom: -10px; left: -5px; width: 12px; height: 12px; border-radius: 50%; background: #aaa; }
+  .newton span:first-child { animation: newtonLeft 1.5s ease-in-out infinite; }
+  .newton span:last-child { animation: newtonRight 1.5s ease-in-out infinite; }
+  @keyframes newtonLeft { 0%, 50% { transform: rotate(0); } 25% { transform: rotate(-30deg); } }
+  @keyframes newtonRight { 50%, 100% { transform: rotate(0); } 75% { transform: rotate(30deg); } }
+
+
+</style>
+</head>
+<body>
+<div class="stage"><div class="hourglass"></div></div>
+
+</body>
+</html>

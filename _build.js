@@ -247,26 +247,70 @@ sortedParsed.forEach((cat, i) => {
 });
 
 // ============================================================
-// 卡片 HTML
+// 为每个 parsed 效果生成独立 HTML（放在 _effects/ 目录）
+// ============================================================
+const effectsDir = path.join(dir, '_effects');
+if (fs.existsSync(effectsDir)) fs.rmSync(effectsDir, { recursive: true });
+fs.mkdirSync(effectsDir);
+
+let effectIndex = 0;
+for (const cat of sortedParsed) {
+  for (const eff of cat.effects) {
+    effectIndex++;
+    const fileName = `${String(effectIndex).padStart(3, '0')}.html`;
+    const stageAttrs = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
+    const stageClass = eff.stageClass ? ` stage${eff.stageClass}` : ' stage';
+    const effectHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${eff.name}</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+${cat.css}
+</style>
+</head>
+<body>
+<div class="${stageClass.trim()}"${stageAttrs}>${eff.stageHtml}</div>
+${cat.scripts.map(s => `<script>${s}<\/script>`).join('\n')}
+</body>
+</html>`;
+    fs.writeFileSync(path.join(effectsDir, fileName), effectHtml);
+    eff._file = `_effects/${fileName}`;
+  }
+}
+
+// iframe 类效果直接用原文件
+for (const cat of sortedIframe) {
+  cat._file = cat.file;
+}
+
+console.log(`📁 Generated ${effectIndex} standalone effect files in _effects/`);
+
+// ============================================================
+// 卡片 HTML（点击全屏展示单个效果）
 // ============================================================
 let allCards = '';
 for (const cat of sortedParsed) {
   for (const eff of cat.effects) {
     const stageAttrs = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
     const stageClass = eff.stageClass ? ` ${eff.stageClass}` : '';
-    allCards += `      <a class="card" data-cat="${cat.id}" href="${cat.file}" target="_blank">
+    allCards += `      <div class="card" data-cat="${cat.id}" data-src="${eff._file}">
         <div class="card-visual"><div class="stage${stageClass}"${stageAttrs}>${eff.stageHtml}</div></div>
         <div class="card-info"><h3>${eff.name}</h3>${eff.tag ? `<span class="tag">${eff.tag}</span>` : ''}</div>
-      </a>\n`;
+      </div>\n`;
   }
 }
 
 let iframeCards = '';
 for (const cat of sortedIframe) {
-  iframeCards += `      <a class="card card-iframe" href="${cat.file}" target="_blank">
+  iframeCards += `      <div class="card card-iframe" data-src="${cat._file}">
         <div class="card-visual"><iframe src="${cat.file}" loading="lazy" sandbox="allow-scripts" scrolling="no"></iframe></div>
         <div class="card-info"><h3>${cat.title}</h3></div>
-      </a>\n`;
+      </div>\n`;
 }
 
 // ============================================================
@@ -319,7 +363,7 @@ a{text-decoration:none;color:inherit}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:rgba(255,255,255,.07)}
 
 /* ── Card ── */
-.card{position:relative;background:#111;text-decoration:none;color:inherit;opacity:0;transform:translateY(8px);display:none;flex-direction:column;transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
+.card{position:relative;background:#111;color:inherit;opacity:0;transform:translateY(8px);display:none;flex-direction:column;transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1);cursor:pointer}
 .card.visible{opacity:1;transform:none}
 .card.show{display:flex}
 .card:hover{background:#161616;z-index:1}
@@ -333,6 +377,14 @@ a{text-decoration:none;color:inherit}
 .card-info{padding:8px 12px 12px;background:#111}
 .card-info h3{font-size:.72rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.2);margin-top:1px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── Fullscreen Overlay ── */
+.effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:column;align-items:center;justify-content:center}
+.effect-overlay.open{display:flex}
+.effect-overlay iframe{width:100%;height:100%;border:none}
+.effect-overlay-close{position:fixed;top:20px;right:24px;z-index:10000;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.effect-overlay-close:hover{background:rgba(255,255,255,.2)}
+.effect-overlay-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2}
 
 /* ── Fav ── */
 .fav-btn{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .15s;z-index:5;opacity:0;border:none;padding:0}
@@ -420,13 +472,29 @@ ${iframeCards}      </div>
 </main>
 </div>
 
+<div class="effect-overlay" id="effectOverlay">
+  <button class="effect-overlay-close" id="overlayClose">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <iframe id="overlayIframe" src="about:blank"></iframe>
+</div>
+
 <` + `script>
 const FAV_KEY='bno_fav';
 function getFavs(){try{return JSON.parse(localStorage.getItem(FAV_KEY))||[];}catch(e){return[];}}
 function setFavs(a){localStorage.setItem(FAV_KEY,JSON.stringify(a));}
 function toggleFav(id){const f=getFavs();const i=f.indexOf(id);if(i>-1)f.splice(i,1);else f.push(id);setFavs(f);return i===-1;}
 
-// Fav buttons
+// Overlay logic
+const overlay=document.getElementById('effectOverlay');
+const overlayIframe=document.getElementById('overlayIframe');
+const overlayClose=document.getElementById('overlayClose');
+function openOverlay(src){overlayIframe.src=src;overlay.classList.add('open');document.body.style.overflow='hidden';}
+function closeOverlay(){overlay.classList.remove('open');overlayIframe.src='about:blank';document.body.style.overflow='';}
+overlayClose.addEventListener('click',closeOverlay);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))closeOverlay();});
+
+// Fav buttons + card click
 document.querySelectorAll('.card').forEach(card=>{
   const h3=card.querySelector('.card-info h3');
   if(!h3)return;
@@ -445,6 +513,12 @@ document.querySelectorAll('.card').forEach(card=>{
     }
   });
   card.appendChild(btn);
+  // Click card -> open overlay
+  card.addEventListener('click',e=>{
+    if(e.target.closest('.fav-btn'))return;
+    const src=card.dataset.src;
+    if(src)openOverlay(src);
+  });
 });
 
 // Filter

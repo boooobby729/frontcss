@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>中间分裂</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+
+  /* Shared transition stage */
+  .stage { width: 100%; height: 260px; position: relative; overflow: hidden; cursor: pointer;  }
+  .stage .page { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700; transition: all .8s cubic-bezier(.4,0,.2,1); }
+  .page-a { background: linear-gradient(135deg, #1a1a2e, #16213e); color: #667eea; z-index: 2; }
+  .page-b { background: linear-gradient(135deg, #2d1b4e, #1a0a3e); color: #f093fb; z-index: 1; }
+
+  /* 1. Circle Expand */
+  .s1 .page-a { clip-path: circle(150% at 50% 50%); }
+  .s1.active .page-a { clip-path: circle(0% at 50% 50%); }
+
+  /* 2. Diagonal Wipe */
+  .s2 .page-a { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  .s2.active .page-a { clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%); }
+
+  /* 3. Split Horizontal */
+  .s3 .page-a { clip-path: inset(0 0 0 0); }
+  .s3.active .page-a { clip-path: inset(0 50% 0 50%); }
+
+  /* 4. Slide Up */
+  .s4 .page-a { transform: translateY(0); }
+  .s4.active .page-a { transform: translateY(-100%); }
+
+  /* 5. Zoom Out */
+  .s5 .page-a { transform: scale(1); opacity: 1; }
+  .s5.active .page-a { transform: scale(.8); opacity: 0; }
+
+  /* 6. Flip */
+  .s6 { perspective: 600px; }
+  .s6 .page-a { backface-visibility: hidden; transform: rotateY(0); }
+  .s6.active .page-a { transform: rotateY(-90deg); }
+  .s6 .page-b { transform: rotateY(90deg); backface-visibility: hidden; }
+  .s6.active .page-b { transform: rotateY(0); transition: all .8s cubic-bezier(.4,0,.2,1) .4s; }
+
+  /* 7. Blinds / Shutters */
+  .s7-blinds { position: absolute; inset: 0; display: flex; z-index: 3; pointer-events: none; }
+  .s7-blind { flex: 1;  transform: scaleY(0); transition: transform .5s ease; transform-origin: top; }
+  .s7.active .s7-blind { transform: scaleY(1); }
+  .s7.active .s7-blind:nth-child(1) { transition-delay: 0s; }
+  .s7.active .s7-blind:nth-child(2) { transition-delay: .05s; }
+  .s7.active .s7-blind:nth-child(3) { transition-delay: .1s; }
+  .s7.active .s7-blind:nth-child(4) { transition-delay: .15s; }
+  .s7.active .s7-blind:nth-child(5) { transition-delay: .2s; }
+  .s7.active .s7-blind:nth-child(6) { transition-delay: .25s; }
+  .s7.active .s7-blind:nth-child(7) { transition-delay: .3s; }
+  .s7.active .s7-blind:nth-child(8) { transition-delay: .35s; }
+
+  /* 8. Diamond */
+  .s8 .page-a { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); transform: scale(3); }
+  .s8.active .page-a { transform: scale(0); }
+
+  /* 9. Morph Blob */
+  .s9 .page-a { clip-path: circle(80% at 50% 50%); }
+  .s9.active .page-a { clip-path: circle(0% at 50% 50%); transition: clip-path 1s cubic-bezier(.77,0,.175,1); }
+
+  /* 10. Pixel Dissolve */
+  .s10-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(5, 1fr); z-index: 3; pointer-events: none; }
+  .s10-cell {  opacity: 0; transition: opacity .4s ease; }
+  .s10.active .s10-cell { opacity: 1; }
+
+  /* === EXPANDED === */
+
+  /* 11. Iris Open */
+  .s11 .page-a { clip-path: circle(0% at 50% 50%); opacity:0; }
+  .s11 .page-b { clip-path: circle(150% at 50% 50%); }
+  .s11.active .page-b { clip-path: circle(0% at 50% 50%); }
+
+  /* 12. Slide Left */
+  .s12 .page-a { transform: translateX(0); }
+  .s12.active .page-a { transform: translateX(-100%); }
+  .s12 .page-b { transform: translateX(100%); }
+  .s12.active .page-b { transform: translateX(0); }
+
+  /* 13. Rotate Scale */
+  .s13 .page-a { transform: rotate(0) scale(1); opacity: 1; }
+  .s13.active .page-a { transform: rotate(15deg) scale(.7); opacity: 0; }
+
+  /* 14. Curtain */
+  .s14-curtain { position:absolute; inset:0; z-index:3; pointer-events:none; display:flex; }
+  .s14-left, .s14-right { flex:1;  transition: transform .8s cubic-bezier(.4,0,.2,1); }
+  .s14-left { transform-origin: left; transform: scaleX(0); }
+  .s14-right { transform-origin: right; transform: scaleX(0); }
+  .s14.active .s14-left, .s14.active .s14-right { transform: scaleX(1); }
+
+  /* 15. Fade Through Black */
+  .s15-overlay { position:absolute; inset:0;  z-index:3; pointer-events:none; opacity:0; transition: opacity .5s; }
+  .s15.active .s15-overlay { opacity:1; }
+  .s15.active .page-a { opacity: 0; transition-delay: .3s; }
+
+  /* 16. Vertical Split */
+  .s16 .page-a { clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%); }
+  .s16 .page-a::after { content:''; position:absolute; inset:50% 0 0 0; background: linear-gradient(135deg, #1a1a2e, #16213e); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  .s16.active .page-a { clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); }
+
+  /* 17. Zoom Into */
+  .s17 .page-a { transform: scale(1); }
+  .s17.active .page-a { transform: scale(3); opacity: 0; }
+
+  /* 18. Cross Fade */
+  .s18 .page-a { opacity: 1; }
+  .s18.active .page-a { opacity: 0; }
+
+  /* 19. Door Open */
+  .s19 { perspective: 800px; }
+  .s19 .page-a { transform-origin: left center; transform: rotateY(0); }
+  .s19.active .page-a { transform: rotateY(-110deg); }
+
+  /* 20. Swirl */
+  .s20 .page-a { transform: rotate(0) scale(1); opacity:1; }
+  .s20.active .page-a { transform: rotate(90deg) scale(0); opacity:0; }
+
+
+</style>
+</head>
+<body>
+<div class="stages3" onclick="this.classList.toggle('active')">
+        <div class="page page-a">Page A</div>
+        <div class="page page-b">Page B</div>
+        <div class="hint">Click to toggle</div>
+      </div>
+<script>// Generate pixel dissolve grid
+  const grid = document.getElementById('pixelGrid');
+  for (let i = 0; i < 40; i++) {
+    const cell = document.createElement('div');
+    cell.className = 's10-cell';
+    cell.style.transitionDelay = (Math.random() * .6).toFixed(2) + 's';
+    grid.appendChild(cell);
+  }
+
+  function togglePixel(el) {
+    el.classList.toggle('active');
+    // Re-randomize delays on each click
+    if (el.classList.contains('active')) {
+      el.querySelectorAll('.s10-cell').forEach(c => {
+        c.style.transitionDelay = (Math.random() * .6).toFixed(2) + 's';
+      });
+    }
+  }</script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>迷你侧栏</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+  .stage{width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;padding:24px}
+
+  /* 1. Hamburger to X */
+  .hamburger{width:48px;height:36px;position:relative;cursor:pointer}
+  .hamburger span{position:absolute;left:0;width:100%;height:4px;background:#fff;border-radius:2px;transition:all .3s}
+  .hamburger span:nth-child(1){top:0}
+  .hamburger span:nth-child(2){top:16px}
+  .hamburger span:nth-child(3){top:32px}
+  .hamburger.open span:nth-child(1){top:16px;transform:rotate(45deg)}
+  .hamburger.open span:nth-child(2){opacity:0}
+  .hamburger.open span:nth-child(3){top:16px;transform:rotate(-45deg)}
+
+  /* 2. Tab Bar with Sliding Indicator */
+  .tabbar{display:flex;border-radius:10px;padding:4px;position:relative;gap:0}
+  .tabbar-item{padding:10px 24px;color:#888;font-size:.85rem;cursor:pointer;position:relative;z-index:1;transition:color .3s;border:none;background:none;font-family:inherit}
+  .tabbar-item.active{color:#fff}
+  .tabbar-indicator{position:absolute;height:calc(100% - 8px);top:4px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:0}
+
+  /* 3. Sidebar Push */
+  .sidebar-demo{width:300px;height:180px;border-radius:12px;overflow:hidden;display:flex;position:relative}
+  .sidebar-panel{width:0;transition:width .3s;overflow:hidden;flex-shrink:0;border-right:1px solid #1e1e2e}
+  .sidebar-panel.open{width:100px}
+  .sidebar-panel ul{list-style:none;padding:12px;width:100px}
+  .sidebar-panel li{padding:6px 8px;color:#888;font-size:.7rem;border-radius:4px;white-space:nowrap;cursor:pointer;transition:background .2s}
+  .sidebar-panel li:hover{background:#667eea22;color:#667eea}
+  .sidebar-content{flex:1;padding:16px;display:flex;flex-direction:column;gap:8px}
+  .sidebar-toggle{width:28px;height:28px;border:1px solid #333;border-radius:6px;color:#888;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+
+  /* 4. Dropdown Fade */
+  .dropdown-wrap{position:relative;display:inline-block}
+  .dropdown-trigger{padding:10px 24px;border:1px solid #333;border-radius:8px;color:#ccc;cursor:pointer;font-size:.85rem;display:flex;align-items:center;gap:8px}
+  .dropdown-trigger::after{content:'\25BC';font-size:.6rem;transition:transform .3s}
+  .dropdown-menu{position:absolute;top:calc(100% + 8px);left:0;min-width:180px;border:1px solid #1e1e2e;border-radius:10px;padding:6px;opacity:0;transform:translateY(-8px);pointer-events:none;transition:all .3s;z-index:10}
+  .dropdown-wrap.open .dropdown-menu{opacity:1;transform:translateY(0);pointer-events:auto}
+  .dropdown-wrap.open .dropdown-trigger::after{transform:rotate(180deg)}
+  .dropdown-menu a{display:block;padding:8px 14px;color:#aaa;font-size:.8rem;text-decoration:none;border-radius:6px;transition:background .2s}
+  .dropdown-menu a:hover{background:#667eea22;color:#fff}
+
+  /* 5. Pill Navigation */
+  .pill-nav{display:flex;gap:6px;padding:6px;border-radius:50px}
+  .pill-item{padding:8px 20px;border-radius:50px;color:#888;font-size:.8rem;cursor:pointer;transition:all .3s;border:none;background:none;font-family:inherit}
+  .pill-item.active{background:linear-gradient(135deg,#43e97b,#38f9d7);color:#000;font-weight:600}
+
+  /* 6. Breadcrumb Animated */
+  .breadcrumb{display:flex;align-items:center;gap:4px}
+  .breadcrumb-item{color:#888;font-size:.8rem;cursor:pointer;transition:color .3s;padding:4px 8px;border-radius:4px}
+  .breadcrumb-item:hover{color:#667eea;background:#667eea11}
+  .breadcrumb-item.current{color:#667eea;font-weight:600}
+  .breadcrumb-sep{color:#333;font-size:.7rem;transition:transform .2s}
+  .breadcrumb-item:hover ~ .breadcrumb-sep{transform:translateX(2px)}
+
+  /* 7. Bottom Nav with Bulge */
+  .bottom-nav{display:flex;border-radius:24px;padding:8px 16px;gap:16px;align-items:flex-end;position:relative}
+  .bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 12px;transition:all .3s;color:#666;font-size:.65rem}
+  .bottom-nav-item svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;transition:all .3s}
+  .bottom-nav-item.active{color:#667eea;transform:translateY(-12px)}
+  .bottom-nav-item.active svg{stroke:#667eea}
+  .bottom-nav-item.active::before{content:'';position:absolute;bottom:0;width:4px;height:4px;background:#667eea;border-radius:50%}
+
+  /* 8. Circular Menu */
+  .circular-wrap{position:relative;width:160px;height:160px}
+  .circular-center{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#f5576c,#fa709a);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;border:none;color:#fff;font-size:1.2rem;transition:transform .3s}
+  .circular-center.open{transform:translate(-50%,-50%) rotate(45deg)}
+  .circular-item{position:absolute;width:36px;height:36px;border-radius:50%;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#888;opacity:0;transform:translate(-50%,-50%) scale(0);transition:all .4s cubic-bezier(.68,-.55,.27,1.55);cursor:pointer}
+  .circular-wrap.open .circular-item{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  .circular-wrap.open .ci-1{top:10%;left:50%}
+  .circular-wrap.open .ci-2{top:25%;left:85%}
+  .circular-wrap.open .ci-3{top:65%;left:90%}
+  .circular-wrap.open .ci-4{top:85%;left:50%}
+  .circular-wrap.open .ci-5{top:65%;left:10%}
+  .circular-wrap.open .ci-6{top:25%;left:15%}
+
+  /* 9. Accordion Menu */
+  .accordion{width:240px}
+  .acc-header{padding:12px 16px;border:1px solid #1e1e2e;border-radius:8px;color:#ccc;font-size:.85rem;cursor:pointer;display:flex;justify-content:space-between;margin-bottom:4px;transition:background .2s}
+  .acc-header:hover{background:#1e1e2e}
+  .acc-header::after{content:'+';transition:transform .3s}
+  .acc-header.open::after{transform:rotate(45deg)}
+  .acc-
+  .acc-body.open{max-height:200px}
+  .acc-body a{display:block;padding:8px 24px;color:#888;font-size:.78rem;text-decoration:none;transition:color .2s}
+  .acc-body a:hover{color:#667eea}
+
+  /* 10. Marquee Nav */
+  .marquee-nav{width:300px;overflow:hidden;position:relative}
+  .marquee-track{display:flex;gap:24px;animation:marqueeScroll 10s linear infinite;width:max-content}
+  @keyframes marqueeScroll{to{transform:translateX(-50%)}}
+  .marquee-item{color:#555;font-size:.85rem;white-space:nowrap;cursor:pointer;transition:color .2s;padding:8px 0}
+  .marquee-item:hover{color:#667eea}
+
+  /* === EXPANDED === */
+
+  /* 11. Pill Nav */
+  .nav-pill { display: flex;  border-radius: 50px; padding: 4px; border: 1px solid #1e1e2e; }
+  .nav-pill a { padding: 10px 24px; border-radius: 46px; color: #888; text-decoration: none; font-size: .85rem; transition: all .3s; }
+  .nav-pill a.active { background: #667eea; color: #fff; }
+
+  /* 12. Dot Indicator */
+  .nav-dots { display: flex; gap: 24px; }
+  .nav-dots a { color: #888; text-decoration: none; font-size: .85rem; position: relative; padding-bottom: 8px; transition: color .3s; }
+  .nav-dots a::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 4px; background: #f5576c; border-radius: 2px; transition: all .3s; transform: translateX(-50%); }
+  .nav-dots a:hover { color: #fff; }
+  .nav-dots a:hover::after { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* 13. Sidebar Mini */
+  .sidebar-mini { width: 56px;  border-radius: 16px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; border: 1px solid #1e1e2e; }
+  .sidebar-mini a { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #888; text-decoration: none; transition: all .3s; font-size: .9rem; }
+  .sidebar-mini a:hover { background: #667eea22; color: #667eea; }
+
+  /* 14. Breadcrumb */
+  .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: .85rem; }
+  .breadcrumb a { color: #667eea; text-decoration: none; transition: color .2s; }
+  .breadcrumb a:hover { color: #f093fb; }
+  .breadcrumb span { color: #555; }
+
+  /* 15. Floating Action */
+  .fab-group { position: relative; }
+  .fab-btn { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg,#667eea,#764ba2); border: none; color: #fff; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 20px rgba(102,126,234,.4); transition: transform .3s; }
+  .fab-btn:hover { transform: rotate(45deg); }
+  .fab-items { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; opacity: 0; pointer-events: none; transition: all .3s; }
+  .fab-group:hover .fab-items { opacity: 1; pointer-events: auto; }
+  .fab-item { width: 44px; height: 44px; border-radius: 50%;  border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: .9rem; cursor: pointer; transition: all .3s; }
+  .fab-item:hover { background: #667eea; color: #fff; }
+
+  /* 16. Tabs Animated */
+  .tabs-anim { display: flex;  border-radius: 12px; border: 1px solid #1e1e2e; overflow: hidden; }
+  .tabs-anim a { flex: 1; padding: 14px 20px; color: #888; text-decoration: none; text-align: center; font-size: .85rem; transition: all .3s; position: relative; }
+  .tabs-anim a::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #667eea; transform: scaleX(0); transition: transform .3s; }
+  .tabs-anim a:hover { color: #fff; background: #ffffff05; }
+  .tabs-anim a:hover::after { transform: scaleX(1); }
+
+  /* 17. Command Palette */
+  .cmd-palette { width: 300px;  border: 1px solid #333; border-radius: 12px; overflow: hidden; }
+  .cmd-input { width: 100%; padding: 14px 18px; background: transparent; border: none; border-bottom: 1px solid #1e1e2e; color: #ccc; font-size: .9rem; outline: none; font-family: inherit; }
+  .cmd-items { padding: 8px; }
+  .cmd-item { padding: 10px 14px; border-radius: 8px; color: #888; font-size: .85rem; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; }
+  .cmd-item:hover { background: #667eea22; color: #fff; }
+  .cmd-kbd { font-size: .7rem; color: #555;  padding: 2px 8px; border-radius: 4px; border: 1px solid #333; }
+
+  /* 18. Progress Steps */
+  .steps { display: flex; align-items: center; gap: 0; }
+  .step { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .step-circle { width: 32px; height: 32px; border-radius: 50%;  border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-size: .75rem; color: #888; transition: all .3s; }
+  .step.done .step-circle { background: #667eea; border-color: #667eea; color: #fff; }
+  .step-label { font-size: .7rem; color: #555; }
+  .step-line { width: 40px; height: 2px; background: #333; margin-bottom: 20px; }
+  .step-line.done { background: #667eea; }
+
+  /* 19. Tag Cloud */
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; max-width: 280px; justify-content: center; }
+  .tag-cloud a { padding: 6px 16px;  border: 1px solid #333; border-radius: 20px; color: #888; font-size: .75rem; text-decoration: none; transition: all .3s; }
+  .tag-cloud a:hover { border-color: #667eea; color: #667eea; background: #667eea11; }
+
+  /* 20. Dock Nav */
+  .dock-nav { display: flex; align-items: end; gap: 6px;  padding: 8px 12px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid #ffffff10; }
+  .dock-item { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: all .2s; }
+  .dock-item:hover { transform: scale(1.4) translateY(-8px); }
+
+
+</style>
+</head>
+<body>
+<div class="stage"><div class="sidebar-mini"><a href="#">⌂</a><a href="#">☰</a><a href="#">⚙</a><a href="#">♥</a></div></div>
+<script>// Tab bar indicator
+  function switchTab(el,idx){
+    document.querySelectorAll('#tabbar1 .tabbar-item').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    const ind=document.getElementById('tabInd');
+    ind.style.left=el.offsetLeft+'px';
+    ind.style.width=el.offsetWidth+'px';
+  }
+  // Init indicator
+  (function(){
+    const first=document.querySelector('#tabbar1 .tabbar-item.active');
+    if(first){const ind=document.getElementById('tabInd');ind.style.left=first.offsetLeft+'px';ind.style.width=first.offsetWidth+'px';}
+  })();
+
+  // Pill nav
+  function switchPill(el){
+    el.parentElement.querySelectorAll('.pill-item').forEach(p=>p.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Bottom nav
+  function switchBottom(el){
+    document.querySelectorAll('#bottomNav .bottom-nav-item').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Accordion
+  function toggleAcc(header){
+    const body=header.nextElementSibling;
+    const wasOpen=header.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.acc-header').forEach(h=>{h.classList.remove('open');h.nextElementSibling.classList.remove('open');});
+    if(!wasOpen){header.classList.add('open');body.classList.add('open');}
+  }</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>文字揭示</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+  .stage{width:100%;min-height:200px;display:flex;align-items:center;justify-content:center;padding:32px;gap:16px;flex-wrap:wrap}
+
+  /* 1. Liquid Fill Button */
+  .btn-liquid{position:relative;padding:14px 40px;background:transparent;border:2px solid #667eea;color:#667eea;font-size:1rem;font-weight:600;cursor:pointer;overflow:hidden;border-radius:8px;transition:color .4s;font-family:inherit}
+  .btn-liquid::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:#667eea;border-radius:50%;transform:translate(-50%,-50%);transition:width .5s,height .5s;z-index:0}
+  .btn-liquid:hover{color:#fff}
+  .btn-liquid:hover::before{width:300px;height:300px}
+  .btn-liquid span{position:relative;z-index:1}
+
+  /* 2. Neon Glow Button */
+  .btn-neon{padding:14px 40px;background:transparent;border:2px solid #43e97b;color:#43e97b;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;position:relative;overflow:hidden;transition:all .3s;font-family:inherit;text-shadow:0 0 10px #43e97b66}
+  .btn-neon:hover{background:#43e97b;color:#000;box-shadow:0 0 20px #43e97b88,0 0 40px #43e97b44,0 0 80px #43e97b22;text-shadow:none}
+
+  /* 3. Gradient Border Spin */
+  .btn-gradient-wrap{position:relative;padding:3px;border-radius:12px;background:conic-gradient(from 0deg,#667eea,#f093fb,#43e97b,#f5576c,#667eea);animation:gradSpin 3s linear infinite}
+  @keyframes gradSpin{to{filter:hue-rotate(360deg)}}
+  .btn-gradient-inner{display:block;padding:12px 36px;border-radius:9px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;border:none;font-family:inherit}
+
+  /* 4. Pulse Ring Button */
+  .btn-pulse-wrap{position:relative;display:inline-block}
+  .btn-pulse{padding:14px 40px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:50px;font-size:1rem;font-weight:600;cursor:pointer;position:relative;z-index:1;font-family:inherit}
+  .btn-pulse-wrap::before,.btn-pulse-wrap::after{content:'';position:absolute;inset:-6px;border-radius:50px;border:2px solid #667eea;opacity:0;animation:pulseRing 2s ease-out infinite}
+  .btn-pulse-wrap::after{animation-delay:1s}
+  @keyframes pulseRing{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(1.15)}}
+
+  /* 5. Slide Arrow Button */
+  .btn-arrow{padding:14px 56px 14px 32px;border:1px solid #333;color:#ccc;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;position:relative;overflow:hidden;transition:all .3s;font-family:inherit}
+  .btn-arrow::after{content:'\2192';position:absolute;right:20px;top:50%;transform:translateY(-50%);transition:right .3s,opacity .3s;opacity:.6}
+  .btn-arrow:hover{padding-right:64px;border-color:#667eea;color:#fff}
+  .btn-arrow:hover::after{right:16px;opacity:1}
+
+  /* 6. Shutter Reveal */
+  .btn-shutter{padding:14px 40px;background:#f5576c;color:#fff;border:none;font-size:1rem;font-weight:600;cursor:pointer;position:relative;overflow:hidden;border-radius:8px;font-family:inherit}
+  .btn-shutter::before{content:attr(data-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#f5576c;transform:translateY(100%);transition:transform .3s}
+  .btn-shutter:hover::before{transform:translateY(0)}
+
+  /* 7. Outline Draw */
+  .btn-draw{padding:14px 40px;background:transparent;color:#fff;border:none;font-size:1rem;font-weight:600;cursor:pointer;position:relative;font-family:inherit}
+  .btn-draw::before,.btn-draw::after{content:'';position:absolute;width:0;height:0;border:2px solid transparent;transition:all .35s}
+  .btn-draw::before{top:0;left:0;border-top-color:#f093fb;border-right-color:#f093fb}
+  .btn-draw::after{bottom:0;right:0;border-bottom-color:#f093fb;border-left-color:#f093fb}
+  .btn-draw:hover::before,.btn-draw:hover::after{width:100%;height:100%}
+
+  /* 8. Click Ripple */
+  .btn-ripple{padding:14px 40px;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;border:1px solid #333;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;position:relative;overflow:hidden;font-family:inherit}
+  .ripple-circle{position:absolute;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:rippleAnim .6s ease-out;pointer-events:none}
+  @keyframes rippleAnim{to{transform:scale(4);opacity:0}}
+
+  /* 9. 3D Press Button */
+  .btn-3d{padding:14px 40px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;box-shadow:0 6px 0 #4a3a8a,0 8px 20px rgba(0,0,0,.3);transition:all .1s;font-family:inherit;position:relative;top:0}
+  .btn-3d:active{top:4px;box-shadow:0 2px 0 #4a3a8a,0 3px 10px rgba(0,0,0,.3)}
+
+  /* 10. Magnetic Stretch */
+  .btn-magnetic{padding:14px 40px;border:1px solid #43e97b;color:#43e97b;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;transition:transform .2s,border-radius .3s;font-family:inherit}
+  .btn-magnetic:hover{border-radius:24px}
+
+  /* 11. Text Swap Button */
+  .btn-swap{padding:14px 40px;border:1px solid #333;color:#ccc;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;position:relative;overflow:hidden;height:50px;font-family:inherit}
+  .btn-swap-inner{display:flex;flex-direction:column;transition:transform .3s;line-height:22px}
+  .btn-swap:hover .btn-swap-inner{transform:translateY(-22px)}
+
+  /* 12. Gradient Shift */
+  .btn-gradshift{padding:14px 40px;background:linear-gradient(135deg,#667eea,#f093fb,#43e97b);background-size:300% 300%;color:#fff;border:none;font-size:1rem;font-weight:600;cursor:pointer;border-radius:8px;animation:gradShift 4s ease infinite;font-family:inherit}
+  @keyframes gradShift{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+
+  /* === EXPANDED === */
+
+  /* 13. Magnetic Pull */
+  .btn-magnetic { padding: 16px 40px; background: linear-gradient(135deg,#667eea,#764ba2); border: none; border-radius: 50px; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; transition: transform .2s; font-family: inherit; }
+
+  /* 14. Text Reveal Button */
+  .btn-text-reveal { padding: 16px 40px; background: transparent; border: 2px solid #fff; color: #fff; font-weight: 600; position: relative; overflow: hidden; cursor: pointer; font-size: .95rem; font-family: inherit; }
+  .btn-text-reveal span { position: relative; z-index: 1; }
+  .btn-text-reveal::before { content: ''; position: absolute; inset: 0; background: #fff; transform: translateY(100%); transition: transform .4s; }
+  .btn-text-reveal:hover::before { transform: translateY(0); }
+  .btn-text-reveal:hover { color: #0a0a0f; }
+
+  /* 15. Icon Spin Button */
+  .btn-icon-spin { padding: 14px 36px;  border: 1px solid #333; border-radius: 12px; color: #ccc; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: .95rem; font-family: inherit; }
+  .btn-icon-spin .icon { transition: transform .4s; display: inline-block; }
+  .btn-icon-spin:hover .icon { transform: rotate(360deg); }
+
+  /* 16. Glitch Button */
+  .btn-glitch { padding: 14px 40px;  border: 2px solid #f5576c; color: #f5576c; font-weight: 700; font-size: 1rem; cursor: pointer; position: relative; text-transform: uppercase; font-family: 'Courier New', monospace; }
+  .btn-glitch:hover { animation: btnGlitch .3s infinite; }
+  @keyframes btnGlitch { 0% { transform: translate(0); } 20% { transform: translate(-2px,1px); } 40% { transform: translate(2px,-1px); } 60% { transform: translate(-1px,2px); } 80% { transform: translate(1px,-2px); } 100% { transform: translate(0); } }
+
+  /* 17. Gradient Shift */
+  .btn-grad-shift { padding: 16px 40px; background: linear-gradient(135deg,#667eea,#f093fb,#43e97b); background-size: 200% 200%; border: none; border-radius: 12px; color: #fff; font-weight: 700; cursor: pointer; font-size: .95rem; animation: gradShiftBtn 3s ease infinite; font-family: inherit; }
+  @keyframes gradShiftBtn { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+  /* 18. Underline Slide Button */
+  .btn-underline { padding: 10px 4px; background: none; border: none; color: #ccc; font-size: 1rem; font-weight: 600; cursor: pointer; position: relative; font-family: inherit; }
+  .btn-underline::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: #667eea; transition: width .4s; }
+  .btn-underline:hover::after { width: 100%; }
+
+  /* 19. Neon Button */
+  .btn-neon { padding: 14px 40px; background: transparent; border: 2px solid #43e97b; color: #43e97b; font-weight: 700; cursor: pointer; font-size: .95rem; transition: all .3s; font-family: inherit; }
+  .btn-neon:hover { background: #43e97b22; box-shadow: 0 0 20px #43e97b44, inset 0 0 20px #43e97b22; text-shadow: 0 0 8px #43e97b88; }
+
+  /* 20. Send Button */
+  .btn-send { padding: 14px 40px; background: #667eea; border: none; border-radius: 12px; color: #fff; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: .95rem; transition: all .3s; font-family: inherit; }
+  .btn-send:hover { padding-right: 50px; }
+  .btn-send .arrow { transition: transform .3s; display: inline-block; }
+  .btn-send:hover .arrow { transform: translateX(8px); }
+
+
+</style>
+</head>
+<body>
+<div class="stage"><button class="btn-text-reveal"><span>Reveal</span></button></div>
+<script>function createRipple(e){
+    const btn=e.currentTarget,c=document.createElement('span');
+    c.className='ripple-circle';
+    const r=btn.getBoundingClientRect();
+    const sz=Math.max(r.width,r.height);
+    c.style.width=c.style.height=sz+'px';
+    c.style.left=(e.clientX-r.left-sz/2)+'px';
+    c.style.top=(e.clientY-r.top-sz/2)+'px';
+    btn.appendChild(c);
+    c.addEventListener('animationend',()=>c.remove());
+  }
+  function magneticMove(e,el){
+    const r=el.getBoundingClientRect();
+    const x=e.clientX-r.left-r.width/2;
+    const y=e.clientY-r.top-r.height/2;
+    el.style.transform=`translate(${x*.2}px,${y*.2}px)`;
+  }</script>
+</body>
+</html>

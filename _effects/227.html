@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>矩形树图</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+  .stage{width:100%;min-height:260px;display:flex;align-items:center;justify-content:center;padding:24px;flex-direction:column;gap:12px}
+
+  /* 1. Bar Chart */
+  .bar-chart{display:flex;align-items:flex-end;gap:12px;height:160px;padding:0 20px}
+  .bar{width:36px;border-radius:6px 6px 0 0;position:relative;animation:barGrow 1s ease-out forwards;transform-origin:bottom}
+  @keyframes barGrow{from{height:0}to{height:var(--h)}}
+  .bar-label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:.65rem;color:#666;white-space:nowrap}
+  .bar-val{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:.7rem;color:#ccc;font-weight:600}
+
+  /* 2. Donut Chart */
+  .donut-chart{position:relative;width:140px;height:140px}
+  .donut-chart svg{transform:rotate(-90deg)}
+  .donut-circle{fill:none;stroke-width:12;stroke-linecap:round;stroke-dasharray:0 999;animation:donutFill 1.5s ease-out forwards}
+  @keyframes donutFill{to{stroke-dasharray:var(--dash) 999}}
+  .donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+  .donut-center .val{font-size:1.8rem;font-weight:800;color:#fff}
+  .donut-center .lbl{font-size:.7rem;color:#666}
+
+  /* 3. Line Sparkline */
+  .sparkline svg{overflow:visible}
+  .sparkline path{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:400;stroke-dashoffset:400;animation:sparkDraw 2s ease forwards}
+  @keyframes sparkDraw{to{stroke-dashoffset:0}}
+  .sparkline .area{opacity:.15;animation:fadeIn 1s ease .5s forwards;opacity:0}
+  @keyframes fadeIn{to{opacity:.15}}
+
+  /* 4. Circular Progress */
+  .circ-progress{position:relative;width:120px;height:120px}
+  .circ-progress svg{transform:rotate(-90deg)}
+  .circ-bg{fill:none;stroke:#1e1e2e;stroke-width:8}
+  .circ-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 999;animation:circFill 1.5s cubic-bezier(.4,0,.2,1) forwards}
+  @keyframes circFill{to{stroke-dasharray:var(--dash) 999}}
+  .circ-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:#fff}
+
+  /* 5. Horizontal Bars */
+  .h-bars{width:280px;display:flex;flex-direction:column;gap:12px}
+  .h-bar-row{display:flex;align-items:center;gap:10px}
+  .h-bar-name{width:60px;font-size:.75rem;color:#888;text-align:right;flex-shrink:0}
+  .h-bar-track{flex:1;height:10px;border-radius:5px;overflow:hidden}
+  .h-bar-fill{height:100%;border-radius:5px;width:0;animation:hBarFill 1s ease forwards}
+  @keyframes hBarFill{to{width:var(--w)}}
+  .h-bar-val{width:32px;font-size:.75rem;color:#ccc;font-weight:600}
+
+  /* 6. Stat Counter */
+  .stat-grid{display:flex;gap:24px}
+  .stat-box{text-align:center}
+  .stat-num{font-size:2rem;font-weight:900;font-family:'Courier New',monospace}
+  .stat-lbl{font-size:.7rem;color:#666;margin-top:4px}
+
+  /* 7. Audio Equalizer */
+  .equalizer{display:flex;align-items:flex-end;gap:3px;height:80px}
+  .eq-bar{width:6px;background:linear-gradient(to top,#667eea,#f093fb);border-radius:3px;animation:eqBounce 1s ease-in-out infinite alternate}
+  @keyframes eqBounce{0%{height:var(--min)}100%{height:var(--max)}}
+
+  /* 8. Pie Segments */
+  .pie-chart{width:140px;height:140px;position:relative;border-radius:50%;overflow:hidden}
+
+  /* 9. Gauge */
+  .gauge{position:relative;width:160px;height:90px;overflow:hidden}
+  .gauge svg{position:absolute;top:0;left:0}
+  .gauge-bg{fill:none;stroke:#1e1e2e;stroke-width:12;stroke-linecap:round}
+  .gauge-fill{fill:none;stroke-width:12;stroke-linecap:round;stroke-dasharray:0 999;animation:gaugeFill 1.5s ease forwards}
+  @keyframes gaugeFill{to{stroke-dasharray:var(--dash) 999}}
+  .gauge-label{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:1.4rem;font-weight:800;color:#fff}
+
+  /* 10. Heatmap */
+  .heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+  .heat-cell{width:20px;height:20px;border-radius:3px;opacity:0;animation:heatPop .3s ease forwards}
+  @keyframes heatPop{to{opacity:1}}
+
+  .replay-btn{margin-top:8px;background:none;border:1px solid #333;color:#888;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.7rem}
+  .replay-btn:hover{border-color:#fee140;color:#fee140}
+
+  /* === EXPANDED === */
+
+  /* 11. Donut Chart */
+  .donut { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#667eea 0% 35%, #f093fb 35% 60%, #43e97b 60% 80%, #333 80% 100%); position: relative; }
+  .donut::after { content: '80%'; position: absolute; inset: 20px;  border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #ccc; font-size: .9rem; }
+
+  /* 12. Gauge */
+  .gauge { width: 120px; height: 60px; border-radius: 120px 120px 0 0; background: conic-gradient(from -90deg at 50% 100%, #667eea 0deg, #f093fb 108deg, #333 108deg 180deg); position: relative; overflow: hidden; }
+  .gauge-needle { position: absolute; bottom: 0; left: 50%; width: 2px; height: 50px; background: #fff; transform-origin: bottom center; transform: rotate(-30deg); transition: transform 1s; }
+  .gauge-center { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 12px; height: 12px; background: #fff; border-radius: 50%; }
+
+  /* 13. Sparkline */
+  .sparkline { display: flex; align-items: end; gap: 2px; height: 40px; }
+  .spark-bar { width: 4px; background: #667eea; border-radius: 2px; animation: sparkGrow 1s ease forwards; transform-origin: bottom; }
+  @keyframes sparkGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+  /* 14. Horizontal Bar */
+  .h-bars { display: flex; flex-direction: column; gap: 10px; width: 200px; }
+  .h-bar { display: flex; align-items: center; gap: 8px; }
+  .h-bar-label { font-size: .7rem; color: #888; width: 30px; text-align: right; }
+  .h-bar-track { flex: 1; height: 8px;  border-radius: 4px; overflow: hidden; }
+  .h-bar-fill { height: 100%; border-radius: 4px; animation: barGrow 1s ease forwards; transform-origin: left; }
+  @keyframes barGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  /* 15. Stat Card */
+  .stat-card {  border: 1px solid #1e1e2e; border-radius: 12px; padding: 16px 24px; text-align: center; min-width: 120px; }
+  .stat-num { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg,#667eea,#f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .stat-label { font-size: .7rem; color: #888; margin-top: 4px; }
+  .stat-change { font-size: .7rem; color: #43e97b; margin-top: 2px; }
+
+  /* 16. Tree Map */
+  .treemap { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 2fr 1fr; gap: 3px; width: 200px; height: 120px; }
+  .treemap div { border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: .6rem; color: rgba(255,255,255,.7); font-weight: 600; }
+  .treemap div:nth-child(1) { grid-row: 1 / 3; background: rgba(102,126,234,.5); }
+  .treemap div:nth-child(2) { background: rgba(240,147,251,.4); }
+  .treemap div:nth-child(3) { background: rgba(67,233,123,.4); }
+  .treemap div:nth-child(4) { background: rgba(245,87,108,.3); }
+  .treemap div:nth-child(5) { background: rgba(255,165,0,.3); }
+
+  /* 17. Radar Outline */
+  .radar-svg { width: 120px; height: 120px; }
+  .radar-line { fill: none; stroke: #333; stroke-width: 1; }
+  .radar-fill { fill: rgba(102,126,234,.2); stroke: #667eea; stroke-width: 2; }
+
+  /* 18. Bubble Chart */
+  .bubbles { position: relative; width: 180px; height: 120px; }
+  .bubble { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .6rem; color: #fff; font-weight: 600; animation: bubbleFloat 3s ease-in-out infinite; }
+  @keyframes bubbleFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  /* 19. Funnel */
+  .funnel { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .funnel-step { height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: .65rem; color: #fff; font-weight: 600; transition: all .3s; }
+  .funnel-step:hover { filter: brightness(1.2); }
+
+  /* 20. Metric Tiles */
+  .metric-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .metric-tile {  border: 1px solid #1e1e2e; border-radius: 10px; padding: 12px; text-align: center; }
+  .metric-tile .val { font-size: 1.2rem; font-weight: 700; }
+  .metric-tile .lbl { font-size: .65rem; color: #888; margin-top: 2px; }
+
+
+</style>
+</head>
+<body>
+<div class="stage"><div class="treemap"><div>45%</div><div>20%</div><div>15%</div><div>12%</div><div>8%</div></div></div>
+<script>// Bar Chart
+  function buildBars(){
+    const data=[{l:'Mon',v:65,c:'#667eea'},{l:'Tue',v:85,c:'#f093fb'},{l:'Wed',v:45,c:'#43e97b'},{l:'Thu',v:95,c:'#f5576c'},{l:'Fri',v:70,c:'#fee140'},{l:'Sat',v:55,c:'#764ba2'},{l:'Sun',v:80,c:'#38f9d7'}];
+    const el=document.getElementById('bars');
+    el.innerHTML='';
+    data.forEach((d,i)=>{
+      const bar=document.createElement('div');
+      bar.className='bar';
+      bar.style.cssText=`--h:${d.v*1.5}px;height:${d.v*1.5}px;background:${d.c};animation-delay:${i*.1}s`;
+      bar.innerHTML=`<span class="bar-val">${d.v}</span><span class="bar-label">${d.l}</span>`;
+      el.appendChild(bar);
+    });
+  }
+  buildBars();
+
+  // Stat counter
+  document.querySelectorAll('.stat-num[data-target]').forEach(el=>{
+    const target=parseInt(el.dataset.target);
+    let current=0;
+    const step=Math.ceil(target/60);
+    function count(){
+      current=Math.min(current+step,target);
+      el.textContent=current.toLocaleString();
+      if(current<target)requestAnimationFrame(count);
+    }
+    count();
+  });
+
+  // Equalizer
+  (function(){
+    const eq=document.getElementById('equalizer');
+    const colors=['#667eea','#f093fb','#43e97b','#f5576c','#fee140','#764ba2','#38f9d7','#fa709a'];
+    for(let i=0;i<20;i++){
+      const bar=document.createElement('div');
+      bar.className='eq-bar';
+      const min=8+Math.random()*12;
+      const max=30+Math.random()*50;
+      bar.style.cssText=`--min:${min}px;--max:${max}px;animation-duration:${.3+Math.random()*.5}s;animation-delay:${Math.random()*.3}s;background:linear-gradient(to top,${colors[i%colors.length]},${colors[(i+3)%colors.length]})`;
+      eq.appendChild(bar);
+    }
+  })();
+
+  // Heatmap
+  (function(){
+    const hm=document.getElementById('heatmap');
+    const levels=['#1e1e2e','#667eea22','#667eea44','#667eea77','#667eeaaa','#667eea'];
+    for(let i=0;i<35;i++){
+      const cell=document.createElement('div');
+      cell.className='heat-cell';
+      cell.style.background=levels[Math.floor(Math.random()*levels.length)];
+      cell.style.animationDelay=(i*.03)+'s';
+      hm.appendChild(cell);
+    }
+  })();</script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>时钟指针</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+  .stage { width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+
+  /* 1. Bounce Ball */
+  .bounce-ball { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); animation: bounce 1s ease infinite; }
+  .bounce-ball-shadow { position: absolute; bottom: 30px; width: 50px; height: 10px; background: rgba(102,126,234,.3); border-radius: 50%; animation: bounceShadow 1s ease infinite; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-60px); } }
+  @keyframes bounceShadow { 0%, 100% { transform: scaleX(1); opacity: .6; } 50% { transform: scaleX(.5); opacity: .2; } }
+
+  /* 2. Pulse */
+  .pulse-ring { width: 60px; height: 60px; border-radius: 50%; background: #764ba2; position: relative; animation: pulseCore 2s ease-in-out infinite; }
+  .pulse-ring::before, .pulse-ring::after { content: ''; position: absolute; inset: -15px; border-radius: 50%; border: 2px solid #764ba2; animation: pulseWave 2s ease-out infinite; }
+  .pulse-ring::after { animation-delay: .6s; }
+  @keyframes pulseCore { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  @keyframes pulseWave { 0% { transform: scale(.8); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+
+  /* 3. Spin Morph */
+  .spin-morph { width: 50px; height: 50px; background: linear-gradient(135deg, #f093fb, #f5576c); animation: spinMorph 3s ease-in-out infinite; }
+  @keyframes spinMorph { 0% { border-radius: 10%; transform: rotate(0deg) scale(1); } 25% { border-radius: 50%; transform: rotate(90deg) scale(.8); } 50% { border-radius: 10%; transform: rotate(180deg) scale(1); } 75% { border-radius: 50%; transform: rotate(270deg) scale(.8); } 100% { border-radius: 10%; transform: rotate(360deg) scale(1); } }
+
+  /* 4. Pendulum */
+  .pendulum-wrap { height: 120px; position: relative; }
+  .pendulum-line { width: 2px; height: 80px; background: #555; position: absolute; top: 0; left: 50%; transform-origin: top center; animation: swing 2s ease-in-out infinite; }
+  .pendulum-ball { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #43e97b, #38f9d7); position: absolute; bottom: -12px; left: -11px; }
+  @keyframes swing { 0%, 100% { transform: rotate(40deg); } 50% { transform: rotate(-40deg); } }
+
+  /* 5. Breathe */
+  .breathe { width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, #667eea, #764ba2); animation: breathe 4s ease-in-out infinite; }
+  @keyframes breathe { 0%, 100% { transform: scale(1); opacity: .6; box-shadow: 0 0 20px #667eea44; } 50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 60px #667eea88; } }
+
+  /* 6. Elastic */
+  .elastic { width: 60px; height: 60px; background: linear-gradient(135deg, #fa709a, #fee140); border-radius: 12px; animation: elastic 2s ease infinite; }
+  @keyframes elastic { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.25, .75); } 40% { transform: scale(.75, 1.25); } 50% { transform: scale(1.15, .85); } 65% { transform: scale(.95, 1.05); } 75% { transform: scale(1.05, .95); } }
+
+  /* 7. Ripple */
+  .ripple-container { position: relative; display: flex; align-items: center; justify-content: center; }
+  .ripple-dot { width: 16px; height: 16px; border-radius: 50%; background: #43e97b; position: relative; z-index: 1; }
+  .ripple-container .r { position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 2px solid #43e97b; animation: rippleOut 2.5s linear infinite; opacity: 0; }
+  .ripple-container .r:nth-child(2) { animation-delay: .8s; }
+  .ripple-container .r:nth-child(3) { animation-delay: 1.6s; }
+  @keyframes rippleOut { 0% { transform: scale(.5); opacity: .8; } 100% { transform: scale(3); opacity: 0; } }
+
+  /* 8. DNA */
+  .dna { display: flex; gap: 6px; align-items: center; height: 80px; }
+  .dna span { width: 8px; height: 8px; border-radius: 50%; background: #667eea; animation: dna 1.8s ease-in-out infinite; }
+  .dna span:nth-child(1) { animation-delay: 0s; } .dna span:nth-child(2) { animation-delay: .15s; }
+  .dna span:nth-child(3) { animation-delay: .3s; } .dna span:nth-child(4) { animation-delay: .45s; }
+  .dna span:nth-child(5) { animation-delay: .6s; } .dna span:nth-child(6) { animation-delay: .75s; }
+  .dna span:nth-child(7) { animation-delay: .9s; } .dna span:nth-child(8) { animation-delay: 1.05s; }
+  @keyframes dna { 0%, 100% { transform: translateY(-30px) scale(.6); background: #667eea; } 50% { transform: translateY(30px) scale(1.2); background: #f093fb; } }
+
+  /* 9. Flip Card */
+  .flip-card { width: 80px; height: 100px; perspective: 600px; }
+  .flip-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: flipCard 3s ease-in-out infinite; }
+  .flip-front, .flip-back { position: absolute; inset: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; backface-visibility: hidden; }
+  .flip-front { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .flip-back { background: linear-gradient(135deg, #f093fb, #f5576c); transform: rotateY(180deg); }
+  @keyframes flipCard { 0%, 40% { transform: rotateY(0); } 50%, 90% { transform: rotateY(180deg); } 100% { transform: rotateY(360deg); } }
+
+  /* 10. Jump Text */
+  .jump-text { display: flex; gap: 4px; font-size: 1.5rem; font-weight: 700; }
+  .jump-text span { display: inline-block; animation: jumpLetter 1.4s ease infinite; color: #667eea; }
+  .jump-text span:nth-child(1) { animation-delay: 0s; } .jump-text span:nth-child(2) { animation-delay: .1s; }
+  .jump-text span:nth-child(3) { animation-delay: .2s; } .jump-text span:nth-child(4) { animation-delay: .3s; }
+  .jump-text span:nth-child(5) { animation-delay: .4s; } .jump-text span:nth-child(6) { animation-delay: .5s; }
+  .jump-text span:nth-child(7) { animation-delay: .6s; }
+  @keyframes jumpLetter { 0%, 40%, 100% { transform: translateY(0); } 20% { transform: translateY(-20px); } }
+
+  /* 11. Orbit */
+  .orbit { width: 120px; height: 120px; position: relative; }
+  .orbit-center { width: 20px; height: 20px; border-radius: 50%; background: #f5576c; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  .orbit-ring { position: absolute; inset: 0; border: 1px dashed #333; border-radius: 50%; animation: orbitSpin 4s linear infinite; }
+  .orbit-ring::before { content: ''; position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; border-radius: 50%; background: #43e97b; transform: translateX(-50%); }
+  .orbit-ring:nth-child(3) { inset: 15px; animation-duration: 2.5s; animation-direction: reverse; }
+  .orbit-ring:nth-child(3)::before { background: #667eea; width: 10px; height: 10px; top: -5px; }
+  @keyframes orbitSpin { to { transform: rotate(360deg); } }
+
+  /* 12. Jelly */
+  .jelly-btn { padding: 14px 36px; background: linear-gradient(135deg, #667eea, #764ba2); border: none; border-radius: 12px; color: #fff; font-size: 1rem; cursor: pointer; animation: jellyIdle 3s ease-in-out infinite; font-weight: 600; letter-spacing: 1px; }
+  .jelly-btn:hover { animation: jellySquish .6s ease; }
+  @keyframes jellyIdle { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+  @keyframes jellySquish { 0% { transform: scale(1,1); } 30% { transform: scale(1.2,.8); } 40% { transform: scale(.8,1.2); } 50% { transform: scale(1.1,.9); } 65% { transform: scale(.95,1.05); } 80% { transform: scale(1.02,.98); } 100% { transform: scale(1,1); } }
+
+  /* === NEW EFFECTS === */
+
+  /* 13. Floating */
+  .floating { width: 60px; height: 60px; border-radius: 16px; background: linear-gradient(135deg, #00c6ff, #0072ff); animation: floating 3s ease-in-out infinite; box-shadow: 0 20px 40px rgba(0,114,255,.2); }
+  @keyframes floating { 0%, 100% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-15px) rotate(2deg); } 75% { transform: translateY(10px) rotate(-2deg); } }
+
+  /* 14. Typewriter Cursor */
+  .typewriter-cursor { width: 3px; height: 36px; background: #667eea; animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* 15. Shake */
+  .shake-box { width: 60px; height: 60px; border-radius: 12px; background: linear-gradient(135deg, #ff6b6b, #ffa500); animation: shake 0.6s ease-in-out infinite; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 10% { transform: translateX(-8px) rotate(-2deg); } 20% { transform: translateX(8px) rotate(2deg); } 30% { transform: translateX(-6px) rotate(-1deg); } 40% { transform: translateX(6px) rotate(1deg); } 50% { transform: translateX(-4px); } 60% { transform: translateX(4px); } 70% { transform: translateX(-2px); } 80% { transform: translateX(2px); } }
+
+  /* 16. Gradient Border Spin */
+  .gradient-border { width: 80px; height: 80px; border-radius: 16px; position: relative;  z-index: 0; }
+  .gradient-border::before { content: ''; position: absolute; inset: -3px; border-radius: 18px; background: conic-gradient(from 0deg, #667eea, #f093fb, #43e97b, #f5576c, #667eea); z-index: -1; animation: spinBorder 3s linear infinite; }
+  .gradient-border::after { content: ''; position: absolute; inset: 3px; border-radius: 13px;  z-index: -1; }
+  @keyframes spinBorder { to { transform: rotate(360deg); } }
+
+  /* 17. Stagger Bars */
+  .stagger-bars { display: flex; gap: 6px; align-items: flex-end; height: 80px; }
+  .stagger-bars span { width: 10px; background: #764ba2; border-radius: 4px 4px 0 0; animation: staggerBar 1.2s ease-in-out infinite; }
+  .stagger-bars span:nth-child(1) { animation-delay: 0s; height: 40px; }
+  .stagger-bars span:nth-child(2) { animation-delay: .1s; height: 60px; }
+  .stagger-bars span:nth-child(3) { animation-delay: .2s; height: 50px; }
+  .stagger-bars span:nth-child(4) { animation-delay: .3s; height: 70px; }
+  .stagger-bars span:nth-child(5) { animation-delay: .4s; height: 45px; }
+  @keyframes staggerBar { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.4); } }
+
+  /* 18. Heartbeat */
+  .heartbeat { font-size: 3rem; animation: heartbeat 1.2s ease-in-out infinite; color: #f5576c; }
+  @keyframes heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.3); } 28% { transform: scale(1); } 42% { transform: scale(1.3); } 70% { transform: scale(1); } }
+
+  /* 19. Infinite Rotate */
+  .infinite-rotate { width: 60px; height: 60px; border: 4px solid transparent; border-top-color: #667eea; border-right-color: #f093fb; border-radius: 50%; animation: infiniteRotate 1s linear infinite; }
+  @keyframes infiniteRotate { to { transform: rotate(360deg); } }
+
+  /* 20. Fold */
+  .fold { width: 80px; height: 80px; position: relative; perspective: 400px; }
+  .fold-face { width: 80px; height: 40px; background: linear-gradient(135deg, #667eea, #764ba2); position: absolute; }
+  .fold-face:first-child { top: 0; transform-origin: bottom; animation: foldTop 2s ease-in-out infinite; border-radius: 8px 8px 0 0; }
+  .fold-face:last-child { bottom: 0; border-radius: 0 0 8px 8px; opacity: .7; }
+  @keyframes foldTop { 0%, 100% { transform: rotateX(0deg); } 50% { transform: rotateX(-80deg); } }
+
+  /* 21. Glitch Flicker */
+  .glitch-box { width: 80px; height: 40px; background: #667eea; position: relative; animation: glitchFlicker 2s steps(1) infinite; }
+  .glitch-box::before, .glitch-box::after { content: ''; position: absolute; inset: 0; background: inherit; }
+  .glitch-box::before { animation: glitchSlice1 2s steps(1) infinite; }
+  .glitch-box::after { animation: glitchSlice2 2s steps(1) infinite; }
+  @keyframes glitchFlicker { 0%, 100% { opacity: 1; } 41% { opacity: 1; } 42% { opacity: 0; } 43% { opacity: 1; } 45% { opacity: 0.7; } 46% { opacity: 1; } }
+  @keyframes glitchSlice1 { 0%, 100% { clip-path: inset(0 0 0 0); transform: translateX(0); } 20% { clip-path: inset(20% 0 60% 0); transform: translateX(-5px); } 40% { clip-path: inset(50% 0 20% 0); transform: translateX(5px); } 60% { clip-path: inset(10% 0 70% 0); transform: translateX(-3px); } }
+  @keyframes glitchSlice2 { 0%, 100% { clip-path: inset(0 0 0 0); transform: translateX(0); } 25% { clip-path: inset(60% 0 10% 0); transform: translateX(4px); } 50% { clip-path: inset(30% 0 40% 0); transform: translateX(-4px); } 75% { clip-path: inset(70% 0 5% 0); transform: translateX(3px); } }
+
+  /* 22. Color Cycle */
+  .color-cycle { width: 60px; height: 60px; border-radius: 50%; animation: colorCycle 4s linear infinite; }
+  @keyframes colorCycle { 0% { background: #667eea; } 16% { background: #f093fb; } 33% { background: #f5576c; } 50% { background: #ffa500; } 66% { background: #43e97b; } 83% {  } 100% { background: #667eea; } }
+
+  /* 23. Swing Door */
+  .swing-door { width: 50px; height: 80px; background: linear-gradient(to bottom, #764ba2, #667eea); border-radius: 4px; transform-origin: left center; animation: swingDoor 3s ease-in-out infinite; }
+  @keyframes swingDoor { 0%, 100% { transform: perspective(400px) rotateY(0deg); } 50% { transform: perspective(400px) rotateY(-70deg); } }
+
+  /* 24. Meteor */
+  .meteor-container { width: 200px; height: 120px; position: relative; overflow: hidden; }
+  .meteor { width: 40px; height: 2px; background: linear-gradient(to right, #667eea, transparent); border-radius: 2px; position: absolute; animation: meteorFall 1.5s linear infinite; }
+  .meteor:nth-child(1) { top: 10%; left: -40px; animation-delay: 0s; }
+  .meteor:nth-child(2) { top: 40%; left: -40px; animation-delay: .5s; width: 30px; }
+  .meteor:nth-child(3) { top: 70%; left: -40px; animation-delay: 1s; width: 50px; }
+  @keyframes meteorFall { 0% { transform: translateX(0) translateY(0); opacity: 1; } 100% { transform: translateX(260px) translateY(40px); opacity: 0; } }
+
+  /* 25. Spring */
+  .spring { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #43e97b, #38f9d7); animation: springBounce 1.5s cubic-bezier(.34,1.56,.64,1) infinite; }
+  @keyframes springBounce { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-50px); } 60% { transform: translateY(-20px); } 80% { transform: translateY(-35px); } }
+
+  /* 26. Typewriter Dots */
+  .typing-dots { display: flex; gap: 8px; }
+  .typing-dots span { width: 12px; height: 12px; border-radius: 50%; background: #764ba2; animation: typingDot 1.4s ease-in-out infinite; }
+  .typing-dots span:nth-child(1) { animation-delay: 0s; }
+  .typing-dots span:nth-child(2) { animation-delay: .2s; }
+  .typing-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes typingDot { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-12px); opacity: 1; } }
+
+  /* 27. Zigzag */
+  .zigzag { width: 20px; height: 20px; border-radius: 50%; background: #ffa500; animation: zigzag 2s linear infinite; }
+  @keyframes zigzag { 0% { transform: translate(0,0); } 25% { transform: translate(40px,-20px); } 50% { transform: translate(80px,0); } 75% { transform: translate(40px,20px); } 100% { transform: translate(0,0); } }
+
+  /* 28. Scale Pulse Grid */
+  .scale-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+  .scale-grid span { width: 20px; height: 20px; border-radius: 4px; background: #667eea; animation: scalePulse 1.8s ease-in-out infinite; }
+  .scale-grid span:nth-child(1) { animation-delay: 0s; } .scale-grid span:nth-child(2) { animation-delay: .1s; }
+  .scale-grid span:nth-child(3) { animation-delay: .2s; } .scale-grid span:nth-child(4) { animation-delay: .3s; }
+  .scale-grid span:nth-child(5) { animation-delay: .4s; } .scale-grid span:nth-child(6) { animation-delay: .5s; }
+  .scale-grid span:nth-child(7) { animation-delay: .6s; } .scale-grid span:nth-child(8) { animation-delay: .7s; }
+  .scale-grid span:nth-child(9) { animation-delay: .8s; }
+  @keyframes scalePulse { 0%, 100% { transform: scale(1); opacity: .3; } 50% { transform: scale(1.3); opacity: 1; } }
+
+  /* 29. Rotate Scale */
+  .rotate-scale { width: 50px; height: 50px; background: linear-gradient(135deg, #f093fb, #f5576c); animation: rotateScale 2s ease-in-out infinite; }
+  @keyframes rotateScale { 0% { transform: rotate(0) scale(1); border-radius: 10%; } 50% { transform: rotate(180deg) scale(.6); border-radius: 50%; } 100% { transform: rotate(360deg) scale(1); border-radius: 10%; } }
+
+  /* 30. Domino */
+  .domino { display: flex; gap: 8px; }
+  .domino span { width: 14px; height: 50px; background: #43e97b; border-radius: 4px; transform-origin: bottom center; animation: dominoFall 2s ease-in-out infinite; }
+  .domino span:nth-child(1) { animation-delay: 0s; } .domino span:nth-child(2) { animation-delay: .15s; }
+  .domino span:nth-child(3) { animation-delay: .3s; } .domino span:nth-child(4) { animation-delay: .45s; }
+  .domino span:nth-child(5) { animation-delay: .6s; }
+  @keyframes dominoFall { 0%, 70%, 100% { transform: rotateX(0); } 35% { transform: rotateX(90deg); } }
+
+  /* 31. Morph Blob */
+  .morph-blob { width: 100px; height: 100px; background: linear-gradient(135deg, #667eea88, #764ba288); animation: morphBlob 8s ease-in-out infinite; filter: blur(0px); }
+  @keyframes morphBlob { 0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; } 50% { border-radius: 50% 60% 30% 60% / 30% 40% 70% 60%; } 75% { border-radius: 60% 30% 60% 40% / 70% 50% 40% 60%; } }
+
+  /* 32. Neon Flicker */
+  .neon-flicker { font-size: 2rem; font-weight: 800; color: #fff; text-shadow: 0 0 7px #667eea, 0 0 10px #667eea, 0 0 21px #667eea, 0 0 42px #764ba2, 0 0 82px #764ba2; animation: neonFlicker 1.5s ease-in-out infinite alternate; }
+  @keyframes neonFlicker { 0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { text-shadow: 0 0 7px #667eea, 0 0 10px #667eea, 0 0 21px #667eea, 0 0 42px #764ba2, 0 0 82px #764ba2; } 20%, 24%, 55% { text-shadow: none; } }
+
+  /* 33. Conveyor Belt */
+  .conveyor { overflow: hidden; width: 200px; height: 40px; position: relative; }
+  .conveyor-inner { display: flex; gap: 20px; animation: conveyorMove 4s linear infinite; position: absolute; white-space: nowrap; }
+  .conveyor-inner span { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; }
+  .conveyor-inner span:nth-child(odd) { background: #667eea; }
+  .conveyor-inner span:nth-child(even) { background: #f093fb; }
+  @keyframes conveyorMove { 0% { transform: translateX(0); } 100% { transform: translateX(-250px); } }
+
+  /* 34. Clock Hand */
+  .clock { width: 80px; height: 80px; border: 2px solid #333; border-radius: 50%; position: relative; }
+  .clock::before { content: ''; position: absolute; width: 2px; height: 30px; background: #667eea; top: 10px; left: 50%; transform-origin: bottom center; animation: clockHand 4s linear infinite; transform: translateX(-50%); }
+  .clock::after { content: ''; position: absolute; width: 8px; height: 8px; background: #f5576c; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  @keyframes clockHand { to { transform: translateX(-50%) rotate(360deg); } }
+
+  /* 35. Accordion Squeeze */
+  .accordion-sq { display: flex; flex-direction: column; gap: 4px; }
+  .accordion-sq span { width: 80px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #667eea, #764ba2); animation: accordionSq 2s ease-in-out infinite; transform-origin: center; }
+  .accordion-sq span:nth-child(1) { animation-delay: 0s; }
+  .accordion-sq span:nth-child(2) { animation-delay: .1s; }
+  .accordion-sq span:nth-child(3) { animation-delay: .2s; }
+  .accordion-sq span:nth-child(4) { animation-delay: .3s; }
+  .accordion-sq span:nth-child(5) { animation-delay: .4s; }
+  @keyframes accordionSq { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.3); } }
+
+</style>
+</head>
+<body>
+<div class="stage"><div class="clock"></div></div>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>箭头弹跳</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+  svg { overflow: visible; }
+
+  /* === NEW EFFECTS === */
+  /* 9. Checkmark Draw */
+  .svg-check line { stroke: #43e97b; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 30; stroke-dashoffset: 30; animation: svgDraw 1.5s ease forwards infinite alternate; }
+  .svg-check line:nth-child(2) { stroke-dasharray: 20; stroke-dashoffset: 20; animation-delay: .3s; }
+  @keyframes svgDraw { to { stroke-dashoffset: 0; } }
+
+  /* 10. Spinning Gear */
+  .svg-gear { animation: gearSpin 4s linear infinite; }
+  @keyframes gearSpin { to { transform: rotate(360deg); } }
+
+  /* 11. Wave Line */
+  .svg-wave-line path { fill: none; stroke: #f093fb; stroke-width: 2; stroke-dasharray: 300; stroke-dashoffset: 300; animation: svgDraw 3s ease infinite; }
+
+  /* 12. Heart Beat SVG */
+  .svg-heart { animation: heartPulse 1.2s ease-in-out infinite; }
+  @keyframes heartPulse { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.15); } 28% { transform: scale(1); } 42% { transform: scale(1.15); } 70% { transform: scale(1); } }
+
+  /* 13. Arrow Bounce */
+  .svg-arrow { animation: arrowBounce 1.5s ease-in-out infinite; }
+  @keyframes arrowBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  /* 14. Circle Progress */
+  .svg-progress circle.track { fill: none; stroke: #1e1e2e; stroke-width: 6; }
+  .svg-progress circle.fill { fill: none; stroke: #667eea; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 251; stroke-dashoffset: 251; animation: circFill 2s ease-out infinite; transform-origin: center; transform: rotate(-90deg); }
+  @keyframes circFill { 0% { stroke-dashoffset: 251; } 50% { stroke-dashoffset: 63; } 100% { stroke-dashoffset: 251; } }
+
+  /* 15. Eye Blink */
+  .svg-eye-lid { animation: eyeBlink 3s ease-in-out infinite; transform-origin: center; }
+  @keyframes eyeBlink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+
+  /* 16. SVG Squares */
+  .svg-squares rect { animation: sqPop 2s ease-in-out infinite; transform-origin: center; opacity: .3; }
+  .svg-squares rect:nth-child(1) { animation-delay: 0s; }
+  .svg-squares rect:nth-child(2) { animation-delay: .2s; }
+  .svg-squares rect:nth-child(3) { animation-delay: .4s; }
+  .svg-squares rect:nth-child(4) { animation-delay: .6s; }
+  @keyframes sqPop { 0%, 100% { transform: scale(0.6); opacity: .3; } 50% { transform: scale(1); opacity: 1; } }
+
+  /* 17. Orbiting Dot */
+  .svg-orbit-dot { animation: orbitDot 3s linear infinite; transform-origin: 60px 60px; }
+  @keyframes orbitDot { to { transform: rotate(360deg); } }
+
+  /* 18. DNA Helix */
+  .svg-dna circle { animation: dnaFloat 2s ease-in-out infinite alternate; }
+  @keyframes dnaFloat { to { cy: 10; } }
+
+  /* 19. Audio Bars */
+  .svg-audio rect { animation: audioBar 1s ease-in-out infinite alternate; transform-origin: bottom; }
+  @keyframes audioBar { 0% { transform: scaleY(.3); } 100% { transform: scaleY(1); } }
+
+  /* 20. Ripple Click */
+  .svg-ripple circle { fill: none; stroke: #667eea; stroke-width: 1.5; }
+
+  /* 21. Typing Cursor SVG */
+  .svg-cursor rect.cursor { animation: svgCursorBlink .8s step-end infinite; }
+  @keyframes svgCursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  .svg-cursor text { fill: #43e97b; font-family: monospace; font-size: 14px; }
+
+  /* 22. Clock */
+  .svg-clock-hour { animation: clockHour 43200s linear infinite; transform-origin: 50px 50px; }
+  .svg-clock-min { animation: clockMin 3600s linear infinite; transform-origin: 50px 50px; }
+  .svg-clock-sec { animation: clockSec 60s linear infinite; transform-origin: 50px 50px; }
+  @keyframes clockHour { to { transform: rotate(360deg); } }
+  @keyframes clockMin { to { transform: rotate(360deg); } }
+  @keyframes clockSec { to { transform: rotate(360deg); } }
+
+
+</style>
+</head>
+<body>
+<div class="stage"><svg class="svg-arrow" width="40" height="50" viewBox="0 0 40 50" fill="none" stroke="#43e97b" stroke-width="3" stroke-linecap="round"><line x1="20" y1="5" x2="20" y2="40"/><polyline points="8,28 20,40 32,28"/></svg></div>
+
+</body>
+</html>

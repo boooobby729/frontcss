@@ -1,0 +1,23 @@
+{
+  "name": "frontend-effects",
+  "version": "1.0.0",
+  "description": "",
+  "main": "_build.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boooobby729/frontcss.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/boooobby729/frontcss/issues"
+  },
+  "homepage": "https://github.com/boooobby729/frontcss#readme",
+  "devDependencies": {
+    "puppeteer-core": "^24.42.0"
+  }
+}

@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-06 raycast.com (Feature Wall)
+- 效果名称：滚动驱动文字高亮墙 (Scroll-driven Feature Wall)
+- 效果描述：一段功能描述文字，每个功能短语是独立的可交互 span，默认呈深灰色（#434345），随滚动进度依次高亮为白色。右侧同步展示对应功能的 UI 预览截图。整体形成"文字墙"效果——大量功能词密集排列，滚动时像扫光一样逐一点亮，视觉冲击力极强。支持鼠标悬停单独高亮。
+- 实现原理：每个功能短语包裹在 `<span role="button">` 中，IntersectionObserver 监听每个 span 进入视口中心区域时添加 active 类，active 状态 color 变为 white，transition: color 0.3s 平滑过渡。右侧预览区用 sticky 定位固定，根据当前 active 的 span 索引切换对应的预览内容（opacity/transform 过渡）。扩展变体：① 纯文字高亮墙（无右侧预览）② 带右侧 UI 预览的双栏布局 ③ 彩色高亮版（不同类别用不同颜色）④ 打字机逐词高亮版
+- 状态：已实现 → 64-scroll-highlight-text.html，已集成到首页
+
 ## 2026-05-06 linear.app (Feature Cards)
 - 效果名称：等轴测线框几何体 (Isometric Wireframe Geometry)
 - 效果描述：三组精美的等轴测线框图（FIG 0.2/0.3/0.4），分别展示层叠圆盘体、积木方块组合、扇形层叠板。纯 SVG path 绘制，深色背景 #08090A，细线描边（0.5px），亮色轮廓线 #D0D6E0 与暗色内部线 #3E3E44 形成层次感，feGaussianBlur 阴影滤镜增加深度。鼠标悬停时几何体有发光描边动画，整体有缓慢浮动效果。

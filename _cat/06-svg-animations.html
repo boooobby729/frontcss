@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SVG 动画 - Bの宝库</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;gap:12px;background:rgba(17,17,17,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.back-btn{color:rgba(255,255,255,.5);font-size:.8rem;padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);transition:all .15s}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.page-title{font-size:1rem;font-weight:600;color:rgba(255,255,255,.9);letter-spacing:-.02em}
+.page-count{font-size:.7rem;color:rgba(255,255,255,.3);margin-left:4px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:57px}
+.card{background:#111;cursor:pointer;transition:background .15s}
+.card:hover{background:#161616}
+.card:hover .card-visual,.card:hover .card-visual .stage{background:#161616 !important}
+.card:hover .card-info{background:#161616}
+.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
+.card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
+.card-info{padding:10px 14px 14px;background:#111}
+.card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
+.effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:column}
+.effect-overlay.open{display:flex}
+.effect-overlay iframe{width:100%;height:100%;border:none}
+.effect-overlay-close{position:fixed;top:16px;right:20px;z-index:10000;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.effect-overlay-close:hover{background:rgba(255,255,255,.2)}
+.effect-overlay-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2}
+@media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+
+  svg { overflow: visible; }
+
+  /* === NEW EFFECTS === */
+  /* 9. Checkmark Draw */
+  .svg-check line { stroke: #43e97b; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 30; stroke-dashoffset: 30; animation: svgDraw 1.5s ease forwards infinite alternate; }
+  .svg-check line:nth-child(2) { stroke-dasharray: 20; stroke-dashoffset: 20; animation-delay: .3s; }
+  @keyframes svgDraw { to { stroke-dashoffset: 0; } }
+
+  /* 10. Spinning Gear */
+  .svg-gear { animation: gearSpin 4s linear infinite; }
+  @keyframes gearSpin { to { transform: rotate(360deg); } }
+
+  /* 11. Wave Line */
+  .svg-wave-line path { fill: none; stroke: #f093fb; stroke-width: 2; stroke-dasharray: 300; stroke-dashoffset: 300; animation: svgDraw 3s ease infinite; }
+
+  /* 12. Heart Beat SVG */
+  .svg-heart { animation: heartPulse 1.2s ease-in-out infinite; }
+  @keyframes heartPulse { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.15); } 28% { transform: scale(1); } 42% { transform: scale(1.15); } 70% { transform: scale(1); } }
+
+  /* 13. Arrow Bounce */
+  .svg-arrow { animation: arrowBounce 1.5s ease-in-out infinite; }
+  @keyframes arrowBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  /* 14. Circle Progress */
+  .svg-progress circle.track { fill: none; stroke: #1e1e2e; stroke-width: 6; }
+  .svg-progress circle.fill { fill: none; stroke: #667eea; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 251; stroke-dashoffset: 251; animation: circFill 2s ease-out infinite; transform-origin: center; transform: rotate(-90deg); }
+  @keyframes circFill { 0% { stroke-dashoffset: 251; } 50% { stroke-dashoffset: 63; } 100% { stroke-dashoffset: 251; } }
+
+  /* 15. Eye Blink */
+  .svg-eye-lid { animation: eyeBlink 3s ease-in-out infinite; transform-origin: center; }
+  @keyframes eyeBlink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+
+  /* 16. SVG Squares */
+  .svg-squares rect { animation: sqPop 2s ease-in-out infinite; transform-origin: center; opacity: .3; }
+  .svg-squares rect:nth-child(1) { animation-delay: 0s; }
+  .svg-squares rect:nth-child(2) { animation-delay: .2s; }
+  .svg-squares rect:nth-child(3) { animation-delay: .4s; }
+  .svg-squares rect:nth-child(4) { animation-delay: .6s; }
+  @keyframes sqPop { 0%, 100% { transform: scale(0.6); opacity: .3; } 50% { transform: scale(1); opacity: 1; } }
+
+  /* 17. Orbiting Dot */
+  .svg-orbit-dot { animation: orbitDot 3s linear infinite; transform-origin: 60px 60px; }
+  @keyframes orbitDot { to { transform: rotate(360deg); } }
+
+  /* 18. DNA Helix */
+  .svg-dna circle { animation: dnaFloat 2s ease-in-out infinite alternate; }
+  @keyframes dnaFloat { to { cy: 10; } }
+
+  /* 19. Audio Bars */
+  .svg-audio rect { animation: audioBar 1s ease-in-out infinite alternate; transform-origin: bottom; }
+  @keyframes audioBar { 0% { transform: scaleY(.3); } 100% { transform: scaleY(1); } }
+
+  /* 20. Ripple Click */
+  .svg-ripple circle { fill: none; stroke: #667eea; stroke-width: 1.5; }
+
+  /* 21. Typing Cursor SVG */
+  .svg-cursor rect.cursor { animation: svgCursorBlink .8s step-end infinite; }
+  @keyframes svgCursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  .svg-cursor text { fill: #43e97b; font-family: monospace; font-size: 14px; }
+
+  /* 22. Clock */
+  .svg-clock-hour { animation: clockHour 43200s linear infinite; transform-origin: 50px 50px; }
+  .svg-clock-min { animation: clockMin 3600s linear infinite; transform-origin: 50px 50px; }
+  .svg-clock-sec { animation: clockSec 60s linear infinite; transform-origin: 50px 50px; }
+  @keyframes clockHour { to { transform: rotate(360deg); } }
+  @keyframes clockMin { to { transform: rotate(360deg); } }
+  @keyframes clockSec { to { transform: rotate(360deg); } }
+
+
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="../index.html" class="back-btn">← 返回</a>
+  <span class="page-title">SVG 动画</span>
+  <span class="page-count">14 个效果</span>
+</div>
+<div class="card-grid">
+    <div class="card" data-src="../_effects/086.html">
+      <div class="card-visual"><div class="stage"><svg class="svg-check" width="60" height="60" viewBox="0 0 60 60"><line x1="15" y1="32" x2="26" y2="42"/><line x1="26" y1="42" x2="45" y2="18"/></svg></div></div>
+      <div class="card-info"><h3>勾选绘制</h3><span class="tag">stroke-dashoffset</span></div>
+    </div>
+    <div class="card" data-src="../_effects/087.html">
+      <div class="card-visual"><div class="stage"><svg class="svg-gear" width="60" height="60" viewBox="0 0 60 60" fill="#667eea"><circle cx="30" cy="30" r="12"/><rect x="27" y="2" width="6" height="14" rx="3"/><rect x="27" y="44" width="6" height="14" rx="3"/><rect x="2" y="27" width="14" height="6" rx="3"/><rect x="44" y="27" width="14" height="6" rx="3"/><rect x="8" y="8" width="6" height="14" rx="3" transform="rotate(45 11 15)"/><rect x="42" y="38" width="6" height="14" rx="3" transform="rotate(45 45 45)"/><rect x="38" y="8" width="14" height="6" rx="3" transform="rotate(45 45 11)"/><rect x="8" y="42" width="14" height="6" rx="3" transform="rotate(45 15 45)"/></svg></div></div>
+      <div class="card-info"><h3>齿轮旋转</h3><span class="tag">rotate infinite</span></div>
+    </div>
+    <div class="card" data-src="../_effects/088.html">
+      <div class="card-visual"><div class="stage"><svg class="svg-wave-line" width="180" height="60" viewBox="0 0 180 60"><path d="M0,30 Q22,5 45,30 T90,30 T135,30 T180,30"/></svg></div></div>
+      <div class="card-info"><h3>波形线条</h3><span class="tag">path 绘制动画</span></div>
+    </div>
+    <div class="card" data-src="../_effects/089.html">
+      <div class="card-visual"><div class="stage"><svg class="svg-heart" width="50" height="50" viewBox="0 0 24 24" fill="#f5576c"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div></div>
+      <div class="card-info"><h3>心跳 SVG</h3><span class="tag">scale 双峰</span></div>
+    </div>
+    <div class="card" data-src="../_effects/090.html">
+      <div class="card-visual"><div class="stage"><svg class="svg-arrow" width="40" height="50" viewBox="0 0 40 50" fill="none" stroke="#43e97b" stroke-width="3" stroke-linecap="round"><line x1="20" y1="5" x2="20" y2="40"/><polyline points="8,28 20,40 32,28"/></svg></div></div>
+      <div class="card-info"><h3>箭头弹跳</h3><span class="tag">translateY bounce</span></div>
+    </div>
+    <div class="card" data-src="../_effects/091.html">
+      <div class="card-visual"><div class="stage"><svg class="svg-progress" width="90" height="90" viewBox="0 0 90 90"><circle class="track" cx="45" cy="45" r="40"/><circle class="fill" cx="45" cy="45" r="40"/></svg></div></div>
+      <div class="card-info"><h3>环形进度</h3><span class="tag">stroke-dashoffset 进度</span></div>
+    </div>
+    <div class="card" data-src="../_effects/092.html">
+      <div class="card-visual"><div class="stage"><svg width="70" height="40" viewBox="0 0 70 40"><ellipse cx="35" cy="20" rx="30" ry="16" fill="none" stroke="#fff" stroke-width="2"/><circle cx="35" cy="20" r="8" fill="#667eea"/><circle cx="35" cy="20" r="3" fill="#fff"/><ellipse class="svg-eye-lid" cx="35" cy="20" rx="30" ry="16" fill="#0a0a0f" clip-path="inset(0 0 50% 0)"/></svg></div></div>
+      <div class="card-info"><h3>眨眼动画</h3><span class="tag">scaleY blink</span></div>
+    </div>
+    <div class="card" data-src="../_effects/093.html">
+      <div class="card-visual"><div class="stage"><svg class="svg-squares" width="100" height="100" viewBox="0 0 100 100"><rect x="10" y="10" width="30" height="30" rx="6" fill="#f5576c"/><rect x="60" y="10" width="30" height="30" rx="6" fill="#667eea"/><rect x="10" y="60" width="30" height="30" rx="6" fill="#43e97b"/><rect x="60" y="60" width="30" height="30" rx="6" fill="#ffa500"/></svg></div></div>
+      <div class="card-info"><h3>方块脉冲</h3><span class="tag">scale stagger</span></div>
+    </div>
+    <div class="card" data-src="../_effects/094.html">
+      <div class="card-visual"><div class="stage"><svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="40" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="4"/><circle class="svg-orbit-dot" cx="60" cy="20" r="6" fill="#f093fb"/></svg></div></div>
+      <div class="card-info"><h3>轨道圆点</h3><span class="tag">rotate transform-origin</span></div>
+    </div>
+    <div class="card" data-src="../_effects/095.html">
+      <div class="card-visual"><div class="stage">
+      <svg class="svg-dna" width="140" height="60" viewBox="0 0 140 60">
+        <line x1="0" y1="30" x2="140" y2="30" stroke="#333" stroke-width=".5"/>
+        <circle cx="10" cy="50" r="4" fill="#667eea" style="animation-delay:0s"/>
+        <circle cx="30" cy="50" r="4" fill="#f093fb" style="animation-delay:.15s"/>
+        <circle cx="50" cy="50" r="4" fill="#667eea" style="animation-delay:.3s"/>
+        <circle cx="70" cy="50" r="4" fill="#f093fb" style="animation-delay:.45s"/>
+        <circle cx="90" cy="50" r="4" fill="#667eea" style="animation-delay:.6s"/>
+        <circle cx="110" cy="50" r="4" fill="#f093fb" style="animation-delay:.75s"/>
+        <circle cx="130" cy="50" r="4" fill="#667eea" style="animation-delay:.9s"/>
+        <circle cx="10" cy="10" r="4" fill="#43e97b" style="animation-delay:.9s;animation-direction:alternate-reverse"/>
+        <circle cx="30" cy="10" r="4" fill="#f5576c" style="animation-delay:.75s;animation-direction:alternate-reverse"/>
+        <circle cx="50" cy="10" r="4" fill="#43e97b" style="animation-delay:.6s;animation-direction:alternate-reverse"/>
+        <circle cx="70" cy="10" r="4" fill="#f5576c" style="animation-delay:.45s;animation-direction:alternate-reverse"/>
+        <circle cx="90" cy="10" r="4" fill="#43e97b" style="animation-delay:.3s;animation-direction:alternate-reverse"/>
+        <circle cx="110" cy="10" r="4" fill="#f5576c" style="animation-delay:.15s;animation-direction:alternate-reverse"/>
+        <circle cx="130" cy="10" r="4" fill="#43e97b" style="animation-delay:0s;animation-direction:alternate-reverse"/>
+      </svg>
+    </div></div>
+      <div class="card-info"><h3>DNA 双螺旋</h3><span class="tag">cy animate alternate</span></div>
+    </div>
+    <div class="card" data-src="../_effects/096.html">
+      <div class="card-visual"><div class="stage">
+      <svg class="svg-audio" width="120" height="60" viewBox="0 0 120 60">
+        <rect x="5"  y="10" width="10" height="50" rx="3" fill="#667eea" style="animation-delay:0s"/>
+        <rect x="20" y="10" width="10" height="50" rx="3" fill="#764ba2" style="animation-delay:.1s"/>
+        <rect x="35" y="10" width="10" height="50" rx="3" fill="#f093fb" style="animation-delay:.2s"/>
+        <rect x="50" y="10" width="10" height="50" rx="3" fill="#f5576c" style="animation-delay:.3s"/>
+        <rect x="65" y="10" width="10" height="50" rx="3" fill="#ffa500" style="animation-delay:.4s"/>
+        <rect x="80" y="10" width="10" height="50" rx="3" fill="#43e97b" style="animation-delay:.5s"/>
+        <rect x="95" y="10" width="10" height="50" rx="3" fill="#38f9d7" style="animation-delay:.6s"/>
+      </svg>
+    </div></div>
+      <div class="card-info"><h3>音频波形</h3><span class="tag">scaleY stagger bars</span></div>
+    </div>
+    <div class="card" data-src="../_effects/097.html">
+      <div class="card-visual"><div class="stage">
+      <svg class="svg-ripple" width="100" height="100" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="5">
+          <animate attributeName="r" from="5" to="45" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" from=".8" to="0" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="50" cy="50" r="5">
+          <animate attributeName="r" from="5" to="45" dur="1.5s" begin=".5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" from=".8" to="0" dur="1.5s" begin=".5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="50" cy="50" r="5">
+          <animate attributeName="r" from="5" to="45" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" from=".8" to="0" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="50" cy="50" r="4" fill="#667eea"/>
+      </svg>
+    </div></div>
+      <div class="card-info"><h3>点击涟漪</h3><span class="tag">SMIL r + opacity</span></div>
+    </div>
+    <div class="card" data-src="../_effects/098.html">
+      <div class="card-visual"><div class="stage">
+      <svg class="svg-cursor" width="160" height="40" viewBox="0 0 160 40">
+        <text x="5" y="28">&gt; hello world</text>
+        <rect class="cursor" x="128" y="12" width="8" height="20" rx="1" fill="#43e97b"/>
+      </svg>
+    </div></div>
+      <div class="card-info"><h3>打字光标</h3><span class="tag">text + rect blink</span></div>
+    </div>
+    <div class="card" data-src="../_effects/099.html">
+      <div class="card-visual"><div class="stage">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#1e1e2e" stroke-width="2"/>
+        <line x1="50" y1="50" x2="50" y2="22" stroke="#fff" stroke-width="2.5" stroke-linecap="round" class="svg-clock-hour"/>
+        <line x1="50" y1="50" x2="50" y2="15" stroke="#888" stroke-width="1.5" stroke-linecap="round" class="svg-clock-min"/>
+        <line x1="50" y1="50" x2="50" y2="12" stroke="#f5576c" stroke-width="1" stroke-linecap="round" class="svg-clock-sec"/>
+        <circle cx="50" cy="50" r="3" fill="#f5576c"/>
+      </svg>
+    </div></div>
+      <div class="card-info"><h3>SVG 时钟</h3><span class="tag">rotate hands infinite</span></div>
+    </div>
+</div>
+<div class="effect-overlay" id="overlay">
+  <button class="effect-overlay-close" id="overlayClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <iframe id="overlayIframe" src="about:blank"></iframe>
+</div>
+<script>
+const overlay=document.getElementById('overlay');
+const iframe=document.getElementById('overlayIframe');
+document.getElementById('overlayClose').addEventListener('click',()=>{overlay.classList.remove('open');iframe.src='about:blank';});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('open'),iframe.src='about:blank';});
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    const src=card.dataset.src;
+    if(src){iframe.src=src;overlay.classList.add('open');}
+  });
+});
+
+</script>
+</body>
+</html>

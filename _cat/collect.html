@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Collect - Bの宝库</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;gap:12px;background:rgba(17,17,17,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.back-btn{color:rgba(255,255,255,.5);font-size:.8rem;padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);transition:all .15s}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.page-title{font-size:1rem;font-weight:600;color:rgba(255,255,255,.9);letter-spacing:-.02em}
+.page-count{font-size:.7rem;color:rgba(255,255,255,.3);margin-left:4px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:57px}
+.card{background:#111;cursor:pointer;transition:background .15s}
+.card:hover{background:#161616}
+.card:hover .card-visual{background:#161616 !important}
+.card:hover .card-info{background:#161616}
+.card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
+.card-info{padding:10px 14px 14px;background:#111}
+.card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.effect-overlay{position:fixed;inset:0;z-index:9999;background:#111;display:none;flex-direction:column}
+.effect-overlay.open{display:flex}
+.effect-overlay iframe{width:100%;height:100%;border:none}
+.effect-overlay-close{position:fixed;top:16px;right:20px;z-index:10000;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.effect-overlay-close:hover{background:rgba(255,255,255,.2)}
+.effect-overlay-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2}
+@media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="../index.html" class="back-btn">← 返回</a>
+  <span class="page-title">Collect</span>
+  <span class="page-count">19 个效果</span>
+</div>
+<div class="card-grid">
+    <div class="card" data-src="../46-collect.html">
+      <div class="card-visual"><img src="../_thumbs/46-collect.png" alt="Collect 灵感收" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Collect 灵感收</h3></div>
+    </div>
+    <div class="card" data-src="../47-collect-text.html">
+      <div class="card-visual"><img src="../_thumbs/47-collect-text.png" alt="Collect 文本变化" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Collect 文本变化</h3></div>
+    </div>
+    <div class="card" data-src="../48-colorful-quote-cards.html">
+      <div class="card-visual"><img src="../_thumbs/48-colorful-quote-cards.png" alt="Colorful Quote Cards" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Colorful Quote Cards</h3></div>
+    </div>
+    <div class="card" data-src="../49-keyboard-shortcuts.html">
+      <div class="card-visual"><img src="../_thumbs/49-keyboard-shortcuts.png" alt="Keyboard Shortcut Visualizer" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Keyboard Shortcut Visualizer</h3></div>
+    </div>
+    <div class="card" data-src="../50-particle-ray-burst.html">
+      <div class="card-visual"><img src="../_thumbs/50-particle-ray-burst.png" alt="Particle Ray Burst 粒子光线放射" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Particle Ray Burst 粒子光线放射</h3></div>
+    </div>
+    <div class="card" data-src="../51-terminal-text-scramble.html">
+      <div class="card-visual"><img src="../_thumbs/51-terminal-text-scramble.png" alt="Terminal Text Scramble Hover" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Terminal Text Scramble Hover</h3></div>
+    </div>
+    <div class="card" data-src="../52-glassmorphism-floating-ui-cards.html">
+      <div class="card-visual"><img src="../_thumbs/52-glassmorphism-floating-ui-cards.png" alt="毛玻璃浮动通知卡片 Glassmorphism Floating UI Cards" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>毛玻璃浮动通知卡片 Glassmorphism Floating UI Cards</h3></div>
+    </div>
+    <div class="card" data-src="../53-diamond-icon-grid-spotlight.html">
+      <div class="card-visual"><img src="../_thumbs/53-diamond-icon-grid-spotlight.png" alt="Diamond Icon Grid Spotlight · 菱形图标网格光晕追踪" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Diamond Icon Grid Spotlight · 菱形图标网格光晕追踪</h3></div>
+    </div>
+    <div class="card" data-src="../54-holographic-rainbow-card.html">
+      <div class="card-visual"><img src="../_thumbs/54-holographic-rainbow-card.png" alt="全息彩虹卡片 Holographic Rainbow Card" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>全息彩虹卡片 Holographic Rainbow Card</h3></div>
+    </div>
+    <div class="card" data-src="../55-contour-terrain-map.html">
+      <div class="card-visual"><img src="../_thumbs/55-contour-terrain-map.png" alt="等高线地形波纹背景 Contour Terrain Map" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>等高线地形波纹背景 Contour Terrain Map</h3></div>
+    </div>
+    <div class="card" data-src="../56-clip-path-fullscreen-menu.html">
+      <div class="card-visual"><img src="../_thumbs/56-clip-path-fullscreen-menu.png" alt="Clip-Path Fullscreen Menu" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Clip-Path Fullscreen Menu</h3></div>
+    </div>
+    <div class="card" data-src="../57-app-icon-galaxy.html">
+      <div class="card-visual"><img src="../_thumbs/57-app-icon-galaxy.png" alt="App Icon Galaxy Grid" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>App Icon Galaxy Grid</h3></div>
+    </div>
+    <div class="card" data-src="../58-scroll-3d-carousel.html">
+      <div class="card-visual"><img src="../_thumbs/58-scroll-3d-carousel.png" alt="Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播</h3></div>
+    </div>
+    <div class="card" data-src="../59-magnetic-button.html">
+      <div class="card-visual"><img src="../_thumbs/59-magnetic-button.png" alt="磁力吸附按钮 Magnetic Button" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>磁力吸附按钮 Magnetic Button</h3></div>
+    </div>
+    <div class="card" data-src="../60-conic-contour.html">
+      <div class="card-visual"><img src="../_thumbs/60-conic-contour.png" alt="Conic Gradient Contour Lines" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Conic Gradient Contour Lines</h3></div>
+    </div>
+    <div class="card" data-src="../61-circular-score-cards.html">
+      <div class="card-visual"><img src="../_thumbs/61-circular-score-cards.png" alt="Circular Score Cards · 圆形进度评分卡" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Circular Score Cards · 圆形进度评分卡</h3></div>
+    </div>
+    <div class="card" data-src="../62-svg-filter-text.html">
+      <div class="card-visual"><img src="../_thumbs/62-svg-filter-text.png" alt="SVG Filter Text Distortion" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>SVG Filter Text Distortion</h3></div>
+    </div>
+    <div class="card" data-src="../63-isometric-wireframe.html">
+      <div class="card-visual"><img src="../_thumbs/63-isometric-wireframe.png" alt="Isometric Wireframe Geometry" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-info"><h3>Isometric Wireframe Geometry</h3></div>
+    </div>
+    <div class="card" data-src="../64-scroll-highlight-text.html">
+      <div class="card-visual"><div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">S</div></div>
+      <div class="card-info"><h3>Scroll Highlight Text — 滚动文字高亮墙</h3></div>
+    </div>
+</div>
+<div class="effect-overlay" id="overlay">
+  <button class="effect-overlay-close" id="overlayClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <iframe id="overlayIframe" src="about:blank"></iframe>
+</div>
+<script>
+const overlay=document.getElementById('overlay');
+const iframe=document.getElementById('overlayIframe');
+document.getElementById('overlayClose').addEventListener('click',()=>{overlay.classList.remove('open');iframe.src='about:blank';});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('open'),iframe.src='about:blank';});
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    const src=card.dataset.src;
+    if(src){iframe.src=src;overlay.classList.add('open');}
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clip-Path Reveal Menu</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080808;
+    --text: #f0f0f0;
+    --muted: #555;
+    --accent1: #7c3aed;
+    --accent2: #0ea5e9;
+    --accent3: #f59e0b;
+    --accent4: #10b981;
+    --accent5: #ef4444;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Page Layout ─── */
+  .page-header {
+    padding: 48px 60px 24px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .page-header h1 {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .page-header p {
+    font-size: 11px;
+    color: #333;
+    margin-top: 4px;
+    letter-spacing: .06em;
+  }
+
+  .sections {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .section {
+    padding: 60px;
+    border-bottom: 1px solid #111;
+  }
+  .section-label {
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 32px;
+  }
+
+  /* ═══════════════════════════════════════
+     VARIANT 1 — Horizontal Clip Reveal
+     Hover → clip-path expands left→right
+  ═══════════════════════════════════════ */
+  .menu-h {
+    list-style: none;
+    border-top: 1px solid #1c1c1c;
+  }
+  .menu-h li {
+    position: relative;
+    border-bottom: 1px solid #1c1c1c;
+    overflow: hidden;
+  }
+  .menu-h li .bg {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    transition: clip-path 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+    will-change: clip-path;
+  }
+  .menu-h li:hover .bg {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transition: clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menu-h li:nth-child(1) .bg { background: var(--accent1); }
+  .menu-h li:nth-child(2) .bg { background: var(--accent2); }
+  .menu-h li:nth-child(3) .bg { background: var(--accent3); }
+  .menu-h li:nth-child(4) .bg { background: var(--accent4); }
+  .menu-h li:nth-child(5) .bg { background: var(--accent5); }
+
+  .menu-h li a {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 0;
+    text-decoration: none;
+    color: var(--text);
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    transition: color 0.3s ease;
+  }
+  .menu-h li:hover a { color: #fff; }
+  .menu-h li a .arrow {
+    font-size: 0.5em;
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .menu-h li:hover a .arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .menu-h li a .num {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: .06em;
+    align-self: flex-start;
+    margin-top: 8px;
+    transition: color 0.3s ease;
+  }
+  .menu-h li:hover a .num { color: rgba(255,255,255,0.5); }
+
+  /* ═══════════════════════════════════════
+     VARIANT 2 — Direction-Aware Clip
+     Clip starts from the direction mouse enters
+  ═══════════════════════════════════════ */
+  .menu-dir {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .menu-dir li {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    cursor: pointer;
+  }
+  .menu-dir li .bg {
+    position: absolute;
+    inset: 0;
+    will-change: clip-path;
+  }
+  .menu-dir li:nth-child(1) .bg { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
+  .menu-dir li:nth-child(2) .bg { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
+  .menu-dir li:nth-child(3) .bg { background: linear-gradient(135deg, #f59e0b, #f97316); }
+  .menu-dir li:nth-child(4) .bg { background: linear-gradient(135deg, #10b981, #059669); }
+  .menu-dir li:nth-child(5) .bg { background: linear-gradient(135deg, #ef4444, #dc2626); }
+  .menu-dir li:nth-child(6) .bg { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+  .menu-dir li .content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+    background: #111;
+    transition: background 0.4s ease;
+  }
+  .menu-dir li.active .content { background: transparent; }
+  .menu-dir li .content h3 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    transition: color 0.3s ease;
+  }
+  .menu-dir li .content p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    transition: color 0.3s ease;
+  }
+  .menu-dir li.active .content p { color: rgba(255,255,255,0.7); }
+
+  /* ═══════════════════════════════════════
+     VARIANT 3 — Circle Clip Expand
+     Circular reveal from mouse position
+  ═══════════════════════════════════════ */
+  .menu-circle {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #1c1c1c;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .menu-circle li {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid #1c1c1c;
+  }
+  .menu-circle li:last-child { border-bottom: none; }
+  .menu-circle li .bg {
+    position: absolute;
+    inset: 0;
+    clip-path: circle(0% at 50% 50%);
+    transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: clip-path;
+  }
+  .menu-circle li:hover .bg {
+    clip-path: circle(150% at var(--mx, 50%) var(--my, 50%));
+  }
+  .menu-circle li:nth-child(1) .bg { background: #1a0a2e; }
+  .menu-circle li:nth-child(2) .bg { background: #0a1a2e; }
+  .menu-circle li:nth-child(3) .bg { background: #0a2e1a; }
+  .menu-circle li:nth-child(4) .bg { background: #2e1a0a; }
+
+  .menu-circle li a {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 28px 32px;
+    text-decoration: none;
+    color: var(--text);
+    transition: color 0.3s ease;
+  }
+  .menu-circle li .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .menu-circle li:hover .icon { transform: scale(1.15) rotate(-5deg); }
+  .menu-circle li:nth-child(1) .icon { background: rgba(124,58,237,0.2); }
+  .menu-circle li:nth-child(2) .icon { background: rgba(14,165,233,0.2); }
+  .menu-circle li:nth-child(3) .icon { background: rgba(16,185,129,0.2); }
+  .menu-circle li:nth-child(4) .icon { background: rgba(245,158,11,0.2); }
+  .menu-circle li .text h3 { font-size: 18px; font-weight: 600; }
+  .menu-circle li .text p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .menu-circle li .chevron {
+    margin-left: auto;
+    font-size: 18px;
+    color: var(--muted);
+    transform: translateX(0);
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+  .menu-circle li:hover .chevron { transform: translateX(6px); color: var(--text); }
+
+  /* ═══════════════════════════════════════
+     VARIANT 4 — Diagonal Clip Wipe
+     Parallelogram clip-path wipe
+  ═══════════════════════════════════════ */
+  .menu-diag {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .menu-diag li {
+    position: relative;
+    overflow: hidden;
+    height: 80px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .menu-diag li .bg {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(0 0, 0 0, -20px 100%, -20px 100%);
+    transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    will-change: clip-path;
+  }
+  .menu-diag li:hover .bg {
+    clip-path: polygon(0 0, calc(100% + 20px) 0, 100% 100%, -20px 100%);
+    transition: clip-path 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menu-diag li:nth-child(1) .bg { background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 100%); }
+  .menu-diag li:nth-child(2) .bg { background: linear-gradient(90deg, #0ea5e9 0%, #06b6d4 100%); }
+  .menu-diag li:nth-child(3) .bg { background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%); }
+  .menu-diag li:nth-child(4) .bg { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+
+  .menu-diag li .content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    background: #111;
+    border-radius: 8px;
+    transition: background 0.4s ease;
+  }
+  .menu-diag li:hover .content { background: transparent; }
+  .menu-diag li .content .label {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    transition: letter-spacing 0.4s ease;
+  }
+  .menu-diag li:hover .content .label { letter-spacing: 0.04em; }
+  .menu-diag li .content .tag {
+    margin-left: auto;
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: #1a1a1a;
+    padding: 4px 10px;
+    border-radius: 20px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  .menu-diag li:hover .content .tag {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+  }
+
+  /* ─── Two-column layout for sections 3 & 4 ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+  }
+  @media (max-width: 900px) {
+    .two-col { grid-template-columns: 1fr; }
+    .section { padding: 40px 24px; }
+    .menu-h li a { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Clip-Path Reveal Menu</h1>
+  <p>Hover interactions using clip-path animation · 4 variants · from tympanus.net/codrops</p>
+</div>
+
+<div class="sections">
+
+  <!-- VARIANT 1: Horizontal Clip -->
+  <div class="section">
+    <div class="section-label">01 — Horizontal Clip Reveal</div>
+    <ul class="menu-h">
+      <li>
+        <div class="bg"></div>
+        <a href="#">
+          <span class="num">01</span>
+          <span>Design Systems</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <div class="bg"></div>
+        <a href="#">
+          <span class="num">02</span>
+          <span>Motion Design</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <div class="bg"></div>
+        <a href="#">
+          <span class="num">03</span>
+          <span>Interaction</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <div class="bg"></div>
+        <a href="#">
+          <span class="num">04</span>
+          <span>Typography</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <div class="bg"></div>
+        <a href="#">
+          <span class="num">05</span>
+          <span>Visual Identity</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- VARIANT 2 & 3 side by side -->
+  <div class="section">
+    <div class="two-col">
+      <div>
+        <div class="section-label">02 — Direction-Aware Clip</div>
+        <ul class="menu-dir" id="menuDir">
+          <li><div class="bg"></div><div class="content"><h3>Branding</h3><p>Visual identity systems</p></div></li>
+          <li><div class="bg"></div><div class="content"><h3>Web Design</h3><p>Digital experiences</p></div></li>
+          <li><div class="bg"></div><div class="content"><h3>Motion</h3><p>Animation & transitions</p></div></li>
+          <li><div class="bg"></div><div class="content"><h3>3D Design</h3><p>Spatial interfaces</p></div></li>
+          <li><div class="bg"></div><div class="content"><h3>Typography</h3><p>Type systems & fonts</p></div></li>
+          <li><div class="bg"></div><div class="content"><h3>Illustration</h3><p>Custom artwork</p></div></li>
+        </ul>
+      </div>
+      <div>
+        <div class="section-label">03 — Circle Clip from Cursor</div>
+        <ul class="menu-circle" id="menuCircle">
+          <li>
+            <div class="bg"></div>
+            <a href="#">
+              <div class="icon">✦</div>
+              <div class="text"><h3>Components</h3><p>Reusable UI building blocks</p></div>
+              <span class="chevron">›</span>
+            </a>
+          </li>
+          <li>
+            <div class="bg"></div>
+            <a href="#">
+              <div class="icon">◈</div>
+              <div class="text"><h3>Animations</h3><p>Micro-interactions & transitions</p></div>
+              <span class="chevron">›</span>
+            </a>
+          </li>
+          <li>
+            <div class="bg"></div>
+            <a href="#">
+              <div class="icon">⬡</div>
+              <div class="text"><h3>Layouts</h3><p>Grid systems & spacing</p></div>
+              <span class="chevron">›</span>
+            </a>
+          </li>
+          <li>
+            <div class="bg"></div>
+            <a href="#">
+              <div class="icon">◎</div>
+              <div class="text"><h3>Tokens</h3><p>Design variables & themes</p></div>
+              <span class="chevron">›</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIANT 4: Diagonal Clip -->
+  <div class="section">
+    <div class="section-label">04 — Diagonal Parallelogram Wipe</div>
+    <ul class="menu-diag">
+      <li>
+        <div class="bg"></div>
+        <div class="content">
+          <span class="label">Brand Strategy</span>
+          <span class="tag">Strategy</span>
+        </div>
+      </li>
+      <li>
+        <div class="bg"></div>
+        <div class="content">
+          <span class="label">UI / UX Design</span>
+          <span class="tag">Design</span>
+        </div>
+      </li>
+      <li>
+        <div class="bg"></div>
+        <div class="content">
+          <span class="label">Frontend Dev</span>
+          <span class="tag">Code</span>
+        </div>
+      </li>
+      <li>
+        <div class="bg"></div>
+        <div class="content">
+          <span class="label">Motion & 3D</span>
+          <span class="tag">Motion</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+// ─── Variant 2: Direction-Aware Clip ───────────────────────────────────────
+const dirItems = document.querySelectorAll('#menuDir li');
+
+function getDirection(e, el) {
+  const rect = el.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const w = rect.width;
+  const h = rect.height;
+  // Determine which edge is closest
+  const top    = y / h;
+  const bottom = (h - y) / h;
+  const left   = x / w;
+  const right  = (w - x) / w;
+  const min = Math.min(top, bottom, left, right);
+  if (min === top)    return 'top';
+  if (min === bottom) return 'bottom';
+  if (min === left)   return 'left';
+  return 'right';
+}
+
+function getClipStart(dir) {
+  switch(dir) {
+    case 'top':    return 'polygon(0 0, 100% 0, 100% 0, 0 0)';
+    case 'bottom': return 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)';
+    case 'left':   return 'polygon(0 0, 0 0, 0 100%, 0 100%)';
+    case 'right':  return 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)';
+  }
+}
+
+function getClipEnd(dir) {
+  switch(dir) {
+    case 'top':    return 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)';
+    case 'bottom': return 'polygon(0 0, 100% 0, 100% 0, 0 0)';
+    case 'left':   return 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)';
+    case 'right':  return 'polygon(0 0, 0 0, 0 100%, 0 100%)';
+  }
+}
+
+dirItems.forEach(item => {
+  const bg = item.querySelector('.bg');
+
+  item.addEventListener('mouseenter', (e) => {
+    const dir = getDirection(e, item);
+    // Set start position instantly (no transition)
+    bg.style.transition = 'none';
+    bg.style.clipPath = getClipStart(dir);
+
+    // Force reflow
+    bg.offsetHeight;
+
+    // Animate to full reveal
+    bg.style.transition = 'clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1)';
+    bg.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
+    item.classList.add('active');
+  });
+
+  item.addEventListener('mouseleave', (e) => {
+    const dir = getDirection(e, item);
+    // Animate out in the direction mouse leaves (easeReverse: fast start)
+    bg.style.transition = 'clip-path 0.4s cubic-bezier(0.77, 0, 0.175, 1)';
+    bg.style.clipPath = getClipEnd(dir);
+    item.classList.remove('active');
+  });
+});
+
+// ─── Variant 3: Circle Clip from Cursor Position ──────────────────────────
+const circleItems = document.querySelectorAll('#menuCircle li');
+
+circleItems.forEach(item => {
+  const bg = item.querySelector('.bg');
+
+  item.addEventListener('mousemove', (e) => {
+    const rect = item.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+    const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+    item.style.setProperty('--mx', x + '%');
+    item.style.setProperty('--my', y + '%');
+  });
+
+  item.addEventListener('mouseenter', (e) => {
+    const rect = item.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+    const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+    item.style.setProperty('--mx', x + '%');
+    item.style.setProperty('--my', y + '%');
+  });
+});
+</script>
+</body>
+</html>

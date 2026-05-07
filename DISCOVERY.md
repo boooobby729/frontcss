@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-07 tympanus.net/codrops (Clip Menu)
+- 效果名称：Clip-Path 菜单展开动效 (Clip-Path Reveal Menu)
+- 效果描述：导航菜单中每个菜单项悬停时，用 clip-path 从不同方向（左→右、上→下、圆形扩散等）展开一个背景色块或图片预览，鼠标离开时以反向缓动（先快后慢）收起，产生极具弹性和趣味感的交互体验。支持多种变体：① 横向 clip 展开背景色 ② 纵向 clip 展开图片预览 ③ 圆形 clip 扩散 ④ 对角线 clip 切割
+- 实现原理：CSS clip-path polygon/circle 属性动画，JS mousemove 检测鼠标进入方向（上/下/左/右），根据方向设置 clip-path 起始状态，CSS transition 或 GSAP 驱动展开动画，离开时用 easeReverse（先快后慢）收起，配合 transform 轻微位移增强立体感
+- 状态：已实现 → 71-clip-reveal-menu.html，待集成到首页
+
 ## 2026-05-07 gsap.com (Hero Letter Animation)
 - 效果名称：字母多态入场 Hero 动画 (Multi-Style Letter Entrance Hero)
 - 效果描述：大号标题文字"Animate Anything"中每个字母以完全不同的方式入场：A 从下方 clip 滑入、n 做 rotateY 翻转、i 从上方滑入、m 从左侧滑入、a 从下方滑入、t 从下方滑入后切换为数字"100"再切回、e 从下方滑入；第二行"anything"中字母同样各有独特入场方式（rotateX 翻转、scale 从零放大、旋转消失等）。字母之间穿插 SVG 装饰图标（风车/四叶草、星星、闪电、蠕虫），这些图标也有独立的入场动画（旋转、scale 放大、路径绘制）。整体形成一种充满活力、每个字母都有个性的 Hero 标题动画，视觉冲击力极强。支持多个变体：① 原版多态入场 ② 纯字母版（无装饰图标）③ 循环播放版 ④ 鼠标悬停触发版

@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-07 codrops / awwwards.com (Clip-Path Wipes)
+- 效果名称：Clip-Path 过渡擦除 (Clip-Path Transition Wipes)
+- 效果描述：用 clip-path 实现多种视觉震撼的内容切换过渡效果。包含 6 种擦除变体：① 对角线擦除（从左上到右下的斜切过渡）② 圆形展开（从中心向外扩散的圆形遮罩）③ 多边形变形（多边形 clip-path 从一种形状变形到另一种）④ 文字遮罩擦除（大号文字轮廓作为 clip-path 遮罩，内容从文字形状中显现）⑤ 百叶窗擦除（多条水平/垂直条带依次展开）⑥ 液态波浪擦除（SVG path 驱动的有机曲线擦除）。点击或滚动触发，配合 CSS transition 或 GSAP 实现流畅过渡。
+- 实现原理：CSS clip-path 属性支持 polygon()、circle()、ellipse()、path() 等形状，通过 CSS transition 或 JS 动态修改 clip-path 值实现过渡动画；文字遮罩用 SVG clipPath + text 元素；百叶窗用多个 div 各自独立 clip-path 动画 + stagger 延迟；液态波浪用 SVG path 的 d 属性动画（SMIL 或 JS 插值）
+- 状态：已实现 → 67-clip-path-wipes.html，已集成到首页
+
 ## 2026-05-06 raycast.com (Feature Wall)
 - 效果名称：滚动驱动文字高亮墙 (Scroll-driven Feature Wall)
 - 效果描述：一段功能描述文字，每个功能短语是独立的可交互 span，默认呈深灰色（#434345），随滚动进度依次高亮为白色。右侧同步展示对应功能的 UI 预览截图。整体形成"文字墙"效果——大量功能词密集排列，滚动时像扫光一样逐一点亮，视觉冲击力极强。支持鼠标悬停单独高亮。

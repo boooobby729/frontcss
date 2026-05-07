@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clip-Path Transition Wipes</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0f;
+    color: #fff;
+    font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Header ─── */
+  .page-header {
+    text-align: center;
+    padding: 60px 20px 20px;
+  }
+  .page-header h1 {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,.5) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .page-header p {
+    margin-top: 10px;
+    font-size: 15px;
+    color: rgba(255,255,255,.4);
+  }
+
+  /* ─── Grid ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+    padding: 40px 40px 80px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .card {
+    border-radius: 16px;
+    overflow: hidden;
+    background: #111118;
+    border: 1px solid rgba(255,255,255,.07);
+  }
+
+  .demo-stage {
+    position: relative;
+    height: 260px;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .card-info {
+    padding: 16px 20px 20px;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .card-info h3 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .card-info p {
+    margin-top: 5px;
+    font-size: 12px;
+    color: rgba(255,255,255,.4);
+    line-height: 1.5;
+  }
+
+  /* ─── Shared layer styles ─── */
+  .layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hint {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    font-size: 11px;
+    color: rgba(255,255,255,.3);
+    pointer-events: none;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ══════════════════════════════════════════
+     1. DIAGONAL WIPE
+  ══════════════════════════════════════════ */
+  #diagonal .layer-a {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+  #diagonal .layer-a .text {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: rgba(255,255,255,.15);
+  }
+  #diagonal .layer-b {
+    background: linear-gradient(135deg, #6c63ff 0%, #a855f7 50%, #ec4899 100%);
+    clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%);
+    transition: clip-path 0.7s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  #diagonal .layer-b .text {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #fff;
+    text-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  #diagonal.active .layer-b {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  }
+  #diagonal.reverse .layer-b {
+    clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%);
+  }
+
+  /* ══════════════════════════════════════════
+     2. CIRCLE REVEAL
+  ══════════════════════════════════════════ */
+  #circle .layer-a {
+    background: #0f0f1a;
+  }
+  #circle .layer-a .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    opacity: .15;
+  }
+  #circle .layer-a .icon-grid span {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.3);
+    display: block;
+  }
+  #circle .layer-b {
+    background: radial-gradient(ellipse at center, #0d1117 0%, #0d2137 100%);
+    clip-path: circle(0% at 50% 50%);
+    transition: clip-path 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #circle .layer-b .center-content {
+    text-align: center;
+  }
+  #circle .layer-b .center-content .big-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 0 40px rgba(59, 130, 246, .5);
+  }
+  #circle .layer-b .center-content p {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+  }
+  #circle.active .layer-b {
+    clip-path: circle(75% at 50% 50%);
+  }
+  #circle.reverse .layer-b {
+    clip-path: circle(0% at 50% 50%);
+  }
+
+  /* ══════════════════════════════════════════
+     3. POLYGON MORPH
+  ══════════════════════════════════════════ */
+  #polygon .layer-a {
+    background: #0a0a0a;
+  }
+  #polygon .layer-a .geo {
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,.05);
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    border: none;
+  }
+  #polygon .layer-b {
+    background: linear-gradient(160deg, #f59e0b 0%, #ef4444 100%);
+    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%);
+    transition: clip-path 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  #polygon .layer-b .label {
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    color: #fff;
+    text-shadow: 0 4px 30px rgba(0,0,0,.3);
+  }
+  #polygon.active .layer-b {
+    clip-path: polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%);
+  }
+  #polygon.reverse .layer-b {
+    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%);
+  }
+
+  /* ══════════════════════════════════════════
+     4. TEXT MASK WIPE
+  ══════════════════════════════════════════ */
+  #textmask .layer-a {
+    background: #050510;
+  }
+  #textmask .layer-a .bg-text {
+    font-size: 90px;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    color: rgba(255,255,255,.04);
+    user-select: none;
+    line-height: 1;
+    text-align: center;
+  }
+  #textmask .layer-b {
+    overflow: hidden;
+  }
+  #textmask .layer-b .mask-text {
+    font-size: 90px;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    text-align: center;
+    background: linear-gradient(135deg, #34d399 0%, #06b6d4 50%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* The gradient background acts as the reveal fill */
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  #textmask.active .layer-b .mask-text {
+    clip-path: inset(0 0% 0 0);
+  }
+  #textmask.reverse .layer-b .mask-text {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  /* ══════════════════════════════════════════
+     5. BLINDS WIPE
+  ══════════════════════════════════════════ */
+  #blinds .layer-a {
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  }
+  #blinds .layer-a .dot-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 12px;
+    padding: 30px;
+  }
+  #blinds .layer-a .dot-grid span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    display: block;
+  }
+  #blinds .blinds-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #blinds .blind-strip {
+    flex: 1;
+    background: linear-gradient(90deg, #7c3aed 0%, #2563eb 100%);
+    transform-origin: top;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  /* staggered delays */
+  #blinds .blind-strip:nth-child(1) { transition-delay: 0.00s; }
+  #blinds .blind-strip:nth-child(2) { transition-delay: 0.05s; }
+  #blinds .blind-strip:nth-child(3) { transition-delay: 0.10s; }
+  #blinds .blind-strip:nth-child(4) { transition-delay: 0.15s; }
+  #blinds .blind-strip:nth-child(5) { transition-delay: 0.20s; }
+  #blinds .blind-strip:nth-child(6) { transition-delay: 0.25s; }
+  #blinds .blind-strip:nth-child(7) { transition-delay: 0.30s; }
+  #blinds .blinds-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease 0.4s;
+  }
+  #blinds.active .blind-strip {
+    clip-path: inset(0 0% 0 0);
+  }
+  #blinds.active .blinds-label { opacity: 1; }
+  #blinds.reverse .blind-strip {
+    clip-path: inset(0 100% 0 0);
+    transition-delay: 0s;
+  }
+  #blinds.reverse .blind-strip:nth-child(7) { transition-delay: 0.00s; }
+  #blinds.reverse .blind-strip:nth-child(6) { transition-delay: 0.05s; }
+  #blinds.reverse .blind-strip:nth-child(5) { transition-delay: 0.10s; }
+  #blinds.reverse .blind-strip:nth-child(4) { transition-delay: 0.15s; }
+  #blinds.reverse .blind-strip:nth-child(3) { transition-delay: 0.20s; }
+  #blinds.reverse .blind-strip:nth-child(2) { transition-delay: 0.25s; }
+  #blinds.reverse .blind-strip:nth-child(1) { transition-delay: 0.30s; }
+  #blinds.reverse .blinds-label { opacity: 0; transition-delay: 0s; }
+
+  /* ══════════════════════════════════════════
+     6. LIQUID WAVE WIPE
+  ══════════════════════════════════════════ */
+  #liquid .layer-a {
+    background: #070714;
+  }
+  #liquid .layer-a .stars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  #liquid .layer-a .star {
+    position: absolute;
+    border-radius: 50%;
+    background: #fff;
+    animation: twinkle 2s ease-in-out infinite alternate;
+  }
+  @keyframes twinkle {
+    from { opacity: 0.1; }
+    to   { opacity: 0.6; }
+  }
+  #liquid .layer-a .planet {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #4f46e5 0%, #1e1b4b 60%, #0f0e28 100%);
+    box-shadow: -8px -6px 0 rgba(255,255,255,.08) inset,
+                0 0 30px rgba(79, 70, 229, .3);
+  }
+  #liquid .layer-b {
+    background: linear-gradient(160deg, #10b981 0%, #0ea5e9 100%);
+    /* start fully off to the left via wave clip */
+    clip-path: polygon(0% 100%, 0% 100%, 0% 100%, 0% 100%, 0% 100%);
+    transition: clip-path 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  #liquid .layer-b .inner {
+    text-align: center;
+  }
+  #liquid .layer-b .inner .num {
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  #liquid .layer-b .inner .sub {
+    font-size: 13px;
+    margin-top: 6px;
+    opacity: 0.8;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  #liquid.active .layer-b {
+    clip-path: polygon(-2% -5%, 25% -8%, 50% -3%, 75% -8%, 102% -5%, 102% 105%, -2% 105%);
+  }
+  #liquid.reverse .layer-b {
+    clip-path: polygon(0% 100%, 0% 100%, 0% 100%, 0% 100%, 0% 100%);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Clip-Path Transition Wipes</h1>
+  <p>Six reveal transitions using CSS clip-path — click any card to toggle</p>
+</div>
+
+<div class="grid">
+
+  <!-- ① Diagonal Wipe -->
+  <div class="card">
+    <div class="demo-stage" id="diagonal">
+      <div class="layer layer-a"><span class="text">BEFORE</span></div>
+      <div class="layer layer-b"><span class="text">AFTER</span></div>
+      <span class="hint">Click to toggle</span>
+    </div>
+    <div class="card-info">
+      <h3>① Diagonal Wipe</h3>
+      <p>对角线擦除。用 polygon() 坐标从右边界推入，形成斜切过渡。</p>
+    </div>
+  </div>
+
+  <!-- ② Circle Reveal -->
+  <div class="card">
+    <div class="demo-stage" id="circle">
+      <div class="layer layer-a">
+        <div class="icon-grid">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="layer layer-b">
+        <div class="center-content">
+          <div class="big-icon">✦</div>
+          <p>Circle Reveal</p>
+        </div>
+      </div>
+      <span class="hint">Click to toggle</span>
+    </div>
+    <div class="card-info">
+      <h3>② Circle Reveal</h3>
+      <p>圆形展开。circle() 从 0% 扩展到 75%，配合 spring 弹性曲线产生回弹感。</p>
+    </div>
+  </div>
+
+  <!-- ③ Polygon Morph -->
+  <div class="card">
+    <div class="demo-stage" id="polygon">
+      <div class="layer layer-a"><div class="geo"></div></div>
+      <div class="layer layer-b"><span class="label">8★</span></div>
+      <span class="hint">Click to toggle</span>
+    </div>
+    <div class="card-info">
+      <h3>③ Polygon Morph</h3>
+      <p>多边形变形。8 点 polygon() 从中心一个点扩展成八角星形，形状变形擦除。</p>
+    </div>
+  </div>
+
+  <!-- ④ Text Mask Wipe -->
+  <div class="card">
+    <div class="demo-stage" id="textmask">
+      <div class="layer layer-a">
+        <div class="bg-text">OK</div>
+      </div>
+      <div class="layer layer-b">
+        <div class="mask-text">OK</div>
+      </div>
+      <span class="hint">Click to toggle</span>
+    </div>
+    <div class="card-info">
+      <h3>④ Text Gradient Reveal</h3>
+      <p>文字渐变擦除。inset() 从右向左收缩，彩色渐变文字从左到右依次显现。</p>
+    </div>
+  </div>
+
+  <!-- ⑤ Blinds Wipe -->
+  <div class="card">
+    <div class="demo-stage" id="blinds">
+      <div class="layer layer-a">
+        <div class="dot-grid">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="blinds-container">
+        <div class="blind-strip"></div>
+        <div class="blind-strip"></div>
+        <div class="blind-strip"></div>
+        <div class="blind-strip"></div>
+        <div class="blind-strip"></div>
+        <div class="blind-strip"></div>
+        <div class="blind-strip"></div>
+      </div>
+      <div class="blinds-label">BLINDS</div>
+      <span class="hint">Click to toggle</span>
+    </div>
+    <div class="card-info">
+      <h3>⑤ Blinds Wipe</h3>
+      <p>百叶窗擦除。7 条水平条带各自 inset() 动画，配合 stagger 延迟依次展开。</p>
+    </div>
+  </div>
+
+  <!-- ⑥ Liquid Wave Wipe -->
+  <div class="card">
+    <div class="demo-stage" id="liquid">
+      <div class="layer layer-a">
+        <div class="stars" id="star-container"></div>
+        <div class="planet"></div>
+      </div>
+      <div class="layer layer-b">
+        <div class="inner">
+          <div class="num">100%</div>
+          <div class="sub">Liquid Wipe</div>
+        </div>
+      </div>
+      <span class="hint">Click to toggle</span>
+    </div>
+    <div class="card-info">
+      <h3>⑥ Liquid Wave Wipe</h3>
+      <p>液态波浪擦除。polygon() 顶边使用不等高点模拟波峰，从底部涌起覆盖画面。</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Star generation for liquid card ──
+  const starContainer = document.getElementById('star-container');
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${Math.random() * 100}%;
+      top: ${Math.random() * 100}%;
+      animation-delay: ${Math.random() * 3}s;
+      animation-duration: ${1.5 + Math.random() * 2.5}s;
+    `;
+    starContainer.appendChild(s);
+  }
+
+  // ── Toggle logic ──
+  const stages = document.querySelectorAll('.demo-stage');
+  stages.forEach(stage => {
+    let animating = false;
+    stage.addEventListener('click', () => {
+      if (animating) return;
+      animating = true;
+
+      if (!stage.classList.contains('active')) {
+        stage.classList.remove('reverse');
+        stage.classList.add('active');
+      } else {
+        stage.classList.remove('active');
+        stage.classList.add('reverse');
+      }
+
+      // longest transition ~950ms
+      setTimeout(() => { animating = false; }, 1000);
+    });
+  });
+</script>
+
+</body>
+</html>

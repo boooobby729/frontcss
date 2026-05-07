@@ -251,6 +251,16 @@ a{text-decoration:none;color:inherit}
       </div>
       <div class="card-info"><h3>Clip-Path Reveal Menu</h3><span class="tag">clip-path · direction-aware · circle · diagonal</span></div>
     </a>
+    <a href="../72-glitch-text.html" class="card">
+      <div class="card-visual">
+        <div style="position:relative;width:100%;height:100%;background:#000;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:16px 18px;gap:10px;">
+          <div id="gt72-1" style="font-family:'Courier New',monospace;font-size:18px;font-weight:900;letter-spacing:-.02em;text-transform:uppercase;color:#fff;position:relative;white-space:nowrap;">SIGNAL LOST</div>
+          <div id="gt72-2" style="font-family:'Courier New',monospace;font-size:14px;font-weight:900;letter-spacing:-.02em;text-transform:uppercase;color:#00e5ff;position:relative;white-space:nowrap;">SYSTEM ERROR</div>
+          <div id="gt72-3" style="font-family:'Courier New',monospace;font-size:12px;font-weight:900;letter-spacing:-.02em;text-transform:uppercase;color:#ff2d55;position:relative;white-space:nowrap;">OVERRIDE</div>
+        </div>
+      </div>
+      <div class="card-info"><h3>Glitch Text Effect</h3><span class="tag">chromatic aberration · slice · matrix decode · scanline</span></div>
+    </a>
 </div>
 <script>
 (function(){
@@ -550,6 +560,37 @@ a{text-decoration:none;color:inherit}
   }
 
   setTimeout(cycle, 400);
+})();
+</script>
+<script>
+(function(){
+  var el1=document.getElementById('gt72-1');
+  var el2=document.getElementById('gt72-2');
+  var el3=document.getElementById('gt72-3');
+  if(!el1)return;
+  function glitchChroma(el){
+    var frames=0;
+    var id=setInterval(function(){
+      var rx=(Math.random()-.5)*10;
+      var bx=(Math.random()-.5)*10;
+      el.style.textShadow=rx+'px 0 #ff003c, '+bx+'px 0 #00f0ff';
+      frames++;
+      if(frames>8){clearInterval(id);el.style.textShadow='none';}
+    },60);
+  }
+  function glitchSlice(el){
+    var orig=el.textContent;
+    var frames=0;
+    var id=setInterval(function(){
+      var tx=(Math.random()-.5)*12;
+      el.style.transform='translateX('+tx+'px)';
+      frames++;
+      if(frames>6){clearInterval(id);el.style.transform='none';}
+    },55);
+  }
+  setInterval(function(){glitchChroma(el1);},1800);
+  setInterval(function(){glitchSlice(el2);},2400);
+  setInterval(function(){glitchChroma(el3);glitchSlice(el3);},3100);
 })();
 </script>
 <script>

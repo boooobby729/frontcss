@@ -101,3 +101,9 @@
 - 效果描述：大号标题文字在鼠标悬停或滚动时，通过 SVG feTurbulence + feDisplacementMap 滤镜产生液态扭曲、故障撕裂、溶解消散等视觉效果。多个变体展示不同滤镜组合：① 液态融化（turbulence 频率渐变）② 故障撕裂（feColorMatrix 通道分离 + 位移）③ 像素溶解（feMorphology + feBlend）④ 霓虹发光扭曲（feGaussianBlur + feComposite）。深色背景，大号白色/彩色文字，鼠标悬停触发动画。
 - 实现原理：SVG defs 中定义 filter 元素，feTurbulence 的 baseFrequency 和 seed 属性用 JS 动态修改驱动动画，feDisplacementMap 的 scale 属性控制扭曲强度，CSS filter: url(#filterId) 应用到文字元素，mousemove/scroll 事件驱动参数变化，requestAnimationFrame 平滑插值
 - 状态：已实现 → 62-svg-filter-text.html，已集成到首页
+
+## 2026-05-07 awwwards.com / css-tricks.com (Glitch Text)
+- 效果名称：故障文字效果 (Glitch Text Effect)
+- 效果描述：文字出现随机的数字故障/赛博朋克风格动画效果。包含 4 种变体：① RGB 色差分离（chromatic aberration）—— 文字的红/绿/蓝通道各自随机偏移，产生彩色重影；② 文字切片故障（slice glitch）—— 文字被随机水平切片，每片独立位移，模拟信号干扰；③ 数字雨解码（matrix decode）—— 文字从随机字符逐渐"解码"为真实内容，每个字母独立随机替换；④ 扫描线故障（scanline glitch）—— 文字上叠加动态扫描线 + 随机闪烁，配合 clip-path 切片位移。深色背景，霓虹色文字，鼠标悬停触发 + 自动随机触发。
+- 实现原理：① CSS text-shadow 多层叠加（红/绿/蓝各一层），JS 定时随机修改偏移量；② 多个绝对定位文字副本 + CSS clip-path inset() 切割 + translateX 随机位移；③ JS 定时器逐字符替换为随机字符集（ASCII/日文/数字），达到目标字符后停止；④ CSS animation + pseudo-element 扫描线叠加
+- 状态：已实现 → `72-glitch-text.html`，集成至 `_cat/collect.html`

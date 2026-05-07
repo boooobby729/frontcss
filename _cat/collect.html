@@ -178,6 +178,22 @@ a{text-decoration:none;color:inherit}
       </div>
       <div class="card-info"><h3>Repeating Image Frame Transition</h3><span class="tag">clip-path · frame animation · panel</span></div>
     </a>
+    <a href="../69-scroll-3d-grid.html" class="card">
+      <div class="card-visual">
+        <div class="stage" id="previewStage69" style="position:relative;overflow:hidden;background:#080810;perspective:300px;">
+          <!-- 3x2 mini grid of 3D-tilting cards -->
+          <div id="grid69" style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:3px;padding:10px;">
+            <div class="g69c" style="border-radius:4px;background:linear-gradient(135deg,#7c3aed,#a855f7);transform:rotateX(60deg);opacity:0;transition:transform .5s,opacity .5s;"></div>
+            <div class="g69c" style="border-radius:4px;background:linear-gradient(135deg,#2563eb,#38bdf8);transform:rotateX(60deg);opacity:0;transition:transform .55s .07s,opacity .55s .07s;"></div>
+            <div class="g69c" style="border-radius:4px;background:linear-gradient(135deg,#dc2626,#f97316);transform:rotateX(60deg);opacity:0;transition:transform .6s .14s,opacity .6s .14s;"></div>
+            <div class="g69c" style="border-radius:4px;background:linear-gradient(135deg,#16a34a,#84cc16);transform:rotateX(60deg);opacity:0;transition:transform .55s .21s,opacity .55s .21s;"></div>
+            <div class="g69c" style="border-radius:4px;background:linear-gradient(135deg,#d97706,#fbbf24);transform:rotateX(60deg);opacity:0;transition:transform .6s .28s,opacity .6s .28s;"></div>
+            <div class="g69c" style="border-radius:4px;background:linear-gradient(135deg,#be185d,#ec4899);transform:rotateX(60deg);opacity:0;transition:transform .65s .35s,opacity .65s .35s;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info"><h3>Scroll-Driven 3D Grid</h3><span class="tag">IntersectionObserver · rotateX · tilt</span></div>
+    </a>
 </div>
 <script>
 (function(){
@@ -331,6 +347,37 @@ a{text-decoration:none;color:inherit}
   }
   runDemo();
   setInterval(runDemo,2800);
+})();
+</script>
+<script>
+(function(){
+  var cards=document.querySelectorAll('.g69c');
+  if(!cards.length)return;
+  var shown=false;
+  function show(){
+    if(shown)return;
+    shown=true;
+    cards.forEach(function(c){
+      c.style.transform='rotateX(0deg)';
+      c.style.opacity='1';
+    });
+  }
+  function hide(){
+    shown=false;
+    cards.forEach(function(c){
+      c.style.transform='rotateX(60deg)';
+      c.style.opacity='0';
+    });
+  }
+  // loop: show → wait → hide → wait → repeat
+  function cycle(){
+    show();
+    setTimeout(function(){
+      hide();
+      setTimeout(cycle,600);
+    },1600);
+  }
+  cycle();
 })();
 </script>
 <script>

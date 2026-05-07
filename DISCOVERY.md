@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-07 tympanus.net/codrops (Staggered 3D Grid)
+- 效果名称：滚动驱动 3D 透视网格 (Scroll-Driven 3D Perspective Grid)
+- 效果描述：页面滚动时，网格中的图片/卡片以错开的（staggered）延迟进行 3D 透视动画：列之间形成圆柱弯曲效果（perspective + rotateX 错位），每列随滚动进度逐步从折叠态展开；同时支持纯文字版的错落动画（每个字母/单词独立触发 3D 翻转）、网格项随滚动缩放/淡入版、以及鼠标悬停时局部倾斜的倾斜卡片版。整体呈现一种机械感十足的空间错落美学。
+- 实现原理：JS 用 IntersectionObserver 或 scroll 事件计算每个网格项相对视口的位置，根据列号和行号计算 rotateX/rotateY 偏移量（perspective 在父元素上），stagger 通过 CSS --delay 变量 + transition-delay 实现，每列的透视值不同制造圆柱弯曲感；文字版用 CSS transform perspective + rotateX 从 90deg（折叠）到 0deg（展开），opacity 同步变化
+- 状态：已实现 → 69-scroll-3d-grid.html，已集成到 collect.html
+
 ## 2026-05-07 tympanus.net/codrops (RepeatingImageTransition)
 - 效果名称：图片帧重复过渡 (Repeating Image Frame Transition)
 - 效果描述：点击网格中的图片卡片时，触发一种独特的"帧动画"过渡效果：系统在起点（网格项）和终点（展开面板）之间生成多个中间帧（mover 元素），这些帧沿路径依次飞过，每个帧都有 clip-path 入场/出场动画，形成连续的帧重复视觉效果，最终图片"落入"展开的详情面板。支持多种 clip-path 方向（上下/左右）、路径运动（线性/正弦波）、旋转抖动等变体。

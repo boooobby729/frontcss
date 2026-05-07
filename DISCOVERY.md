@@ -28,7 +28,7 @@
 - 效果名称：文字粒子爆炸 (Text Particle Explosion)
 - 效果描述：点击文字时，文字碎裂成粒子向四周飞散，然后重新聚合
 - 实现原理：Canvas 2D API，将文字渲染到离屏 canvas，读取像素点生成粒子数组，用物理模拟驱动粒子运动
-- 状态：待实现
+- 状态：已实现 → 66-text-particle-explosion.html，已集成到 collect.html
 
 ## 2026-05-05 tympanus.net/codrops (Playground)
 - 效果名称：等高线地形图 (Contour Terrain Map)

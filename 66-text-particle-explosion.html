@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Text Particle Explosion · 文字粒子爆炸</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#000;
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── Layout ── */
+.page-header{
+  padding:56px 32px 16px;
+  text-align:center;
+}
+.page-header h1{
+  font-size:clamp(1.1rem,2vw,1.4rem);
+  font-weight:600;
+  letter-spacing:-.02em;
+  color:rgba(255,255,255,.85);
+}
+.page-header p{
+  margin-top:6px;
+  font-size:.8rem;
+  color:rgba(255,255,255,.3);
+}
+
+.section{
+  padding:80px 32px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+  position:relative;
+}
+.section + .section{
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.section-label{
+  font-size:.68rem;
+  font-weight:600;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.2);
+}
+.hint{
+  font-size:.72rem;
+  color:rgba(255,255,255,.2);
+  margin-top:4px;
+}
+
+/* ── Canvas wrapper ── */
+.canvas-wrap{
+  position:relative;
+  display:inline-block;
+  cursor:pointer;
+}
+canvas{
+  display:block;
+}
+
+/* ── Variant 1: Explode & Reassemble ── */
+#c1{ cursor:pointer; }
+
+/* ── Variant 2: Shatter on hover ── */
+#c2{ cursor:pointer; }
+
+/* ── Variant 3: Typed text burst ── */
+.typed-wrap{
+  position:relative;
+  width:min(680px, 90vw);
+  height:120px;
+  overflow:visible;
+}
+#c3{
+  position:absolute;
+  top:0; left:0;
+  pointer-events:none;
+}
+.typed-input{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:transparent;
+  border:none;
+  outline:none;
+  font-size:clamp(2rem,6vw,4rem);
+  font-weight:700;
+  font-family:inherit;
+  letter-spacing:-.04em;
+  color:#fff;
+  text-align:center;
+  width:100%;
+  caret-color:#a78bfa;
+  z-index:2;
+}
+
+/* ── Variant 4: Color explosion ── */
+#c4{ cursor:pointer; }
+
+/* ── Variant 5: Scatter word cloud ── */
+#c5{ cursor:pointer; }
+
+/* ── Color palette chips ── */
+.palette-row{
+  display:flex;
+  gap:8px;
+  margin-top:4px;
+}
+.chip{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  cursor:pointer;
+  border:2px solid transparent;
+  transition:transform .15s, border-color .15s;
+}
+.chip:hover{ transform:scale(1.2); }
+.chip.active{ border-color:#fff; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Text Particle Explosion &nbsp;·&nbsp; 文字粒子爆炸</h1>
+  <p>Canvas 2D · pixel-sampling · spring physics · 5 variants</p>
+</div>
+
+<!-- ── VARIANT 1 ── Click to explode, auto-reassemble ── -->
+<section class="section">
+  <span class="section-label">01 · Explode &amp; Reassemble</span>
+  <div class="canvas-wrap">
+    <canvas id="c1" width="640" height="200"></canvas>
+  </div>
+  <span class="hint">Click to shatter · particles spring back</span>
+</section>
+
+<!-- ── VARIANT 2 ── Hover shatter per character ── -->
+<section class="section">
+  <span class="section-label">02 · Per-Character Hover Shatter</span>
+  <div class="canvas-wrap">
+    <canvas id="c2" width="640" height="200"></canvas>
+  </div>
+  <span class="hint">Hover over each character to explode it</span>
+</section>
+
+<!-- ── VARIANT 3 ── Type &amp; burst ── -->
+<section class="section">
+  <span class="section-label">03 · Type &amp; Burst</span>
+  <div class="typed-wrap">
+    <canvas id="c3" width="680" height="120"></canvas>
+    <input id="typeInput" class="typed-input" maxlength="16" value="HELLO" autocomplete="off" spellcheck="false">
+  </div>
+  <span class="hint">Edit the text · press Enter to burst</span>
+</section>
+
+<!-- ── VARIANT 4 ── Color explosion ── -->
+<section class="section">
+  <span class="section-label">04 · Chromatic Burst</span>
+  <div class="palette-row" id="paletteRow">
+    <div class="chip active" data-color="#a78bfa" style="background:#a78bfa"></div>
+    <div class="chip" data-color="#f472b6" style="background:#f472b6"></div>
+    <div class="chip" data-color="#38bdf8" style="background:#38bdf8"></div>
+    <div class="chip" data-color="#4ade80" style="background:#4ade80"></div>
+    <div class="chip" data-color="#fb923c" style="background:#fb923c"></div>
+  </div>
+  <div class="canvas-wrap">
+    <canvas id="c4" width="640" height="200"></canvas>
+  </div>
+  <span class="hint">Choose a colour · click to burst</span>
+</section>
+
+<!-- ── VARIANT 5 ── Multi-word scatter ── -->
+<section class="section">
+  <span class="section-label">05 · Word Cloud Scatter</span>
+  <div class="canvas-wrap">
+    <canvas id="c5" width="640" height="340"></canvas>
+  </div>
+  <span class="hint">Click anywhere to scatter · click again to collect</span>
+</section>
+
+<script>
+/* ===================================================
+   Shared utilities
+=================================================== */
+const DPR = Math.min(window.devicePixelRatio||1, 2);
+
+function setupHiDPI(canvas, w, h){
+  canvas.width  = w * DPR;
+  canvas.height = h * DPR;
+  canvas.style.width  = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
+  return ctx;
+}
+
+/* Sample text pixels into an array of {x,y} points */
+function sampleTextPixels(text, fontSize, canvasW, canvasH, density){
+  const tmp = document.createElement('canvas');
+  tmp.width  = canvasW  * DPR;
+  tmp.height = canvasH * DPR;
+  const tc = tmp.getContext('2d');
+  tc.scale(DPR, DPR);
+  tc.clearRect(0,0,canvasW,canvasH);
+  tc.fillStyle = '#fff';
+  tc.font = `700 ${fontSize}px -apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif`;
+  tc.textAlign = 'center';
+  tc.textBaseline = 'middle';
+  tc.fillText(text, canvasW/2, canvasH/2);
+
+  const imgData = tc.getImageData(0,0,tmp.width,tmp.height);
+  const pixels  = [];
+  const step = density || 4;
+  for(let y=0; y<tmp.height; y+=step){
+    for(let x=0; x<tmp.width; x+=step){
+      const i=(y*tmp.width+x)*4;
+      if(imgData.data[i+3]>128){
+        pixels.push({ x: x/DPR, y: y/DPR });
+      }
+    }
+  }
+  return pixels;
+}
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function easeOutExpo(t){ return t===1?1:1-Math.pow(2,-10*t); }
+function easeInExpo(t){ return t===0?0:Math.pow(2,10*t-10); }
+
+/* ===================================================
+   VARIANT 1  ·  Explode & Reassemble
+=================================================== */
+(function(){
+  const W=640, H=200;
+  const canvas = document.getElementById('c1');
+  const ctx    = setupHiDPI(canvas, W, H);
+
+  const TEXT      = 'EXPLORE';
+  const FONT_SIZE = 88;
+
+  let   targets  = sampleTextPixels(TEXT, FONT_SIZE, W, H, 3);
+  let   particles= [];
+  let   state    = 'idle';   // idle | exploding | assembling
+  let   animId   = null;
+
+  /* Build particles at target positions */
+  function buildParticles(){
+    particles = targets.map(t=>({
+      x: t.x, y: t.y,
+      tx: t.x, ty: t.y,
+      vx:0, vy:0,
+      size: rand(.8,2.2),
+      alpha:1
+    }));
+  }
+  buildParticles();
+
+  function explode(){
+    if(state==='exploding') return;
+    state='exploding';
+    particles.forEach(p=>{
+      const angle = rand(0,Math.PI*2);
+      const speed = rand(4,18);
+      p.vx = Math.cos(angle)*speed;
+      p.vy = Math.sin(angle)*speed - rand(2,6);
+    });
+    cancelAnimationFrame(animId);
+    animate();
+  }
+
+  function assemble(){
+    state='assembling';
+    cancelAnimationFrame(animId);
+    animate();
+  }
+
+  canvas.addEventListener('click', ()=>{
+    if(state==='idle'||state==='assembling') explode();
+    else if(state==='exploding') assemble();
+  });
+
+  /* auto-assemble after 1.4 s */
+  let autoTimer=null;
+  canvas.addEventListener('click',()=>{
+    clearTimeout(autoTimer);
+    if(state==='exploding'){
+      autoTimer=setTimeout(()=>{ if(state==='exploding') assemble(); },1400);
+    }
+  });
+
+  function animate(){
+    ctx.clearRect(0,0,W,H);
+
+    let done = true;
+
+    particles.forEach(p=>{
+      if(state==='exploding'){
+        p.vx *= .92;
+        p.vy  = p.vy*.92 + .35;   // gravity
+        p.x  += p.vx;
+        p.y  += p.vy;
+        p.alpha = Math.max(0, p.alpha - .008);
+        done = false;
+      } else if(state==='assembling'){
+        const dx = p.tx - p.x;
+        const dy = p.ty - p.y;
+        p.vx = p.vx*.7 + dx*.12;
+        p.vy = p.vy*.7 + dy*.12;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha = Math.min(1, p.alpha + .04);
+        if(Math.abs(dx)<.5 && Math.abs(dy)<.5 && Math.abs(p.vx)<.3 && Math.abs(p.vy)<.3) {
+          p.x = p.tx; p.y = p.ty; p.vx=0; p.vy=0;
+        } else { done = false; }
+      }
+
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle   = '#fff';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    ctx.globalAlpha = 1;
+
+    if(!done){
+      animId = requestAnimationFrame(animate);
+    } else {
+      if(state==='assembling') state='idle';
+    }
+  }
+
+  /* initial draw */
+  animate();
+  state='idle';
+})();
+
+
+/* ===================================================
+   VARIANT 2  ·  Per-Character Hover Shatter
+=================================================== */
+(function(){
+  const W=640, H=200;
+  const canvas = document.getElementById('c2');
+  const ctx    = setupHiDPI(canvas, W, H);
+
+  const CHARS     = 'SHATTER'.split('');
+  const FONT_SIZE = 80;
+  const SPACING   = W/(CHARS.length+1);
+
+  /* Build one particle system per character */
+  const charSystems = CHARS.map((ch,i)=>{
+    const cx = SPACING*(i+1);
+    const cy = H/2;
+    const targets = sampleTextPixels(ch, FONT_SIZE, W, H, 3).map(t=>({
+      x: t.x - W/2 + cx,
+      y: t.y - H/2 + cy
+    }));
+    return {
+      ch, cx, cy,
+      targets,
+      particles: targets.map(t=>({
+        x:t.x, y:t.y, tx:t.x, ty:t.y,
+        vx:0,  vy:0, size:rand(.8,2), alpha:1
+      })),
+      state:'idle',
+      animId:null
+    };
+  });
+
+  function explodeChar(sys){
+    if(sys.state==='exploding') return;
+    sys.state='exploding';
+    sys.particles.forEach(p=>{
+      const angle = rand(0,Math.PI*2);
+      const speed = rand(3,14);
+      p.vx = Math.cos(angle)*speed;
+      p.vy = Math.sin(angle)*speed - rand(1,5);
+    });
+    setTimeout(()=>{
+      if(sys.state==='exploding') reassembleChar(sys);
+    },1000);
+    loop();
+  }
+
+  function reassembleChar(sys){
+    sys.state='assembling';
+  }
+
+  let loopId = null;
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    charSystems.forEach(sys=>{
+      sys.particles.forEach(p=>{
+        if(sys.state==='exploding'){
+          p.vx *= .90; p.vy = p.vy*.90 + .3;
+          p.x += p.vx; p.y += p.vy;
+          p.alpha = Math.max(0, p.alpha-.006);
+        } else if(sys.state==='assembling'){
+          const dx=p.tx-p.x, dy=p.ty-p.y;
+          p.vx=p.vx*.72+dx*.14; p.vy=p.vy*.72+dy*.14;
+          p.x+=p.vx; p.y+=p.vy;
+          p.alpha=Math.min(1,p.alpha+.05);
+          if(Math.abs(dx)<.4&&Math.abs(dy)<.4){
+            p.x=p.tx;p.y=p.ty;p.vx=0;p.vy=0;
+          }
+        }
+        ctx.globalAlpha=p.alpha;
+        ctx.fillStyle='#fff';
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fill();
+      });
+    });
+    ctx.globalAlpha=1;
+
+    /* check all idle */
+    const allIdle = charSystems.every(s=>{
+      if(s.state==='assembling'){
+        const settled=s.particles.every(p=>Math.abs(p.x-p.tx)<.5&&Math.abs(p.y-p.ty)<.5);
+        if(settled) s.state='idle';
+        return settled;
+      }
+      return s.state==='idle';
+    });
+    loopId = requestAnimationFrame(loop);
+  }
+  loop();
+
+  canvas.addEventListener('mousemove',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left);
+    const my=(e.clientY-rect.top);
+    charSystems.forEach(sys=>{
+      const d=Math.sqrt((mx-sys.cx)**2+(my-sys.cy)**2);
+      if(d<50 && sys.state==='idle') explodeChar(sys);
+    });
+  });
+})();
+
+
+/* ===================================================
+   VARIANT 3  ·  Type & Burst
+=================================================== */
+(function(){
+  const W=680, H=120;
+  const canvas = document.getElementById('c3');
+  const ctx    = setupHiDPI(canvas,W,H);
+  const input  = document.getElementById('typeInput');
+
+  let particles = [];
+  let animId    = null;
+  let bursting  = false;
+
+  function burst(){
+    const text = input.value||'HELLO';
+    const pts  = sampleTextPixels(text, clampFontSize(text.length), W, H, 3);
+    particles  = pts.map(t=>({
+      x:t.x, y:t.y,
+      vx: rand(-12,12),
+      vy: rand(-14,-2),
+      alpha:1,
+      size:rand(.9,2.4),
+      color: `hsl(${rand(240,300)},80%,70%)`
+    }));
+    bursting=true;
+    cancelAnimationFrame(animId);
+    animate();
+  }
+
+  function clampFontSize(len){
+    if(len<=4)  return 72;
+    if(len<=8)  return 58;
+    if(len<=12) return 46;
+    return 36;
+  }
+
+  function animate(){
+    ctx.clearRect(0,0,W,H);
+    let live=false;
+    particles.forEach(p=>{
+      if(p.alpha<=0) return;
+      p.vx*=.90; p.vy=p.vy*.90+.5;
+      p.x+=p.vx; p.y+=p.vy;
+      p.alpha-=.022;
+      live=true;
+      ctx.globalAlpha=Math.max(0,p.alpha);
+      ctx.fillStyle=p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha=1;
+    if(live) animId=requestAnimationFrame(animate);
+    else { ctx.clearRect(0,0,W,H); bursting=false; }
+  }
+
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){ e.preventDefault(); burst(); }
+  });
+
+  /* Show idle hint on canvas */
+  function drawIdle(){
+    if(bursting) return;
+    ctx.clearRect(0,0,W,H);
+  }
+  drawIdle();
+})();
+
+
+/* ===================================================
+   VARIANT 4  ·  Chromatic Burst
+=================================================== */
+(function(){
+  const W=640, H=200;
+  const canvas = document.getElementById('c4');
+  const ctx    = setupHiDPI(canvas,W,H);
+
+  let accentColor = '#a78bfa';
+
+  /* palette */
+  document.getElementById('paletteRow').addEventListener('click',e=>{
+    const chip=e.target.closest('.chip');
+    if(!chip) return;
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    accentColor=chip.dataset.color;
+    rebuildIdle();
+  });
+
+  const TEXT='VIBRANT', FONT=80;
+  let targets = sampleTextPixels(TEXT,FONT,W,H,3);
+  let particles= [];
+  let state='idle', animId=null;
+
+  function hexToHsl(hex){
+    let r=parseInt(hex.slice(1,3),16)/255;
+    let g=parseInt(hex.slice(3,5),16)/255;
+    let b=parseInt(hex.slice(5,7),16)/255;
+    const max=Math.max(r,g,b),min=Math.min(r,g,b);
+    let h,s,l=(max+min)/2;
+    if(max===min){h=s=0;}else{
+      const d=max-min;s=l>.5?d/(2-max-min):d/(max+min);
+      switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4;}h/=6;
+    }
+    return [Math.round(h*360),Math.round(s*100),Math.round(l*100)];
+  }
+
+  function buildIdle(){
+    particles=targets.map(t=>({
+      x:t.x,y:t.y,tx:t.x,ty:t.y,
+      vx:0,vy:0,size:rand(.8,2.2),alpha:1,
+      color:accentColor
+    }));
+  }
+
+  function rebuildIdle(){
+    particles.forEach(p=>p.color=accentColor);
+    drawStatic();
+  }
+
+  function drawStatic(){
+    ctx.clearRect(0,0,W,H);
+    const [h,s,l]=hexToHsl(accentColor);
+    particles.forEach(p=>{
+      /* slight hue variation per particle */
+      const hv=h+rand(-20,20);
+      ctx.globalAlpha=rand(.6,1);
+      ctx.fillStyle=`hsl(${hv},${s}%,${l}%)`;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha=1;
+  }
+
+  function explode(){
+    if(state==='exploding') return;
+    state='exploding';
+    const [h,s,l]=hexToHsl(accentColor);
+    particles.forEach(p=>{
+      const angle=rand(0,Math.PI*2);
+      const spd=rand(5,20);
+      p.vx=Math.cos(angle)*spd;
+      p.vy=Math.sin(angle)*spd-rand(2,8);
+      p.color=`hsl(${h+rand(-40,40)},${s+rand(-10,20)}%,${l+rand(-10,15)}%)`;
+    });
+    setTimeout(()=>{ if(state==='exploding') assemble(); },1200);
+    cancelAnimationFrame(animId);
+    animate();
+  }
+
+  function assemble(){
+    state='assembling';
+  }
+
+  canvas.addEventListener('click',()=>{
+    if(state==='idle') explode();
+    else if(state==='exploding') assemble();
+  });
+
+  function animate(){
+    ctx.clearRect(0,0,W,H);
+    let settled=0;
+    particles.forEach(p=>{
+      if(state==='exploding'){
+        p.vx*=.91; p.vy=p.vy*.91+.32;
+        p.x+=p.vx; p.y+=p.vy;
+        p.alpha=Math.max(0,p.alpha-.007);
+      } else if(state==='assembling'){
+        const dx=p.tx-p.x, dy=p.ty-p.y;
+        p.vx=p.vx*.72+dx*.14; p.vy=p.vy*.72+dy*.14;
+        p.x+=p.vx; p.y+=p.vy;
+        p.alpha=Math.min(1,p.alpha+.04);
+        if(Math.abs(dx)<.5&&Math.abs(dy)<.5) settled++;
+      }
+      ctx.globalAlpha=p.alpha;
+      ctx.fillStyle=p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha=1;
+    if(state==='assembling'&&settled===particles.length) state='idle';
+    if(state!=='idle') animId=requestAnimationFrame(animate);
+  }
+
+  buildIdle();
+  drawStatic();
+})();
+
+
+/* ===================================================
+   VARIANT 5  ·  Word Cloud Scatter
+=================================================== */
+(function(){
+  const W=640, H=340;
+  const canvas=document.getElementById('c5');
+  const ctx=setupHiDPI(canvas,W,H);
+
+  const WORDS=[
+    {text:'DESIGN',  x:W*.18, y:H*.28, size:62, color:'#a78bfa'},
+    {text:'CODE',    x:W*.72, y:H*.22, size:52, color:'#38bdf8'},
+    {text:'CREATE',  x:W*.15, y:H*.65, size:48, color:'#f472b6'},
+    {text:'ANIMATE', x:W*.60, y:H*.72, size:44, color:'#4ade80'},
+    {text:'EXPLORE', x:W*.40, y:H*.45, size:70, color:'#fb923c'},
+    {text:'BUILD',   x:W*.82, y:H*.50, size:46, color:'#e879f9'},
+  ];
+
+  let wordSystems=[];
+  let state='assembled';
+  let animId=null;
+
+  /* build each word's particle cloud */
+  function buildSystems(){
+    wordSystems=WORDS.map(w=>{
+      const tmp=document.createElement('canvas');
+      const tw=300,th=120;
+      tmp.width=tw*DPR; tmp.height=th*DPR;
+      const tc=tmp.getContext('2d');
+      tc.scale(DPR,DPR);
+      tc.fillStyle='#fff';
+      tc.font=`700 ${w.size}px -apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif`;
+      tc.textAlign='center'; tc.textBaseline='middle';
+      tc.fillText(w.text,tw/2,th/2);
+      const img=tc.getImageData(0,0,tmp.width,tmp.height);
+      const pts=[];
+      const step=3;
+      for(let y=0;y<tmp.height;y+=step){
+        for(let x=0;x<tmp.width;x+=step++){
+          const i=(y*tmp.width+x)*4;
+          if(img.data[i+3]>128){
+            pts.push({
+              x:x/DPR-tw/2+w.x,
+              y:y/DPR-th/2+w.y
+            });
+          }
+        }
+      }
+      return {
+        word:w,
+        particles:pts.map(t=>({
+          x:t.x, y:t.y, tx:t.x, ty:t.y,
+          vx:0, vy:0,
+          size:rand(.8,2.2),
+          alpha:1,
+          color:w.color
+        })),
+        state:'idle'
+      };
+    });
+  }
+
+  function scatter(){
+    if(state==='scattered') return;
+    state='scattered';
+    wordSystems.forEach(sys=>{
+      sys.state='scattering';
+      sys.particles.forEach(p=>{
+        /* scatter radially from word center */
+        const dx=p.tx-sys.word.x, dy=p.ty-sys.word.y;
+        const angle=Math.atan2(dy,dx)+rand(-.5,.5);
+        const spd=rand(2,12);
+        p.vx=Math.cos(angle)*spd;
+        p.vy=Math.sin(angle)*spd-rand(0,4);
+      });
+    });
+    cancelAnimationFrame(animId);
+    loop();
+  }
+
+  function collect(){
+    if(state==='assembled') return;
+    state='assembled';
+    wordSystems.forEach(sys=>sys.state='collecting');
+    cancelAnimationFrame(animId);
+    loop();
+  }
+
+  canvas.addEventListener('click',()=>{
+    if(state==='assembled') scatter();
+    else collect();
+  });
+
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    let allDone=true;
+    wordSystems.forEach(sys=>{
+      sys.particles.forEach(p=>{
+        if(sys.state==='scattering'){
+          p.vx*=.93; p.vy=p.vy*.93+.15;
+          p.x+=p.vx; p.y+=p.vy;
+          p.alpha=Math.max(0,p.alpha-.008);
+          allDone=false;
+        } else if(sys.state==='collecting'){
+          const dx=p.tx-p.x, dy=p.ty-p.y;
+          p.vx=p.vx*.74+dx*.13; p.vy=p.vy*.74+dy*.13;
+          p.x+=p.vx; p.y+=p.vy;
+          p.alpha=Math.min(1,p.alpha+.03);
+          if(Math.abs(p.vx)<.4&&Math.abs(p.vy)<.4&&Math.abs(dx)<1&&Math.abs(dy)<1){
+            p.x=p.tx;p.y=p.ty;
+          } else allDone=false;
+        }
+        ctx.globalAlpha=p.alpha;
+        ctx.fillStyle=p.color;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fill();
+      });
+    });
+    ctx.globalAlpha=1;
+    if(!allDone) animId=requestAnimationFrame(loop);
+  }
+
+  buildSystems();
+  loop();
+  /* draw assembled */
+  wordSystems.forEach(sys=>sys.particles.forEach(p=>{
+    ctx.globalAlpha=p.alpha;
+    ctx.fillStyle=p.color;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fill();
+  }));
+  ctx.globalAlpha=1;
+})();
+</script>
+</body>
+</html>

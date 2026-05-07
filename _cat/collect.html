@@ -194,6 +194,40 @@ a{text-decoration:none;color:inherit}
       </div>
       <div class="card-info"><h3>Scroll-Driven 3D Grid</h3><span class="tag">IntersectionObserver · rotateX · tilt</span></div>
     </a>
+    <a href="../70-hero-letter-entrance.html" class="card">
+      <div class="card-visual">
+        <div class="stage" id="previewStage70" style="position:relative;overflow:hidden;background:#0a0a0a;display:flex;align-items:center;justify-content:center;">
+          <div id="heroLetters70" style="font-family:'Arial Black',sans-serif;font-weight:900;font-size:28px;line-height:1;letter-spacing:-0.02em;color:#f0ede3;display:flex;flex-direction:column;gap:2px;">
+            <div style="display:flex;align-items:center;gap:1px;">
+              <span id="hl70-A" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateY(110%)">A</span></span>
+              <span id="hl70-n" style="display:inline-block;transform:rotateY(-180deg);opacity:0">n</span>
+              <span style="display:inline-block;width:18px;height:18px;vertical-align:middle;" id="hl70-wm">
+                <svg viewBox="0 0 137 135" fill="none"><path d="M84 67H136C136.6 67 137 67.4 137 68V134C137 134.5 136.6 134.8 136.2 134.8C99 134.4 69 104.8 68.5 68.2V134.2C68.5 134.6 68.1 135 67.7 135H0.8C0.4 135 0 134.6 0 134.2C0.4 97.3 30.9 67.5 68.5 67.5H0.8C0.4 67.5 0 67.1 0 66.7V0.8C0 0.4 0.4 0 0.8 0C38 0.4 68 30 68.5 66.6V0.8C68.5 0.4 68.9 0 69.3 0H136.2C136.6 0 137 0.4 137 0.8C136.6 32.5 114.1 58.9 83.9 65.8C83 66 83.2 67.3 84.1 67.3H84Z" fill="url(#wg70)"/><defs><linearGradient id="wg70" x1="-76" y1="-15" x2="165" y2="81" gradientUnits="userSpaceOnUse"><stop offset="0.43" stop-color="#FF8709"/><stop offset="0.79" stop-color="#F7BDF8"/></linearGradient></defs></svg>
+              </span>
+              <span id="hl70-i" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateY(-110%)">i</span></span>
+              <span id="hl70-m" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateX(-110%)">m</span></span>
+              <span id="hl70-a" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateY(110%)">a</span></span>
+              <span id="hl70-t" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateY(110%)">t</span></span>
+              <span id="hl70-e" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateY(110%)">e</span></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1px;">
+              <span id="hl70-a2" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateY(-110%)">a</span></span>
+              <span id="hl70-n2" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateY(-110%)">n</span></span>
+              <span id="hl70-y" style="display:inline-block;transform:scale(0);opacity:0">y</span>
+              <span id="hl70-t2" style="display:inline-block;transform:scale(0);opacity:0">t</span>
+              <span style="display:inline-block;width:12px;height:20px;vertical-align:middle;" id="hl70-bolt">
+                <svg viewBox="0 0 134 229" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M101 11C102.4 11 103.4 12.3 103 13.6L78.7 88.3C78.3 89.6 79.2 90.9 80.6 90.9H109C110.6 90.9 111.6 92.8 110.6 94.2L10.2 227L39.4 125.7C39.8 124.4 38.8 123.2 37.5 123.2H7.8C6.4 123.2 5.5 121.8 5.9 120.5L44.1 12.3C44.4 11.5 45.2 11 46 11H101Z" fill="#0AE448" opacity="0" id="bolt70"/></svg>
+              </span>
+              <span id="hl70-h" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateY(-110%)">h</span></span>
+              <span id="hl70-i2" style="display:inline-block;transform:rotateX(-90deg);opacity:0">i</span>
+              <span id="hl70-n3" style="display:inline-block;overflow:hidden;"><span style="display:inline-block;transform:translateX(-110%)">n</span></span>
+              <span id="hl70-g" style="display:inline-block;transform:rotate(-120deg);opacity:0">g</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info"><h3>Hero Letter Entrance</h3><span class="tag">clip · stagger · scramble · 3D rotate</span></div>
+    </a>
 </div>
 <script>
 (function(){
@@ -376,6 +410,89 @@ a{text-decoration:none;color:inherit}
       hide();
       setTimeout(cycle,600);
     },1600);
+  }
+  cycle();
+})();
+</script>
+<script>
+(function(){
+  // Hero Letter Entrance preview animation
+  var letters = [
+    {id:'hl70-A',  inner:true,  from:{ty:110},        to:{ty:0}},
+    {id:'hl70-n',  inner:false, from:{ry:-180,op:0},  to:{ry:0,op:1}},
+    {id:'hl70-wm', inner:false, from:{r:-360,op:0},   to:{r:0,op:1}},
+    {id:'hl70-i',  inner:true,  from:{ty:-110},       to:{ty:0}},
+    {id:'hl70-m',  inner:true,  from:{tx:-110},       to:{tx:0}},
+    {id:'hl70-a',  inner:true,  from:{ty:110},        to:{ty:0}},
+    {id:'hl70-t',  inner:true,  from:{ty:110},        to:{ty:0}},
+    {id:'hl70-e',  inner:true,  from:{ty:110},        to:{ty:0}},
+    {id:'hl70-a2', inner:true,  from:{ty:-110},       to:{ty:0}},
+    {id:'hl70-n2', inner:true,  from:{ty:-110},       to:{ty:0}},
+    {id:'hl70-y',  inner:false, from:{s:0,op:0},      to:{s:1,op:1}},
+    {id:'hl70-t2', inner:false, from:{s:0,op:0},      to:{s:1,op:1}},
+    {id:'bolt70',  inner:false, from:{op:0},          to:{op:0.9}},
+    {id:'hl70-h',  inner:true,  from:{ty:-110},       to:{ty:0}},
+    {id:'hl70-i2', inner:false, from:{rx:-90,op:0},   to:{rx:0,op:1}},
+    {id:'hl70-n3', inner:true,  from:{tx:-110},       to:{tx:0}},
+    {id:'hl70-g',  inner:false, from:{r:-120,op:0},   to:{r:0,op:1}},
+  ];
+  var delays=[0,60,120,180,240,300,360,420,500,560,620,680,740,800,860,920,980];
+  var dur=500;
+
+  function applyTf(el,s){
+    var t='';
+    if(s.tx!==undefined)t+='translateX('+s.tx+'%) ';
+    if(s.ty!==undefined)t+='translateY('+s.ty+'%) ';
+    if(s.rx!==undefined)t+='rotateX('+s.rx+'deg) ';
+    if(s.ry!==undefined)t+='rotateY('+s.ry+'deg) ';
+    if(s.r!==undefined) t+='rotate('+s.r+'deg) ';
+    if(s.s!==undefined) t+='scale('+s.s+') ';
+    el.style.transform=t.trim()||'none';
+    if(s.op!==undefined)el.style.opacity=String(s.op);
+  }
+
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function easeOut(t){return t===1?1:1-Math.pow(2,-10*t);}
+
+  function animLetter(el,from,to,duration){
+    var start=performance.now();
+    function frame(now){
+      var t=Math.min((now-start)/duration,1);
+      var e=easeOut(t);
+      var s={};
+      for(var k in to){s[k]=lerp(from[k]!==undefined?from[k]:to[k],to[k],e);}
+      applyTf(el,s);
+      if(t<1)requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function runAnim(){
+    letters.forEach(function(cfg,i){
+      var el=document.getElementById(cfg.id);
+      if(!el)return;
+      var target=cfg.inner?el.firstElementChild:el;
+      if(!target)return;
+      applyTf(target,cfg.from);
+      setTimeout(function(){animLetter(target,cfg.from,cfg.to,dur);},delays[i]);
+    });
+  }
+
+  function resetAll(){
+    letters.forEach(function(cfg){
+      var el=document.getElementById(cfg.id);
+      if(!el)return;
+      var target=cfg.inner?el.firstElementChild:el;
+      if(target)applyTf(target,cfg.from);
+    });
+  }
+
+  function cycle(){
+    runAnim();
+    setTimeout(function(){
+      resetAll();
+      setTimeout(cycle,800);
+    },2200);
   }
   cycle();
 })();

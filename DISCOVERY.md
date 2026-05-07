@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-07 gsap.com (Hero Letter Animation)
+- 效果名称：字母多态入场 Hero 动画 (Multi-Style Letter Entrance Hero)
+- 效果描述：大号标题文字"Animate Anything"中每个字母以完全不同的方式入场：A 从下方 clip 滑入、n 做 rotateY 翻转、i 从上方滑入、m 从左侧滑入、a 从下方滑入、t 从下方滑入后切换为数字"100"再切回、e 从下方滑入；第二行"anything"中字母同样各有独特入场方式（rotateX 翻转、scale 从零放大、旋转消失等）。字母之间穿插 SVG 装饰图标（风车/四叶草、星星、闪电、蠕虫），这些图标也有独立的入场动画（旋转、scale 放大、路径绘制）。整体形成一种充满活力、每个字母都有个性的 Hero 标题动画，视觉冲击力极强。支持多个变体：① 原版多态入场 ② 纯字母版（无装饰图标）③ 循环播放版 ④ 鼠标悬停触发版
+- 实现原理：每个字母包裹在独立 span 中，用 CSS clip（overflow:hidden）+ transform 控制入场方向，不同字母用不同 transform 起始态：translateY(100%) 从下、translateY(-100%) 从上、translateX(-100%) 从左、rotateX(-180deg) 翻转、rotateY(-180deg) 翻转、scale(0,0) 从零放大、rotate(-120deg)+opacity:0 旋转消失；JS 用 setTimeout/requestAnimationFrame 或 GSAP timeline 控制每个字母的入场时序（stagger），transition 或 GSAP tween 驱动 transform 归零；SVG 装饰图标用 stroke-dasharray 路径绘制动画 + scale/rotate 入场
+- 状态：已实现 → 70-hero-letter-entrance.html，已集成到 collect.html
+
 ## 2026-05-07 tympanus.net/codrops (Staggered 3D Grid)
 - 效果名称：滚动驱动 3D 透视网格 (Scroll-Driven 3D Perspective Grid)
 - 效果描述：页面滚动时，网格中的图片/卡片以错开的（staggered）延迟进行 3D 透视动画：列之间形成圆柱弯曲效果（perspective + rotateX 错位），每列随滚动进度逐步从折叠态展开；同时支持纯文字版的错落动画（每个字母/单词独立触发 3D 翻转）、网格项随滚动缩放/淡入版、以及鼠标悬停时局部倾斜的倾斜卡片版。整体呈现一种机械感十足的空间错落美学。

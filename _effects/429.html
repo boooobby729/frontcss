@@ -50,6 +50,12 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 .back-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none}
 @media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
 
+
+.copy-ai-btn{position:fixed;top:56px;right:16px;z-index:201;padding:8px 16px;border-radius:8px;background:rgba(102,126,234,.15);border:1px solid rgba(102,126,234,.3);color:rgba(255,255,255,.8);font-size:.75rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.copy-ai-btn:hover{background:rgba(102,126,234,.3);color:#fff;border-color:rgba(102,126,234,.5)}
+.copy-ai-btn.copied{background:rgba(67,233,123,.2);border-color:rgba(67,233,123,.4);color:#43e97b}
+.copy-ai-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
 .stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#111}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -72,6 +78,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 </nav>
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item active" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
 <a href="../_cat/36-liquid-backgrounds.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<button class="copy-ai-btn" id="copyAiBtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
 <div class="effect-main">
 <div class="stage" id="plasma"><canvas id="plasma-canvas"></canvas></div>
 </div>
@@ -146,6 +153,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 </script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"}];
+window.__COPY_DATA__ = {"name":"等离子体效果","tag":"","css":".demo canvas{position:absolute;inset:0;width:100%;height:100%}\n  .nav a:hover{color:#fff;background:#ffffff10}","html":"<canvas id=\"plasma-canvas\"></canvas>","js":"\n(function(){\n  const canvas = document.getElementById('plasma-canvas');\n  const ctx = canvas.getContext('2d');\n  // Use smaller buffer for performance\n  const PW=320, PH=200;\n  canvas.width=PW; canvas.height=PH;\n  canvas.style.imageRendering='auto';\n  let t=0;\n  \n  const imgData = ctx.createImageData(PW,PH);\n  \n  function render(){\n    t+=0.03;\n    const d=imgData.data;\n    for(let y=0;y<PH;y++){\n      for(let x=0;x<PW;x++){\n        const v1=Math.sin(x*0.03+t);\n        const v2=Math.sin(y*0.04-t*0.7);\n        const v3=Math.sin((x+y)*0.02+t*0.5);\n        const v4=Math.sin(Math.sqrt((x-PW/2)*(x-PW/2)+(y-PH/2)*(y-PH/2))*0.04-t);\n        const v=(v1+v2+v3+v4)/4;\n        const idx=(y*PW+x)*4;\n        d[idx]=Math.floor((Math.sin(v*Math.PI*2)*0.5+0.5)*180+50);\n        d[idx+1]=Math.floor((Math.cos(v*Math.PI*2+2)*0.5+0.5)*100+30);\n        d[idx+2]=Math.floor((Math.sin(v*Math.PI*2+4)*0.5+0.5)*220+35);\n        d[idx+3]=255;\n      }\n    }\n    ctx.putImageData(imgData,0,0);\n    requestAnimationFrame(render);\n  }\n  render();\n})();\n"};
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;
@@ -291,6 +299,44 @@ window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度"
   }
   var active=scroll.querySelector('.nav-item.active');
   if(active)setTimeout(function(){active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})},100);
+})();
+
+// 复制给 AI 按钮逻辑
+(function(){
+  var btn = document.getElementById('copyAiBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var d = window.__COPY_DATA__;
+    var text = '请帮我实现以下前端动效，生成可直接使用的代码：\n\n';
+    text += '## 效果名称\n' + d.name + '\n\n';
+    if (d.tag) text += '## 技术标签\n' + d.tag + '\n\n';
+    text += '## 参考代码\n\n';
+    if (d.css) text += '### CSS\n```css\n' + d.css + '\n```\n\n';
+    if (d.html) text += '### HTML\n```html\n' + d.html + '\n```\n\n';
+    if (d.js) text += '### JavaScript\n```javascript\n' + d.js + '\n```\n\n';
+    text += '## 要求\n';
+    text += '1. 将颜色、尺寸、动画时长等参数抽取为 CSS 变量或配置对象，方便定制\n';
+    text += '2. 调整 class 命名避免冲突，适配我的项目\n';
+    text += '3. 纯 HTML/CSS/JS 实现，零依赖\n';
+    text += '4. 响应式适配\n';
+    if (d.js) text += '5. 提供 init()/destroy() 方法，方便 SPA 挂载卸载\n';
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ showCopied(btn); }).catch(function(){ fallbackCopy(text, btn); });
+    } else { fallbackCopy(text, btn); }
+  });
+  function showCopied(b) {
+    b.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>已复制';
+    b.classList.add('copied');
+    setTimeout(function(){ b.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI'; b.classList.remove('copied'); }, 2000);
+  }
+  function fallbackCopy(text, b) {
+    var ta = document.createElement('textarea'); ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(b); } catch(e) { alert('复制失败，请手动复制'); }
+    document.body.removeChild(ta);
+  }
 })();
 </script>
 </body>

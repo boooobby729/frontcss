@@ -1375,6 +1375,26 @@ const iframeCtrlPanelJs = `
 })();`;
 
 // ============================================================
+// 复制给 AI 按钮 - CSS + JS（注入到 _effects/ 和 _cat/ 页面）
+// ============================================================
+const copyBtnCss = `
+.copy-ai-btn{position:fixed;top:56px;right:16px;z-index:201;padding:8px 16px;border-radius:8px;background:rgba(102,126,234,.15);border:1px solid rgba(102,126,234,.3);color:rgba(255,255,255,.8);font-size:.75rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.copy-ai-btn:hover{background:rgba(102,126,234,.3);color:#fff;border-color:rgba(102,126,234,.5)}
+.copy-ai-btn.copied{background:rgba(67,233,123,.2);border-color:rgba(67,233,123,.4);color:#43e97b}
+.copy-ai-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+`;
+
+// 为 _cat/ 分类页面的卡片添加复制按钮的 CSS
+const catCopyBtnCss = `
+.card{position:relative}
+.card .card-copy-btn{position:absolute;top:8px;right:8px;z-index:10;padding:4px 10px;border-radius:6px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7);font-size:.6rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none}
+.card:hover .card-copy-btn{opacity:1;pointer-events:auto}
+.card .card-copy-btn:hover{background:rgba(102,126,234,.4);color:#fff;border-color:rgba(102,126,234,.5)}
+.card .card-copy-btn.copied{background:rgba(67,233,123,.3);border-color:rgba(67,233,123,.4);color:#43e97b;opacity:1;pointer-events:auto}
+.card .card-copy-btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+`;
+
+// ============================================================
 // 生成独立效果详情页（_effects/） - 带专属控制面板
 // ============================================================
 const effectsDir = path.join(dir, '_effects');
@@ -1512,6 +1532,15 @@ for (const cat of sortedParsed) {
       ? eff._assignedJs.map(s => `<script>${s}<\/script>`).join('\n')
       : '';
 
+    // 构建复制给 AI 的数据
+    const copyData = {
+      name: eff.name,
+      tag: eff.tag || '',
+      css: effectPageCss.trim(),
+      html: eff.stageHtml,
+      js: (eff._assignedJs || []).join('\n\n')
+    };
+
     const effectHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1523,6 +1552,7 @@ for (const cat of sortedParsed) {
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
 ${navCss}
 ${ctrlCss}
+${copyBtnCss}
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
 .stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 ${effectPageCss}
@@ -1531,6 +1561,7 @@ ${effectPageCss}
 <body>
 ${generateNavBar(cat.id, '../')}
 <a href="../_cat/${cat.id}.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<button class="copy-ai-btn" id="copyAiBtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
 <div class="effect-main">
 <div class="${stageClass.trim()}"${stageAttrs}>${eff.stageHtml}</div>
 </div>
@@ -1540,8 +1571,47 @@ ${generateNavBar(cat.id, '../')}
 ${effectScripts}
 <` + `script>
 window.__EFFECT_CONTROLS__ = ${JSON.stringify(controls)};
+window.__COPY_DATA__ = ${JSON.stringify(copyData)};
 ${ctrlPanelJs}
 ${navJs}
+
+// 复制给 AI 按钮逻辑
+(function(){
+  var btn = document.getElementById('copyAiBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var d = window.__COPY_DATA__;
+    var text = '请帮我实现以下前端动效，生成可直接使用的代码：\\n\\n';
+    text += '## 效果名称\\n' + d.name + '\\n\\n';
+    if (d.tag) text += '## 技术标签\\n' + d.tag + '\\n\\n';
+    text += '## 参考代码\\n\\n';
+    if (d.css) text += '### CSS\\n\`\`\`css\\n' + d.css + '\\n\`\`\`\\n\\n';
+    if (d.html) text += '### HTML\\n\`\`\`html\\n' + d.html + '\\n\`\`\`\\n\\n';
+    if (d.js) text += '### JavaScript\\n\`\`\`javascript\\n' + d.js + '\\n\`\`\`\\n\\n';
+    text += '## 要求\\n';
+    text += '1. 将颜色、尺寸、动画时长等参数抽取为 CSS 变量或配置对象，方便定制\\n';
+    text += '2. 调整 class 命名避免冲突，适配我的项目\\n';
+    text += '3. 纯 HTML/CSS/JS 实现，零依赖\\n';
+    text += '4. 响应式适配\\n';
+    if (d.js) text += '5. 提供 init()/destroy() 方法，方便 SPA 挂载卸载\\n';
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ showCopied(btn); }).catch(function(){ fallbackCopy(text, btn); });
+    } else { fallbackCopy(text, btn); }
+  });
+  function showCopied(b) {
+    b.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>已复制';
+    b.classList.add('copied');
+    setTimeout(function(){ b.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI'; b.classList.remove('copied'); }, 2000);
+  }
+  function fallbackCopy(text, b) {
+    var ta = document.createElement('textarea'); ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(b); } catch(e) { alert('复制失败，请手动复制'); }
+    document.body.removeChild(ta);
+  }
+})();
 <` + `/script>
 </body>
 </html>`;
@@ -1654,6 +1724,15 @@ for (const cat of sortedIframe) {
       return patched;
     });
 
+    // 构建复制给 AI 的数据（iframe 类型）
+    const iframeCopyData = {
+      name: eff.name,
+      tag: '',
+      css: allCss.trim(),
+      html: eff.demoHtml,
+      js: eff.scripts.join('\n\n')
+    };
+
     const iframeEffectHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1665,6 +1744,7 @@ for (const cat of sortedIframe) {
 body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;display:flex;flex-direction:row}
 ${navCss}
 ${ctrlCss}
+${copyBtnCss}
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
 .stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;${bgStyle}}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -1674,6 +1754,7 @@ ${allCss}
 <body>
 ${generateNavBar(cat.id, '../')}
 <a href="../_cat/${cat.id}.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<button class="copy-ai-btn" id="copyAiBtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
 <div class="effect-main">
 <div class="stage"${stageId}>${eff.demoHtml}</div>
 </div>
@@ -1685,8 +1766,47 @@ ${eff._needsSharedHtml && cat.sharedHtmlElements ? cat.sharedHtmlElements : ''}
 ${patchedScripts.map(s => `<` + `script>${s}<` + `/script>`).join('\n')}
 <` + `script>
 window.__EFFECT_CONTROLS__ = ${JSON.stringify(iframeControls)};
+window.__COPY_DATA__ = ${JSON.stringify(iframeCopyData)};
 ${iframeCtrlPanelJs}
 ${navJs}
+
+// 复制给 AI 按钮逻辑
+(function(){
+  var btn = document.getElementById('copyAiBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var d = window.__COPY_DATA__;
+    var text = '请帮我实现以下前端动效，生成可直接使用的代码：\\n\\n';
+    text += '## 效果名称\\n' + d.name + '\\n\\n';
+    if (d.tag) text += '## 技术标签\\n' + d.tag + '\\n\\n';
+    text += '## 参考代码\\n\\n';
+    if (d.css) text += '### CSS\\n\`\`\`css\\n' + d.css + '\\n\`\`\`\\n\\n';
+    if (d.html) text += '### HTML\\n\`\`\`html\\n' + d.html + '\\n\`\`\`\\n\\n';
+    if (d.js) text += '### JavaScript\\n\`\`\`javascript\\n' + d.js + '\\n\`\`\`\\n\\n';
+    text += '## 要求\\n';
+    text += '1. 将颜色、尺寸、动画时长等参数抽取为 CSS 变量或配置对象，方便定制\\n';
+    text += '2. 调整 class 命名避免冲突，适配我的项目\\n';
+    text += '3. 纯 HTML/CSS/JS 实现，零依赖\\n';
+    text += '4. 响应式适配\\n';
+    if (d.js) text += '5. 提供 init()/destroy() 方法，方便 SPA 挂载卸载\\n';
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ showCopied(btn); }).catch(function(){ fallbackCopy(text, btn); });
+    } else { fallbackCopy(text, btn); }
+  });
+  function showCopied(b) {
+    b.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>已复制';
+    b.classList.add('copied');
+    setTimeout(function(){ b.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI'; b.classList.remove('copied'); }, 2000);
+  }
+  function fallbackCopy(text, b) {
+    var ta = document.createElement('textarea'); ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(b); } catch(e) { alert('复制失败，请手动复制'); }
+    document.body.removeChild(ta);
+  }
+})();
 <` + `/script>
 </body>
 </html>`;
@@ -1723,13 +1843,22 @@ fs.mkdirSync(catPagesDir);
 
 for (const cat of sortedParsed) {
   let cards = '';
-  for (const eff of cat.effects) {
+  const catCopyDataArr = [];
+  for (let ei = 0; ei < cat.effects.length; ei++) {
+    const eff = cat.effects[ei];
     const stageAttrs = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
     const stageClass = eff.stageClass ? ` ${eff.stageClass}` : '';
-    cards += `    <a href="../${eff._file}" class="card">
+    cards += `    <a href="../${eff._file}" class="card" data-idx="${ei}">
       <div class="card-visual"><div class="stage${stageClass}"${stageAttrs}>${eff.stageHtml}</div></div>
       <div class="card-info"><h3>${eff.name}</h3>${eff.tag ? `<span class="tag">${eff.tag}</span>` : ''}</div>
     </a>\n`;
+    catCopyDataArr.push({
+      name: eff.name,
+      tag: eff.tag || '',
+      css: cleanCssForEffectPage(cat.css).trim(),
+      html: eff.stageHtml,
+      js: (eff._assignedJs || []).join('\n\n')
+    });
   }
 
   const catHtml = `<!DOCTYPE html>
@@ -1744,6 +1873,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 a{text-decoration:none;color:inherit}
 ${navCss}
 ${cardGridCss}
+${catCopyBtnCss}
 ${cat.css}
 </style>
 </head>
@@ -1754,6 +1884,53 @@ ${cards}</div>
 <` + `script>
 ${navJs}
 ${cat.scripts.map(s => s).join('\n')}
+
+// 复制给 AI - 卡片按钮
+(function(){
+  var copyDataArr = ${JSON.stringify(catCopyDataArr)};
+  var ICON_COPY = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  var ICON_CHECK = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+  document.querySelectorAll('.card[data-idx]').forEach(function(card) {
+    var idx = parseInt(card.getAttribute('data-idx'));
+    var btn = document.createElement('button');
+    btn.className = 'card-copy-btn';
+    btn.innerHTML = ICON_COPY + '复制';
+    btn.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      var d = copyDataArr[idx];
+      if (!d) return;
+      var text = '请帮我实现以下前端动效，生成可直接使用的代码：\\n\\n';
+      text += '## 效果名称\\n' + d.name + '\\n\\n';
+      if (d.tag) text += '## 技术标签\\n' + d.tag + '\\n\\n';
+      text += '## 参考代码\\n\\n';
+      if (d.css) text += '### CSS\\n\`\`\`css\\n' + d.css + '\\n\`\`\`\\n\\n';
+      if (d.html) text += '### HTML\\n\`\`\`html\\n' + d.html + '\\n\`\`\`\\n\\n';
+      if (d.js) text += '### JavaScript\\n\`\`\`javascript\\n' + d.js + '\\n\`\`\`\\n\\n';
+      text += '## 要求\\n';
+      text += '1. 将颜色、尺寸、动画时长等参数抽取为 CSS 变量或配置对象，方便定制\\n';
+      text += '2. 调整 class 命名避免冲突，适配我的项目\\n';
+      text += '3. 纯 HTML/CSS/JS 实现，零依赖\\n';
+      text += '4. 响应式适配\\n';
+      if (d.js) text += '5. 提供 init()/destroy() 方法，方便 SPA 挂载卸载\\n';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ showCopied(btn); }).catch(function(){ fallbackCopy(text, btn); });
+      } else { fallbackCopy(text, btn); }
+    });
+    card.appendChild(btn);
+  });
+  function showCopied(b) {
+    b.innerHTML = ICON_CHECK + '已复制';
+    b.classList.add('copied');
+    setTimeout(function(){ b.innerHTML = ICON_COPY + '复制'; b.classList.remove('copied'); }, 2000);
+  }
+  function fallbackCopy(text, b) {
+    var ta = document.createElement('textarea'); ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(b); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+})();
 <` + `/script>
 </body>
 </html>`;

@@ -50,6 +50,12 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 .back-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none}
 @media(max-width:768px){.ctrl-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;max-height:200px;border-left:none;border-top:1px solid rgba(255,255,255,.06);padding:12px;flex-direction:row;flex-wrap:wrap;z-index:100}.effect-page{padding-bottom:200px}}
 
+
+.copy-ai-btn{position:fixed;top:56px;right:16px;z-index:201;padding:8px 16px;border-radius:8px;background:rgba(102,126,234,.15);border:1px solid rgba(102,126,234,.3);color:rgba(255,255,255,.8);font-size:.75rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.copy-ai-btn:hover{background:rgba(102,126,234,.3);color:#fff;border-color:rgba(102,126,234,.5)}
+.copy-ai-btn.copied{background:rgba(67,233,123,.2);border-color:rgba(67,233,123,.4);color:#43e97b}
+.copy-ai-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:48px;position:relative;overflow:hidden}
 .stage{width:100%;height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#0a0a0a}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -72,6 +78,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 </nav>
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item active" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
 <a href="../_cat/23-glitch-effects.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<button class="copy-ai-btn" id="copyAiBtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
 <div class="effect-main">
 <div class="stage" id="rgb-split-demo">
     <canvas id="rgb-canvas"></canvas>
@@ -225,6 +232,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 </script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"mouse-influence","label":"鼠标影响","min":0,"max":3,"step":0.1,"value":1,"unit":"x","action":"mouseScale"}];
+window.__COPY_DATA__ = {"name":"RGB 色彩分离","tag":"","css":".demo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }\n  .nav a:hover { color: #fff; background: #ffffff10; }","html":"\n    <canvas id=\"rgb-canvas\"></canvas>\n    <div id=\"rgb-text\" style=\"position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(40px,10vw,120px);font-weight:900;font-family:'Arial Black',sans-serif;color:white;z-index:2;pointer-events:none;letter-spacing:0.05em\">CYBERPUNK</div>\n  ","js":"\n(function(){\n  const demo = document.getElementById('rgb-split-demo');\n  const canvas = document.getElementById('rgb-canvas');\n  const ctx = canvas.getContext('2d');\n  let w, h;\n\n  function resize(){\n    w = canvas.width = demo.clientWidth;\n    h = canvas.height = demo.clientHeight;\n  }\n  resize();\n  window.addEventListener('resize', resize);\n\n  const mouse = { x: w/2, y: h/2 };\n  demo.addEventListener('mousemove', e => {\n    const r = demo.getBoundingClientRect();\n    mouse.x = e.clientX - r.left;\n    mouse.y = e.clientY - r.top;\n  });\n\n  // Draw base image (text) to offscreen\n  const offscreen = document.createElement('canvas');\n  const offCtx = offscreen.getContext('2d');\n\n  function renderFrame() {\n    offscreen.width = w;\n    offscreen.height = h;\n\n    // Draw text on offscreen\n    offCtx.clearRect(0, 0, w, h);\n    offCtx.fillStyle = '#fff';\n    offCtx.font = `900 ${Math.min(w * 0.1, 120)}px \"Arial Black\", sans-serif`;\n    offCtx.textAlign = 'center';\n    offCtx.textBaseline = 'middle';\n    offCtx.fillText('CYBERPUNK', w/2, h/2);\n\n    // Additional decorative elements\n    offCtx.font = `300 ${Math.min(w * 0.02, 18)}px \"Courier New\", monospace`;\n    offCtx.fillStyle = 'rgba(255,255,255,0.5)';\n    offCtx.fillText('2 0 7 7', w/2, h/2 + 80);\n\n    // Horizontal scan lines as grid\n    offCtx.strokeStyle = 'rgba(255,255,255,0.1)';\n    offCtx.lineWidth = 0.5;\n    for (let y = 0; y < h; y += 40) {\n      offCtx.beginPath();\n      offCtx.moveTo(0, y);\n      offCtx.lineTo(w, y);\n      offCtx.stroke();\n    }\n\n    // Get pixel data\n    const imageData = offCtx.getImageData(0, 0, w, h);\n    const src = imageData.data;\n\n    // Calculate split amount based on mouse position\n    const cx = w / 2, cy = h / 2;\n    const dx = mouse.x - cx, dy = mouse.y - cy;\n    const dist = Math.sqrt(dx * dx + dy * dy);\n    const maxSplit = 15;\n    const splitAmount = Math.min(maxSplit, dist * 0.03);\n    const angle = Math.atan2(dy, dx);\n\n    const rOff = { x: Math.round(Math.cos(angle) * splitAmount), y: Math.round(Math.sin(angle) * splitAmount * 0.3) };\n    const bOff = { x: Math.round(-Math.cos(angle) * splitAmount), y: Math.round(-Math.sin(angle) * splitAmount * 0.3) };\n\n    // Build RGB-split output\n    ctx.fillStyle = '#0a0a0a';\n    ctx.fillRect(0, 0, w, h);\n\n    const output = ctx.createImageData(w, h);\n    const out = output.data;\n\n    for (let y = 0; y < h; y++) {\n      for (let x = 0; x < w; x++) {\n        const i = (y * w + x) * 4;\n\n        // Red channel (offset)\n        const rx = Math.min(w - 1, Math.max(0, x + rOff.x));\n        const ry = Math.min(h - 1, Math.max(0, y + rOff.y));\n        const ri = (ry * w + rx) * 4;\n\n        // Blue channel (offset)\n        const bx = Math.min(w - 1, Math.max(0, x + bOff.x));\n        const by = Math.min(h - 1, Math.max(0, y + bOff.y));\n        const bi = (by * w + bx) * 4;\n\n        out[i] = src[ri];       // R from offset position\n        out[i + 1] = src[i + 1]; // G from center\n        out[i + 2] = src[bi + 2]; // B from opposite offset\n        out[i + 3] = Math.max(src[ri + 3], src[i + 3], src[bi + 3]);\n      }\n    }\n\n    ctx.putImageData(output, 0, 0);\n\n    // Random glitch slices\n    if (Math.random() < 0.05) {\n      const sliceY = Math.random() * h;\n      const sliceH = 5 + Math.random() * 30;\n      const sliceShift = (Math.random() - 0.5) * 40;\n      const slice = ctx.getImageData(0, sliceY, w, sliceH);\n      ctx.putImageData(slice, sliceShift, sliceY);\n    }\n\n    requestAnimationFrame(renderFrame);\n  }\n  renderFrame();\n})();\n"};
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;
@@ -370,6 +378,44 @@ window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度"
   }
   var active=scroll.querySelector('.nav-item.active');
   if(active)setTimeout(function(){active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})},100);
+})();
+
+// 复制给 AI 按钮逻辑
+(function(){
+  var btn = document.getElementById('copyAiBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var d = window.__COPY_DATA__;
+    var text = '请帮我实现以下前端动效，生成可直接使用的代码：\n\n';
+    text += '## 效果名称\n' + d.name + '\n\n';
+    if (d.tag) text += '## 技术标签\n' + d.tag + '\n\n';
+    text += '## 参考代码\n\n';
+    if (d.css) text += '### CSS\n```css\n' + d.css + '\n```\n\n';
+    if (d.html) text += '### HTML\n```html\n' + d.html + '\n```\n\n';
+    if (d.js) text += '### JavaScript\n```javascript\n' + d.js + '\n```\n\n';
+    text += '## 要求\n';
+    text += '1. 将颜色、尺寸、动画时长等参数抽取为 CSS 变量或配置对象，方便定制\n';
+    text += '2. 调整 class 命名避免冲突，适配我的项目\n';
+    text += '3. 纯 HTML/CSS/JS 实现，零依赖\n';
+    text += '4. 响应式适配\n';
+    if (d.js) text += '5. 提供 init()/destroy() 方法，方便 SPA 挂载卸载\n';
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ showCopied(btn); }).catch(function(){ fallbackCopy(text, btn); });
+    } else { fallbackCopy(text, btn); }
+  });
+  function showCopied(b) {
+    b.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>已复制';
+    b.classList.add('copied');
+    setTimeout(function(){ b.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI'; b.classList.remove('copied'); }, 2000);
+  }
+  function fallbackCopy(text, b) {
+    var ta = document.createElement('textarea'); ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(b); } catch(e) { alert('复制失败，请手动复制'); }
+    document.body.removeChild(ta);
+  }
 })();
 </script>
 </body>

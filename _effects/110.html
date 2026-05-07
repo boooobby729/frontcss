@@ -237,17 +237,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">3D 开门效果</div>
 </div>
-<script>(function(){
-  const s=document.getElementById('sphere3d');if(!s)return;
-  const n=24,r=45;
-  for(let i=0;i<n;i++){
-    const phi=Math.acos(-1+2*i/n),theta=Math.sqrt(n*Math.PI)*phi;
-    const x=r*Math.cos(theta)*Math.sin(phi),y=r*Math.sin(theta)*Math.sin(phi),z=r*Math.cos(phi);
-    const d=document.createElement('div');d.className='sphere-dot';
-    d.style.transform=`translate3d(${x}px,${y}px,${z}px)`;
-    s.appendChild(d);
-  }
-})();</script>
+
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"anim-speed","label":"动画速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"speed"},{"type":"range","id":"door-frame-radius","label":"圆角","min":0,"max":100,"step":1,"value":4,"unit":"px","action":"css","target":".door-frame","props":["borderRadius"]},{"type":"color","id":"door-frame-bgcolor","label":"颜色","value":"#333333","action":"css","target":".door-frame","props":["background"]},{"type":"range","id":"door-panel-radius","label":"圆角","min":0,"max":100,"step":1,"value":4,"unit":"px","action":"css","target":".door-panel","props":["borderRadius"]},{"type":"color","id":"door-panel-color1","label":"主色","value":"#1a1a2e","action":"gradient","target":".door-panel","index":0},{"type":"color","id":"door-panel-color2","label":"副色","value":"#2a2a4e","action":"gradient","target":".door-panel","index":1}];
 

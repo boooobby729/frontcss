@@ -200,14 +200,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
   }
 
   function togglePixel(el) {
-    el.classList.toggle('active');
-    // Re-randomize delays on each click
-    if (el.classList.contains('active')) {
-      el.querySelectorAll('.s10-cell').forEach(c => {
-        c.style.transitionDelay = (Math.random() * .6).toFixed(2) + 's';
-      });
-    }
-  }</script>
+    el.classList.toggle('active');</script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"page-fontsize","label":"字号","min":0.5,"max":8,"step":0.1,"value":1.4,"unit":"rem","action":"css","target":".page","props":["fontSize"]},{"type":"color","id":"page-a-color1","label":"主色","value":"#1a1a2e","action":"gradient","target":".page-a","index":0},{"type":"color","id":"page-a-color2","label":"副色","value":"#16213e","action":"gradient","target":".page-a","index":1},{"type":"color","id":"page-b-color1","label":"主色","value":"#2d1b4e","action":"gradient","target":".page-b","index":0},{"type":"color","id":"page-b-color2","label":"副色","value":"#1a0a3e","action":"gradient","target":".page-b","index":1}];
 

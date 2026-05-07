@@ -205,25 +205,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">标签输入</div>
 </div>
-<script>// Password strength
-  function checkPw(v){
-    const fill=document.getElementById('pwFill');
-    const text=document.getElementById('pwText');
-    let s=0;
-    if(v.length>4)s++;if(v.length>8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
-    const levels=[{w:'0%',c:'#333',t:'Enter a password'},{w:'20%',c:'#f5576c',t:'Very weak'},{w:'40%',c:'#ff6b6b',t:'Weak'},{w:'60%',c:'#fee140',t:'Fair'},{w:'80%',c:'#43e97b',t:'Strong'},{w:'100%',c:'#667eea',t:'Very strong'}];
-    const l=levels[s];
-    fill.style.width=l.w;fill.style.background=l.c;text.textContent=l.t;text.style.color=l.c;
-  }
 
-  // OTP auto-focus
-  function otpNext(el){
-    if(el.value.length===1&&el.nextElementSibling){el.nextElementSibling.focus();}
-  }
-
-  // Auto-grow textarea
-  function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px';}
-  function updateCount(el){document.getElementById('charNum').textContent=el.value.length;}</script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"chip-group-radius","label":"圆角","min":0,"max":100,"step":1,"value":10,"unit":"px","action":"css","target":".chip-group","props":["borderRadius"]},{"type":"range","id":"chip-group-gap","label":"间距","min":0,"max":40,"step":1,"value":6,"unit":"px","action":"css","target":".chip-group","props":["gap"]},{"type":"range","id":"chip-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"css","target":".chip","props":["borderRadius"]},{"type":"color","id":"chip-bgcolor","label":"颜色","value":"#667eea22","action":"css","target":".chip","props":["background"]},{"type":"range","id":"chip-gap","label":"间距","min":0,"max":40,"step":1,"value":6,"unit":"px","action":"css","target":".chip","props":["gap"]}];
 

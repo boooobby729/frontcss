@@ -206,60 +206,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">仪表盘</div>
 </div>
-<script>// Bar Chart
-  function buildBars(){
-    const data=[{l:'Mon',v:65,c:'#667eea'},{l:'Tue',v:85,c:'#f093fb'},{l:'Wed',v:45,c:'#43e97b'},{l:'Thu',v:95,c:'#f5576c'},{l:'Fri',v:70,c:'#fee140'},{l:'Sat',v:55,c:'#764ba2'},{l:'Sun',v:80,c:'#38f9d7'}];
-    const el=document.getElementById('bars');
-    el.innerHTML='';
-    data.forEach((d,i)=>{
-      const bar=document.createElement('div');
-      bar.className='bar';
-      bar.style.cssText=`--h:${d.v*1.5}px;height:${d.v*1.5}px;background:${d.c};animation-delay:${i*.1}s`;
-      bar.innerHTML=`<span class="bar-val">${d.v}</span><span class="bar-label">${d.l}</span>`;
-      el.appendChild(bar);
-    });
-  }
-  buildBars();
 
-  // Stat counter
-  document.querySelectorAll('.stat-num[data-target]').forEach(el=>{
-    const target=parseInt(el.dataset.target);
-    let current=0;
-    const step=Math.ceil(target/60);
-    function count(){
-      current=Math.min(current+step,target);
-      el.textContent=current.toLocaleString();
-      if(current<target)requestAnimationFrame(count);
-    }
-    count();
-  });
-
-  // Equalizer
-  (function(){
-    const eq=document.getElementById('equalizer');
-    const colors=['#667eea','#f093fb','#43e97b','#f5576c','#fee140','#764ba2','#38f9d7','#fa709a'];
-    for(let i=0;i<20;i++){
-      const bar=document.createElement('div');
-      bar.className='eq-bar';
-      const min=8+Math.random()*12;
-      const max=30+Math.random()*50;
-      bar.style.cssText=`--min:${min}px;--max:${max}px;animation-duration:${.3+Math.random()*.5}s;animation-delay:${Math.random()*.3}s;background:linear-gradient(to top,${colors[i%colors.length]},${colors[(i+3)%colors.length]})`;
-      eq.appendChild(bar);
-    }
-  })();
-
-  // Heatmap
-  (function(){
-    const hm=document.getElementById('heatmap');
-    const levels=['#1e1e2e','#667eea22','#667eea44','#667eea77','#667eeaaa','#667eea'];
-    for(let i=0;i<35;i++){
-      const cell=document.createElement('div');
-      cell.className='heat-cell';
-      cell.style.background=levels[Math.floor(Math.random()*levels.length)];
-      cell.style.animationDelay=(i*.03)+'s';
-      hm.appendChild(cell);
-    }
-  })();</script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"anim-speed","label":"动画速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"speed"},{"type":"range","id":"gauge-size","label":"尺寸","min":32,"max":480,"step":1,"value":160,"unit":"px","action":"css","target":".gauge","props":["width","height"]},{"type":"range","id":"gauge-radius","label":"圆角","min":0,"max":360,"step":1,"value":120,"unit":"px","action":"css","target":".gauge","props":["borderRadius"]},{"type":"range","id":"gauge-needle-size","label":"尺寸","min":4,"max":6,"step":1,"value":2,"unit":"px","action":"css","target":".gauge-needle","props":["width","height"]},{"type":"color","id":"gauge-needle-bgcolor","label":"颜色","value":"#ffffff","action":"css","target":".gauge-needle","props":["background"]},{"type":"range","id":"gauge-center-size","label":"尺寸","min":4,"max":36,"step":1,"value":12,"unit":"px","action":"css","target":".gauge-center","props":["width","height"]},{"type":"color","id":"gauge-center-bgcolor","label":"颜色","value":"#ffffff","action":"css","target":".gauge-center","props":["background"]}];
 

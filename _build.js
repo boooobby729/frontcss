@@ -314,8 +314,46 @@ function extractIframeEffects(filePath) {
     });
   }
 
-  // 如果有效果缺少 script，尝试从文件的共享 script 块中按 IIFE 分配
+  // 提取 section 之间/之后的共享 HTML 元素（如光标 div 等）
+  // 策略：找到所有 section 之后的 HTML 元素（在 <script> 之前的 <div> 等元素）
+  let sharedHtmlElements = '';
+  if (sectionStarts.length > 0) {
+    const lastSectionStart = sectionStarts[sectionStarts.length - 1];
+    const afterContent = html.slice(lastSectionStart);
+    // 找到第一个 <script> 标签的位置
+    const scriptIdx = afterContent.search(/<script[\s>]/i);
+    if (scriptIdx > 0) {
+      const beforeScript = afterContent.slice(0, scriptIdx);
+      // 提取所有独立的 <div id="...">...</div> 元素（不属于 section 内部的）
+      // 找到 section 的第一个 </div>（section 级别的闭合标签）后面的内容
+      // 通过匹配 <!-- 注释 --> 和 <div id="..."> 来提取共享元素
+      const sharedDivs = [];
+      const divRegex = /<div\s+id="[^"]+"\s+[^>]*>[\s\S]*?<\/div>/g;
+      let dm;
+      // 只在 section 闭合后查找：找到 section 的第一个闭合 </div>
+      const sectionClose = beforeScript.indexOf('</div>');
+      if (sectionClose > 0) {
+        const afterSectionClose = beforeScript.slice(sectionClose + 6);
+        while ((dm = divRegex.exec(afterSectionClose)) !== null) {
+          sharedDivs.push(dm[0]);
+        }
+      }
+      if (sharedDivs.length > 0) {
+        sharedHtmlElements = sharedDivs.join('\n');
+      }
+    }
+  }
+
+  // 如果有效果缺少 script，尝试从文件的共享 script 块中智能分配
   const effectsWithoutScripts = effects.filter(e => e.scripts.length === 0);
+  // 提取文件中所有非 src 的 script 内容（即使已有 script 的效果也需要，用于后续恢复）
+  const allScriptRegex2 = /<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/g;
+  let allJsFull = '';
+  let scriptMatch2;
+  while ((scriptMatch2 = allScriptRegex2.exec(html)) !== null) {
+    if (scriptMatch2[1].trim()) allJsFull += scriptMatch2[1] + '\n';
+  }
+
   if (effectsWithoutScripts.length > 0) {
     // 提取文件中所有非 src 的 script 内容
     const allScriptRegex = /<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/g;
@@ -326,7 +364,7 @@ function extractIframeEffects(filePath) {
     }
 
     if (allJs) {
-      // 按 IIFE 边界拆分：(function(){ ... })(); 或 (function(){ ... }())
+      // 策略1：按 IIFE 边界拆分
       const iifes = [];
       const iifeRegex = /\(function\s*\([^)]*\)\s*\{/g;
       let iifeMatch;
@@ -338,38 +376,239 @@ function extractIframeEffects(filePath) {
         const start = iifeStarts[i];
         const end = i < iifeStarts.length - 1 ? iifeStarts[i + 1] : allJs.length;
         let block = allJs.slice(start, end).trim();
-        // 去除尾部的 // === 注释行
         block = block.replace(/\n\/\/\s*===.*$/s, '').trim();
         iifes.push(block);
       }
 
-      // 为每个没有 script 的效果，通过 HTML 中的元素 ID 匹配对应 IIFE
-      for (const eff of effectsWithoutScripts) {
-        // 从 demoHtml 中提取所有 id
-        const idMatches = eff.demoHtml.match(/id="([^"]+)"/g);
-        const ids = idMatches ? idMatches.map(m => m.match(/id="([^"]+)"/)[1]) : [];
-        // 也包含 demoId
-        if (eff.demoId) ids.push(eff.demoId);
+      // 策略2：按注释分隔符拆分（// N. xxx 或 // Generate xxx 或 // Xxx）
+      function splitByComments(js) {
+        const lines = js.split('\n');
+        const blocks = [];
+        let currentBlock = [];
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          // 检测顶层分隔注释（如 // 1. Xxx, // === Xxx ===, // Xxx, // Xxx xxx）
+          const isSep = /^\s*\/\/\s*(\d+\.\s|===|[A-Z][a-z])/.test(line) && !/^\s*\/\/\s*(eslint|prettier|noinspection|ts-|@|if |else|return|const|let|var)/.test(line);
+          if (isSep && currentBlock.length > 0) {
+            blocks.push(currentBlock.join('\n'));
+            currentBlock = [line];
+          } else {
+            currentBlock.push(line);
+          }
+        }
+        if (currentBlock.length > 0) blocks.push(currentBlock.join('\n'));
+        return blocks.filter(b => b.trim().length > 0);
+      }
 
-        for (const iife of iifes) {
-          for (const elemId of ids) {
-            if (iife.includes(`'${elemId}'`) || iife.includes(`"${elemId}"`)) {
-              eff.scripts.push(iife);
-              break;
+      // 辅助函数：从 JS 中提取所有 getElementById 的 ID
+      function getJsIds(js) {
+        const ids = [];
+        const re = /getElementById\(['"]([^'"]+)['"]\)/g;
+        let m2;
+        while ((m2 = re.exec(js)) !== null) ids.push(m2[1]);
+        return ids;
+      }
+
+      // 辅助函数：获取效果 HTML 中的所有 ID
+      function getEffIds(eff2) {
+        const ids = [];
+        const re = /id="([^"]+)"/g;
+        let m2;
+        while ((m2 = re.exec(eff2.demoHtml)) !== null) ids.push(m2[1]);
+        if (eff2.demoId) ids.push(eff2.demoId);
+        if (eff2.id) ids.push(eff2.id);
+        return ids;
+      }
+
+      // 如果有 IIFE，先用 IIFE 匹配
+      if (iifes.length > 0) {
+        for (const eff of effectsWithoutScripts) {
+          const ids = getEffIds(eff);
+          for (const iife of iifes) {
+            for (const elemId of ids) {
+              if (iife.includes(`'${elemId}'`) || iife.includes(`"${elemId}"`)) {
+                eff.scripts.push(iife);
+                break;
+              }
+            }
+            if (eff.scripts.length > 0) break;
+          }
+        }
+      }
+
+      // 对于仍然没有 script 的效果，用注释块 + ID 匹配策略
+      const stillWithout = effectsWithoutScripts.filter(e => e.scripts.length === 0);
+      if (stillWithout.length > 0) {
+        const commentBlocks = splitByComments(allJs);
+
+        for (const eff of stillWithout) {
+          const effIds = getEffIds(eff);
+          // 提取效果 HTML 中 onclick 等调用的函数名
+          const effFuncs = [];
+          const funcCallRegex = /on\w+="([a-zA-Z_]\w*)\(/g;
+          let fcm;
+          while ((fcm = funcCallRegex.exec(eff.demoHtml)) !== null) {
+            effFuncs.push(fcm[1]);
+          }
+
+          for (const block of commentBlocks) {
+            const jsIds = getJsIds(block);
+            // 提取该块定义的函数名
+            const funcDefs = [];
+            const fdRegex = /function\s+([a-zA-Z_]\w*)\s*\(/g;
+            let fdm;
+            while ((fdm = fdRegex.exec(block)) !== null) funcDefs.push(fdm[1]);
+
+            const idMatch = jsIds.some(id => effIds.includes(id));
+            const funcMatch = funcDefs.some(fn => effFuncs.includes(fn));
+            if (idMatch || funcMatch) {
+              eff.scripts.push(block);
             }
           }
-          if (eff.scripts.length > 0) break;
         }
+      }
 
-        // 如果 IIFE 匹配失败，将整个 script 块分配给该效果（非 IIFE 结构或 ID 不匹配）
-        if (eff.scripts.length === 0) {
-          eff.scripts.push(allJs.trim());
+      // 最终 fallback：如果效果仍然没有 JS，不再盲目分配整个 script
+      // 纯 CSS 效果不需要 JS，让它们保持没有 script 即可
+    }
+  }
+
+  // 对所有有 scripts 的效果，过滤掉不属于该效果的代码块
+  // （处理最后一个 section 包含了共享 script 的情况）
+  for (const eff of effects) {
+    if (eff.scripts.length === 0) continue;
+    const effIds = [];
+    const idRe = /id="([^"]+)"/g;
+    let idM;
+    while ((idM = idRe.exec(eff.demoHtml)) !== null) effIds.push(idM[1]);
+    if (eff.demoId) effIds.push(eff.demoId);
+    if (eff.id) effIds.push(eff.id);
+    // 提取效果 HTML 的 onclick 函数名
+    const effFuncs = [];
+    const fcRe = /on\w+="([a-zA-Z_]\w*)\(/g;
+    let fcM;
+    while ((fcM = fcRe.exec(eff.demoHtml)) !== null) effFuncs.push(fcM[1]);
+
+    // 对每个 script，检查是否是一个大的"共享"代码块（包含多个效果的 ID）
+    const filteredScripts = [];
+    for (const script of eff.scripts) {
+      // 检查该 script 中引用的所有 getElementById IDs
+      const jsIds = [];
+      const jsIdRe = /getElementById\(['"]([^'"]+)['"]\)/g;
+      let jm;
+      while ((jm = jsIdRe.exec(script)) !== null) jsIds.push(jm[1]);
+      
+      // 如果 JS 中引用的 ID 超过一半不在效果中，说明是共享代码块
+      const missingIds = jsIds.filter(id => !effIds.includes(id));
+      if (jsIds.length > 2 && missingIds.length > jsIds.length * 0.5) {
+        // 这是一个共享代码块，需要按注释拆分并只保留相关部分
+        const lines = script.split('\n');
+        const blocks = [];
+        let currentBlock = [];
+        for (const line of lines) {
+          const isSep = /^\s*\/\/\s*(\d+\.\s|===|[A-Z][a-z])/.test(line) && !/^\s*\/\/\s*(eslint|prettier|noinspection|ts-|@|if |else|return|const|let|var)/.test(line);
+          if (isSep && currentBlock.length > 0) {
+            blocks.push(currentBlock.join('\n'));
+            currentBlock = [line];
+          } else {
+            currentBlock.push(line);
+          }
         }
+        if (currentBlock.length > 0) blocks.push(currentBlock.join('\n'));
+
+        // 只保留与该效果相关的块
+        for (const block of blocks) {
+          const blockIds = [];
+          const bIdRe = /getElementById\(['"]([^'"]+)['"]\)/g;
+          let bm;
+          while ((bm = bIdRe.exec(block)) !== null) blockIds.push(bm[1]);
+          const blockFuncs = [];
+          const bfRe = /function\s+([a-zA-Z_]\w*)\s*\(/g;
+          let bfm;
+          while ((bfm = bfRe.exec(block)) !== null) blockFuncs.push(bfm[1]);
+
+          const idMatch = blockIds.some(id => effIds.includes(id));
+          const funcMatch = blockFuncs.some(fn => effFuncs.includes(fn));
+          if (idMatch || funcMatch) {
+            filteredScripts.push(block);
+          } else if (blockIds.length === 0 && blockFuncs.length === 0) {
+            // 无引用的代码块（如变量声明），如果很短就保留
+            if (block.trim().length < 200) filteredScripts.push(block);
+          }
+        }
+      } else {
+        // 该 script 的引用基本都在效果中，保留原样
+        filteredScripts.push(script);
+      }
+    }
+    eff.scripts = filteredScripts;
+  }
+
+  // 恢复机制：检测"统一脚本"模式
+  // 如果共享脚本中包含 currentSection 或 data-effect 模式，说明这是一个
+  // 统一的事件循环架构，每个独立效果页面都需要完整脚本
+  if (allJsFull && allJsFull.includes('currentSection')) {
+    const hasInteractivity = (scripts) => {
+      const joined = scripts.join('\n');
+      return joined.includes('addEventListener') || 
+             joined.includes('requestAnimationFrame') || 
+             joined.includes('setInterval') ||
+             joined.includes('setTimeout') ||
+             joined.includes('.onmouse') ||
+             joined.includes('.onclick') ||
+             joined.includes('querySelectorAll');
+    };
+
+    // 提取脚本中的 data-effect 到 currentSection 赋值模式
+    const csAssignRegex = /currentSection\s*=\s*sec\s*\?\s*sec\.dataset\.effect\s*:\s*''/;
+    const hasCsPattern = csAssignRegex.test(allJsFull);
+
+    for (const eff of effects) {
+      // 需要恢复的条件：效果没有交互能力（过滤掉了核心逻辑，或从未获得脚本）
+      const needsRestore = (eff.scripts.length > 0 && !hasInteractivity(eff.scripts)) ||
+                           (eff.scripts.length === 0);
+      
+      if (needsRestore) {
+        // 从原始 section 的 data-effect 属性获取效果标识
+        // 在 extractIframeEffects 中 eff.id 是 section 的 id 属性
+        // 需要从原始 HTML 获取 data-effect
+        const sectionMatch = html.match(new RegExp(`<div[^>]*id="${eff.id}"[^>]*data-effect="([^"]+)"`));
+        const dataEffect = sectionMatch ? sectionMatch[1] : eff.id;
+        
+        // 恢复完整脚本，并硬编码 currentSection
+        let restoredScript = allJsFull;
+        if (hasCsPattern) {
+          restoredScript = restoredScript.replace(
+            /currentSection\s*=\s*sec\s*\?\s*sec\.dataset\.effect\s*:\s*''/g,
+            `currentSection = '${dataEffect}'`
+          );
+          // 移除 elementFromPoint 检测（独立页面整个页面就是一个效果）
+          restoredScript = restoredScript.replace(
+            /const\s+el\s*=\s*document\.elementFromPoint\([^)]+\);\s*\n\s*const\s+sec\s*=\s*el\s*\?\s*el\.closest\(['"]\.section['"]\)\s*:\s*null;/g,
+            ''
+          );
+        }
+        // 对不存在的 DOM 元素添加 null 保护：
+        // 将 getElementById(...).getContext(...) 改为 getElementById(...)?.getContext(...)
+        restoredScript = restoredScript.replace(
+          /document\.getElementById\(([^)]+)\)\.getContext/g,
+          'document.getElementById($1)?.getContext'
+        );
+        // 将 getElementById(...).parentElement 改为 getElementById(...)?.parentElement
+        restoredScript = restoredScript.replace(
+          /document\.getElementById\(([^)]+)\)\.(parentElement|getBoundingClientRect|addEventListener|style|width|height|offsetWidth|offsetHeight)/g,
+          'document.getElementById($1)?.$2'
+        );
+        // 包裹整个恢复脚本在 try-catch 中避免初始化崩溃
+        restoredScript = `try {\n${restoredScript}\n} catch(_e) { console.warn('Effect init partial:', _e.message); }`;
+        eff.scripts = [restoredScript];
+        // 标记需要注入共享 HTML 元素
+        eff._needsSharedHtml = true;
       }
     }
   }
 
-  return { effects, globalCss };
+  return { effects, globalCss, sharedHtmlElements };
 }
 
 // ============================================================
@@ -737,7 +976,7 @@ for (const file of files) {
     console.log(`✓ ${file}: ${result.effects.length} effects (${result.structure})`);
   } else {
     const iframeResult = extractIframeEffects(path.join(dir, file));
-    iframeCategories.push({ id: catId, file, title: cleanTitle, effects: iframeResult.effects, globalCss: iframeResult.globalCss });
+    iframeCategories.push({ id: catId, file, title: cleanTitle, effects: iframeResult.effects, globalCss: iframeResult.globalCss, sharedHtmlElements: iframeResult.sharedHtmlElements || '' });
     totalEffects += Math.max(iframeResult.effects.length, 1);
     console.log(`◆ ${file}: iframe mode (${cleanTitle}) - ${iframeResult.effects.length} sub-effects`);
   }
@@ -1142,6 +1381,120 @@ const effectsDir = path.join(dir, '_effects');
 if (fs.existsSync(effectsDir)) fs.rmSync(effectsDir, { recursive: true });
 fs.mkdirSync(effectsDir);
 
+// ============================================================
+// 预处理：为 parsedCategories 的每个效果智能分配 JS
+// ============================================================
+function splitScriptIntoBlocks(scriptContent) {
+  // 按顶层注释分割代码块
+  // 支持格式：// N. xxx, // === xxx ===, // Xxx xxx (首字母大写的注释)
+  const lines = scriptContent.split('\n');
+  const blocks = [];
+  let currentBlock = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // 检测是否是顶层分隔注释（如 // 1. Xxx, // === Xxx ===, // Xxx, // Xxx xxx）
+    const isSeparator = /^\s*\/\/\s*(\d+\.\s|===|[A-Z][a-z])/.test(line) && !/^\s*\/\/\s*(eslint|prettier|noinspection|ts-|@|if |else|return|const|let|var)/.test(line);
+    if (isSeparator && currentBlock.length > 0) {
+      blocks.push(currentBlock.join('\n'));
+      currentBlock = [line];
+    } else {
+      currentBlock.push(line);
+    }
+  }
+  if (currentBlock.length > 0) {
+    blocks.push(currentBlock.join('\n'));
+  }
+  return blocks.filter(b => b.trim().length > 0);
+}
+
+function extractIdsFromHtml(html) {
+  const ids = [];
+  const idRegex = /id="([^"]+)"/g;
+  let m;
+  while ((m = idRegex.exec(html)) !== null) {
+    ids.push(m[1]);
+  }
+  return ids;
+}
+
+function extractIdsFromJs(js) {
+  const ids = [];
+  const regex = /getElementById\(['"]([^'"]+)['"]\)/g;
+  let m;
+  while ((m = regex.exec(js)) !== null) {
+    ids.push(m[1]);
+  }
+  return ids;
+}
+
+function extractFunctionCallsFromHtml(html) {
+  // 提取 onclick="funcName(this)" 等事件处理函数名
+  const funcs = [];
+  const regex = /on\w+="([a-zA-Z_]\w*)\(/g;
+  let m;
+  while ((m = regex.exec(html)) !== null) {
+    funcs.push(m[1]);
+  }
+  return funcs;
+}
+
+function assignScriptsToEffects(cat) {
+  if (!cat.scripts || cat.scripts.length === 0) return;
+
+  const allJs = cat.scripts.join('\n');
+  // 按顶层注释分隔符分割成代码块
+  const blocks = splitScriptIntoBlocks(allJs);
+
+  // 为每个效果收集它的 HTML 中的 ID 和调用的函数名
+  for (const eff of cat.effects) {
+    eff._assignedJs = [];
+    eff._htmlIds = extractIdsFromHtml(eff.stageHtml);
+    eff._htmlFuncs = extractFunctionCallsFromHtml(eff.stageHtml);
+  }
+
+  // 对每个代码块，找出它属于哪个效果
+  for (const block of blocks) {
+    const jsIds = extractIdsFromJs(block);
+    // 提取该块定义的函数名
+    const funcDefs = [];
+    const funcRegex = /function\s+([a-zA-Z_]\w*)\s*\(/g;
+    let fm;
+    while ((fm = funcRegex.exec(block)) !== null) {
+      funcDefs.push(fm[1]);
+    }
+
+    let assigned = false;
+    for (const eff of cat.effects) {
+      // 通过 ID 匹配：JS 中 getElementById 的 ID 出现在效果的 HTML 中
+      const idMatch = jsIds.some(id => eff._htmlIds.includes(id));
+      // 通过函数名匹配：效果 HTML 的 onclick 等调用的函数在这个块中定义
+      const funcMatch = funcDefs.some(fn => eff._htmlFuncs.includes(fn));
+
+      if (idMatch || funcMatch) {
+        eff._assignedJs.push(block);
+        assigned = true;
+        // 不 break，可能多个效果共享同一个代码块（如果多个效果都引用了同一 ID）
+      }
+    }
+
+    // 如果没有效果匹配（可能是工具函数），不分配给任何效果（避免崩溃）
+    // 但如果只有一个效果没有任何分配的 JS，可能这个块是它的
+    if (!assigned) {
+      // 这是一个没有 getElementById 调用的代码块（如工具函数或变量声明）
+      // 只分配给需要它的效果（通过看它引用的变量/选择器）
+      // 安全策略：不分配，避免崩溃
+    }
+  }
+
+  // 对于没有分配到任何 JS 的效果，如果该效果确实是纯 CSS 的，就不需要 JS
+  // 无需特殊处理
+}
+
+for (const cat of sortedParsed) {
+  assignScriptsToEffects(cat);
+}
+
 let effectIndex = 0;
 for (const cat of sortedParsed) {
   for (const eff of cat.effects) {
@@ -1153,6 +1506,11 @@ for (const cat of sortedParsed) {
     // 提取该效果的专属控制项
     const controls = extractEffectControls(cat.css, eff.stageHtml);
     const effectPageCss = cleanCssForEffectPage(cat.css);
+
+    // 使用智能分配的 JS（而非整个分类的 scripts）
+    const effectScripts = eff._assignedJs && eff._assignedJs.length > 0
+      ? eff._assignedJs.map(s => `<script>${s}<\/script>`).join('\n')
+      : '';
 
     const effectHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -1179,7 +1537,7 @@ ${generateNavBar(cat.id, '../')}
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">${eff.name}</div>
 </div>
-${cat.scripts.map(s => `<script>${s}<\/script>`).join('\n')}
+${effectScripts}
 <` + `script>
 window.__EFFECT_CONTROLS__ = ${JSON.stringify(controls)};
 ${ctrlPanelJs}
@@ -1210,7 +1568,7 @@ for (const cat of sortedIframe) {
 
     const allCss = iframeCssClean + '\n' + (eff.localCss || '');
     const bgStyle = eff.demoStyle || 'background:#111';
-    const stageId = eff.demoId ? ` id="${eff.demoId}"` : '';
+    const stageId = eff.demoId ? ` id="${eff.demoId}"` : (eff.id ? ` id="${eff.id}"` : '');
 
     // 提取该效果的控制项（传入完整 CSS = 全局 + 本地）
     const iframeControls = extractIframeControls(eff.scripts, allCss, eff.demoHtml);
@@ -1319,6 +1677,7 @@ ${generateNavBar(cat.id, '../')}
 <div class="effect-main">
 <div class="stage"${stageId}>${eff.demoHtml}</div>
 </div>
+${eff._needsSharedHtml && cat.sharedHtmlElements ? cat.sharedHtmlElements : ''}
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">${eff.name}</div>
 </div>

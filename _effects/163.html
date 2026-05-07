@@ -217,46 +217,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">步骤进度</div>
 </div>
-<script>// Heart
-  function toggleHeart(btn) {
-    btn.classList.toggle('liked');
-  }
-
-  // Notification
-  let notifCount = 0;
-  function addNotif() {
-    notifCount++;
-    const b = document.getElementById('notifBadge');
-    b.textContent = notifCount;
-    b.classList.add('show', 'pop');
-    setTimeout(() => b.classList.remove('pop'), 400);
-  }
-  function clearNotif() {
-    notifCount = 0;
-    const b = document.getElementById('notifBadge');
-    b.textContent = '0';
-    b.classList.remove('show');
-  }
-
-  // Search
-  function openSearch(wrap) {
-    wrap.classList.add('open');
-    wrap.querySelector('.search-input').focus();
-    document.addEventListener('click', function handler(e) {
-      if (!wrap.contains(e.target)) {
-        wrap.classList.remove('open');
-        document.removeEventListener('click', handler);
-      }
-    });
-  }
-
-  // Pull to refresh
-  function startPull(el, e) {
-    el.classList.add('pulling');
-    setTimeout(() => el.classList.remove('pulling'), 1200);
-  }
-
-  // Progress Steps
+<script>  // Progress Steps
   function setStep(idx) {
     const dots = document.querySelectorAll('#progressSteps .step-dot');
     const lines = document.querySelectorAll('#progressSteps .step-line');
@@ -270,8 +231,8 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
       if (i < idx) l.classList.add('filled');
       else l.classList.remove('filled');
     });
-  }</script>
-<script>function createRipple(e) {
+  }
+function createRipple(e) {
   const btn = e.currentTarget;
   const r = btn.getBoundingClientRect();
   const ripple = document.createElement('span');

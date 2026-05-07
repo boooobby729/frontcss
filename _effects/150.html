@@ -189,24 +189,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">极速放大</div>
 </div>
-<script>// Generate pixel dissolve grid
-  const grid = document.getElementById('pixelGrid');
-  for (let i = 0; i < 40; i++) {
-    const cell = document.createElement('div');
-    cell.className = 's10-cell';
-    cell.style.transitionDelay = (Math.random() * .6).toFixed(2) + 's';
-    grid.appendChild(cell);
-  }
 
-  function togglePixel(el) {
-    el.classList.toggle('active');
-    // Re-randomize delays on each click
-    if (el.classList.contains('active')) {
-      el.querySelectorAll('.s10-cell').forEach(c => {
-        c.style.transitionDelay = (Math.random() * .6).toFixed(2) + 's';
-      });
-    }
-  }</script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"page-fontsize","label":"字号","min":0.5,"max":8,"step":0.1,"value":1.4,"unit":"rem","action":"css","target":".page","props":["fontSize"]},{"type":"color","id":"page-a-color1","label":"主色","value":"#1a1a2e","action":"gradient","target":".page-a","index":0},{"type":"color","id":"page-a-color2","label":"副色","value":"#16213e","action":"gradient","target":".page-a","index":1},{"type":"color","id":"page-b-color1","label":"主色","value":"#2d1b4e","action":"gradient","target":".page-b","index":0},{"type":"color","id":"page-b-color2","label":"副色","value":"#1a0a3e","action":"gradient","target":".page-b","index":1}];
 

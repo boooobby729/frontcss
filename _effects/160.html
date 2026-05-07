@@ -212,81 +212,12 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">下拉刷新</div>
 </div>
-<script>// Heart
-  function toggleHeart(btn) {
-    btn.classList.toggle('liked');
-  }
-
-  // Notification
-  let notifCount = 0;
-  function addNotif() {
-    notifCount++;
-    const b = document.getElementById('notifBadge');
-    b.textContent = notifCount;
-    b.classList.add('show', 'pop');
-    setTimeout(() => b.classList.remove('pop'), 400);
-  }
-  function clearNotif() {
-    notifCount = 0;
-    const b = document.getElementById('notifBadge');
-    b.textContent = '0';
-    b.classList.remove('show');
-  }
-
-  // Search
-  function openSearch(wrap) {
-    wrap.classList.add('open');
-    wrap.querySelector('.search-input').focus();
-    document.addEventListener('click', function handler(e) {
-      if (!wrap.contains(e.target)) {
-        wrap.classList.remove('open');
-        document.removeEventListener('click', handler);
-      }
-    });
-  }
-
-  // Pull to refresh
+<script>  // Pull to refresh
   function startPull(el, e) {
     el.classList.add('pulling');
     setTimeout(() => el.classList.remove('pulling'), 1200);
   }
-
-  // Progress Steps
-  function setStep(idx) {
-    const dots = document.querySelectorAll('#progressSteps .step-dot');
-    const lines = document.querySelectorAll('#progressSteps .step-line');
-    dots.forEach((d, i) => {
-      d.classList.remove('active', 'done');
-      if (i < idx) { d.classList.add('done'); d.innerHTML = '&#10003;'; }
-      else if (i === idx) { d.classList.add('active'); d.textContent = i + 1; }
-      else { d.textContent = i + 1; }
-    });
-    lines.forEach((l, i) => {
-      if (i < idx) l.classList.add('filled');
-      else l.classList.remove('filled');
-    });
-  }</script>
-<script>function createRipple(e) {
-  const btn = e.currentTarget;
-  const r = btn.getBoundingClientRect();
-  const ripple = document.createElement('span');
-  ripple.className = 'ripple';
-  const size = Math.max(r.width, r.height);
-  ripple.style.width = ripple.style.height = size + 'px';
-  ripple.style.left = (e.clientX - r.left - size/2) + 'px';
-  ripple.style.top = (e.clientY - r.top - size/2) + 'px';
-  btn.appendChild(ripple);
-  setTimeout(() => ripple.remove(), 600);
-}
-function copyFeedback(btn) {
-  btn.textContent = 'Copied!';
-  btn.classList.add('copied');
-  setTimeout(() => { btn.textContent = 'Copy Code'; btn.classList.remove('copied'); }, 1500);
-}
-function pillToggle(el) {
-  el.parentElement.querySelectorAll('.pill-opt').forEach(o => o.classList.remove('active'));
-  el.classList.add('active');
-}</script>
+</script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"anim-speed","label":"动画速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"speed"},{"type":"range","id":"pull-demo-radius","label":"圆角","min":0,"max":100,"step":1,"value":12,"unit":"px","action":"css","target":".pull-demo","props":["borderRadius"]},{"type":"range","id":"pull-arrow-fontsize","label":"字号","min":0.5,"max":8,"step":0.1,"value":1.2,"unit":"rem","action":"css","target":".pull-arrow","props":["fontSize"]}];
 

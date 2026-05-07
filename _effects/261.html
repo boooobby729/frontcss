@@ -197,6 +197,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="stage"><p>repeating-linear-gradient 无限循环条纹</p>
     <span class="tag">repeating-linear-gradient 45deg</span></div>
 </div>
+
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">斜纹条纹</div>
 </div>
@@ -230,89 +231,9 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
     return Math.floor(_virtualDate);
   };
 })();</script>
-<script>// Generate stars
-  const starsLayer = document.getElementById('starsLayer');
-  for (let i = 0; i < 150; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
-    star.style.animationDelay = Math.random() * 3 + 's';
-    star.style.animationDuration = (2 + Math.random() * 3) + 's';
-    const size = (.5 + Math.random() * 2) + 'px';
-    star.style.width = size;
-    star.style.height = size;
-    starsLayer.appendChild(star);
-  }
 
-  // Spotlight follow
-  const spotBg = document.getElementById('spotlightBg');
-  if (spotBg) {
-    spotBg.addEventListener('mousemove', e => {
-      const rect = spotBg.getBoundingClientRect();
-      const x = e.clientX - rect.left, y = e.clientY - rect.top;
-      spotBg.style.background = `radial-gradient(circle 200px at ${x}px ${y}px, rgba(102,126,234,.15), #050510 70%)`;
-    });
-    spotBg.addEventListener('mouseleave', () => { spotBg.style.background = '#050510'; });
-  }
-
-  // Sun rays
-  const sunraysEl = document.getElementById('sunrays');
-  if (sunraysEl) {
-    for (let i = 0; i < 24; i++) {
-      const ray = document.createElement('div');
-      ray.className = 'sunray';
-      ray.style.transform = `rotate(${i * 15}deg)`;
-      ray.style.opacity = (.2 + Math.random() * .3).toFixed(2);
-      sunraysEl.appendChild(ray);
-    }
-  }
-
-  // Circuit nodes
-  const circuitEl = document.getElementById('circuitSection');
-  if (circuitEl) {
-    for (let i = 0; i < 20; i++) {
-      const node = document.createElement('div');
-      node.className = 'circuit-node';
-      node.style.left = (Math.round(Math.random() * 24) * 40 + 20) + 'px';
-      node.style.top = (Math.round(Math.random() * 14) * 40 + 20) + 'px';
-      node.style.animationDelay = (Math.random() * 2).toFixed(1) + 's';
-      circuitEl.appendChild(node);
-    }
-  }
-
-  // Bubbles
-  const bubbleEl = document.getElementById('bubbleSection');
-  if (bubbleEl) {
-    for (let i = 0; i < 15; i++) {
-      const b = document.createElement('div');
-      b.className = 'bubble';
-      let size = (window.__ctrl_size !== undefined ? window.__ctrl_size : 10) + Math.random() * 40;
-window.addEventListener('__jsVarChanged', function() { size = (window.__ctrl_size !== undefined ? window.__ctrl_size : size); });
-
-      b.style.width = size + 'px';
-      b.style.height = size + 'px';
-      b.style.left = Math.random() * 100 + '%';
-      b.style.animationDuration = (4 + Math.random() * 6) + 's';
-      b.style.animationDelay = (Math.random() * 5) + 's';
-      bubbleEl.appendChild(b);
-    }
-  }
-
-  // Mosaic cells
-  const mosaicBg = document.getElementById('mosaicBg');
-  if (mosaicBg) {
-    const colors = ['#667eea','#f093fb','#43e97b','#f5576c','#764ba2','#ffa500'];
-    for (let i = 0; i < 48; i++) {
-      const cell = document.createElement('div');
-      cell.className = 'mosaic-cell';
-      cell.style.background = colors[Math.floor(Math.random() * colors.length)];
-      cell.style.animationDelay = (Math.random() * 4).toFixed(1) + 's';
-      mosaicBg.appendChild(cell);
-    }
-  }</script>
 <script>
-window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"js-size","label":"尺寸","min":1,"max":40,"step":1,"value":10,"unit":"","action":"jsVar","varName":"size"},{"type":"range","id":"css-duration","label":"动画时长","min":3,"max":75,"step":0.1,"value":15,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"color","id":"css-color-1","label":"副色","value":"#0a0a2e","action":"cssColor","index":1},{"type":"color","id":"css-color-2","label":"副色","value":"#43e97b","action":"cssColor","index":2},{"type":"range","id":"mouse-influence","label":"鼠标影响","min":0,"max":3,"step":0.1,"value":1,"unit":"x","action":"mouseScale"},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
+window.__EFFECT_CONTROLS__ = [{"type":"range","id":"time-speed","label":"速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"timeScale"},{"type":"range","id":"css-duration","label":"动画时长","min":3,"max":75,"step":0.1,"value":15,"unit":"s","action":"cssDuration"},{"type":"color","id":"css-color-0","label":"主色","value":"#667eea","action":"cssColor","index":0},{"type":"color","id":"css-color-1","label":"副色","value":"#0a0a2e","action":"cssColor","index":1},{"type":"color","id":"css-color-2","label":"副色","value":"#43e97b","action":"cssColor","index":2},{"type":"range","id":"css-border-radius","label":"圆角","min":0,"max":100,"step":1,"value":20,"unit":"px","action":"cssBorderRadius"}];
 
 (function(){
   var controls = window.__EFFECT_CONTROLS__;

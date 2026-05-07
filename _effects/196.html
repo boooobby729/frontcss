@@ -239,40 +239,12 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 <div class="ctrl-sidebar" id="ctrlSidebar">
 <div class="ctrl-title">胶囊导航</div>
 </div>
-<script>// Tab bar indicator
-  function switchTab(el,idx){
-    document.querySelectorAll('#tabbar1 .tabbar-item').forEach(t=>t.classList.remove('active'));
-    el.classList.add('active');
-    const ind=document.getElementById('tabInd');
-    ind.style.left=el.offsetLeft+'px';
-    ind.style.width=el.offsetWidth+'px';
-  }
-  // Init indicator
-  (function(){
-    const first=document.querySelector('#tabbar1 .tabbar-item.active');
-    if(first){const ind=document.getElementById('tabInd');ind.style.left=first.offsetLeft+'px';ind.style.width=first.offsetWidth+'px';}
-  })();
-
-  // Pill nav
+<script>  // Pill nav
   function switchPill(el){
     el.parentElement.querySelectorAll('.pill-item').forEach(p=>p.classList.remove('active'));
     el.classList.add('active');
   }
-
-  // Bottom nav
-  function switchBottom(el){
-    document.querySelectorAll('#bottomNav .bottom-nav-item').forEach(b=>b.classList.remove('active'));
-    el.classList.add('active');
-  }
-
-  // Accordion
-  function toggleAcc(header){
-    const body=header.nextElementSibling;
-    const wasOpen=header.classList.contains('open');
-    // Close all
-    document.querySelectorAll('.acc-header').forEach(h=>{h.classList.remove('open');h.nextElementSibling.classList.remove('open');});
-    if(!wasOpen){header.classList.add('open');body.classList.add('open');}
-  }</script>
+</script>
 <script>
 window.__EFFECT_CONTROLS__ = [{"type":"range","id":"anim-speed","label":"动画速度","min":0.1,"max":5,"step":0.1,"value":1,"unit":"x","action":"speed"},{"type":"range","id":"pill-nav-radius","label":"圆角","min":0,"max":150,"step":1,"value":50,"unit":"px","action":"css","target":".pill-nav","props":["borderRadius"]},{"type":"range","id":"pill-nav-gap","label":"间距","min":0,"max":40,"step":1,"value":6,"unit":"px","action":"css","target":".pill-nav","props":["gap"]},{"type":"range","id":"pill-item-radius","label":"圆角","min":0,"max":150,"step":1,"value":50,"unit":"px","action":"css","target":".pill-item","props":["borderRadius"]},{"type":"color","id":"active-color1","label":"主色","value":"#43e97b","action":"gradient","target":".active","index":0},{"type":"color","id":"active-color2","label":"副色","value":"#38f9d7","action":"gradient","target":".active","index":1},{"type":"color","id":"active-bgcolor","label":"颜色","value":"#667eea","action":"css","target":".active","props":["background"]}];
 

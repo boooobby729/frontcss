@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-07 tympanus.net/codrops (RepeatingImageTransition)
+- 效果名称：图片帧重复过渡 (Repeating Image Frame Transition)
+- 效果描述：点击网格中的图片卡片时，触发一种独特的"帧动画"过渡效果：系统在起点（网格项）和终点（展开面板）之间生成多个中间帧（mover 元素），这些帧沿路径依次飞过，每个帧都有 clip-path 入场/出场动画，形成连续的帧重复视觉效果，最终图片"落入"展开的详情面板。支持多种 clip-path 方向（上下/左右）、路径运动（线性/正弦波）、旋转抖动等变体。
+- 实现原理：JS 计算起点和终点的 getBoundingClientRect()，在两点之间线性插值生成 N 个中间位置（steps=6），每个位置创建一个 div.mover 元素，设置相同的背景图片和对应的 fixed 定位，用 CSS clip-path inset() 做入场（从隐藏到全显）和出场（从全显到隐藏）动画，每个 mover 有 stepInterval 的延迟错开，形成帧动画效果；同时其他网格项淡出，最终面板用 clip-path 展开
+- 状态：已实现 → 68-repeating-image-transition.html，已集成到 collect.html
+
 ## 2026-05-07 codrops / awwwards.com (Clip-Path Wipes)
 - 效果名称：Clip-Path 过渡擦除 (Clip-Path Transition Wipes)
 - 效果描述：用 clip-path 实现多种视觉震撼的内容切换过渡效果。包含 6 种擦除变体：① 对角线擦除（从左上到右下的斜切过渡）② 圆形展开（从中心向外扩散的圆形遮罩）③ 多边形变形（多边形 clip-path 从一种形状变形到另一种）④ 文字遮罩擦除（大号文字轮廓作为 clip-path 遮罩，内容从文字形状中显现）⑤ 百叶窗擦除（多条水平/垂直条带依次展开）⑥ 液态波浪擦除（SVG path 驱动的有机曲线擦除）。点击或滚动触发，配合 CSS transition 或 GSAP 实现流畅过渡。

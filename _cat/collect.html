@@ -161,6 +161,23 @@ a{text-decoration:none;color:inherit}
       </div>
       <div class="card-info"><h3>Clip-Path Transition Wipes</h3><span class="tag">CSS clip-path · 6 variants</span></div>
     </a>
+    <a href="../68-repeating-image-transition.html" class="card">
+      <div class="card-visual">
+        <div class="stage" id="previewStage68" style="position:relative;overflow:hidden;background:#080810;">
+          <div style="position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background:rgba(255,255,255,.06);">
+            <div id="gi68a" style="background:linear-gradient(135deg,#1a0533,#7c3aed);transition:opacity .4s,transform .4s;"></div>
+            <div id="gi68b" style="background:linear-gradient(135deg,#0a1628,#2563eb);transition:opacity .4s .05s,transform .4s .05s;"></div>
+            <div id="gi68c" style="background:linear-gradient(135deg,#1a0a0a,#dc2626);transition:opacity .4s .1s,transform .4s .1s;"></div>
+            <div id="gi68d" style="background:linear-gradient(135deg,#0a1a0a,#16a34a);transition:opacity .4s .15s,transform .4s .15s;"></div>
+          </div>
+          <!-- flying frames -->
+          <div id="mover68" style="position:absolute;left:0;top:0;width:50%;height:50%;background:linear-gradient(135deg,#1a0533,#7c3aed);clip-path:inset(100% 0% 0% 0%);transition:clip-path .32s cubic-bezier(.77,0,.175,1);opacity:0;"></div>
+          <!-- panel -->
+          <div id="panel68" style="position:absolute;right:0;top:0;width:50%;height:100%;background:linear-gradient(135deg,#1a0533,#7c3aed);clip-path:inset(0% 100% 0% 0%);transition:clip-path .5s cubic-bezier(.77,0,.175,1);"></div>
+        </div>
+      </div>
+      <div class="card-info"><h3>Repeating Image Frame Transition</h3><span class="tag">clip-path · frame animation · panel</span></div>
+    </a>
 </div>
 <script>
 (function(){
@@ -259,6 +276,61 @@ a{text-decoration:none;color:inherit}
   var demoTimer=setInterval(function(){
     if(state==='idle') explode();
   },2200);
+})();
+</script>
+<script>
+(function(){
+  var gis=[
+    document.getElementById('gi68a'),
+    document.getElementById('gi68b'),
+    document.getElementById('gi68c'),
+    document.getElementById('gi68d')
+  ];
+  var mover=document.getElementById('mover68');
+  var panel=document.getElementById('panel68');
+  if(!mover||!panel)return;
+  function runDemo(){
+    // fade out grid items
+    gis.forEach(function(g){
+      if(g){g.style.opacity='0.12';g.style.transform='scale(0.92)';}
+    });
+    // animate mover frames (simulate 4 frames)
+    var frames=[
+      {left:'0%',top:'0%',w:'50%',h:'50%'},
+      {left:'12%',top:'12%',w:'50%',h:'50%'},
+      {left:'25%',top:'25%',w:'50%',h:'50%'},
+      {left:'38%',top:'12%',w:'50%',h:'50%'},
+    ];
+    frames.forEach(function(f,i){
+      setTimeout(function(){
+        mover.style.left=f.left;
+        mover.style.top=f.top;
+        mover.style.width=f.w;
+        mover.style.height=f.h;
+        mover.style.opacity='1';
+        mover.style.clipPath='inset(0% 0% 0% 0%)';
+        setTimeout(function(){
+          mover.style.clipPath='inset(0% 0% 100% 0%)';
+          mover.style.opacity='0.3';
+        },280);
+      },i*80);
+    });
+    // reveal panel
+    setTimeout(function(){
+      panel.style.clipPath='inset(0% 0% 0% 0%)';
+    },380);
+    // reset
+    setTimeout(function(){
+      panel.style.clipPath='inset(0% 100% 0% 0%)';
+      mover.style.clipPath='inset(100% 0% 0% 0%)';
+      mover.style.opacity='0';
+      gis.forEach(function(g){
+        if(g){g.style.opacity='1';g.style.transform='scale(1)';}
+      });
+    },1600);
+  }
+  runDemo();
+  setInterval(runDemo,2800);
 })();
 </script>
 <script>

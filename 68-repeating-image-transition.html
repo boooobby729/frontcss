@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>68 · 图片帧重复过渡 Repeating Image Frame Transition</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080810;
+    --surface: #0f0f1a;
+    --border: rgba(255,255,255,0.08);
+    --text: #e8e8f0;
+    --muted: rgba(232,232,240,0.45);
+    --accent: #7c6af7;
+    --accent2: #f76a8a;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    padding: 2rem 2.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .header h1 {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .header p {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  /* ── Config Tabs ── */
+  .config-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .config-bar span {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-right: 0.5rem;
+  }
+  .config-btn {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .config-btn:hover { border-color: var(--accent); color: var(--text); }
+  .config-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── Main Layout ── */
+  .main {
+    display: flex;
+    height: calc(100vh - 120px);
+    min-height: 500px;
+    position: relative;
+  }
+
+  /* ── Grid ── */
+  .grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .grid-item {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--surface);
+  }
+  .grid-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+    transition: opacity 0.3s;
+  }
+  .grid-item:hover::after { opacity: 0.6; }
+
+  .grid-item-img {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+  .grid-item:hover .grid-item-img { transform: scale(1.05); }
+
+  .grid-item-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 1.2rem;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .grid-item-caption h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    letter-spacing: -0.01em;
+  }
+  .grid-item-caption p {
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  /* ── Panel ── */
+  .panel {
+    width: 380px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    clip-path: inset(0% 100% 0% 0%);
+    transition: clip-path 0s;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel.open {
+    clip-path: inset(0% 0% 0% 0%);
+    transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  .panel.panel-right {
+    order: -1;
+    border-left: none;
+    border-right: 1px solid var(--border);
+    clip-path: inset(0% 0% 0% 100%);
+  }
+  .panel.panel-right.open {
+    clip-path: inset(0% 0% 0% 0%);
+  }
+
+  .panel-img {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+    min-height: 0;
+  }
+
+  .panel-content {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .panel-content h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  .panel-content p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .panel-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    cursor: pointer;
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .panel-close:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+  /* ── Mover (flying frames) ── */
+  .mover {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    background-size: cover;
+    background-position: center;
+    will-change: clip-path, opacity, transform;
+  }
+
+  /* ── Variant Labels ── */
+  .variant-label {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 3;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  /* ── Hint ── */
+  .hint {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    color: var(--muted);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 0.5s;
+  }
+  .hint.hidden { opacity: 0; }
+
+  /* ── Grid item state during animation ── */
+  .grid-item.fading {
+    transition: opacity 0.3s, transform 0.3s;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>图片帧重复过渡 · Repeating Image Frame Transition</h1>
+  <p>点击任意图片，观察帧动画过渡效果 — 灵感来自 Codrops</p>
+</div>
+
+<div class="config-bar">
+  <span>过渡方向：</span>
+  <button class="config-btn active" data-dir="top-bottom">↓ 上→下</button>
+  <button class="config-btn" data-dir="bottom-top">↑ 下→上</button>
+  <button class="config-btn" data-dir="left-right">→ 左→右</button>
+  <button class="config-btn" data-dir="right-left">← 右→左</button>
+  <span style="margin-left:1rem">帧数：</span>
+  <button class="config-btn active" data-steps="6">6帧</button>
+  <button class="config-btn" data-steps="10">10帧</button>
+  <button class="config-btn" data-steps="4">4帧</button>
+  <span style="margin-left:1rem">路径：</span>
+  <button class="config-btn active" data-path="linear">直线</button>
+  <button class="config-btn" data-path="sine">正弦波</button>
+</div>
+
+<div class="main">
+  <div class="grid" id="grid">
+    <!-- Items injected by JS -->
+  </div>
+  <div class="panel" id="panel">
+    <div class="panel-img" id="panelImg"></div>
+    <div class="panel-content">
+      <h3 id="panelTitle">—</h3>
+      <p id="panelDesc">—</p>
+      <button class="panel-close" id="panelClose">✕ 关闭</button>
+    </div>
+  </div>
+  <div class="hint" id="hint">点击图片触发帧过渡动画</div>
+</div>
+
+<script>
+// ─── Config ───────────────────────────────────────────────────────────────────
+const config = {
+  clipDir: 'top-bottom',   // top-bottom | bottom-top | left-right | right-left
+  steps: 6,                // number of mover frames
+  stepDuration: 320,       // ms per frame animation
+  stepInterval: 55,        // ms delay between frames
+  pauseBeforeExit: 120,    // ms pause before frame exits
+  pathMotion: 'linear',    // linear | sine
+  sineAmplitude: 60,
+  rotationRange: 0,        // random rotation per frame (deg)
+};
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const items = [
+  {
+    bg: 'linear-gradient(135deg, #1a0533 0%, #3d1a6e 40%, #7c3aed 100%)',
+    title: '深紫星云',
+    desc: '宇宙深处的紫色星云，神秘而壮观',
+    variant: 'A · 默认',
+  },
+  {
+    bg: 'linear-gradient(135deg, #0a1628 0%, #1e3a5f 40%, #2563eb 100%)',
+    title: '深海蓝调',
+    desc: '深海的蓝色光芒，宁静而深邃',
+    variant: 'B · 默认',
+  },
+  {
+    bg: 'linear-gradient(135deg, #1a0a0a 0%, #5f1a1a 40%, #dc2626 100%)',
+    title: '赤焰熔岩',
+    desc: '炽热的熔岩流，充满原始力量',
+    variant: 'C · 默认',
+  },
+  {
+    bg: 'linear-gradient(135deg, #0a1a0a 0%, #1a4a1a 40%, #16a34a 100%)',
+    title: '翠绿森林',
+    desc: '茂密的热带雨林，生机盎然',
+    variant: 'D · 默认',
+  },
+  {
+    bg: 'linear-gradient(135deg, #1a1a0a 0%, #4a3a0a 40%, #d97706 100%)',
+    title: '琥珀暮色',
+    desc: '黄昏时分的琥珀色天空',
+    variant: 'E · 默认',
+  },
+  {
+    bg: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 40%, #6366f1 100%)',
+    title: '靛蓝极光',
+    desc: '北极上空的靛蓝色极光',
+    variant: 'F · 默认',
+  },
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let isAnimating = false;
+let isPanelOpen = false;
+
+// ─── DOM ──────────────────────────────────────────────────────────────────────
+const gridEl = document.getElementById('grid');
+const panelEl = document.getElementById('panel');
+const panelImg = document.getElementById('panelImg');
+const panelTitle = document.getElementById('panelTitle');
+const panelDesc = document.getElementById('panelDesc');
+const panelClose = document.getElementById('panelClose');
+const hintEl = document.getElementById('hint');
+
+// ─── Build Grid ───────────────────────────────────────────────────────────────
+items.forEach((item, i) => {
+  const el = document.createElement('div');
+  el.className = 'grid-item';
+  el.innerHTML = `
+    <div class="grid-item-img" style="background:${item.bg}"></div>
+    <div class="variant-label">${item.variant}</div>
+    <div class="grid-item-caption">
+      <h3>${item.title}</h3>
+      <p>${item.desc}</p>
+    </div>
+  `;
+  el.addEventListener('click', () => onItemClick(el, item));
+  gridEl.appendChild(el);
+});
+
+// ─── Clip-path helpers ────────────────────────────────────────────────────────
+function getClipPaths(dir) {
+  switch (dir) {
+    case 'bottom-top': return {
+      from:   'inset(0% 0% 100% 0%)',
+      reveal: 'inset(0% 0% 0% 0%)',
+      hide:   'inset(100% 0% 0% 0%)',
+    };
+    case 'left-right': return {
+      from:   'inset(0% 100% 0% 0%)',
+      reveal: 'inset(0% 0% 0% 0%)',
+      hide:   'inset(0% 0% 0% 100%)',
+    };
+    case 'right-left': return {
+      from:   'inset(0% 0% 0% 100%)',
+      reveal: 'inset(0% 0% 0% 0%)',
+      hide:   'inset(0% 100% 0% 0%)',
+    };
+    case 'top-bottom':
+    default: return {
+      from:   'inset(100% 0% 0% 0%)',
+      reveal: 'inset(0% 0% 0% 0%)',
+      hide:   'inset(0% 0% 100% 0%)',
+    };
+  }
+}
+
+// ─── Motion path ──────────────────────────────────────────────────────────────
+function generatePath(startRect, endRect, steps) {
+  const path = [];
+  for (let i = 0; i < steps; i++) {
+    const t = i / (steps - 1);
+    const left = lerp(startRect.left, endRect.left, t);
+    const top  = lerp(startRect.top,  endRect.top,  t);
+    const w    = lerp(startRect.width, endRect.width, t);
+    const h    = lerp(startRect.height, endRect.height, t);
+
+    let offsetX = 0, offsetY = 0;
+    if (config.pathMotion === 'sine') {
+      const angle = t * Math.PI;
+      const perp = perpendicular(startRect, endRect);
+      offsetX = perp.x * Math.sin(angle) * config.sineAmplitude;
+      offsetY = perp.y * Math.sin(angle) * config.sineAmplitude;
+    }
+
+    path.push({ left: left + offsetX, top: top + offsetY, width: w, height: h });
+  }
+  return path;
+}
+
+function perpendicular(r1, r2) {
+  const dx = r2.left - r1.left;
+  const dy = r2.top  - r1.top;
+  const len = Math.hypot(dx, dy) || 1;
+  return { x: -dy / len, y: dx / len };
+}
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+// ─── Animate ──────────────────────────────────────────────────────────────────
+function onItemClick(el, item) {
+  if (isAnimating) return;
+  isAnimating = true;
+  hintEl.classList.add('hidden');
+
+  // Determine panel side
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const isLeft = cx < window.innerWidth / 2;
+
+  // Auto-flip horizontal clip direction
+  let dir = config.clipDir;
+  if (dir === 'left-right' || dir === 'right-left') {
+    dir = isLeft ? 'left-right' : 'right-left';
+  }
+
+  // Position panel
+  if (isLeft) {
+    panelEl.classList.remove('panel-right');
+  } else {
+    panelEl.classList.add('panel-right');
+  }
+
+  // Set panel content
+  panelImg.style.background = item.bg;
+  panelTitle.textContent = item.title;
+  panelDesc.textContent = item.desc;
+
+  // Fade out other grid items
+  const allItems = gridEl.querySelectorAll('.grid-item');
+  allItems.forEach((gi, idx) => {
+    const delay = gi === el ? 0 : Math.random() * 150;
+    setTimeout(() => {
+      gi.style.transition = 'opacity 0.3s, transform 0.3s';
+      gi.style.opacity = gi === el ? '0' : '0.15';
+      gi.style.transform = gi === el ? 'scale(1)' : 'scale(0.95)';
+    }, delay);
+  });
+
+  // Get rects
+  const startRect = el.querySelector('.grid-item-img').getBoundingClientRect();
+
+  // We need panel rect — panel is hidden, so we temporarily measure it
+  panelEl.style.visibility = 'hidden';
+  panelEl.style.clipPath = 'inset(0% 0% 0% 0%)';
+  const endRect = panelEl.querySelector('.panel-img').getBoundingClientRect();
+  panelEl.style.clipPath = '';
+  panelEl.style.visibility = '';
+
+  // Generate path
+  const path = generatePath(startRect, endRect, config.steps);
+  const clips = getClipPaths(dir);
+
+  // Create movers
+  const movers = [];
+  path.forEach((step, i) => {
+    const mover = document.createElement('div');
+    mover.className = 'mover';
+    mover.style.cssText = `
+      left: ${step.left}px;
+      top: ${step.top}px;
+      width: ${step.width}px;
+      height: ${step.height}px;
+      background: ${item.bg};
+      clip-path: ${clips.from};
+      opacity: 0;
+      transform: rotate(${(Math.random() * 2 - 1) * config.rotationRange}deg);
+    `;
+    document.body.appendChild(mover);
+    movers.push(mover);
+  });
+
+  // Animate movers sequentially
+  movers.forEach((mover, i) => {
+    const delay = i * config.stepInterval;
+
+    // Enter
+    setTimeout(() => {
+      mover.style.transition = `clip-path ${config.stepDuration}ms cubic-bezier(0.77,0,0.175,1), opacity ${config.stepDuration * 0.3}ms`;
+      mover.style.clipPath = clips.reveal;
+      mover.style.opacity = '1';
+    }, delay);
+
+    // Exit
+    setTimeout(() => {
+      mover.style.transition = `clip-path ${config.stepDuration}ms cubic-bezier(0.77,0,0.175,1), opacity ${config.stepDuration * 0.5}ms ${config.stepDuration * 0.5}ms`;
+      mover.style.clipPath = clips.hide;
+      mover.style.opacity = '0.3';
+    }, delay + config.stepDuration + config.pauseBeforeExit);
+  });
+
+  // Reveal panel
+  const panelRevealDelay = (config.steps - 1) * config.stepInterval + config.stepDuration * 0.6;
+  setTimeout(() => {
+    panelEl.classList.add('open');
+    isPanelOpen = true;
+  }, panelRevealDelay);
+
+  // Cleanup movers
+  const cleanupDelay = (config.steps - 1) * config.stepInterval + config.stepDuration * 2 + config.pauseBeforeExit + 100;
+  setTimeout(() => {
+    movers.forEach(m => m.remove());
+    isAnimating = false;
+  }, cleanupDelay);
+}
+
+function closePanel() {
+  if (isAnimating || !isPanelOpen) return;
+  isAnimating = true;
+
+  // Determine close direction
+  const isRight = panelEl.classList.contains('panel-right');
+  panelEl.style.transition = 'clip-path 0.4s cubic-bezier(0.77,0,0.175,1)';
+  panelEl.style.clipPath = isRight ? 'inset(0% 0% 0% 100%)' : 'inset(0% 100% 0% 0%)';
+
+  setTimeout(() => {
+    panelEl.classList.remove('open');
+    panelEl.style.transition = '';
+    panelEl.style.clipPath = '';
+    isPanelOpen = false;
+
+    // Restore grid items
+    const allItems = gridEl.querySelectorAll('.grid-item');
+    allItems.forEach(gi => {
+      gi.style.transition = 'opacity 0.4s, transform 0.4s';
+      gi.style.opacity = '1';
+      gi.style.transform = 'scale(1)';
+    });
+
+    isAnimating = false;
+    hintEl.classList.remove('hidden');
+  }, 420);
+}
+
+panelClose.addEventListener('click', closePanel);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePanel();
+});
+
+// ─── Config Buttons ───────────────────────────────────────────────────────────
+document.querySelectorAll('[data-dir]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-dir]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    config.clipDir = btn.dataset.dir;
+  });
+});
+
+document.querySelectorAll('[data-steps]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-steps]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    config.steps = parseInt(btn.dataset.steps);
+  });
+});
+
+document.querySelectorAll('[data-path]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-path]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    config.pathMotion = btn.dataset.path;
+  });
+});
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 - 效果名称：液态文字变形 (Fluid Text Morph)
 - 效果描述：多个单词/短语之间用 SVG feTurbulence + feBlend 滤镜实现液态融合变形过渡。文字像液体一样在不同词语之间流动变形——两个文字同时存在时，通过高斯模糊 + 对比度滤镜（gooey effect）让文字边缘产生液态粘连感，然后一个词"融化"消失，另一个词从液态中"凝固"出现。支持多个变体：① 单行标题词语循环变形（如 Design → Build → Ship → Launch）② 多行段落中关键词高亮变形 ③ 鼠标悬停触发单词液化 ④ 彩色液态变形（不同词用不同颜色）。深色背景，大号白色/彩色文字，视觉冲击力极强。
 - 实现原理：SVG filter 中 feGaussianBlur（stdDeviation=8）+ feColorMatrix（contrast 矩阵，将模糊边缘锐化为液态边界）组合实现 gooey effect；两个文字层叠加，用 CSS opacity + transform scale 控制出场/入场，过渡期间两层同时可见，gooey filter 让边缘产生液态粘连；JS 定时器循环切换词语，transition 驱动 opacity/scale 变化；彩色版用 feFlood + feComposite 给液态区域染色
-- 状态：待实现
+- 状态：已实现 → 74-fluid-text-morph.html，已集成到 collect.html
 
 ## 2026-05-12 tympanus.net/codrops (On-Scroll 3D Carousel)
 - 效果名称：滚动驱动 3D 圆柱轮播 (On-Scroll 3D Carousel)

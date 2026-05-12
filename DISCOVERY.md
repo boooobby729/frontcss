@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 linear.app (Isometric Wireframe Geometry)
+- 效果名称：等距线框几何体 (Isometric Wireframe Geometry)
+- 效果描述：以等距视角（isometric projection）展示多种纯线框 3D 几何体——层叠立方体、模块堆叠、层叠面板、旋转正方体。所有几何体用 CSS transform + SVG 线条实现，无需 WebGL。悬停时几何体做旋转/展开动画，页面加载时逐层构建动画（每条边依次从 0 到全长绘制）。4-6 种变体：① 层叠立方体塔（cubic stack）② 分解爆炸视图（exploded view）③ 旋转线框正方体（rotating wireframe）④ 网格平面（grid plane）⑤ 层叠面板（stacked panels）
+- 实现原理：等距投影用 CSS `transform: rotateX(54.7deg) rotateZ(45deg)` 实现标准等距视角，立方体三个面用绝对定位 + 不同旋转构建，线框用 SVG `<line>` 或 CSS border 绘制，入场动画用 SVG `stroke-dashoffset` 从全长到 0 模拟描边效果，悬停旋转用 CSS transition 驱动，整体深色背景配细白线，呈现 Linear 风格的精密感
+- 状态：已实现 → `82-isometric-wireframe.html`，已集成到 `index.html`
+
 ## 2026-05-13 tympanus.net/codrops (Scroll Image Reveal Grid)
 - 效果名称：滚动图片网格揭示 (Scroll Image Reveal Grid)
 - 效果描述：一组图片以紧凑网格排列，滚动时每张图片依次通过 clip-path 从遮罩状态"揭开"，同时配合 scale + translate 产生景深感。支持 4 种变体：① 从中心展开（clip-path: inset 从四周收缩到 0）② 横向百叶窗（多条竖向条带依次从上往下消失，露出图片）③ 网格碎片揭示（图片被分成 NxM 小格，小格随机延迟 clip-path 消失）④ 文字遮罩揭示（大号粗体文字作为 clip-path mask，图片通过文字形状"透出"）。深色背景，配合滚动进度指示线，整体有强烈的编辑风格质感。

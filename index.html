@@ -239,6 +239,48 @@ a{text-decoration:none;color:inherit}
       <div class="cat-visual"><img src="_thumbs/46-collect.png" alt="Collect" loading="lazy"></div>
       <div class="cat-info"><h3>Collect</h3><span class="cat-count">36</span></div>
     </a>
+    <a href="82-isometric-wireframe.html" class="cat-card">
+      <div class="cat-visual" style="background:#080810;overflow:hidden;position:relative">
+        <style>
+          .iso-prev{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+          .iso-prev svg{overflow:visible;animation:iso-float 3s ease-in-out infinite}
+          @keyframes iso-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+          .iso-wire{fill:none;stroke:rgba(255,255,255,0.75);stroke-width:1;stroke-linecap:round}
+          .iso-top{fill:rgba(255,255,255,0.08);stroke:none}
+          .iso-side{fill:rgba(255,255,255,0.03);stroke:none}
+        </style>
+        <div class="iso-prev">
+          <svg width="100" height="90" viewBox="0 0 100 90">
+            <!-- Cube 1 bottom -->
+            <polygon class="iso-top"  points="50,42 74,54 50,66 26,54"/>
+            <polygon class="iso-side" points="74,54 74,70 50,82 50,66"/>
+            <polygon class="iso-side" points="26,54 50,66 50,82 26,70"/>
+            <polyline class="iso-wire" points="50,42 74,54 50,66 26,54 50,42"/>
+            <line class="iso-wire" x1="74" y1="54" x2="74" y2="70"/>
+            <line class="iso-wire" x1="50" y1="66" x2="50" y2="82"/>
+            <line class="iso-wire" x1="26" y1="54" x2="26" y2="70"/>
+            <polyline class="iso-wire" points="74,70 50,82 26,70 26,54"/>
+            <!-- Cube 2 middle -->
+            <polygon class="iso-top"  points="50,20 74,32 50,44 26,32"/>
+            <polygon class="iso-side" points="74,32 74,54 50,66 50,44"/>
+            <polygon class="iso-side" points="26,32 50,44 50,66 26,54"/>
+            <polyline class="iso-wire" points="50,20 74,32 50,44 26,32 50,20"/>
+            <line class="iso-wire" x1="74" y1="32" x2="74" y2="54"/>
+            <line class="iso-wire" x1="26" y1="32" x2="26" y2="54"/>
+            <!-- Cube 3 top (small) -->
+            <polygon class="iso-top"  points="50,5 63,12 50,19 37,12"/>
+            <polygon class="iso-side" points="63,12 63,20 50,27 50,19"/>
+            <polygon class="iso-side" points="37,12 50,19 50,27 37,20"/>
+            <polyline class="iso-wire" style="stroke:rgba(255,255,255,0.95)" points="50,5 63,12 50,19 37,12 50,5"/>
+            <line class="iso-wire" x1="63" y1="12" x2="63" y2="20"/>
+            <line class="iso-wire" x1="50" y1="19" x2="50" y2="27"/>
+            <line class="iso-wire" x1="37" y1="12" x2="37" y2="20"/>
+            <polyline class="iso-wire" style="stroke:rgba(255,255,255,0.95)" points="63,20 50,27 37,20 37,12"/>
+          </svg>
+        </div>
+      </div>
+      <div class="cat-info"><h3>等距线框几何体</h3><span class="cat-count">6 变体</span></div>
+    </a>
     <a href="80-scroll-svg-filter-text.html" class="cat-card">
       <div class="cat-visual" style="background:#000;overflow:hidden;position:relative">
         <style>.svgft-word{position:absolute;font-size:1.6rem;font-weight:900;letter-spacing:-.04em;color:#fff;white-space:nowrap;animation:svgft-melt 3s ease-in-out infinite alternate;filter:url(#svgft-preview)}.svgft-word:nth-child(2){font-size:1rem;color:rgba(255,255,255,.35);bottom:28%;animation-delay:.8s;animation-name:svgft-glitch}@keyframes svgft-melt{0%{filter:url(#svgft-preview) blur(0px);opacity:1}100%{filter:url(#svgft-preview2) blur(.5px);opacity:.85}}@keyframes svgft-glitch{0%,100%{transform:translateX(0);color:rgba(255,255,255,.35)}45%{transform:translateX(-3px);color:#f0f}55%{transform:translateX(3px);color:#0ff}60%{transform:translateX(0);color:rgba(255,255,255,.35)}}</style>

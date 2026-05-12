@@ -222,6 +222,21 @@ a{text-decoration:none;color:inherit}
       </div>
       <div class="card-info"><h3>Physics Particles · 物理粒子</h3></div>
     </a>
+    <a href="../80-scroll-svg-filter-text.html" class="card" data-idx="35">
+      <div class="card-visual" style="overflow:hidden;position:relative;background:#0a0a0a">
+        <svg id="svg-filter-preview" viewBox="0 0 180 135" style="width:100%;height:100%;display:block">
+          <defs>
+            <filter id="prev-melt" x="-20%" y="-20%" width="140%" height="140%">
+              <feTurbulence id="prev-turb" type="turbulence" baseFrequency="0.02 0.06" numOctaves="3" seed="2" result="noise"/>
+              <feDisplacementMap id="prev-disp" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+          </defs>
+          <text x="90" y="58" text-anchor="middle" font-family="'Arial Black',Impact,sans-serif" font-size="28" font-weight="900" fill="#e8c97a" filter="url(#prev-melt)" letter-spacing="2">MELT</text>
+          <text x="90" y="95" text-anchor="middle" font-family="'Arial Black',Impact,sans-serif" font-size="13" font-weight="700" fill="rgba(255,255,255,0.3)" letter-spacing="4">SVG FILTER</text>
+        </svg>
+      </div>
+      <div class="card-info"><h3>Scroll SVG Filter Text · 滚动 SVG 滤镜文字</h3></div>
+    </a>
 </div>
 <script>
 
@@ -453,6 +468,25 @@ a{text-decoration:none;color:inherit}
     requestAnimationFrame(loop);
   }
   loop();
+})();
+
+// SVG Filter Text preview animation
+(function(){
+  var turb = document.getElementById('prev-turb');
+  var disp = document.getElementById('prev-disp');
+  if (!turb || !disp) return;
+  var start = performance.now();
+  function frame() {
+    var t = (performance.now() - start) / 1000;
+    // sine wave: 0 → 18 → 0 cycle
+    var p = (Math.sin(t * 0.8) * 0.5 + 0.5);
+    var scale = p * 18;
+    var bf = (0.015 + p * 0.025).toFixed(4) + ' ' + (0.04 + p * 0.04).toFixed(4);
+    turb.setAttribute('baseFrequency', bf);
+    disp.setAttribute('scale', scale.toFixed(1));
+    requestAnimationFrame(frame);
+  }
+  frame();
 })();
 </script>
 </body>

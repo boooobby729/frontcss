@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>80 · Scroll SVG Filter Text · 滚动 SVG 滤镜文字</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--accent:#a78bfa}
+html{scroll-behavior:auto}
+body{background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;overflow-x:hidden}
+
+/* ── NAV ── */
+.back-nav{position:fixed;top:0;left:0;right:0;z-index:200;height:48px;background:rgba(0,0,0,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 20px;gap:12px}
+.back-btn{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.5);font-size:.8rem;text-decoration:none;transition:color .2s}
+.back-btn:hover{color:#fff}
+.back-btn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+.nav-title{font-size:.8rem;color:rgba(255,255,255,.25);flex:1;text-align:center}
+.nav-badge{font-size:.65rem;color:rgba(255,255,255,.3);padding:3px 8px;border:1px solid rgba(255,255,255,.1);border-radius:12px}
+
+/* ── PAGE HEADER ── */
+.page-header{padding:80px 40px 24px;text-align:center}
+.page-header h1{font-size:clamp(1.2rem,2.5vw,1.6rem);font-weight:700;letter-spacing:-.03em;color:rgba(255,255,255,.9)}
+.page-header p{margin-top:8px;font-size:.8rem;color:rgba(255,255,255,.3);max-width:520px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+/* ── VARIANT LABEL ── */
+.variant-label{text-align:center;padding:16px 0 0;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18)}
+
+/* ───────────────────────────────────
+   VARIANT 1: LIQUID MELT
+   文字随滚动像熔岩融化
+──────────────────────────────────── */
+.section-liquid{min-height:300vh;position:relative}
+.sticky-liquid{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.liquid-text{font-size:clamp(5rem,16vw,13rem);font-weight:900;letter-spacing:-.05em;line-height:.9;text-align:center;color:#fff;filter:url(#filter-liquid);will-change:filter;user-select:none;text-transform:uppercase}
+.liquid-sub{margin-top:2rem;font-size:clamp(.7rem,1.5vw,1rem);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.25);filter:url(#filter-liquid-sub)}
+
+/* ───────────────────────────────────
+   VARIANT 2: GLITCH TEAR
+   故障撕裂 + RGB 色差分离
+──────────────────────────────────── */
+.section-glitch{min-height:300vh;position:relative;background:#000}
+.sticky-glitch{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.glitch-wrap{position:relative;display:inline-block}
+.glitch-text{font-size:clamp(4rem,14vw,11rem);font-weight:900;letter-spacing:-.04em;line-height:.9;text-align:center;color:#fff;text-transform:uppercase;position:relative;display:block;filter:url(#filter-glitch)}
+.glitch-text::before,.glitch-text::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;font-size:inherit;font-weight:inherit;letter-spacing:inherit;line-height:inherit;text-transform:inherit}
+.glitch-text::before{color:#f0f;clip-path:polygon(0 0,100% 0,100% 45%,0 45%);transform:translateX(var(--glitch-x1,0px))}
+.glitch-text::after{color:#0ff;clip-path:polygon(0 55%,100% 55%,100% 100%,0 100%);transform:translateX(var(--glitch-x2,0px))}
+.glitch-progress{margin-top:2.5rem;width:min(300px,60vw);height:2px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.glitch-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#a78bfa,#60a5fa);border-radius:2px;transition:width .05s linear}
+
+/* ───────────────────────────────────
+   VARIANT 3: DISSOLVE
+   溶解消散 — 像素噪点扩散
+──────────────────────────────────── */
+.section-dissolve{min-height:300vh;position:relative;background:#050505}
+.sticky-dissolve{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.dissolve-text{font-size:clamp(3.5rem,12vw,10rem);font-weight:900;letter-spacing:-.04em;line-height:.9;text-align:center;color:#fff;text-transform:uppercase;filter:url(#filter-dissolve)}
+.dissolve-hint{margin-top:3rem;font-size:.7rem;letter-spacing:.18em;color:rgba(255,255,255,.2);text-transform:uppercase}
+
+/* ───────────────────────────────────
+   VARIANT 4: FREEZE & REFORM
+   冻结重生 — 扭曲后凝固成新词
+──────────────────────────────────── */
+.section-freeze{min-height:400vh;position:relative;background:#02020a}
+.sticky-freeze{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.freeze-text{font-size:clamp(4rem,13vw,11rem);font-weight:900;letter-spacing:-.05em;line-height:.9;text-align:center;text-transform:uppercase;filter:url(#filter-freeze)}
+.freeze-text .word-a{color:#fff;transition:opacity .1s}
+.freeze-text .word-b{color:var(--accent);position:absolute;top:0;left:0;width:100%;opacity:0;transition:opacity .1s}
+.freeze-text-wrap{position:relative;display:inline-block}
+.freeze-stage{margin-top:1.5rem;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.2)}
+
+/* ── SCROLL INDICATOR ── */
+.scroll-cue{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.4;animation:scrollBob 2s ease-in-out infinite}
+.scroll-cue span{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:#fff}
+.scroll-cue svg{width:18px;height:18px;stroke:#fff;stroke-width:1.5;fill:none}
+@keyframes scrollBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+/* ── DIVIDER ── */
+.section-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);margin:0 40px}
+
+/* ── FOOTER SPACE ── */
+.footer-space{height:20vh;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:rgba(255,255,255,.12);letter-spacing:.1em}
+</style>
+
+<!-- SVG Filter Definitions (hidden) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <defs>
+
+    <!-- Filter 1: Liquid Melt -->
+    <filter id="filter-liquid" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feTurbulence id="liq-turb" type="fractalNoise" baseFrequency="0 0" numOctaves="3" seed="2" result="noise"/>
+      <feDisplacementMap id="liq-disp" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feGaussianBlur id="liq-blur" in="displaced" stdDeviation="0" result="blurred"/>
+      <feComposite in="blurred" in2="SourceGraphic" operator="over"/>
+    </filter>
+
+    <!-- Filter 1b: liquid sub text (lighter) -->
+    <filter id="filter-liquid-sub" x="-30%" y="-30%" width="160%" height="160%">
+      <feTurbulence id="liq-sub-turb" type="fractalNoise" baseFrequency="0 0" numOctaves="2" seed="5" result="noise"/>
+      <feDisplacementMap id="liq-sub-disp" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <!-- Filter 2: Glitch Tear -->
+    <filter id="filter-glitch" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence id="glt-turb" type="turbulence" baseFrequency="0.05 0.0" numOctaves="1" seed="8" result="noise"/>
+      <feDisplacementMap id="glt-disp" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <!-- Filter 3: Dissolve -->
+    <filter id="filter-dissolve" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+      <feTurbulence id="dis-turb" type="fractalNoise" baseFrequency="0.65 0.65" numOctaves="4" seed="12" result="noise"/>
+      <feColorMatrix id="dis-cm" in="noise" type="matrix"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 50 -25" result="mask"/>
+      <feDisplacementMap id="dis-disp" in="SourceGraphic" in2="mask" scale="0" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feComposite in="displaced" in2="mask" operator="in"/>
+    </filter>
+
+    <!-- Filter 4: Freeze/Reform -->
+    <filter id="filter-freeze" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence id="frz-turb" type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="3" seed="3" result="noise"/>
+      <feDisplacementMap id="frz-disp" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feGaussianBlur id="frz-blur" in="displaced" stdDeviation="0"/>
+    </filter>
+
+  </defs>
+</svg>
+
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="back-nav">
+  <a href="../index.html" class="back-btn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    返回
+  </a>
+  <span class="nav-title">Scroll SVG Filter Text</span>
+  <span class="nav-badge">#80</span>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <h1>滚动驱动 SVG 滤镜文字扭曲</h1>
+  <p>向下滚动，让文字在液态熔化、故障撕裂、溶解消散、冻结重生之间流转。<br>纯 SVG feTurbulence + feDisplacementMap，零依赖。</p>
+</div>
+
+<!-- ────────────────────────────────────────
+  VARIANT 1: LIQUID MELT
+──────────────────────────────────────── -->
+<div class="variant-label">① Liquid Melt · 液态熔化</div>
+<section class="section-liquid" id="sec-liquid">
+  <div class="sticky-liquid">
+    <div class="liquid-text" id="liquid-text">MELT</div>
+    <div class="liquid-sub" id="liquid-sub">scroll to dissolve</div>
+    <div class="scroll-cue">
+      <span>scroll</span>
+      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ────────────────────────────────────────
+  VARIANT 2: GLITCH TEAR
+──────────────────────────────────────── -->
+<div class="variant-label">② Glitch Tear · 故障撕裂</div>
+<section class="section-glitch" id="sec-glitch">
+  <div class="sticky-glitch">
+    <div class="glitch-wrap">
+      <span class="glitch-text" id="glitch-text" data-text="GLITCH">GLITCH</span>
+    </div>
+    <div class="glitch-progress"><div class="glitch-progress-bar" id="glitch-bar"></div></div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ────────────────────────────────────────
+  VARIANT 3: DISSOLVE
+──────────────────────────────────────── -->
+<div class="variant-label">③ Pixel Dissolve · 像素溶解</div>
+<section class="section-dissolve" id="sec-dissolve">
+  <div class="sticky-dissolve">
+    <div class="dissolve-text" id="dissolve-text">DISSOLVE</div>
+    <div class="dissolve-hint" id="dissolve-hint">fading into noise</div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ────────────────────────────────────────
+  VARIANT 4: FREEZE & REFORM
+──────────────────────────────────────── -->
+<div class="variant-label">④ Freeze &amp; Reform · 冻结重生</div>
+<section class="section-freeze" id="sec-freeze">
+  <div class="sticky-freeze">
+    <div class="freeze-text" id="freeze-text">
+      <div class="freeze-text-wrap">
+        <span class="word-a" id="freeze-word-a">CHAOS</span>
+        <span class="word-b" id="freeze-word-b">ORDER</span>
+      </div>
+    </div>
+    <div class="freeze-stage" id="freeze-stage">phase 1 of 4 · clarity</div>
+  </div>
+</section>
+
+<div class="footer-space">— end of scroll —</div>
+
+<script>
+// ── Utility ──
+function lerp(a,b,t){return a+(b-a)*t}
+function clamp(v,mn,mx){return Math.min(Math.max(v,mn),mx)}
+function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function easeIn(t){return t*t*t}
+function easeOut(t){return 1-Math.pow(1-t,3)}
+
+// Get scroll progress for a section (0 → 1)
+function sectionProgress(el){
+  const rect=el.getBoundingClientRect();
+  const totalScroll=el.offsetHeight-window.innerHeight;
+  if(totalScroll<=0)return 0;
+  const scrolled=-rect.top;
+  return clamp(scrolled/totalScroll,0,1);
+}
+
+// SVG filter element helpers
+const liqTurb=document.getElementById('liq-turb');
+const liqDisp=document.getElementById('liq-disp');
+const liqBlur=document.getElementById('liq-blur');
+const liqSubTurb=document.getElementById('liq-sub-turb');
+const liqSubDisp=document.getElementById('liq-sub-disp');
+
+const gltTurb=document.getElementById('glt-turb');
+const gltDisp=document.getElementById('glt-disp');
+
+const disTurb=document.getElementById('dis-turb');
+const disCm=document.getElementById('dis-cm');
+const disDisp=document.getElementById('dis-disp');
+
+const frzTurb=document.getElementById('frz-turb');
+const frzDisp=document.getElementById('frz-disp');
+const frzBlur=document.getElementById('frz-blur');
+
+// Section elements
+const secLiquid=document.getElementById('sec-liquid');
+const secGlitch=document.getElementById('sec-glitch');
+const secDissolve=document.getElementById('sec-dissolve');
+const secFreeze=document.getElementById('sec-freeze');
+
+const glitchText=document.getElementById('glitch-text');
+const glitchBar=document.getElementById('glitch-bar');
+const freezeWordA=document.getElementById('freeze-word-a');
+const freezeWordB=document.getElementById('freeze-word-b');
+const freezeStage=document.getElementById('freeze-stage');
+
+// Seed animation for turbulence (creates organic movement)
+let seedOffset=0;
+let lastTime=0;
+
+function tick(ts){
+  const dt=ts-lastTime;
+  lastTime=ts;
+
+  // Slowly drift seeds for organic feel
+  seedOffset+=dt*0.0004;
+
+  // ── Variant 1: Liquid Melt ──
+  const p1=sectionProgress(secLiquid);
+  const e1=easeIn(p1);
+
+  // baseFrequency climbs 0 → 0.045 with both x and y
+  const liqFreq=(e1*0.045).toFixed(4);
+  liqTurb.setAttribute('baseFrequency',`${liqFreq} ${(e1*0.025).toFixed(4)}`);
+  liqTurb.setAttribute('seed',Math.floor(seedOffset*3)%99);
+  liqDisp.setAttribute('scale',(e1*120).toFixed(1));
+  liqBlur.setAttribute('stdDeviation',(e1*1.5).toFixed(2));
+
+  // sub text dissolves faster
+  const liqSubFreq=(e1*0.06).toFixed(4);
+  liqSubTurb.setAttribute('baseFrequency',`${liqSubFreq} ${(e1*0.03).toFixed(4)}`);
+  liqSubDisp.setAttribute('scale',(e1*80).toFixed(1));
+
+  // ── Variant 2: Glitch Tear ──
+  const p2=sectionProgress(secGlitch);
+  const e2=easeInOut(p2);
+
+  // Turbulence frequency spikes on scroll for tear effect
+  const gltFreqX=(0.03+e2*0.08).toFixed(4);
+  gltTurb.setAttribute('baseFrequency',`${gltFreqX} 0`);
+  gltTurb.setAttribute('seed',Math.floor(seedOffset*5)%99);
+  const gltScale=e2*60;
+  gltDisp.setAttribute('scale',gltScale.toFixed(1));
+
+  // RGB aberration offsets on the pseudo-elements
+  const aberr=(e2*18).toFixed(1);
+  glitchText.style.setProperty('--glitch-x1',`${aberr}px`);
+  glitchText.style.setProperty('--glitch-x2',`-${aberr}px`);
+  glitchBar.style.width=(p2*100)+'%';
+
+  // Random horizontal jitter for intense effect when scroll mid-range
+  if(p2>0.3&&p2<0.8&&Math.random()<0.08){
+    const jitter=(Math.random()-0.5)*8;
+    glitchText.style.transform=`translateX(${jitter}px)`;
+  } else {
+    glitchText.style.transform='';
+  }
+
+  // ── Variant 3: Dissolve ──
+  const p3=sectionProgress(secDissolve);
+  const e3=easeIn(p3);
+
+  // For dissolve: seed changes rapidly to create flickering noise
+  disTurb.setAttribute('seed',Math.floor(seedOffset*8)%99);
+
+  // The colorMatrix threshold shifts: at p3=0 text is clear, at p3=1 dissolved
+  const contrast=clamp(50-e3*45,5,50);
+  const bias=clamp(-25+e3*20,-25,10);
+  disCm.setAttribute('values',`1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 ${contrast.toFixed(1)} ${bias.toFixed(1)}`);
+  disDisp.setAttribute('scale',(e3*40).toFixed(1));
+
+  // Opacity fades as it dissolves
+  const dissolveEl=document.getElementById('dissolve-text');
+  dissolveEl.style.opacity=clamp(1-e3*0.6,0.4,1);
+
+  // ── Variant 4: Freeze & Reform ──
+  const p4=sectionProgress(secFreeze);
+  // Phase 0→0.25: clear (CHAOS)
+  // Phase 0.25→0.5: freeze/distort
+  // Phase 0.5→0.75: peak chaos
+  // Phase 0.75→1.0: reform (ORDER)
+  const phase=p4*4; // 0→4
+  let frzScale=0;
+  let frzBlurVal=0;
+  let stageText='';
+  let wordAOpacity=1;
+  let wordBOpacity=0;
+
+  if(phase<1){
+    // Clarity
+    const t=phase;
+    frzScale=t*30;
+    frzBlurVal=t*0.5;
+    stageText='phase 1 of 4 · building tension';
+    wordAOpacity=1; wordBOpacity=0;
+  } else if(phase<2){
+    // Freeze
+    const t=phase-1;
+    frzScale=30+t*120;
+    frzBlurVal=0.5+t*3;
+    stageText='phase 2 of 4 · freezing';
+    wordAOpacity=clamp(1-t*2,0,1);
+    wordBOpacity=0;
+  } else if(phase<3){
+    // Peak chaos
+    const t=phase-2;
+    frzScale=150-t*80;
+    frzBlurVal=3.5-t*2;
+    frzTurb.setAttribute('seed',Math.floor(seedOffset*10+t*20)%99);
+    stageText='phase 3 of 4 · reforming';
+    wordAOpacity=0;
+    wordBOpacity=clamp(t*2-0.8,0,1);
+  } else {
+    // Reform
+    const t=phase-3;
+    frzScale=clamp(70-t*70,0,70);
+    frzBlurVal=clamp(1.5-t*1.5,0,1.5);
+    stageText='phase 4 of 4 · order restored';
+    wordAOpacity=0;
+    wordBOpacity=1;
+  }
+
+  frzTurb.setAttribute('baseFrequency',(0.015+easeIn(clamp(frzScale/150,0,1))*0.04).toFixed(4));
+  frzDisp.setAttribute('scale',frzScale.toFixed(1));
+  frzBlur.setAttribute('stdDeviation',frzBlurVal.toFixed(2));
+  freezeWordA.style.opacity=wordAOpacity;
+  freezeWordB.style.opacity=wordBOpacity;
+  freezeStage.textContent=stageText;
+
+  requestAnimationFrame(tick);
+}
+
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

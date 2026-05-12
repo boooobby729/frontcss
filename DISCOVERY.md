@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-12 tympanus.net/codrops (Scroll-based SVG Filter Text)
+- 效果名称：滚动驱动 SVG 滤镜文字扭曲 (Scroll-driven SVG Filter Text Distortion)
+- 效果描述：大号文字随滚动进度动态变形——通过 SVG feTurbulence + feDisplacementMap 滤镜，文字边缘随滚动从清晰逐渐扭曲成液态/故障/溶解效果。灵感来自 EDITORA 网站（Garden Eight / MisatoDaiq 创作）。支持 4 个变体：① 液态熔化（文字边缘随滚动像熔岩融化，feTurbulence baseFrequency 从 0 增至 0.04）② 故障撕裂（feDisplacementMap scale 增大，文字水平撕裂错位，配合 RGB 色差分离）③ 溶解消散（文字像素随滚动逐渐溶解成噪点，结合 feColorMatrix 降低对比度）④ 冻结重生（滚动到顶时文字清晰，中段完全扭曲，底部重新凝固成不同字词——循环意象）。深色背景，大号白色粗体文字，整体氛围黑暗艺术感。
+- 实现原理：SVG defs 中定义 filter（feTurbulence → feDisplacementMap → feComposite），JS 监听 scroll 事件计算 scrollProgress（0→1），用 lerp 插值动态修改 feTurbulence 的 baseFrequency 和 seed 属性、feDisplacementMap 的 scale 属性；CSS filter: url(#filterID) 应用到文字元素；故障版用 CSS ::before/::after 伪元素复制文字做 RGB 色差偏移；不需要 GSAP，纯原生 JS + SVG 实现
+- 状态：待实现
+
 ## 2026-05-12 gsap.com + codrops (Physics Particle Playground)
 - 效果名称：物理弹跳粒子乐园 (Physics Particle Playground)
 - 效果描述：受 GSAP Physics2D 插件启发，用纯 JS 模拟真实物理世界的粒子系统。鼠标点击屏幕任意位置，爆炸散射出一批彩色粒子，每个粒子有独立的初速度、重力加速度、空气阻力、弹性系数。粒子碰到边界时真实弹跳（速度乘以弹性系数反向），随时间逐渐减速并透明消散。支持 4 个变体：① 基础重力弹跳（粒子受重力下落，碰底弹起）② 零重力爆炸（粒子向四周均匀扩散，碰壁反弹，像台球）③ 烟花模式（粒子上升后在顶部二次爆炸，拖尾效果）④ 连锁反应（粒子碰撞时触发新的小爆炸，雪崩效应）。深色背景，粒子颜色从亮色渐变到透明，拖尾轨迹增强速度感。

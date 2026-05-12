@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>86 · On-Scroll Layout Formations</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080810;
+    --text: #e8e8f0;
+    --muted: #555568;
+    --accent1: #7c6af7;
+    --accent2: #f76a8a;
+    --accent3: #6af7c8;
+  }
+
+  html { scroll-behavior: auto; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1.2rem;
+    position: relative;
+  }
+  .hero-label {
+    font-size: .75rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .hero h1 {
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+  }
+  .hero h1 span { color: var(--accent1); }
+  .hero p {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 420px;
+    line-height: 1.6;
+  }
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+    color: var(--muted);
+    font-size: .7rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  .scroll-hint::after {
+    content: '';
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    text-align: center;
+    padding: 5rem 1rem 2rem;
+    position: relative;
+    z-index: 10;
+  }
+  .section-label .num {
+    font-size: .7rem;
+    letter-spacing: .2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+  }
+  .section-label h2 {
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+  .section-label p {
+    margin-top: .6rem;
+    font-size: .9rem;
+    color: var(--muted);
+  }
+
+  /* ── Pin wrapper ── */
+  /* Each formation: tall scroll container + sticky inner */
+  .formation-wrap {
+    position: relative;
+  }
+  .formation-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Grid canvas ── */
+  .grid-canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── Image tiles ── */
+  .tile {
+    position: absolute;
+    overflow: hidden;
+    border-radius: 6px;
+    will-change: transform, opacity;
+    transition: none; /* driven by JS */
+  }
+  .tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Gradient placeholder when no real image */
+  .tile-bg {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .65rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.35);
+    font-weight: 600;
+  }
+
+  /* ── Formation title overlay ── */
+  .formation-title {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+    z-index: 20;
+    transition: opacity .4s;
+  }
+  .formation-title h3 {
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    font-weight: 600;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+  }
+  .formation-title p {
+    font-size: .75rem;
+    color: var(--muted);
+    margin-top: .3rem;
+  }
+
+  /* ── Progress bar ── */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent1);
+    z-index: 100;
+    transition: width .1s linear;
+    width: 0%;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    text-align: center;
+  }
+  .footer h2 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .footer p { color: var(--muted); font-size: .9rem; }
+  .tag {
+    display: inline-block;
+    padding: .25rem .7rem;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-label">86 · Scroll Formations</div>
+  <h1>On-Scroll<br><span>Layout Formations</span></h1>
+  <p>Scroll to watch scattered elements assemble into precise grid formations — four distinct layouts.</p>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- ════════════════════════════════════════
+     FORMATION 1 · 3-Column Grid
+════════════════════════════════════════ -->
+<div class="section-label">
+  <div class="num">Formation 01</div>
+  <h2>Three-Column Grid</h2>
+  <p>Six tiles fly in from random positions and snap into a symmetric grid.</p>
+</div>
+
+<div class="formation-wrap" id="f1" data-scroll-height="300">
+  <div class="formation-sticky">
+    <div class="grid-canvas" id="canvas1">
+      <!-- tiles injected by JS -->
+    </div>
+    <div class="formation-title" id="title1">
+      <h3>Grid Assembly</h3>
+      <p>Scroll to assemble ↑</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     FORMATION 2 · Magazine Layout
+════════════════════════════════════════ -->
+<div class="section-label">
+  <div class="num">Formation 02</div>
+  <h2>Magazine Layout</h2>
+  <p>A hero image flanked by smaller editorial tiles — editorial elegance.</p>
+</div>
+
+<div class="formation-wrap" id="f2" data-scroll-height="300">
+  <div class="formation-sticky">
+    <div class="grid-canvas" id="canvas2"></div>
+    <div class="formation-title" id="title2">
+      <h3>Editorial Formation</h3>
+      <p>Scroll to assemble ↑</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     FORMATION 3 · Mosaic / Bento
+════════════════════════════════════════ -->
+<div class="section-label">
+  <div class="num">Formation 03</div>
+  <h2>Bento Mosaic</h2>
+  <p>Irregular-sized tiles lock into a bento-box mosaic pattern.</p>
+</div>
+
+<div class="formation-wrap" id="f3" data-scroll-height="300">
+  <div class="formation-sticky">
+    <div class="grid-canvas" id="canvas3"></div>
+    <div class="formation-title" id="title3">
+      <h3>Mosaic Assembly</h3>
+      <p>Scroll to assemble ↑</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     FORMATION 4 · Timeline / Alternating
+════════════════════════════════════════ -->
+<div class="section-label">
+  <div class="num">Formation 04</div>
+  <h2>Timeline Formation</h2>
+  <p>Cards alternate left and right, converging on a central axis.</p>
+</div>
+
+<div class="formation-wrap" id="f4" data-scroll-height="300">
+  <div class="formation-sticky">
+    <div class="grid-canvas" id="canvas4"></div>
+    <div class="formation-title" id="title4">
+      <h3>Timeline Assembly</h3>
+      <p>Scroll to assemble ↑</p>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<section class="footer">
+  <div class="tag">86 · On-Scroll Layout Formations</div>
+  <h2>All Formations<br>Complete.</h2>
+  <p>Inspired by Codrops · tympanus.net/codrops</p>
+</section>
+
+<script>
+// ─────────────────────────────────────────────
+// Palette helpers
+// ─────────────────────────────────────────────
+const PALETTES = [
+  // Formation 1 – cool purples/blues
+  ['#1a1040','#2d1b69','#3d2b8a','#4a3aaa','#6a5acd','#8b7ae8'],
+  // Formation 2 – warm editorial
+  ['#1a0a0a','#3d1515','#6b2020','#8b3a3a','#c06060','#e08080'],
+  // Formation 3 – teal/green bento
+  ['#0a1a15','#0d2e22','#1a4a35','#2a6b50','#3a9b72','#5ac89a'],
+  // Formation 4 – amber/gold timeline
+  ['#1a1200','#3d2e00','#6b5200','#9b7a00','#c8a800','#f0cc40'],
+];
+
+const LABELS = [
+  ['ARCH','FORM','GRID','SPACE','LAYER','DEPTH'],
+  ['HERO','EDIT','FEAT','SIDE','PULL','QUOTE'],
+  ['MAIN','WIDE','TALL','MINI','SPAN','FILL'],
+  ['2019','2020','2021','2022','2023','2024'],
+];
+
+// ─────────────────────────────────────────────
+// Easing
+// ─────────────────────────────────────────────
+function easeOutExpo(t) {
+  return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+}
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+}
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+// ─────────────────────────────────────────────
+// Build tile elements
+// ─────────────────────────────────────────────
+function makeTile(color, label) {
+  const el = document.createElement('div');
+  el.className = 'tile';
+  const bg = document.createElement('div');
+  bg.className = 'tile-bg';
+  bg.style.background = `linear-gradient(135deg, ${color}cc, ${color}44)`;
+  bg.style.borderTop = `1px solid ${color}88`;
+  bg.style.borderLeft = `1px solid ${color}44`;
+  bg.textContent = label;
+  el.appendChild(bg);
+  return el;
+}
+
+// ─────────────────────────────────────────────
+// Formation definitions
+// Each tile: { target: {x,y,w,h} in %, scatter: {dx,dy,rot,scale} }
+// ─────────────────────────────────────────────
+
+// Helper: convert % of viewport to px
+function vw(p) { return window.innerWidth * p / 100; }
+function vh(p) { return window.innerHeight * p / 100; }
+
+// ── Formation 1: 3-col × 2-row grid ──
+function getF1Layout() {
+  const cols = 3, rows = 2;
+  const gap = 8; // px
+  const totalW = Math.min(window.innerWidth * 0.82, 900);
+  const totalH = Math.min(window.innerHeight * 0.72, 560);
+  const tileW = (totalW - gap * (cols - 1)) / cols;
+  const tileH = (totalH - gap * (rows - 1)) / rows;
+  const startX = (window.innerWidth - totalW) / 2;
+  const startY = (window.innerHeight - totalH) / 2;
+
+  const tiles = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const tx = startX + c * (tileW + gap);
+      const ty = startY + r * (tileH + gap);
+      // scatter: random offsets
+      const angle = (c + r * cols) * (Math.PI * 2 / 6);
+      const dist = 280 + Math.random() * 120;
+      tiles.push({
+        tx, ty, tw: tileW, th: tileH,
+        sx: Math.cos(angle) * dist * (Math.random() > .5 ? 1 : -1),
+        sy: Math.sin(angle) * dist * (Math.random() > .5 ? 1 : -1),
+        srot: (Math.random() - .5) * 40,
+        sscale: 0.3 + Math.random() * 0.4,
+        delay: (c + r * cols) * 0.06,
+      });
+    }
+  }
+  return tiles;
+}
+
+// ── Formation 2: Magazine (1 big + 4 small) ──
+function getF2Layout() {
+  const gap = 8;
+  const totalW = Math.min(window.innerWidth * 0.82, 900);
+  const totalH = Math.min(window.innerHeight * 0.72, 560);
+  const startX = (window.innerWidth - totalW) / 2;
+  const startY = (window.innerHeight - totalH) / 2;
+
+  const bigW = totalW * 0.55;
+  const bigH = totalH;
+  const smallW = totalW - bigW - gap;
+  const smallH = (totalH - gap * 3) / 4;
+
+  const tiles = [];
+  // Big hero tile
+  tiles.push({
+    tx: startX, ty: startY, tw: bigW, th: bigH,
+    sx: -350, sy: -80, srot: -15, sscale: 0.5, delay: 0,
+  });
+  // 4 small tiles on right
+  for (let i = 0; i < 4; i++) {
+    tiles.push({
+      tx: startX + bigW + gap,
+      ty: startY + i * (smallH + gap),
+      tw: smallW, th: smallH,
+      sx: 300 + i * 20, sy: (i - 1.5) * 120, srot: (i % 2 === 0 ? 1 : -1) * 20, sscale: 0.4,
+      delay: 0.05 + i * 0.07,
+    });
+  }
+  return tiles;
+}
+
+// ── Formation 3: Bento mosaic ──
+function getF3Layout() {
+  const gap = 8;
+  const totalW = Math.min(window.innerWidth * 0.82, 900);
+  const totalH = Math.min(window.innerHeight * 0.72, 560);
+  const startX = (window.innerWidth - totalW) / 2;
+  const startY = (window.innerHeight - totalH) / 2;
+
+  const u = (totalW - gap * 2) / 3; // unit
+  const uh = (totalH - gap) / 2;
+
+  // Bento: [wide, tall, small, small, wide-bottom, tall-right]
+  const defs = [
+    { x: 0,       y: 0,   w: u*2+gap, h: uh },         // wide top-left
+    { x: u*2+gap*2, y: 0, w: u,       h: totalH },      // tall right
+    { x: 0,       y: uh+gap, w: u,    h: uh },          // small bottom-left
+    { x: u+gap,   y: uh+gap, w: u,    h: uh },          // small bottom-mid
+  ];
+
+  return defs.map((d, i) => {
+    const angle = i * (Math.PI / 2) + Math.PI / 4;
+    const dist = 250 + i * 40;
+    return {
+      tx: startX + d.x, ty: startY + d.y, tw: d.w, th: d.h,
+      sx: Math.cos(angle) * dist, sy: Math.sin(angle) * dist,
+      srot: (i % 2 === 0 ? 1 : -1) * (15 + i * 5),
+      sscale: 0.35 + i * 0.1,
+      delay: i * 0.08,
+    };
+  });
+}
+
+// ── Formation 4: Timeline (alternating) ──
+function getF4Layout() {
+  const gap = 10;
+  const totalW = Math.min(window.innerWidth * 0.75, 800);
+  const totalH = Math.min(window.innerHeight * 0.78, 600);
+  const startX = (window.innerWidth - totalW) / 2;
+  const startY = (window.innerHeight - totalH) / 2;
+
+  const rows = 3;
+  const tileH = (totalH - gap * (rows - 1)) / rows;
+  const tileW = totalW * 0.44;
+
+  const tiles = [];
+  for (let i = 0; i < rows; i++) {
+    const isLeft = i % 2 === 0;
+    const tx = isLeft ? startX : startX + totalW - tileW;
+    const ty = startY + i * (tileH + gap);
+    tiles.push({
+      tx, ty, tw: tileW, th: tileH,
+      sx: isLeft ? -400 : 400,
+      sy: (i - 1) * 60,
+      srot: isLeft ? -20 : 20,
+      sscale: 0.4,
+      delay: i * 0.1,
+    });
+  }
+  return tiles;
+}
+
+// ─────────────────────────────────────────────
+// Formation class
+// ─────────────────────────────────────────────
+class Formation {
+  constructor(wrapId, canvasId, titleId, layoutFn, paletteIdx) {
+    this.wrap = document.getElementById(wrapId);
+    this.canvas = document.getElementById(canvasId);
+    this.titleEl = document.getElementById(titleId);
+    this.layoutFn = layoutFn;
+    this.paletteIdx = paletteIdx;
+    this.tiles = [];
+    this.tileEls = [];
+    this.built = false;
+  }
+
+  build() {
+    if (this.built) return;
+    this.built = true;
+    this.canvas.innerHTML = '';
+    this.tileEls = [];
+
+    this.tiles = this.layoutFn();
+    const palette = PALETTES[this.paletteIdx];
+    const labels = LABELS[this.paletteIdx];
+
+    this.tiles.forEach((t, i) => {
+      const el = makeTile(palette[i % palette.length], labels[i % labels.length]);
+      el.style.width = t.tw + 'px';
+      el.style.height = t.th + 'px';
+      el.style.left = t.tx + 'px';
+      el.style.top = t.ty + 'px';
+      // Start scattered
+      el.style.transform = `translate(${t.sx}px, ${t.sy}px) rotate(${t.srot}deg) scale(${t.sscale})`;
+      el.style.opacity = '0';
+      this.canvas.appendChild(el);
+      this.tileEls.push(el);
+    });
+  }
+
+  update(rawProgress) {
+    if (!this.built) this.build();
+
+    this.tiles.forEach((t, i) => {
+      const el = this.tileEls[i];
+      // Each tile has a staggered start
+      const start = t.delay;
+      const end = start + 0.65;
+      const p = Math.max(0, Math.min(1, (rawProgress - start) / (end - start)));
+      const ep = easeOutExpo(p);
+
+      const tx = lerp(t.sx, 0, ep);
+      const ty = lerp(t.sy, 0, ep);
+      const rot = lerp(t.srot, 0, ep);
+      const sc = lerp(t.sscale, 1, ep);
+      const op = lerp(0, 1, Math.min(1, p * 2));
+
+      el.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(${sc})`;
+      el.style.opacity = op;
+    });
+
+    // Update title
+    if (this.titleEl) {
+      const assembled = rawProgress > 0.85;
+      this.titleEl.querySelector('p').textContent = assembled
+        ? '✦ Formation complete'
+        : `Assembling… ${Math.round(rawProgress * 100)}%`;
+      this.titleEl.style.opacity = rawProgress > 0.05 ? '1' : '0.3';
+    }
+  }
+
+  rebuild() {
+    this.built = false;
+    this.build();
+  }
+}
+
+// ─────────────────────────────────────────────
+// Init formations
+// ─────────────────────────────────────────────
+const formations = [
+  new Formation('f1', 'canvas1', 'title1', getF1Layout, 0),
+  new Formation('f2', 'canvas2', 'title2', getF2Layout, 1),
+  new Formation('f3', 'canvas3', 'title3', getF3Layout, 2),
+  new Formation('f4', 'canvas4', 'title4', getF4Layout, 3),
+];
+
+// Set scroll height for each wrap
+function setScrollHeights() {
+  formations.forEach(f => {
+    f.wrap.style.height = (window.innerHeight * 3) + 'px';
+  });
+}
+setScrollHeights();
+
+// ─────────────────────────────────────────────
+// Scroll handler
+// ─────────────────────────────────────────────
+function onScroll() {
+  const scrollY = window.scrollY;
+  const docH = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('progressBar').style.width = (scrollY / docH * 100) + '%';
+
+  formations.forEach(f => {
+    const rect = f.wrap.getBoundingClientRect();
+    const wrapH = f.wrap.offsetHeight;
+    // progress: 0 when sticky starts, 1 when sticky ends
+    const stickyH = window.innerHeight;
+    const scrollable = wrapH - stickyH;
+    const scrolled = -rect.top; // how far we've scrolled into the wrap
+    const progress = Math.max(0, Math.min(1, scrolled / scrollable));
+
+    if (progress > 0 || rect.top < window.innerHeight) {
+      f.update(progress);
+    }
+  });
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+
+// Rebuild on resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    formations.forEach(f => f.rebuild());
+    setScrollHeights();
+  }, 200);
+});
+
+// Initial build
+formations.forEach(f => f.build());
+onScroll();
+</script>
+</body>
+</html>

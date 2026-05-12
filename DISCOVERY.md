@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 tympanus.net/codrops (On-Scroll Layout Formations)
+- 效果名称：滚动驱动布局组装动画 (On-Scroll Layout Formations)
+- 效果描述：多张图片/内容卡片初始处于分散、错位、旋转的状态，随着用户向下滚动，页面内容被"pin"住（固定不动），图片们像被磁力吸引一样逐步归位，最终组装成一个完整的网格布局。支持多种布局变体：① 3列网格组装（图片从四面八方飞入归位）② 杂志双栏布局（大图+小图组合）③ 马赛克拼图（不规则尺寸图片拼合）④ 时间轴布局（图片从左右交替飞入）。每个布局组装完成后，内容解除 pin，继续滚动进入下一个布局组装段落。整体呈现出强烈的"拼图完成"满足感和空间层次感。
+- 实现原理：CSS scroll-driven animations 或 IntersectionObserver + CSS sticky/position:fixed 实现 pin 效果；每张图片设置初始 transform（translate + rotate + scale），滚动进度映射到 transform 归零的过程；用 CSS custom property --progress（0→1）驱动每张图片的位移插值；零依赖纯原生 JS + CSS 实现（不用 GSAP）
+- 状态：待实现
+
 ## 2026-05-13 tympanus.net/codrops (Context-Aware Animation for Fixed Elements)
 - 效果名称：上下文感知固定元素动画 (Context-Aware Animation for Fixed Elements)
 - 效果描述：页面中有固定定位的标题/Logo，当滚动内容块与固定元素发生"碰撞"时，固定元素根据当前内容块的主题触发不同的隐藏/变形动画（共7种变体）：① scale 缩小消失 ② blur 模糊消失 ③ slideUp 向上推出 ④ charsScatter 字符逐个散开 ⑤ rotate+xPercent 旋转移出 ⑥ move away 平移消失 ⑦ chars shuffle 字符乱码后复原。内容块离开时固定元素以对应的反向动画恢复原位。整体呈现出内容与固定UI元素之间的"感知"互动感。

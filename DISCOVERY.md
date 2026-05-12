@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-12 tympanus.net/codrops (On-Scroll 3D Carousel)
+- 效果名称：滚动驱动 3D 圆柱轮播 (On-Scroll 3D Carousel)
+- 效果描述：多张图片卡片以圆柱形排列在 3D 空间中（rotateY + translateZ），随页面滚动整个圆柱从 rotationY:0 旋转到 rotationY:-180，中间卡片正面朝向观众，两侧卡片向后折叠，形成极具透视感的 3D 轮播效果。同时伴随 rotationX/Z 的微妙倾斜（±3°）和卡片亮度从 250% 降至 80% 的光影变化，营造出真实的 3D 空间感。支持多个变体：① 时尚摄影风格（暖色调背景）② 深色科技风格 ③ 自动播放版（无需滚动）④ 鼠标拖拽旋转版
+- 实现原理：N 个卡片用 CSS transform: rotateY(i*360/N deg) translateZ(radius px) 均匀排列成圆柱；父元素 .carousel 用 CSS perspective 开启 3D 透视；JS 监听 scroll 事件计算滚动进度（0→1），用 lerp 插值驱动 carousel 的 rotateY 从 0 到 -180deg；同时插值 rotateX/Z（±3°）和每张卡片的 filter:brightness；requestAnimationFrame 保证流畅；无需 GSAP，纯原生 JS 实现
+- 状态：已实现 → 73-scroll-3d-carousel.html
+
 ## 2026-05-07 tympanus.net/codrops (Clip Menu)
 - 效果名称：Clip-Path 菜单展开动效 (Clip-Path Reveal Menu)
 - 效果描述：导航菜单中每个菜单项悬停时，用 clip-path 从不同方向（左→右、上→下、圆形扩散等）展开一个背景色块或图片预览，鼠标离开时以反向缓动（先快后慢）收起，产生极具弹性和趣味感的交互体验。支持多种变体：① 横向 clip 展开背景色 ② 纵向 clip 展开图片预览 ③ 圆形 clip 扩散 ④ 对角线 clip 切割

@@ -304,6 +304,57 @@ a{text-decoration:none;color:inherit}
       </div>
       <div class="cat-info"><h3>滚动图片揭示</h3><span class="cat-count">4 变体</span></div>
     </a>
+    <a href="83-spirograph.html" class="cat-card">
+      <div class="cat-visual" style="background:#000;overflow:hidden;position:relative">
+        <canvas id="spiro-prev" width="200" height="150" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+        <script>
+        (function(){
+          var cvs=document.getElementById('spiro-prev');
+          var ctx=cvs.getContext('2d');
+          var W=200,H=150,cx=100,cy=75;
+          var presets=[
+            {R:55,r:12,d:44},
+            {R:55,r:8,d:40},
+            {R:55,r:18,d:46},
+            {R:55,r:22,d:50},
+          ];
+          var pi=0,t=0,totalSteps=2000,animId;
+          function gcd(a,b){return b===0?a:gcd(b,a%b);}
+          function lcm(a,b){return(a*b)/gcd(a,b);}
+          function startPreset(){
+            var p=presets[pi];
+            var a=Math.round(Math.abs(p.R-p.r)),b=Math.round(Math.abs(p.r));
+            var totalAngle=Math.PI*2*lcm(a,b)/b;
+            var k=(p.R-p.r)/p.r;
+            ctx.clearRect(0,0,W,H);
+            t=0;
+            var px=null,py=null;
+            function step(){
+              var batch=20;
+              for(var i=0;i<batch;i++){
+                if(t>totalSteps)break;
+                var ang=(totalAngle/totalSteps)*t;
+                var x=cx+(p.R-p.r)*Math.cos(ang)+p.d*Math.cos(k*ang);
+                var y=cy+(p.R-p.r)*Math.sin(ang)-p.d*Math.sin(k*ang);
+                if(px!==null){
+                  ctx.strokeStyle='rgba(255,255,255,0.7)';
+                  ctx.lineWidth=0.6;
+                  ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(x,y);ctx.stroke();
+                }
+                px=x;py=y;t++;
+              }
+              if(t<=totalSteps){animId=requestAnimationFrame(step);}
+              else{setTimeout(function(){pi=(pi+1)%presets.length;startPreset();},1200);}
+            }
+            if(animId)cancelAnimationFrame(animId);
+            animId=requestAnimationFrame(step);
+          }
+          startPreset();
+        })();
+        </script>
+      </div>
+      <div class="cat-info"><h3>Spirograph</h3><span class="cat-count">4 变体</span></div>
+    </a>
 </div>
 <script>
 

@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 linear.app (Spirograph)
+- 效果名称：Spirograph 万花筒几何图形 (Spirograph Mathematical Curves)
+- 效果描述：基于滚圆（hypotrochoid）数学公式生成的螺旋花瓣图案，从简单圆形演化到复杂密集花瓣。包含 4 个变体：① 演化序列（Circle→Loops→Star→Petals→Dense 5阶段展示）② 交互式参数控制（实时调节 R/r/d/花瓣数）③ 12种图案画廊（网格展示不同参数组合）④ 逐笔绘制动画（实时描绘螺旋轨迹，自动切换图案）
+- 实现原理：hypotrochoid 公式 x=(R-r)cos(t)+d·cos((R-r)/r·t)，y=(R-r)sin(t)-d·sin((R-r)/r·t)；Canvas 2D 绘制；总角度用 lcm(R-r, r)/r × 2π 计算确保闭合；动画版用 requestAnimationFrame 逐步绘制，每帧批量绘制多段线
+- 状态：已实现 → `83-spirograph.html`，已集成到 `index.html`
+
 ## 2026-05-13 linear.app (Isometric Wireframe Geometry)
 - 效果名称：等距线框几何体 (Isometric Wireframe Geometry)
 - 效果描述：以等距视角（isometric projection）展示多种纯线框 3D 几何体——层叠立方体、模块堆叠、层叠面板、旋转正方体。所有几何体用 CSS transform + SVG 线条实现，无需 WebGL。悬停时几何体做旋转/展开动画，页面加载时逐层构建动画（每条边依次从 0 到全长绘制）。4-6 种变体：① 层叠立方体塔（cubic stack）② 分解爆炸视图（exploded view）③ 旋转线框正方体（rotating wireframe）④ 网格平面（grid plane）⑤ 层叠面板（stacked panels）
@@ -10,7 +16,7 @@
 - 效果名称：滚动图片网格揭示 (Scroll Image Reveal Grid)
 - 效果描述：一组图片以紧凑网格排列，滚动时每张图片依次通过 clip-path 从遮罩状态"揭开"，同时配合 scale + translate 产生景深感。支持 4 种变体：① 从中心展开（clip-path: inset 从四周收缩到 0）② 横向百叶窗（多条竖向条带依次从上往下消失，露出图片）③ 网格碎片揭示（图片被分成 NxM 小格，小格随机延迟 clip-path 消失）④ 文字遮罩揭示（大号粗体文字作为 clip-path mask，图片通过文字形状"透出"）。深色背景，配合滚动进度指示线，整体有强烈的编辑风格质感。
 - 实现原理：CSS scroll-driven animations（animation-timeline: scroll() + animation-range），配合 @keyframes 修改 clip-path 值；网格碎片版用 JS 动态生成子元素并设置不同 animation-delay；文字遮罩版用 CSS mix-blend-mode: multiply 或 SVG clipPath 文字路径实现；零依赖纯原生实现
-- 状态：待实现
+- 状态：已实现 → `81-scroll-image-reveal.html`，已集成到 `index.html`
 
 ## 2026-05-12 tympanus.net/codrops (Scroll-based SVG Filter Text)
 - 效果名称：滚动驱动 SVG 滤镜文字扭曲 (Scroll-driven SVG Filter Text Distortion)

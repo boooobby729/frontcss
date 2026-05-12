@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spirograph — Mathematical Beauty</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    text-align: center;
+    padding: 64px 24px 48px;
+  }
+
+  header h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  header p {
+    font-size: 15px;
+    color: #666;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── Section ── */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 32px;
+  }
+
+  /* ── Variant 1: Evolution Strip ── */
+  .evolution-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 80px;
+  }
+
+  .evo-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .evo-item canvas {
+    display: block;
+    transition: filter 0.3s ease;
+  }
+
+  .evo-item:hover canvas {
+    filter: drop-shadow(0 0 12px rgba(255,255,255,0.4));
+  }
+
+  .evo-label {
+    font-size: 11px;
+    color: #444;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Variant 2: Interactive Big Spirograph ── */
+  .big-spiro-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 80px;
+  }
+
+  #bigCanvas {
+    display: block;
+    cursor: crosshair;
+    transition: filter 0.4s ease;
+  }
+
+  #bigCanvas:hover {
+    filter: drop-shadow(0 0 24px rgba(255,255,255,0.15));
+  }
+
+  .controls {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .ctrl-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ctrl-group label {
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ctrl-group input[type=range] {
+    -webkit-appearance: none;
+    width: 140px;
+    height: 2px;
+    background: #222;
+    outline: none;
+    border-radius: 2px;
+  }
+
+  .ctrl-group input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .ctrl-group input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+  }
+
+  .ctrl-val {
+    font-size: 12px;
+    color: #666;
+    font-variant-numeric: tabular-nums;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  /* ── Variant 3: Grid Gallery ── */
+  .spiro-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 2px;
+    margin-bottom: 80px;
+  }
+
+  .grid-cell {
+    aspect-ratio: 1;
+    background: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .grid-cell:hover {
+    background: #111;
+  }
+
+  .grid-cell canvas {
+    display: block;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                filter 0.4s ease;
+  }
+
+  .grid-cell:hover canvas {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 16px rgba(255,255,255,0.3));
+  }
+
+  .grid-cell .cell-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 10px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    font-size: 10px;
+    color: #555;
+    opacity: 0;
+    transition: opacity 0.3s;
+    letter-spacing: 0.06em;
+  }
+
+  .grid-cell:hover .cell-info {
+    opacity: 1;
+  }
+
+  /* ── Variant 4: Animated Drawing ── */
+  .draw-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  #drawCanvas {
+    display: block;
+  }
+
+  .draw-btns {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 8px 20px;
+    border: 1px solid #333;
+    background: transparent;
+    color: #888;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .btn:hover {
+    border-color: #666;
+    color: #fff;
+  }
+
+  .btn.active {
+    border-color: #fff;
+    color: #fff;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: #111;
+    margin-bottom: 64px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Spirograph</h1>
+  <p>Mathematical curves generated by rolling circles — from simple loops to intricate petal patterns.</p>
+</header>
+
+<div class="section">
+
+  <!-- Variant 1: Evolution Strip -->
+  <div class="section-label">01 — Evolution</div>
+  <div class="evolution-strip" id="evoStrip"></div>
+
+  <div class="divider"></div>
+
+  <!-- Variant 2: Interactive -->
+  <div class="section-label">02 — Interactive</div>
+  <div class="big-spiro-wrap">
+    <canvas id="bigCanvas" width="480" height="480"></canvas>
+    <div class="controls">
+      <div class="ctrl-group">
+        <label>Outer R</label>
+        <input type="range" id="ctrlR" min="60" max="180" value="120" step="1">
+        <span class="ctrl-val" id="valR">120</span>
+      </div>
+      <div class="ctrl-group">
+        <label>Inner r</label>
+        <input type="range" id="ctrlr" min="10" max="100" value="47" step="1">
+        <span class="ctrl-val" id="valr">47</span>
+      </div>
+      <div class="ctrl-group">
+        <label>Pen d</label>
+        <input type="range" id="ctrld" min="10" max="160" value="80" step="1">
+        <span class="ctrl-val" id="vald">80</span>
+      </div>
+      <div class="ctrl-group">
+        <label>Petals</label>
+        <input type="range" id="ctrlp" min="2" max="24" value="7" step="1">
+        <span class="ctrl-val" id="valp">7</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Variant 3: Grid Gallery -->
+  <div class="section-label">03 — Gallery</div>
+  <div class="spiro-grid" id="spiroGrid"></div>
+
+  <div class="divider"></div>
+
+  <!-- Variant 4: Animated Drawing -->
+  <div class="section-label">04 — Drawing Animation</div>
+  <div class="draw-wrap">
+    <canvas id="drawCanvas" width="480" height="480"></canvas>
+    <div class="draw-btns">
+      <button class="btn active" id="btnPlay">Play</button>
+      <button class="btn" id="btnNext">Next Pattern</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// Core: draw a hypotrochoid / epitrochoid
+// x(t) = (R-r)*cos(t) + d*cos((R-r)/r * t)
+// y(t) = (R-r)*sin(t) - d*sin((R-r)/r * t)
+// ─────────────────────────────────────────────
+function drawSpirograph(ctx, cx, cy, R, r, d, steps = 2000, strokeStyle = '#fff', lineWidth = 0.8, alpha = 1) {
+  const k = (R - r) / r;
+  const totalAngle = Math.PI * 2 * lcm(Math.round(R - r), Math.round(r)) / Math.round(r);
+  const pts = steps;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = strokeStyle;
+  ctx.lineWidth = lineWidth;
+  ctx.beginPath();
+  for (let i = 0; i <= pts; i++) {
+    const t = (totalAngle / pts) * i;
+    const x = cx + (R - r) * Math.cos(t) + d * Math.cos(k * t);
+    const y = cy + (R - r) * Math.sin(t) - d * Math.sin(k * t);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function lcm(a, b) { return (a * b) / gcd(a, b); }
+
+// ─────────────────────────────────────────────
+// Variant 1: Evolution Strip
+// ─────────────────────────────────────────────
+const evoPresets = [
+  { R: 72, r: 72, d: 0,  label: 'Circle',  steps: 200,  lw: 1.0, al: 0.70 },
+  { R: 72, r: 18, d: 18, label: 'Loops',   steps: 600,  lw: 0.9, al: 0.85 },
+  { R: 72, r: 12, d: 60, label: 'Star',    steps: 800,  lw: 0.8, al: 0.85 },
+  { R: 72, r: 16, d: 56, label: 'Petals',  steps: 900,  lw: 0.7, al: 0.75 },
+  { R: 72, r:  8, d: 48, label: 'Dense',   steps: 1400, lw: 0.4, al: 0.55 },
+];
+
+function drawEvo(ctx, p, i, hover) {
+  ctx.clearRect(0, 0, 160, 160);
+  const lw = hover ? p.lw * 1.4 : p.lw;
+  const al = hover ? Math.min(1, p.al * 1.3) : p.al;
+  if (i === 0) {
+    ctx.save();
+    ctx.strokeStyle = hover ? '#fff' : 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = hover ? 1.2 : 1.0;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.arc(80, 80, p.R - 4, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    drawSpirograph(ctx, 80, 80, p.R, p.r, p.d, p.steps,
+      `rgba(255,255,255,${al.toFixed(2)})`, lw);
+  }
+}
+
+const strip = document.getElementById('evoStrip');
+evoPresets.forEach((p, i) => {
+  const item = document.createElement('div');
+  item.className = 'evo-item';
+
+  const cvs = document.createElement('canvas');
+  cvs.width = 160; cvs.height = 160;
+  const ctx = cvs.getContext('2d');
+  drawEvo(ctx, p, i, false);
+
+  const label = document.createElement('span');
+  label.className = 'evo-label';
+  label.textContent = p.label;
+
+  item.appendChild(cvs);
+  item.appendChild(label);
+  strip.appendChild(item);
+
+  item.addEventListener('mouseenter', () => drawEvo(ctx, p, i, true));
+  item.addEventListener('mouseleave', () => drawEvo(ctx, p, i, false));
+});
+
+// ─────────────────────────────────────────────
+// Variant 2: Interactive Big Spirograph
+// ─────────────────────────────────────────────
+const bigCtx = document.getElementById('bigCanvas').getContext('2d');
+
+function getParams() {
+  return {
+    R: +document.getElementById('ctrlR').value,
+    r: +document.getElementById('ctrlr').value,
+    d: +document.getElementById('ctrld').value,
+  };
+}
+
+function redrawBig() {
+  bigCtx.clearRect(0, 0, 480, 480);
+  const { R, r, d } = getParams();
+  // Subtle outer circle guide
+  bigCtx.save();
+  bigCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+  bigCtx.lineWidth = 1;
+  bigCtx.beginPath();
+  bigCtx.arc(240, 240, R, 0, Math.PI * 2);
+  bigCtx.stroke();
+  bigCtx.restore();
+  drawSpirograph(bigCtx, 240, 240, R, r, d, 4000, 'rgba(255,255,255,0.9)', 0.8);
+}
+
+['ctrlR','ctrlr','ctrld','ctrlp'].forEach(id => {
+  const el = document.getElementById(id);
+  const valId = 'val' + id.replace('ctrl','');
+  el.addEventListener('input', () => {
+    document.getElementById(valId).textContent = el.value;
+    // For petals: adjust r to create p petals: r = R / (p+1)
+    if (id === 'ctrlp') {
+      const R = +document.getElementById('ctrlR').value;
+      const p = +el.value;
+      const newR2 = Math.round(R / (p + 1));
+      document.getElementById('ctrlr').value = Math.min(100, Math.max(10, newR2));
+      document.getElementById('valr').textContent = document.getElementById('ctrlr').value;
+    }
+    redrawBig();
+  });
+});
+
+redrawBig();
+
+// ─────────────────────────────────────────────
+// Variant 3: Grid Gallery
+// ─────────────────────────────────────────────
+const galleryPresets = [
+  { R:100, r:40, d:60,  label:'R100 r40 d60' },
+  { R:100, r:60, d:60,  label:'R100 r60 d60' },
+  { R:100, r:11, d:60,  label:'R100 r11 d60' },
+  { R:100, r:37, d:80,  label:'R100 r37 d80' },
+  { R:100, r:29, d:70,  label:'R100 r29 d70' },
+  { R:100, r:71, d:90,  label:'R100 r71 d90' },
+  { R:100, r:13, d:50,  label:'R100 r13 d50' },
+  { R:100, r:43, d:100, label:'R100 r43 d100' },
+  { R:100, r:17, d:80,  label:'R100 r17 d80' },
+  { R:100, r:23, d:60,  label:'R100 r23 d60' },
+  { R:100, r:31, d:90,  label:'R100 r31 d90' },
+  { R:100, r:47, d:70,  label:'R100 r47 d70' },
+];
+
+const grid = document.getElementById('spiroGrid');
+galleryPresets.forEach(p => {
+  const cell = document.createElement('div');
+  cell.className = 'grid-cell';
+
+  const cvs = document.createElement('canvas');
+  cvs.width = 160; cvs.height = 160;
+  const ctx = cvs.getContext('2d');
+  drawSpirograph(ctx, 80, 80, p.R * 0.72, p.r * 0.72, p.d * 0.72, 3000, 'rgba(255,255,255,0.75)', 0.7);
+
+  const info = document.createElement('div');
+  info.className = 'cell-info';
+  info.textContent = p.label;
+
+  cell.appendChild(cvs);
+  cell.appendChild(info);
+  grid.appendChild(cell);
+});
+
+// ─────────────────────────────────────────────
+// Variant 4: Animated Drawing
+// ─────────────────────────────────────────────
+const drawCvs = document.getElementById('drawCanvas');
+const drawCtx = drawCvs.getContext('2d');
+
+const animPresets = [
+  { R:140, r:47, d:90  },
+  { R:140, r:11, d:90  },
+  { R:140, r:60, d:110 },
+  { R:140, r:29, d:100 },
+  { R:140, r:71, d:120 },
+  { R:140, r:37, d:80  },
+];
+
+let animIdx = 0;
+let animFrame = null;
+let isPlaying = true;
+let currentT = 0;
+const TOTAL_STEPS = 3000;
+
+function getAnimTotalAngle(R, r) {
+  const a = Math.round(Math.abs(R - r));
+  const b = Math.round(Math.abs(r));
+  if (a === 0 || b === 0) return Math.PI * 2;
+  return Math.PI * 2 * lcm(a, b) / b;
+}
+
+function startAnim() {
+  const { R, r, d } = animPresets[animIdx];
+  const totalAngle = getAnimTotalAngle(R, r);
+  const k = (R - r) / r;
+
+  drawCtx.clearRect(0, 0, 480, 480);
+  currentT = 0;
+
+  // Draw faint guide circle
+  drawCtx.save();
+  drawCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+  drawCtx.lineWidth = 1;
+  drawCtx.beginPath();
+  drawCtx.arc(240, 240, R, 0, Math.PI * 2);
+  drawCtx.stroke();
+  drawCtx.restore();
+
+  let prevX = null, prevY = null;
+
+  function step() {
+    if (!isPlaying) return;
+
+    const batchSize = 12;
+    for (let b = 0; b < batchSize; b++) {
+      if (currentT > TOTAL_STEPS) break;
+      const t = (totalAngle / TOTAL_STEPS) * currentT;
+      const x = 240 + (R - r) * Math.cos(t) + d * Math.cos(k * t);
+      const y = 240 + (R - r) * Math.sin(t) - d * Math.sin(k * t);
+
+      if (prevX !== null) {
+        // Color based on progress
+        const progress = currentT / TOTAL_STEPS;
+        const alpha = 0.6 + 0.4 * Math.sin(progress * Math.PI);
+        drawCtx.save();
+        drawCtx.strokeStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
+        drawCtx.lineWidth = 0.8;
+        drawCtx.beginPath();
+        drawCtx.moveTo(prevX, prevY);
+        drawCtx.lineTo(x, y);
+        drawCtx.stroke();
+        drawCtx.restore();
+
+        // Draw rolling circle indicator (subtle)
+        if (currentT % 80 === 0) {
+          drawCtx.save();
+          drawCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+          drawCtx.lineWidth = 0.5;
+          drawCtx.beginPath();
+          drawCtx.arc(
+            240 + (R - r) * Math.cos(t),
+            240 + (R - r) * Math.sin(t),
+            r, 0, Math.PI * 2
+          );
+          drawCtx.stroke();
+          drawCtx.restore();
+        }
+      }
+
+      prevX = x; prevY = y;
+      currentT++;
+    }
+
+    if (currentT <= TOTAL_STEPS) {
+      animFrame = requestAnimationFrame(step);
+    } else {
+      // Pause briefly then auto-advance
+      setTimeout(() => {
+        if (isPlaying) {
+          animIdx = (animIdx + 1) % animPresets.length;
+          startAnim();
+        }
+      }, 1800);
+    }
+  }
+
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animFrame = requestAnimationFrame(step);
+}
+
+document.getElementById('btnPlay').addEventListener('click', function() {
+  isPlaying = !isPlaying;
+  this.textContent = isPlaying ? 'Pause' : 'Play';
+  this.classList.toggle('active', isPlaying);
+  if (isPlaying) startAnim();
+  else if (animFrame) cancelAnimationFrame(animFrame);
+});
+
+document.getElementById('btnNext').addEventListener('click', () => {
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animIdx = (animIdx + 1) % animPresets.length;
+  isPlaying = true;
+  document.getElementById('btnPlay').textContent = 'Pause';
+  document.getElementById('btnPlay').classList.add('active');
+  startAnim();
+});
+
+startAnim();
+</script>
+</body>
+</html>

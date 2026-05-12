@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>81 · Scroll Image Reveal</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #050507;
+    --fg: #f0ede6;
+    --accent: #c8f53a;
+    --gap: 8px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(5,5,7,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  nav .logo { font-size: 13px; letter-spacing: 0.15em; opacity: 0.6; text-transform: uppercase; }
+  nav .variants {
+    display: flex; gap: 8px;
+  }
+  nav .variants a {
+    font-size: 12px; padding: 6px 14px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px; color: var(--fg);
+    text-decoration: none; letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  nav .variants a:hover, nav .variants a.active {
+    background: var(--accent); color: #000; border-color: var(--accent);
+  }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 100px 40px 80px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.4;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: clamp(28px, 5vw, 56px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .section-desc {
+    font-size: 14px;
+    opacity: 0.5;
+    max-width: 500px;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 60px;
+  }
+
+  /* ════════════════════════════════════
+     VARIANT 1 · INSET CLIP REVEAL
+     每张图从四周收缩的 clip-path 揭开
+  ════════════════════════════════════ */
+  .grid-inset {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap);
+    width: 100%;
+    max-width: 900px;
+  }
+
+  /* Ratio wrapper: forces height via padding-bottom trick */
+  .grid-inset .cell-ratio {
+    position: relative;
+    width: 100%;
+    padding-bottom: 130%; /* 3:4 ratio */
+  }
+
+  .grid-inset .cell {
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  /* Dark overlay that slides up to reveal the bg beneath */
+  .grid-inset .cell .cover {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    transform: translateY(0%);
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2;
+  }
+
+  .grid-inset .cell-ratio.revealed .cover {
+    transform: translateY(101%);
+  }
+
+  .grid-inset .cell .img-wrap {
+    position: absolute;
+    inset: 0;
+  }
+
+  .grid-inset .cell .img-wrap .bg {
+    width: 100%; height: 100%;
+    transform: scale(1.12);
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .grid-inset .cell-ratio.revealed .bg {
+    transform: scale(1);
+  }
+
+  /* Color palettes for cells */
+  .c1  { background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+  .c2  { background: linear-gradient(145deg, #2d1b69 0%, #11998e 100%); }
+  .c3  { background: linear-gradient(145deg, #fc466b 0%, #3f5efb 100%); }
+  .c4  { background: linear-gradient(145deg, #f7971e 0%, #ffd200 100%); }
+  .c5  { background: linear-gradient(145deg, #0f0c29 0%, #302b63 50%, #24243e 100%); }
+  .c6  { background: linear-gradient(145deg, #4facfe 0%, #00f2fe 100%); }
+  .c7  { background: linear-gradient(145deg, #43e97b 0%, #38f9d7 100%); }
+  .c8  { background: linear-gradient(145deg, #fa709a 0%, #fee140 100%); }
+  .c9  { background: linear-gradient(145deg, #a18cd1 0%, #fbc2eb 100%); }
+
+  .cell-label {
+    position: absolute;
+    bottom: 12px; left: 12px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    z-index: 5;
+  }
+
+  /* ════════════════════════════════════
+     VARIANT 2 · BLINDS REVEAL
+     竖向百叶窗条带，从左到右依次揭开
+  ════════════════════════════════════ */
+  .grid-blinds {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gap);
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .grid-blinds .cell-ratio {
+    position: relative;
+    width: 100%;
+    padding-bottom: 62.5%; /* 16:10 ratio */
+  }
+
+  .grid-blinds .cell {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .blinds-inner {
+    position: relative;
+    width: 100%; height: 100%;
+  }
+
+  .blind-bg {
+    width: 100%; height: 100%;
+    position: absolute; inset: 0;
+    transform: scale(1.08);
+  }
+
+  /* 8 vertical blind strips overlay */
+  .blinds-strips {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .blind-strip {
+    flex: 1;
+    background: var(--bg);
+    transform-origin: top center;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cell-ratio.revealed .blind-strip {
+    transform: scaleY(0);
+  }
+
+  /* Stagger each strip */
+  .blind-strip:nth-child(1) { transition-delay: 0.00s; }
+  .blind-strip:nth-child(2) { transition-delay: 0.06s; }
+  .blind-strip:nth-child(3) { transition-delay: 0.12s; }
+  .blind-strip:nth-child(4) { transition-delay: 0.18s; }
+  .blind-strip:nth-child(5) { transition-delay: 0.24s; }
+  .blind-strip:nth-child(6) { transition-delay: 0.30s; }
+  .blind-strip:nth-child(7) { transition-delay: 0.36s; }
+  .blind-strip:nth-child(8) { transition-delay: 0.42s; }
+
+  /* ════════════════════════════════════
+     VARIANT 3 · MOSAIC TILE REVEAL
+     NxM 碎片格，随机延迟逐个揭开
+  ════════════════════════════════════ */
+  .grid-mosaic {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap);
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .grid-mosaic .cell-ratio {
+    position: relative;
+    width: 100%;
+    padding-bottom: 75%; /* 4:3 ratio */
+  }
+
+  .grid-mosaic .cell {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .mosaic-inner {
+    position: relative;
+    width: 100%; height: 100%;
+  }
+
+  .mosaic-bg {
+    width: 100%; height: 100%;
+    position: absolute; inset: 0;
+    transform: scale(1.05);
+    transition: transform 0.6s ease;
+  }
+
+  .cell-ratio.revealed .mosaic-bg {
+    transform: scale(1);
+  }
+
+  .mosaic-tiles {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .mosaic-tile {
+    background: var(--bg);
+    transition: opacity 0.3s ease;
+  }
+
+  .cell-ratio.revealed .mosaic-tile {
+    opacity: 0;
+  }
+
+  /* ════════════════════════════════════
+     VARIANT 4 · TEXT MASK REVEAL
+     大号文字作为 clip-path，图片从字形中透出
+  ════════════════════════════════════ */
+  .text-mask-section {
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  .text-mask-row {
+    position: relative;
+    height: clamp(100px, 14vw, 160px);
+    margin-bottom: 6px;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .text-mask-word {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .text-mask-word span {
+    font-size: clamp(80px, 11vw, 130px);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.15);
+    text-transform: uppercase;
+    user-select: none;
+    line-height: 1;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* The colorful background behind each row */
+  .text-mask-row .row-bg {
+    position: absolute;
+    inset: 0;
+    transform: scale(1.1) translateY(8px);
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    clip-path: none;
+  }
+
+  /* Overlay that slides away from bottom */
+  .text-mask-row .row-cover {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    transform: translateY(0%);
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1;
+  }
+
+  .text-mask-row.revealed .row-cover {
+    transform: translateY(100%);
+  }
+
+  .text-mask-row.revealed .row-bg {
+    transform: scale(1) translateY(0);
+  }
+
+  /* Big text cutout using mix-blend-mode */
+  .text-cutout {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    mix-blend-mode: multiply;
+    background: var(--bg);
+  }
+
+  .text-cutout span {
+    font-size: clamp(80px, 11vw, 130px);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* row background gradients */
+  .rb1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .rb2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .rb3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .rb4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  .rb5 { background: linear-gradient(135deg, #fa709a, #fee140); }
+
+  /* ─── SCROLL INDICATOR ─── */
+  .scroll-hint {
+    position: fixed;
+    bottom: 30px; right: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.4;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+
+  .scroll-hint.hidden { opacity: 0; }
+
+  .scroll-arrow {
+    width: 1px; height: 50px;
+    background: var(--fg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scroll-arrow::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--accent);
+    animation: scrollLine 1.4s ease-in-out infinite;
+  }
+
+  @keyframes scrollLine {
+    0%   { top: -100%; }
+    100% { top: 100%; }
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 60px 40px;
+    font-size: 12px;
+    opacity: 0.3;
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">81 · Scroll Image Reveal</div>
+  <div class="variants">
+    <a href="#s1" class="active">Inset</a>
+    <a href="#s2">Blinds</a>
+    <a href="#s3">Mosaic</a>
+    <a href="#s4">Text Mask</a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════
+     VARIANT 1 · INSET CLIP REVEAL
+══════════════════════════════════ -->
+<section class="section" id="s1">
+  <div class="section-label">Variant 01</div>
+  <h2 class="section-title">Inset Clip Reveal</h2>
+  <p class="section-desc">Each panel sweeps open from bottom to top using clip-path inset, with a subtle scale-in for depth.</p>
+
+  <div class="grid-inset" id="grid1">
+    <div class="cell-ratio"><div class="cell"><div class="img-wrap"><div class="bg c1"></div></div><div class="cover"></div><span class="cell-label">01</span></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="img-wrap"><div class="bg c2"></div></div><div class="cover"></div><span class="cell-label">02</span></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="img-wrap"><div class="bg c3"></div></div><div class="cover"></div><span class="cell-label">03</span></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="img-wrap"><div class="bg c4"></div></div><div class="cover"></div><span class="cell-label">04</span></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="img-wrap"><div class="bg c5"></div></div><div class="cover"></div><span class="cell-label">05</span></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="img-wrap"><div class="bg c6"></div></div><div class="cover"></div><span class="cell-label">06</span></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="img-wrap"><div class="bg c7"></div></div><div class="cover"></div><span class="cell-label">07</span></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="img-wrap"><div class="bg c8"></div></div><div class="cover"></div><span class="cell-label">08</span></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="img-wrap"><div class="bg c9"></div></div><div class="cover"></div><span class="cell-label">09</span></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     VARIANT 2 · BLINDS REVEAL
+══════════════════════════════════ -->
+<section class="section" id="s2">
+  <div class="section-label">Variant 02</div>
+  <h2 class="section-title">Vertical Blinds</h2>
+  <p class="section-desc">Eight vertical strips collapse downward in staggered sequence, like opening venetian blinds.</p>
+
+  <div class="grid-blinds" id="grid2">
+    <div class="cell-ratio"><div class="cell"><div class="blinds-inner"><div class="blind-bg c3"></div><div class="blinds-strips"><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div></div></div></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="blinds-inner"><div class="blind-bg c6"></div><div class="blinds-strips"><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div></div></div></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="blinds-inner"><div class="blind-bg c8"></div><div class="blinds-strips"><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div></div></div></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="blinds-inner"><div class="blind-bg c2"></div><div class="blinds-strips"><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div><div class="blind-strip"></div></div></div></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     VARIANT 3 · MOSAIC TILES
+══════════════════════════════════ -->
+<section class="section" id="s3">
+  <div class="section-label">Variant 03</div>
+  <h2 class="section-title">Mosaic Tiles</h2>
+  <p class="section-desc">Each image is divided into a 5×4 grid of tiles that fade away with randomised delays, fragmenting the reveal.</p>
+
+  <div class="grid-mosaic" id="grid3">
+    <div class="cell-ratio"><div class="cell"><div class="mosaic-inner"><div class="mosaic-bg c4"></div><div class="mosaic-tiles" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr)"></div></div></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="mosaic-inner"><div class="mosaic-bg c7"></div><div class="mosaic-tiles" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr)"></div></div></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="mosaic-inner"><div class="mosaic-bg c1"></div><div class="mosaic-tiles" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr)"></div></div></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="mosaic-inner"><div class="mosaic-bg c5"></div><div class="mosaic-tiles" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr)"></div></div></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="mosaic-inner"><div class="mosaic-bg c9"></div><div class="mosaic-tiles" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr)"></div></div></div></div>
+    <div class="cell-ratio"><div class="cell"><div class="mosaic-inner"><div class="mosaic-bg c3"></div><div class="mosaic-tiles" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr)"></div></div></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     VARIANT 4 · TEXT MASK REVEAL
+══════════════════════════════════ -->
+<section class="section" id="s4">
+  <div class="section-label">Variant 04</div>
+  <h2 class="section-title">Text Mask Reveal</h2>
+  <p class="section-desc">Colour panels slide up behind large typographic labels. The text acts as a framing device — content and title emerge together.</p>
+
+  <div class="text-mask-section" id="grid4">
+    <div class="text-mask-row">
+      <div class="row-bg rb1"></div>
+      <div class="row-cover"></div>
+      <div class="text-cutout"><span>MOTION</span></div>
+    </div>
+    <div class="text-mask-row">
+      <div class="row-bg rb2"></div>
+      <div class="row-cover"></div>
+      <div class="text-cutout"><span>DESIGN</span></div>
+    </div>
+    <div class="text-mask-row">
+      <div class="row-bg rb3"></div>
+      <div class="row-cover"></div>
+      <div class="text-cutout"><span>SCROLL</span></div>
+    </div>
+    <div class="text-mask-row">
+      <div class="row-bg rb4"></div>
+      <div class="row-cover"></div>
+      <div class="text-cutout"><span>REVEAL</span></div>
+    </div>
+    <div class="text-mask-row">
+      <div class="row-bg rb5"></div>
+      <div class="row-cover"></div>
+      <div class="text-cutout"><span>STUDIO</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="footer">81 · Scroll Image Reveal · 4 Variants · Pure HTML / CSS / JS</div>
+
+<!-- Scroll hint -->
+<div class="scroll-hint" id="scrollHint">
+  <span>Scroll</span>
+  <div class="scroll-arrow"></div>
+</div>
+
+<script>
+  // ── Build mosaic tiles ──────────────────────────────────────────────────
+  document.querySelectorAll('.mosaic-tiles').forEach(container => {
+    const cols = 5, rows = 4;
+    const delays = [];
+    for (let i = 0; i < cols * rows; i++) delays.push(i);
+    // Shuffle
+    for (let i = delays.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [delays[i], delays[j]] = [delays[j], delays[i]];
+    }
+    delays.forEach(d => {
+      const tile = document.createElement('div');
+      tile.className = 'mosaic-tile';
+      tile.style.transitionDelay = (d * 0.018) + 's';
+      container.appendChild(tile);
+    });
+  });
+
+  // ── IntersectionObserver for all cells ────────────────────────────────
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const cell = entry.target;
+        const index = parseInt(cell.dataset.index || 0);
+        // Use a small base delay + stagger per cell
+        const delay = index * 90;
+        setTimeout(() => {
+          cell.classList.add('revealed');
+        }, delay);
+        observer.unobserve(cell);
+      }
+    });
+  }, {
+    threshold: 0.05,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  // Observe grid-inset cell-ratios (the outer wrapper that has real height)
+  document.querySelectorAll('.grid-inset .cell-ratio').forEach((wrap, i) => {
+    wrap.dataset.index = i;
+    observer.observe(wrap);
+  });
+
+  // Observe grid-blinds cell-ratios
+  document.querySelectorAll('.grid-blinds .cell-ratio').forEach((wrap, i) => {
+    wrap.dataset.index = i;
+    observer.observe(wrap);
+  });
+
+  // Observe grid-mosaic cell-ratios
+  document.querySelectorAll('.grid-mosaic .cell-ratio').forEach((wrap, i) => {
+    wrap.dataset.index = i;
+    observer.observe(wrap);
+  });
+
+  // Observe text-mask rows
+  document.querySelectorAll('.text-mask-row').forEach((row, i) => {
+    row.dataset.index = i;
+    observer.observe(row);
+  });
+
+  // ── Nav active link update ────────────────────────────────────────────
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav .variants a');
+
+  const sectionObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { threshold: 0.4 });
+
+  sections.forEach(s => sectionObserver.observe(s));
+
+  // ── Scroll hint ─────────────────────────────────────────────────────
+  const hint = document.getElementById('scrollHint');
+  window.addEventListener('scroll', () => {
+    hint.classList.toggle('hidden', window.scrollY > 200);
+  }, { passive: true });
+</script>
+</body>
+</html>

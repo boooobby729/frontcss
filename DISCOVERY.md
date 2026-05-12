@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 tympanus.net/codrops (Scroll Image Reveal Grid)
+- 效果名称：滚动图片网格揭示 (Scroll Image Reveal Grid)
+- 效果描述：一组图片以紧凑网格排列，滚动时每张图片依次通过 clip-path 从遮罩状态"揭开"，同时配合 scale + translate 产生景深感。支持 4 种变体：① 从中心展开（clip-path: inset 从四周收缩到 0）② 横向百叶窗（多条竖向条带依次从上往下消失，露出图片）③ 网格碎片揭示（图片被分成 NxM 小格，小格随机延迟 clip-path 消失）④ 文字遮罩揭示（大号粗体文字作为 clip-path mask，图片通过文字形状"透出"）。深色背景，配合滚动进度指示线，整体有强烈的编辑风格质感。
+- 实现原理：CSS scroll-driven animations（animation-timeline: scroll() + animation-range），配合 @keyframes 修改 clip-path 值；网格碎片版用 JS 动态生成子元素并设置不同 animation-delay；文字遮罩版用 CSS mix-blend-mode: multiply 或 SVG clipPath 文字路径实现；零依赖纯原生实现
+- 状态：待实现
+
 ## 2026-05-12 tympanus.net/codrops (Scroll-based SVG Filter Text)
 - 效果名称：滚动驱动 SVG 滤镜文字扭曲 (Scroll-driven SVG Filter Text Distortion)
 - 效果描述：大号文字随滚动进度动态变形——通过 SVG feTurbulence + feDisplacementMap 滤镜，文字边缘随滚动从清晰逐渐扭曲成液态/故障/溶解效果。灵感来自 EDITORA 网站（Garden Eight / MisatoDaiq 创作）。支持 4 个变体：① 液态熔化（文字边缘随滚动像熔岩融化，feTurbulence baseFrequency 从 0 增至 0.04）② 故障撕裂（feDisplacementMap scale 增大，文字水平撕裂错位，配合 RGB 色差分离）③ 溶解消散（文字像素随滚动逐渐溶解成噪点，结合 feColorMatrix 降低对比度）④ 冻结重生（滚动到顶时文字清晰，中段完全扭曲，底部重新凝固成不同字词——循环意象）。深色背景，大号白色粗体文字，整体氛围黑暗艺术感。

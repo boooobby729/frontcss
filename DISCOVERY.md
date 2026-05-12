@@ -4,7 +4,7 @@
 - 效果名称：全息光折射着色器 (Holo Shader)
 - 效果描述：液态全息流动背景，模拟光线在全息表面分裂成彩虹的视觉效果。青色/绿色/紫色/蓝色的丝绸质感液态波纹，颜色不是直接指定而是由数学函数控制，通过 sin/cos 噪声场驱动色相（hue）在全色域循环，配合扭曲变形产生流动感。白色圆角形状漂浮在全息背景上，形成强烈的材质对比。整体呈现出高端产品发布页的震撼视觉效果。包含 4 个变体：① 纯全息背景（可作为 hero 背景）② 全息卡片（白色圆角内容卡片浮于其上）③ 全息文字遮罩（全息效果应用于大字标题）④ 鼠标交互版（鼠标位置影响光晕中心和扭曲强度）
 - 实现原理：WebGL fragment shader（或 Canvas 2D 多层 sin 函数模拟）；核心是用 3-4 层 fBm（分形布朗运动）叠加生成流体噪声场，将噪声值映射到 HSL 色相（hue = noise * 360 + time * 30），saturation 保持 90-100%，lightness 55-75%；time uniform 随 requestAnimationFrame 递增驱动流动；鼠标位置作为额外扰动中心叠加进噪声场；白色遮罩元素用 mix-blend-mode: overlay 或 screen 与下层全息混合
-- 状态：待实现
+- 状态：已实现 → 77-holo-shader.html，已集成到 collect.html
 
 ## 2026-05-12 linear.app (Scroll Step Navigator)
 - 效果名称：滚动步骤导航 (Scroll Step Navigator)

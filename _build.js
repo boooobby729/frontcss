@@ -1994,16 +1994,44 @@ ${navJs}
 // collect 分类的集合页面
 if (sortedCollect.length > 0) {
   let collectCardsHtml = '';
-  for (const item of sortedCollect) {
+  const collectCopyDataArr = [];
+  for (let ci = 0; ci < sortedCollect.length; ci++) {
+    const item = sortedCollect[ci];
     const thumbFile = item.file.replace('.html', '.png');
     const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
     const visual = thumbExists
       ? `<img src="../_thumbs/${thumbFile}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover">`
       : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${item.title.charAt(0)}</div>`;
-    collectCardsHtml += `    <a href="../${item.file}" class="card">
+    collectCardsHtml += `    <a href="../${item.file}" class="card" data-idx="${ci}">
       <div class="card-visual">${visual}</div>
       <div class="card-info"><h3>${item.title}</h3></div>
     </a>\n`;
+
+    // 读取源文件提取 CSS/HTML/JS 用于复制
+    try {
+      const srcContent = fs.readFileSync(path.join(dir, item.file), 'utf-8');
+      const styleMatch = srcContent.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
+      const scriptMatch = srcContent.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
+      const bodyMatch = srcContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+      let cssCode = '';
+      if (styleMatch) {
+        cssCode = styleMatch.map(s => s.replace(/<\/?style[^>]*>/gi, '').trim()).join('\n\n');
+      }
+      let jsCode = '';
+      if (scriptMatch) {
+        jsCode = scriptMatch.map(s => s.replace(/<\/?script[^>]*>/gi, '').trim()).join('\n\n');
+      }
+      let htmlCode = '';
+      if (bodyMatch) {
+        htmlCode = bodyMatch[1]
+          .replace(/<style[\s\S]*?<\/style>/gi, '')
+          .replace(/<script[\s\S]*?<\/script>/gi, '')
+          .trim();
+      }
+      collectCopyDataArr.push({ name: item.title, css: cssCode, html: htmlCode, js: jsCode });
+    } catch (e) {
+      collectCopyDataArr.push({ name: item.title, css: '', html: '', js: '' });
+    }
   }
 
   const collectHtml = `<!DOCTYPE html>
@@ -2018,6 +2046,7 @@ body{background:#111;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,
 a{text-decoration:none;color:inherit}
 ${navCss}
 ${cardGridCss}
+${catCopyBtnCss}
 </style>
 </head>
 <body>
@@ -2026,6 +2055,52 @@ ${generateNavBar('collect', '../')}
 ${collectCardsHtml}</div>
 <` + `script>
 ${navJs}
+
+// 复制给 AI - 卡片按钮
+(function(){
+  var copyDataArr = ${JSON.stringify(collectCopyDataArr)};
+  var ICON_COPY = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  var ICON_CHECK = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+  document.querySelectorAll('.card[data-idx]').forEach(function(card) {
+    var idx = parseInt(card.getAttribute('data-idx'));
+    var btn = document.createElement('button');
+    btn.className = 'card-copy-btn';
+    btn.innerHTML = ICON_COPY + '复制';
+    btn.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      var d = copyDataArr[idx];
+      if (!d) return;
+      var text = '请帮我实现以下前端动效，生成可直接使用的代码：\\n\\n';
+      text += '## 效果名称\\n' + d.name + '\\n\\n';
+      text += '## 参考代码\\n\\n';
+      if (d.css) text += '### CSS\\n\`\`\`css\\n' + d.css + '\\n\`\`\`\\n\\n';
+      if (d.html) text += '### HTML\\n\`\`\`html\\n' + d.html + '\\n\`\`\`\\n\\n';
+      if (d.js) text += '### JavaScript\\n\`\`\`javascript\\n' + d.js + '\\n\`\`\`\\n\\n';
+      text += '## 要求\\n';
+      text += '1. 将颜色、尺寸、动画时长等参数抽取为 CSS 变量或配置对象，方便定制\\n';
+      text += '2. 调整 class 命名避免冲突，适配我的项目\\n';
+      text += '3. 纯 HTML/CSS/JS 实现，零依赖\\n';
+      text += '4. 响应式适配\\n';
+      if (d.js) text += '5. 提供 init()/destroy() 方法，方便 SPA 挂载卸载\\n';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ showCopied(btn); }).catch(function(){ fallbackCopy(text, btn); });
+      } else { fallbackCopy(text, btn); }
+    });
+    card.appendChild(btn);
+  });
+  function showCopied(b) {
+    b.innerHTML = ICON_CHECK + '已复制';
+    b.classList.add('copied');
+    setTimeout(function(){ b.innerHTML = ICON_COPY + '复制'; b.classList.remove('copied'); }, 2000);
+  }
+  function fallbackCopy(text, b) {
+    var ta = document.createElement('textarea'); ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(b); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+})();
 <` + `/script>
 </body>
 </html>`;

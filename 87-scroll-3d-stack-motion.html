@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>87 · On-Scroll 3D Stack Motion</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #050508;
+  --card-w: 200px;
+  --card-h: 280px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.page-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(5,5,8,0.9) 0%, transparent 100%);
+}
+.page-header h1 {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+.page-header .badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.05em;
+}
+
+/* ── Section labels ── */
+.section-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 1;
+}
+.section-label .num {
+  font-size: clamp(80px, 15vw, 160px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  user-select: none;
+}
+.section-label .title {
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  margin-top: 8px;
+}
+
+/* ── Scroll sections ── */
+.scroll-section {
+  position: relative;
+  height: 300vh;
+}
+
+/* ── Sticky stage ── */
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Stack wrapper — fills stage, provides perspective centered on viewport ── */
+.stack-wrap {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  /* perspective here: origin = 50% 50% of this 100vw×100vh div = viewport center.
+     NO transform on this element — perspective property only works when the
+     element itself has no transform. */
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+}
+
+/* ── Stack inner — centered anchor, NO rotation here ── */
+.stack-inner {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  transform-style: preserve-3d;
+  /* No rotation — cards handle their own 3D transforms in world space */
+}
+
+/* ── Cards ── */
+.card {
+  position: absolute;
+  /* stack-inner is 0×0, so center with negative half-size offsets */
+  top: calc(var(--card-h) / -2);
+  left: calc(var(--card-w) / -2);
+  width: var(--card-w);
+  height: var(--card-h);
+  border-radius: 16px;
+  overflow: hidden;
+  will-change: transform;
+  backface-visibility: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+}
+
+/* Card gradient backgrounds — 12 unique cards */
+.card:nth-child(1)  .card-inner { background: linear-gradient(135deg, #1a0533 0%, #6b21a8 50%, #a855f7 100%); }
+.card:nth-child(2)  .card-inner { background: linear-gradient(135deg, #0c1445 0%, #1d4ed8 50%, #60a5fa 100%); }
+.card:nth-child(3)  .card-inner { background: linear-gradient(135deg, #0f2d1a 0%, #15803d 50%, #4ade80 100%); }
+.card:nth-child(4)  .card-inner { background: linear-gradient(135deg, #2d0c0c 0%, #b91c1c 50%, #f87171 100%); }
+.card:nth-child(5)  .card-inner { background: linear-gradient(135deg, #1a1a0c 0%, #a16207 50%, #fbbf24 100%); }
+.card:nth-child(6)  .card-inner { background: linear-gradient(135deg, #0c1f2d 0%, #0e7490 50%, #22d3ee 100%); }
+.card:nth-child(7)  .card-inner { background: linear-gradient(135deg, #2d0c2a 0%, #9d174d 50%, #f472b6 100%); }
+.card:nth-child(8)  .card-inner { background: linear-gradient(135deg, #0d1f0d 0%, #166534 50%, #86efac 100%); }
+.card:nth-child(9)  .card-inner { background: linear-gradient(135deg, #1c1c2d 0%, #4338ca 50%, #818cf8 100%); }
+.card:nth-child(10) .card-inner { background: linear-gradient(135deg, #2d1a0c 0%, #c2410c 50%, #fb923c 100%); }
+.card:nth-child(11) .card-inner { background: linear-gradient(135deg, #0c2d2d 0%, #0f766e 50%, #2dd4bf 100%); }
+.card:nth-child(12) .card-inner { background: linear-gradient(135deg, #1f0c2d 0%, #7c3aed 50%, #c4b5fd 100%); }
+
+/* Card decorative elements */
+.card-glow {
+  position: absolute;
+  top: -30%;
+  left: -30%;
+  width: 160%;
+  height: 160%;
+  border-radius: 50%;
+  opacity: 0.3;
+  filter: blur(40px);
+}
+.card:nth-child(odd)  .card-glow { background: rgba(255,255,255,0.15); }
+.card:nth-child(even) .card-glow { background: rgba(255,255,255,0.08); }
+
+.card-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.3) 0px, rgba(255,255,255,0.3) 1px, transparent 1px, transparent 20px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.3) 0px, rgba(255,255,255,0.3) 1px, transparent 1px, transparent 20px);
+}
+
+.card-id {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 4px;
+}
+.card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.3;
+}
+.card-shine {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+  border-radius: 16px 16px 0 0;
+}
+
+/* ── Info panel ── */
+.info-panel {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 10;
+}
+.info-panel .effect-name {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 6px;
+}
+.info-panel .scroll-hint {
+  font-size: 12px;
+  color: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+.scroll-arrow {
+  width: 1px;
+  height: 30px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+  margin: 0 auto;
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 0.8; transform: scaleY(1.2); }
+}
+
+/* ── Progress bar ── */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #a855f7, #60a5fa, #4ade80);
+  z-index: 200;
+  transition: width 0.1s linear;
+  width: 0%;
+}
+
+/* ── Divider ── */
+.section-divider {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+}
+.section-divider::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.08), transparent);
+}
+.divider-text {
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+  line-height: 1.2;
+}
+.divider-text span {
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.4) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.divider-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── Footer ── */
+.page-footer {
+  height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.page-footer p {
+  font-size: 12px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.08em;
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header class="page-header">
+  <h1>On-Scroll 3D Stack Motion</h1>
+  <span class="badge">3 Variants · Pure JS</span>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     EFFECT 1: Fan Spread (扇形展开)
+════════════════════════════════════════════ -->
+<section class="scroll-section" id="section1">
+  <div class="stage effect-1">
+    <div class="section-label">
+      <div class="num">01</div>
+      <div class="title">Fan Spread</div>
+    </div>
+    <div class="stack-wrap" id="stack1"><div class="stack-inner"></div></div>
+    <div class="info-panel">
+      <div class="effect-name">扇形展开 · Fan Spread</div>
+      <div class="scroll-arrow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Divider -->
+<div class="section-divider">
+  <div class="divider-text"><span>Three ways<br>cards can move.</span></div>
+  <div class="divider-sub">Scroll to explore each variant</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     EFFECT 2: Vertical Burst (垂直爆发)
+════════════════════════════════════════════ -->
+<section class="scroll-section" id="section2">
+  <div class="stage effect-2">
+    <div class="section-label">
+      <div class="num">02</div>
+      <div class="title">Vertical Burst</div>
+    </div>
+    <div class="stack-wrap" id="stack2"><div class="stack-inner"></div></div>
+    <div class="info-panel">
+      <div class="effect-name">垂直爆发 · Vertical Burst</div>
+      <div class="scroll-arrow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Divider -->
+<div class="section-divider">
+  <div class="divider-text"><span>Each card<br>has its own path.</span></div>
+  <div class="divider-sub">Staggered timing · 3D perspective</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     EFFECT 3: Spiral Unfold (螺旋展开)
+════════════════════════════════════════════ -->
+<section class="scroll-section" id="section3">
+  <div class="stage effect-3">
+    <div class="section-label">
+      <div class="num">03</div>
+      <div class="title">Spiral Unfold</div>
+    </div>
+    <div class="stack-wrap" id="stack3"><div class="stack-inner"></div></div>
+    <div class="info-panel">
+      <div class="effect-name">螺旋展开 · Spiral Unfold</div>
+      <div class="scroll-arrow"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="page-footer">
+  <p>Inspired by Codrops · On-Scroll 3D Stack Motion</p>
+  <p>Pure CSS + Vanilla JS · No dependencies</p>
+</footer>
+
+<script>
+// ── Card data ──────────────────────────────────────────────────────────────
+const CARD_DATA = [
+  { id: '#001', name: 'Neon Drift' },
+  { id: '#002', name: 'Void Walker' },
+  { id: '#003', name: 'Forest Code' },
+  { id: '#004', name: 'Crimson Key' },
+  { id: '#005', name: 'Gold Rush' },
+  { id: '#006', name: 'Deep Ocean' },
+  { id: '#007', name: 'Pink Noise' },
+  { id: '#008', name: 'Jade Circuit' },
+  { id: '#009', name: 'Indigo Wave' },
+  { id: '#010', name: 'Ember Core' },
+  { id: '#011', name: 'Teal Pulse' },
+  { id: '#012', name: 'Violet Dream' },
+];
+
+// ── Utility ────────────────────────────────────────────────────────────────
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+const easeInOut = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+// ── Build cards ────────────────────────────────────────────────────────────
+function buildCards(stackEl) {
+  CARD_DATA.forEach((data, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-glow"></div>
+        <div class="card-pattern"></div>
+        <div class="card-shine"></div>
+        <div class="card-id">${data.id}</div>
+        <div class="card-name">${data.name}</div>
+      </div>
+    `;
+    stackEl.appendChild(card);
+  });
+}
+
+buildCards(document.querySelector('#stack1 .stack-inner'));
+buildCards(document.querySelector('#stack2 .stack-inner'));
+buildCards(document.querySelector('#stack3 .stack-inner'));
+
+// ── Stack Motion Engine ────────────────────────────────────────────────────
+class StackMotion {
+  constructor(sectionEl, stackEl, config) {
+    this.section = sectionEl;
+    this.stack = stackEl;
+    this.cards = Array.from(stackEl.querySelectorAll('.card'));
+    this.config = config;
+    this.total = this.cards.length;
+    this.progress = 0;
+    this.targetProgress = 0;
+    this.visible = false;
+
+    // Set initial z positions (stacked)
+    this.cards.forEach((card, i) => {
+      card.style.transform = `translateZ(${-i * 2}px)`;
+    });
+  }
+
+  // Calculate scroll progress for this section (0 → 1)
+  getScrollProgress() {
+    const rect = this.section.getBoundingClientRect();
+    const sectionH = this.section.offsetHeight;
+    const viewH = window.innerHeight;
+    // Progress: 0 when section top hits viewport bottom, 1 when section bottom hits viewport top
+    const scrolled = -rect.top;
+    const total = sectionH - viewH;
+    return clamp(scrolled / total, 0, 1);
+  }
+
+  update(rawProgress) {
+    this.progress = rawProgress;
+    const vw = window.innerWidth;
+
+    this.cards.forEach((card, i) => {
+      const transform = this.config.getTransform(this.progress, i, this.total, vw);
+      card.style.transform = transform;
+    });
+  }
+}
+
+// ── Effect configs ─────────────────────────────────────────────────────────
+// KEY INSIGHT: translateZ must come AFTER rotations so it moves along the
+// card's local Z axis (which is tilted by the rotations). This creates the
+// correct 3D depth effect centered on the viewport.
+//
+// The "viewing angle" tilt is baked into each card's rotateX/Y so the
+// perspective container (.stack-wrap) stays untransformed and its
+// perspective-origin (50% 50%) always maps to the exact viewport center.
+
+// Effect 1: Fan Spread — cards fan out like a deck being spread
+const config1 = {
+  staggerOffset: 0.12,
+  // Shared viewing angle for this effect (isometric-ish tilt)
+  tiltX: -20, tiltY: 35, tiltZ: 15,
+  getTransform(p, i, total) {
+    const stagger = (i / (total - 1)) * this.staggerOffset;
+    const cp = clamp(p * (1 + this.staggerOffset) - stagger, 0, 1);
+    const ep = easeInOut(cp);
+
+    // Z: cards start stacked deep, fly through to front
+    const zStart = -300 - i * 20;
+    const zEnd   =  200 + (total - i - 1) * 20;
+    const z = lerp(zStart, zEnd, ep);
+
+    // Fan rotation around Z axis
+    const rotZStart = -180 + i * 5;
+    const rotZEnd   = (i - total / 2) * 22;
+    const rotZ = lerp(rotZStart, rotZEnd, ep);
+
+    // Slight Y rotation per card for depth variety
+    const rotYExtra = lerp(-10, (i - total/2) * 8, ep);
+
+    return `rotateX(${this.tiltX}deg) rotateY(${this.tiltY + rotYExtra}deg) rotateZ(${this.tiltZ + rotZ}deg) translateZ(${z}px)`;
+  }
+};
+
+// Effect 2: Vertical Burst — cards fan out vertically like a spread hand
+const config2 = {
+  staggerOffset: 0.1,
+  tiltX: -30, tiltY: 15, tiltZ: 5,
+  getTransform(p, i, total) {
+    const stagger = (i / (total - 1)) * this.staggerOffset;
+    const cp = clamp(p * (1 + this.staggerOffset) - stagger, 0, 1);
+    const ep = easeInOut(cp);
+
+    const zStart = -280 - i * 18;
+    const zEnd   =  180 + (total - i - 1) * 18;
+    const z = lerp(zStart, zEnd, ep);
+
+    // Strong vertical spread — cards burst upward/downward
+    const yEnd = (i - (total - 1) / 2) * 120;
+    const y = lerp(0, yEnd, ep);
+
+    // Horizontal spread too for more drama
+    const xEnd = (i % 2 === 0 ? 1 : -1) * (i * 15);
+    const x = lerp(0, xEnd, ep);
+
+    // Each card tilts differently as it flies out
+    const rotXEnd = (i % 2 === 0 ? 20 : -20) + (i - total/2) * 4;
+    const rotX = lerp(-90, rotXEnd, ep);
+
+    const rotZEnd = (i % 2 === 0 ? 15 : -15);
+    const rotZ = lerp(-15, rotZEnd, ep);
+
+    return `rotateX(${this.tiltX}deg) rotateY(${this.tiltY}deg) rotateZ(${this.tiltZ + rotZ}deg) translateZ(${z}px) translateX(${x}px) translateY(${y}px) rotateX(${rotX}deg)`;
+  }
+};
+
+// Effect 3: Spiral Unfold — cards spread in a clock-face ring
+const config3 = {
+  staggerOffset: 0.08,
+  // Steep top-down tilt so the clock-face ring is clearly visible
+  tiltX: -55, tiltY: -15, tiltZ: -5,
+  getTransform(p, i, total) {
+    const stagger = (i / (total - 1)) * this.staggerOffset;
+    const cp = clamp(p * (1 + this.staggerOffset) - stagger, 0, 1);
+    const ep = easeInOut(cp);
+
+    const zStart = -200 - i * 12;
+    const zEnd   =  100 + (total - i - 1) * 12;
+    const z = lerp(zStart, zEnd, ep);
+
+    // Large clock-face spread — 300px radius, cards clearly separated
+    const angle = (i / total) * 360 - 90; // start from 12 o'clock
+    const radius = lerp(0, 300, ep);
+    const x = Math.cos((angle * Math.PI) / 180) * radius;
+    const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+    // Each card rotates to face outward from center
+    const rotZEnd = angle + 90; // face outward
+    const rotZ = lerp(0, rotZEnd, ep);
+
+    return `rotateX(${this.tiltX}deg) rotateY(${this.tiltY}deg) rotateZ(${this.tiltZ}deg) translateZ(${z}px) translateX(${x}px) translateY(${y}px) rotateZ(${rotZ}deg)`;
+  }
+};
+
+// ── Instantiate ────────────────────────────────────────────────────────────
+const motions = [
+  new StackMotion(document.getElementById('section1'), document.querySelector('#stack1 .stack-inner'), config1),
+  new StackMotion(document.getElementById('section2'), document.querySelector('#stack2 .stack-inner'), config2),
+  new StackMotion(document.getElementById('section3'), document.querySelector('#stack3 .stack-inner'), config3),
+];
+
+// ── Progress bar ───────────────────────────────────────────────────────────
+const progressBar = document.getElementById('progressBar');
+
+function updateProgressBar() {
+  const scrollTop = window.scrollY;
+  const docH = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = (scrollTop / docH) * 100;
+  progressBar.style.width = pct + '%';
+}
+
+// ── RAF loop ───────────────────────────────────────────────────────────────
+let ticking = false;
+
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    requestAnimationFrame(tick);
+    ticking = true;
+  }
+}, { passive: true });
+
+function tick() {
+  ticking = false;
+  updateProgressBar();
+  motions.forEach(m => {
+    const p = m.getScrollProgress();
+    m.update(p);
+  });
+}
+
+// Initial render
+tick();
+</script>
+</body>
+</html>

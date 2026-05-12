@@ -4,6 +4,12 @@
 - 效果名称：滚动驱动布局组装动画 (On-Scroll Layout Formations)
 - 效果描述：多张图片/内容卡片初始处于分散、错位、旋转的状态，随着用户向下滚动，页面内容被"pin"住（固定不动），图片们像被磁力吸引一样逐步归位，最终组装成一个完整的网格布局。支持多种布局变体：① 3列网格组装（图片从四面八方飞入归位）② 杂志双栏布局（大图+小图组合）③ 马赛克拼图（不规则尺寸图片拼合）④ 时间轴布局（图片从左右交替飞入）。每个布局组装完成后，内容解除 pin，继续滚动进入下一个布局组装段落。整体呈现出强烈的"拼图完成"满足感和空间层次感。
 - 实现原理：CSS scroll-driven animations 或 IntersectionObserver + CSS sticky/position:fixed 实现 pin 效果；每张图片设置初始 transform（translate + rotate + scale），滚动进度映射到 transform 归零的过程；用 CSS custom property --progress（0→1）驱动每张图片的位移插值；零依赖纯原生 JS + CSS 实现（不用 GSAP）
+- 状态：已实现 → `86-scroll-layout-formations.html`，已集成到 `index.html`
+
+## 2026-05-13 tympanus.net/codrops (On-Scroll 3D Stack Motion)
+- 效果名称：滚动驱动 3D 卡片堆叠扇形展开 (On-Scroll 3D Stack Motion)
+- 效果描述：多张卡片（NFT/图片风格）以 3D 堆叠方式排列，初始整体有 rotate3d 倾斜（像一叠斜放的牌）。随着页面向下滚动，卡片从远处（z 轴负方向）飞向观众，同时绕 Z 轴旋转，形成扑克牌扇形展开的视觉效果。支持 3 种变体：① 扇形展开（rotationZ -220°→120°，卡片向右展开）② 垂直堆叠飞出（卡片从下方依次弹出）③ 螺旋展开（rotationX + rotationZ 组合，形成螺旋状）。深色背景，卡片有渐变色/图案，整体呈现出强烈的 3D 空间感和动感。
+- 实现原理：CSS perspective + transform-style: preserve-3d 开启 3D 空间；JS 监听 scroll 事件计算滚动进度（0→1），用 lerp 插值驱动每张卡片的 translateZ（从 -2.65*vw 到 +1.4*vw）和 rotateZ（从 -220° 到 120°）；stagger 通过给每张卡片加不同的进度偏移实现错开效果；整体容器有固定的 rotate3d 倾斜角度；零依赖纯原生 JS + CSS 实现
 - 状态：待实现
 
 ## 2026-05-13 tympanus.net/codrops (Context-Aware Animation for Fixed Elements)

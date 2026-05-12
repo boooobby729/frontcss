@@ -237,7 +237,16 @@ a{text-decoration:none;color:inherit}
     </a>
     <a href="_cat/collect.html" class="cat-card">
       <div class="cat-visual"><img src="_thumbs/46-collect.png" alt="Collect" loading="lazy"></div>
-      <div class="cat-info"><h3>Collect</h3><span class="cat-count">34</span></div>
+      <div class="cat-info"><h3>Collect</h3><span class="cat-count">35</span></div>
+    </a>
+    <a href="80-scroll-svg-filter-text.html" class="cat-card">
+      <div class="cat-visual" style="background:#000;overflow:hidden;position:relative">
+        <style>.svgft-word{position:absolute;font-size:1.6rem;font-weight:900;letter-spacing:-.04em;color:#fff;white-space:nowrap;animation:svgft-melt 3s ease-in-out infinite alternate;filter:url(#svgft-preview)}.svgft-word:nth-child(2){font-size:1rem;color:rgba(255,255,255,.35);bottom:28%;animation-delay:.8s;animation-name:svgft-glitch}@keyframes svgft-melt{0%{filter:url(#svgft-preview) blur(0px);opacity:1}100%{filter:url(#svgft-preview2) blur(.5px);opacity:.85}}@keyframes svgft-glitch{0%,100%{transform:translateX(0);color:rgba(255,255,255,.35)}45%{transform:translateX(-3px);color:#f0f}55%{transform:translateX(3px);color:#0ff}60%{transform:translateX(0);color:rgba(255,255,255,.35)}}</style>
+        <svg width="0" height="0" style="position:absolute"><defs><filter id="svgft-preview"><feTurbulence type="fractalNoise" baseFrequency="0.02 0.04" numOctaves="2" seed="2" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="svgft-preview2"><feTurbulence type="fractalNoise" baseFrequency="0.04 0.08" numOctaves="3" seed="5" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
+        <span class="svgft-word" style="top:30%;left:50%;transform:translateX(-50%)">MELT</span>
+        <span class="svgft-word" style="bottom:22%;left:50%;transform:translateX(-50%)">SCROLL</span>
+      </div>
+      <div class="cat-info"><h3>滚动 SVG 滤镜文字</h3><span class="cat-count">4 变体</span></div>
     </a>
 </div>
 <script>

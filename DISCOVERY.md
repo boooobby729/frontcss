@@ -4,7 +4,7 @@
 - 效果名称：滚动驱动 SVG 滤镜文字扭曲 (Scroll-driven SVG Filter Text Distortion)
 - 效果描述：大号文字随滚动进度动态变形——通过 SVG feTurbulence + feDisplacementMap 滤镜，文字边缘随滚动从清晰逐渐扭曲成液态/故障/溶解效果。灵感来自 EDITORA 网站（Garden Eight / MisatoDaiq 创作）。支持 4 个变体：① 液态熔化（文字边缘随滚动像熔岩融化，feTurbulence baseFrequency 从 0 增至 0.04）② 故障撕裂（feDisplacementMap scale 增大，文字水平撕裂错位，配合 RGB 色差分离）③ 溶解消散（文字像素随滚动逐渐溶解成噪点，结合 feColorMatrix 降低对比度）④ 冻结重生（滚动到顶时文字清晰，中段完全扭曲，底部重新凝固成不同字词——循环意象）。深色背景，大号白色粗体文字，整体氛围黑暗艺术感。
 - 实现原理：SVG defs 中定义 filter（feTurbulence → feDisplacementMap → feComposite），JS 监听 scroll 事件计算 scrollProgress（0→1），用 lerp 插值动态修改 feTurbulence 的 baseFrequency 和 seed 属性、feDisplacementMap 的 scale 属性；CSS filter: url(#filterID) 应用到文字元素；故障版用 CSS ::before/::after 伪元素复制文字做 RGB 色差偏移；不需要 GSAP，纯原生 JS + SVG 实现
-- 状态：待实现
+- 状态：已实现 → 80-scroll-svg-filter-text.html，已集成到 index.html
 
 ## 2026-05-12 gsap.com + codrops (Physics Particle Playground)
 - 效果名称：物理弹跳粒子乐园 (Physics Particle Playground)

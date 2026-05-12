@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-12 gsap.com + codrops (Physics Particle Playground)
+- 效果名称：物理弹跳粒子乐园 (Physics Particle Playground)
+- 效果描述：受 GSAP Physics2D 插件启发，用纯 JS 模拟真实物理世界的粒子系统。鼠标点击屏幕任意位置，爆炸散射出一批彩色粒子，每个粒子有独立的初速度、重力加速度、空气阻力、弹性系数。粒子碰到边界时真实弹跳（速度乘以弹性系数反向），随时间逐渐减速并透明消散。支持 4 个变体：① 基础重力弹跳（粒子受重力下落，碰底弹起）② 零重力爆炸（粒子向四周均匀扩散，碰壁反弹，像台球）③ 烟花模式（粒子上升后在顶部二次爆炸，拖尾效果）④ 连锁反应（粒子碰撞时触发新的小爆炸，雪崩效应）。深色背景，粒子颜色从亮色渐变到透明，拖尾轨迹增强速度感。
+- 实现原理：Canvas 2D API；每个粒子对象有 {x, y, vx, vy, radius, color, alpha, life}；每帧 requestAnimationFrame 更新：vy += gravity，vx *= friction，vy *= friction，x += vx，y += vy；边界检测：x < r 或 x > W-r 时 vx *= -bounce，y > H-r 时 vy *= -bounce；alpha 随 life 递减；粒子 life 归零时从数组移除；拖尾用 ctx.globalAlpha = 0.15 的半透明黑色矩形覆盖实现
+- 状态：已实现 → 79-physics-particles.html
+
 ## 2026-05-12 gsap.com + css-tricks.com (SVG Shape Morph)
 - 效果名称：SVG 形状变形 (SVG Shape Morph)
 - 效果描述：多个 SVG 形状之间流畅地相互变形——圆形→星形→心形→水滴→多边形，形状边缘像液体一样平滑过渡。支持 4 个变体：① 基础形状循环变形（圆→方→三角→星→心形，自动循环）② 鼠标悬停触发变形（hover 时形状融化变形）③ 多形状同步变形舞台（多个形状同时以不同节奏变形）④ 文字轮廓变形（"A"→"B"→"C" 字母轮廓之间变形）。深色背景，彩色渐变填充，变形过程中颜色同步渐变。

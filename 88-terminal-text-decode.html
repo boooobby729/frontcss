@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terminal Text Decode Hover</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --font: 'JetBrains Mono', 'Courier New', monospace;
+    --page-pad: 2.5rem;
+    --fs-item: clamp(12px, 1.1vw, 16px);
+    --fs-label: 10px;
+  }
+
+  body {
+    font-family: var(--font);
+    min-height: 100vh;
+    text-transform: uppercase;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* scanline overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent, transparent 2px,
+      rgba(0,0,0,0.035) 3px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── THEMES ─── */
+  .demo-1 {
+    background: #f5f4f0;
+    color: #111;
+    --c-label: #999;
+    --c-num: #111;
+    --c-border: rgba(0,0,0,0.12);
+    --c-scan: rgba(0,0,0,0.055);
+    --c-cursor: #111;
+  }
+  .demo-2 {
+    background: #1a1f2e;
+    color: #c8c2b5;
+    --c-label: #3d4a5c;
+    --c-num: #e8e0d0;
+    --c-border: rgba(255,255,255,0.07);
+    --c-scan: rgba(255,255,255,0.06);
+    --c-cursor: #c8c2b5;
+  }
+  .demo-3 {
+    background: #0d1a0a;
+    color: #9ecf8a;
+    --c-label: #2a3d24;
+    --c-num: #6db85a;
+    --c-border: rgba(110,200,90,0.12);
+    --c-scan: rgba(110,200,90,0.09);
+    --c-cursor: #9ecf8a;
+  }
+  .demo-4 {
+    background: #080808;
+    color: rgba(255,255,255,0.8);
+    --c-label: #2a2a2a;
+    --c-num: #444;
+    --c-border: rgba(255,255,255,0.06);
+    --c-scan: rgba(255,255,255,0.06);
+    --c-cursor: rgba(255,255,255,0.8);
+    --fs-item: clamp(18px, 2.2vw, 30px);
+  }
+
+  /* ─── DEMO NAV ─── */
+  .demo-nav {
+    position: fixed;
+    top: 1.2rem;
+    right: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 200;
+    font-size: 10px;
+    font-family: var(--font);
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .demo-nav button {
+    background: none;
+    border: 1px solid currentColor;
+    color: inherit;
+    padding: 3px 9px;
+    cursor: pointer;
+    font: inherit;
+    opacity: 0.35;
+    transition: opacity 0.2s;
+  }
+  .demo-nav button.active,
+  .demo-nav button:hover { opacity: 1; }
+
+  /* ─── PAGE ─── */
+  .page {
+    padding: var(--page-pad);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .frame {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--c-label);
+    margin-bottom: 4rem;
+  }
+  .frame__title { color: inherit; opacity: 0.9; }
+
+  /* ─── SECTION ─── */
+  .section { margin-bottom: 3rem; }
+  .section__label {
+    font-size: var(--fs-label);
+    color: var(--c-label);
+    letter-spacing: 2px;
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  /* ─── LIST ─── */
+  .list {
+    list-style: none;
+    counter-reset: item 0;
+  }
+
+  .list__item {
+    display: grid;
+    grid-template-columns: 56px 28% 1fr 1fr 36px;
+    column-gap: 1.5rem;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--c-border);
+    cursor: default;
+    position: relative;
+    font-size: var(--fs-item);
+    font-weight: 300;
+    line-height: 1;
+    user-select: none;
+  }
+
+  /* row number via counter */
+  .list__item-num {
+    font-weight: 500;
+    color: var(--c-num);
+    font-size: var(--fs-item);
+    line-height: 1;
+  }
+  .list--alt .list__item-num {
+    font-size: calc(var(--fs-item) * 0.75);
+    font-weight: 400;
+    color: var(--c-label);
+  }
+
+  /* scan bg */
+  .list__item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--c-scan);
+    transform-origin: 0% 50%;
+    transform: scaleX(0);
+    pointer-events: none;
+    transition: none;
+  }
+  .list__item.scanning::before {
+    transform: scaleX(1);
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* col */
+  .list__item-col {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+    padding: 2px 0;
+  }
+  .list__item-col:last-child {
+    text-align: right;
+    color: var(--c-num);
+    font-weight: 500;
+  }
+
+  /* char spans — must stay inline */
+  .list__item-col .char {
+    display: inline;
+    position: relative;
+  }
+
+  /* cursor block (demo-1 only) */
+  .demo-1 .list__item-col .char::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0;
+    width: 1ch; height: 1.1em;
+    background: var(--c-cursor);
+    opacity: var(--opa, 0);
+    pointer-events: none;
+  }
+
+  /* demo-4: larger, backdrop blur on scan */
+  .demo-4 .list__item {
+    grid-template-columns: 64px 30% 1fr 1fr 48px;
+    padding: 0.75rem 0;
+  }
+  .demo-4 .list__item::before {
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+
+  /* alt list */
+  .list--alt .list__item {
+    grid-template-columns: 80px 1fr 1fr 1fr 1fr;
+    font-size: calc(var(--fs-item) * 0.85);
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    margin-top: auto;
+    padding-top: 2rem;
+    font-size: 9px;
+    color: var(--c-label);
+    letter-spacing: 1px;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body class="demo-1">
+
+<nav class="demo-nav">
+  <button class="active" data-demo="1">V1</button>
+  <button data-demo="2">V2</button>
+  <button data-demo="3">V3</button>
+  <button data-demo="4">V4</button>
+</nav>
+
+<div class="page">
+  <header class="frame">
+    <span class="frame__title">Terminal Text Decode</span>
+    <span>Hover Animations on Line Typography</span>
+  </header>
+
+  <!-- SECTION 1 -->
+  <section class="section">
+    <div class="section__label">Volcanic Eruptions</div>
+    <ul class="list">
+      <li class="list__item">
+        <span class="list__item-num">01</span>
+        <span class="list__item-col hover-effect">Mount Vespera</span>
+        <span class="list__item-col hover-effect">Planet Thalassa</span>
+        <span class="list__item-col hover-effect">2157-03-14</span>
+        <span class="list__item-col hover-effect">6</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">02</span>
+        <span class="list__item-col hover-effect">Kraxion</span>
+        <span class="list__item-col hover-effect">Exo-Planet Zyra</span>
+        <span class="list__item-col hover-effect">2243-11-09</span>
+        <span class="list__item-col hover-effect">7</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">03</span>
+        <span class="list__item-col hover-effect">Helion Peak</span>
+        <span class="list__item-col hover-effect">Planet Elara</span>
+        <span class="list__item-col hover-effect">2180-05-18</span>
+        <span class="list__item-col hover-effect">5</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">04</span>
+        <span class="list__item-col hover-effect">Pyrosphere</span>
+        <span class="list__item-col hover-effect">Moon Xanthe</span>
+        <span class="list__item-col hover-effect">2291-06-15</span>
+        <span class="list__item-col hover-effect">6</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">05</span>
+        <span class="list__item-col hover-effect">Vulcanus</span>
+        <span class="list__item-col hover-effect">Asteroid B-612</span>
+        <span class="list__item-col hover-effect">2312-08-22</span>
+        <span class="list__item-col hover-effect">5</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">06</span>
+        <span class="list__item-col hover-effect">Tarkon's Fury</span>
+        <span class="list__item-col hover-effect">Planet Drakonis</span>
+        <span class="list__item-col hover-effect">2455-12-01</span>
+        <span class="list__item-col hover-effect">8</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">07</span>
+        <span class="list__item-col hover-effect">Aether Plume</span>
+        <span class="list__item-col hover-effect">Planet Ganymede</span>
+        <span class="list__item-col hover-effect">2379-04-10</span>
+        <span class="list__item-col hover-effect">4</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">08</span>
+        <span class="list__item-col hover-effect">Mount Zenith</span>
+        <span class="list__item-col hover-effect">Planet Lumina</span>
+        <span class="list__item-col hover-effect">2399-09-21</span>
+        <span class="list__item-col hover-effect">6</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">09</span>
+        <span class="list__item-col hover-effect">Inferno Crest</span>
+        <span class="list__item-col hover-effect">Moon Rhea</span>
+        <span class="list__item-col hover-effect">2410-03-08</span>
+        <span class="list__item-col hover-effect">5</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">10</span>
+        <span class="list__item-col hover-effect">Jacob's Hill</span>
+        <span class="list__item-col hover-effect">Exoplanet HU5</span>
+        <span class="list__item-col hover-effect">2205-12-09</span>
+        <span class="list__item-col hover-effect">7</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- SECTION 2 -->
+  <section class="section">
+    <div class="section__label">Event Codes</div>
+    <ul class="list list--alt">
+      <li class="list__item">
+        <span class="list__item-num">EVT#010</span>
+        <span class="list__item-col hover-effect">2178-04-21</span>
+        <span class="list__item-col hover-effect">2190-07-16</span>
+        <span class="list__item-col hover-effect">X7</span>
+        <span class="list__item-col hover-effect">2205-12-08</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">EVT#020</span>
+        <span class="list__item-col hover-effect">2234-02-11</span>
+        <span class="list__item-col hover-effect">2241-09-25</span>
+        <span class="list__item-col hover-effect">A5</span>
+        <span class="list__item-col hover-effect">2253-01-30</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">EVT#030</span>
+        <span class="list__item-col hover-effect">2301-06-17</span>
+        <span class="list__item-col hover-effect">2312-03-05</span>
+        <span class="list__item-col hover-effect">B9</span>
+        <span class="list__item-col hover-effect">2320-08-14</span>
+      </li>
+      <li class="list__item">
+        <span class="list__item-num">EVT#040</span>
+        <span class="list__item-col hover-effect">2404-11-19</span>
+        <span class="list__item-col hover-effect">2415-07-22</span>
+        <span class="list__item-col hover-effect">L0</span>
+        <span class="list__item-col hover-effect">2428-05-27</span>
+      </li>
+    </ul>
+  </section>
+
+  <footer class="footer">
+    Hover over any row &mdash; Terminal Text Decode &mdash; inspired by Codrops / Manoela Ilic
+  </footer>
+</div>
+
+<script>
+  // ─── CONFIG ───────────────────────────────────────────────────────────
+  const CHARS = 'abcdefghijklmnopqrstuvwxyz!@#$%^&*-_+=;:<>,0123456789';
+  const REPEAT_COUNT = 3;       // how many random chars before restoring
+  const FRAME_MS = 35;          // ms per random frame
+  const CHAR_DELAY_MS = 65;     // stagger between chars (ms)
+
+  // ─── SPLIT TEXT INTO CHAR SPANS ───────────────────────────────────────
+  function splitToChars(el) {
+    if (el.dataset.split) return;
+    el.dataset.split = '1';
+    const text = el.textContent;
+    // Build fragment to avoid reflow per char
+    const frag = document.createDocumentFragment();
+    for (const ch of text) {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.dataset.original = ch;
+      span.textContent = ch;
+      frag.appendChild(span);
+    }
+    el.textContent = '';
+    el.appendChild(frag);
+  }
+
+  // ─── ANIMATE A SINGLE CHAR ────────────────────────────────────────────
+  function animateChar(span, delay) {
+    const original = span.dataset.original;
+    // skip whitespace, hyphens, apostrophes
+    if (/[\s\-'']/.test(original)) return;
+
+    setTimeout(() => {
+      let count = 0;
+      span.style.setProperty('--opa', '1');
+
+      const iv = setInterval(() => {
+        if (count < REPEAT_COUNT) {
+          span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
+          count++;
+        } else {
+          clearInterval(iv);
+          span.textContent = original;
+          span.style.setProperty('--opa', '0');
+        }
+      }, FRAME_MS);
+    }, delay);
+  }
+
+  // ─── ANIMATE A ROW ────────────────────────────────────────────────────
+  function animateRow(item) {
+    if (item._animating) return;
+    item._animating = true;
+    item.classList.add('scanning');
+
+    const cols = item.querySelectorAll('.hover-effect');
+    let pos = 0;
+
+    cols.forEach(col => {
+      col.querySelectorAll('.char').forEach(ch => {
+        animateChar(ch, pos * CHAR_DELAY_MS);
+        pos++;
+      });
+    });
+
+    const totalMs = pos * CHAR_DELAY_MS + REPEAT_COUNT * FRAME_MS + 120;
+    setTimeout(() => {
+      item._animating = false;
+      item.classList.remove('scanning');
+    }, totalMs);
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────────────────
+  function init() {
+    document.querySelectorAll('.list__item').forEach(item => {
+      item.querySelectorAll('.hover-effect').forEach(col => splitToChars(col));
+      item.addEventListener('mouseenter', () => animateRow(item));
+    });
+  }
+
+  init();
+
+  // ─── DEMO SWITCHER ────────────────────────────────────────────────────
+  document.querySelectorAll('.demo-nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.body.className = `demo-${btn.dataset.demo}`;
+      document.querySelectorAll('.demo-nav button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

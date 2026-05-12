@@ -1999,11 +1999,34 @@ if (sortedCollect.length > 0) {
     const item = sortedCollect[ci];
     const thumbFile = item.file.replace('.html', '.png');
     const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
-    const visual = thumbExists
-      ? `<img src="../_thumbs/${thumbFile}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover">`
-      : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${item.title.charAt(0)}</div>`;
+
+    // 自定义预览 map：key 为文件名，value 为 card-visual 内部 HTML + 可选的 card-visual style
+    const customVisuals = {
+      '88-terminal-text-decode.html': {
+        style: ' style="background:#0a1a08 !important"',
+        html: `<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:10px 12px;font-family:'Courier New',monospace;overflow:hidden">
+          <div style="font-size:6px;color:#2a4020;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #2a4020;padding-bottom:3px;margin-bottom:5px">VOLCANIC ERUPTIONS</div>
+          <div style="display:flex;gap:6px;font-size:6.5px;color:#7ec86a;text-transform:uppercase;padding:2px 0;border-bottom:1px solid rgba(100,180,80,.1)"><span style="color:#5aaa46;min-width:12px">01</span><span style="flex:1">MOUNT VESPERA</span><span>2157-03-14</span></div>
+          <div style="display:flex;gap:6px;font-size:6.5px;color:#7ec86a;text-transform:uppercase;padding:2px 0;border-bottom:1px solid rgba(100,180,80,.1)"><span style="color:#5aaa46;min-width:12px">02</span><span style="flex:1">KRAXION</span><span>2243-11-09</span></div>
+          <div style="display:flex;gap:6px;font-size:6.5px;color:#7ec86a;text-transform:uppercase;padding:2px 0;border-bottom:1px solid rgba(100,180,80,.1)"><span style="color:#5aaa46;min-width:12px">03</span><span style="flex:1">HELION PEAK</span><span>2180-05-18</span></div>
+          <div style="display:flex;gap:6px;font-size:6.5px;color:#7ec86a;text-transform:uppercase;padding:2px 0;border-bottom:1px solid rgba(100,180,80,.1)"><span style="color:#5aaa46;min-width:12px">04</span><span style="flex:1">PYROSPHERE</span><span>2291-06-15</span></div>
+          <div style="display:flex;gap:6px;font-size:6.5px;color:#7ec86a;text-transform:uppercase;padding:2px 0"><span style="color:#5aaa46;min-width:12px">05</span><span style="flex:1">VULCANUS</span><span>2312-08-22</span></div>
+        </div>`
+      }
+    };
+
+    let visual, cardVisualStyle = '';
+    if (customVisuals[item.file]) {
+      cardVisualStyle = customVisuals[item.file].style;
+      visual = customVisuals[item.file].html;
+    } else if (thumbExists) {
+      visual = `<img src="../_thumbs/${thumbFile}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover">`;
+    } else {
+      visual = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${item.title.charAt(0)}</div>`;
+    }
+
     collectCardsHtml += `    <a href="../${item.file}" class="card" data-idx="${ci}">
-      <div class="card-visual">${visual}</div>
+      <div class="card-visual"${cardVisualStyle}>${visual}</div>
       <div class="card-info"><h3>${item.title}</h3></div>
     </a>\n`;
 

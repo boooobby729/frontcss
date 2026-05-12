@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colorful Liquid Morph · Fluid Text Morph</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+  }
+  .svg-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 48px;
+    font-weight: 500;
+  }
+  .color-stage {
+    position: relative;
+    width: min(800px, 90vw);
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: url(#gooey-color);
+  }
+  .color-word {
+    position: absolute;
+    font-size: clamp(52px, 8.5vw, 100px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    opacity: 0;
+    transform: scale(0.82) translateY(8px);
+    transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+                filter 0.55s ease;
+    filter: blur(10px);
+    white-space: nowrap;
+  }
+  .color-word.active { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+  .color-word.leaving { opacity: 0; transform: scale(1.18) translateY(-6px); filter: blur(14px); }
+  .color-word:nth-child(1) { color: #a78bfa; }
+  .color-word:nth-child(2) { color: #34d399; }
+  .color-word:nth-child(3) { color: #f472b6; }
+  .color-word:nth-child(4) { color: #fb923c; }
+  .color-word:nth-child(5) { color: #60a5fa; }
+  .color-word:nth-child(6) { color: #fbbf24; }
+  .color-dots {
+    display: flex;
+    gap: 8px;
+    margin-top: 40px;
+  }
+  .color-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #333;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .color-dot.active { transform: scale(1.5); }
+  .section-desc {
+    font-size: 14px;
+    color: #444;
+    margin-top: 32px;
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<svg class="svg-filters" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="gooey-color" x="-40%" y="-80%" width="180%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 18 -7"
+        result="gooey"/>
+      <feComposite in="SourceGraphic" in2="gooey" operator="atop"/>
+    </filter>
+  </defs>
+</svg>
+
+<p class="label">Variant 04 · Colorful Liquid Morph</p>
+
+<div class="color-stage" id="color-stage">
+  <span class="color-word active">PURPLE</span>
+  <span class="color-word">EMERALD</span>
+  <span class="color-word">PINK</span>
+  <span class="color-word">ORANGE</span>
+  <span class="color-word">BLUE</span>
+  <span class="color-word">GOLD</span>
+</div>
+
+<div class="color-dots" id="color-dots">
+  <div class="color-dot active" style="background:#a78bfa"></div>
+  <div class="color-dot" style="background:#34d399"></div>
+  <div class="color-dot" style="background:#f472b6"></div>
+  <div class="color-dot" style="background:#fb923c"></div>
+  <div class="color-dot" style="background:#60a5fa"></div>
+  <div class="color-dot" style="background:#fbbf24"></div>
+</div>
+
+<p class="section-desc">
+  每个词语有独立颜色，gooey-color 滤镜保留颜色信息，
+  切换时彩色液态边缘在黑色背景上产生发光融合效果。
+</p>
+
+<script>
+const colorWords = document.querySelectorAll('#color-stage .color-word');
+const colorDots  = document.querySelectorAll('#color-dots .color-dot');
+let colorCurrent = 0;
+
+function colorNext() {
+  const prev = colorCurrent;
+  colorCurrent = (colorCurrent + 1) % colorWords.length;
+  colorWords[prev].classList.remove('active');
+  colorWords[prev].classList.add('leaving');
+  colorDots[prev].classList.remove('active');
+  setTimeout(() => {
+    colorWords[colorCurrent].classList.add('active');
+    colorDots[colorCurrent].classList.add('active');
+  }, 200);
+  setTimeout(() => { colorWords[prev].classList.remove('leaving'); }, 750);
+}
+setInterval(colorNext, 2000);
+</script>
+</body>
+</html>

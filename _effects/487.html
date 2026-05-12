@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inline Keyword Morph · Fluid Text Morph</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #02020a;
+    color: #fff;
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+  }
+  .svg-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 48px;
+    font-weight: 500;
+  }
+  .prose-block {
+    max-width: 680px;
+    text-align: center;
+  }
+  .prose-text {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.3;
+    color: #888;
+    letter-spacing: -0.02em;
+  }
+  .inline-morph {
+    position: relative;
+    display: inline-block;
+    filter: url(#gooey);
+  }
+  .inline-word {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    opacity: 0;
+    filter: blur(6px);
+    transition: opacity 0.5s ease, filter 0.5s ease;
+    font-weight: 800;
+    color: #fff;
+  }
+  .inline-word.active { opacity: 1; filter: blur(0px); }
+  .inline-word.leaving { opacity: 0; filter: blur(8px); }
+  .inline-sizer {
+    visibility: hidden;
+    pointer-events: none;
+    font-weight: 800;
+    color: #fff;
+  }
+  .section-desc {
+    font-size: 14px;
+    color: #444;
+    margin-top: 48px;
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<svg class="svg-filters" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="gooey" x="-30%" y="-80%" width="160%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 18 -7"
+        result="gooey"/>
+      <feComposite in="SourceGraphic" in2="gooey" operator="atop"/>
+    </filter>
+  </defs>
+</svg>
+
+<p class="label">Variant 03 · Inline Keyword Morph</p>
+
+<div class="prose-block">
+  <p class="prose-text">
+    The future of the web is
+    <span class="inline-morph" id="inline-morph">
+      <span class="inline-sizer" id="inline-sizer">immersive</span>
+      <span class="inline-word active">immersive</span>
+      <span class="inline-word">intelligent</span>
+      <span class="inline-word">expressive</span>
+      <span class="inline-word">fluid</span>
+      <span class="inline-word">alive</span>
+    </span>
+  </p>
+</div>
+
+<p class="section-desc">
+  行内关键词变形——文字嵌入句子中，宽度随词语长度平滑过渡，
+  gooey 滤镜让词语切换时产生液态融合感。
+</p>
+
+<script>
+const inlineWords = document.querySelectorAll('#inline-morph .inline-word');
+const inlineSizer = document.getElementById('inline-sizer');
+let inlineCurrent = 0;
+
+function inlineNext() {
+  const prev = inlineCurrent;
+  inlineCurrent = (inlineCurrent + 1) % inlineWords.length;
+  inlineSizer.textContent = inlineWords[inlineCurrent].textContent;
+  inlineWords[prev].classList.remove('active');
+  inlineWords[prev].classList.add('leaving');
+  setTimeout(() => { inlineWords[inlineCurrent].classList.add('active'); }, 150);
+  setTimeout(() => { inlineWords[prev].classList.remove('leaving'); }, 700);
+}
+setInterval(inlineNext, 2000);
+</script>
+</body>
+</html>

@@ -387,6 +387,23 @@ a{text-decoration:none;color:inherit}
       </div>
       <div class="cat-info"><h3>重复图像过渡</h3><span class="cat-count">4 变体</span></div>
     </a>
+    <a href="85-context-aware-animation.html" class="cat-card">
+      <div class="cat-visual" style="background:#0a0a0f !important">
+        <style>
+          .caa-prev{width:100%;height:100%;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#0a0a0f}
+          .caa-logo{position:absolute;top:18px;left:18px;font-size:1rem;font-weight:900;letter-spacing:-.03em;color:#f0f0f0;font-family:'Helvetica Neue',Arial,sans-serif;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s,filter .5s}
+          .caa-block{position:absolute;bottom:0;left:0;right:0;height:55%;background:linear-gradient(160deg,#0f0f1a,#1a0f2e);display:flex;align-items:center;padding:0 18px;animation:caa-rise 3s ease-in-out infinite alternate}
+          .caa-block-text{font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(124,106,247,.7)}
+          @keyframes caa-rise{0%{transform:translateY(100%)}60%,100%{transform:translateY(0)}}
+          .caa-prev:hover .caa-logo{transform:scale(0);opacity:0}
+        </style>
+        <div class="caa-prev">
+          <div class="caa-logo">STUDIO</div>
+          <div class="caa-block"><span class="caa-block-text">Scale Shrink</span></div>
+        </div>
+      </div>
+      <div class="cat-info"><h3>上下文感知动画</h3><span class="cat-count">7 种效果</span></div>
+    </a>
 </div>
 <script>
 

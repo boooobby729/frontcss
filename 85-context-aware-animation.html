@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>85 - Context-Aware Animation for Fixed Elements</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --fg: #f0f0f0;
+    --accent: #7c6af7;
+    --accent2: #f76a8a;
+    --accent3: #6af7c8;
+    --mono: 'Courier New', monospace;
+  }
+
+  html { scroll-behavior: auto; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Fixed Logo ── */
+  .fixed-logo {
+    position: fixed;
+    top: 2rem;
+    left: 2.5rem;
+    z-index: 100;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: var(--fg);
+    pointer-events: none;
+    will-change: transform, opacity, filter;
+    transform-origin: left center;
+    line-height: 1;
+  }
+
+  .fixed-logo .char {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+
+  /* ── Fixed Nav ── */
+  .fixed-nav {
+    position: fixed;
+    top: 2.2rem;
+    right: 2.5rem;
+    z-index: 100;
+    display: flex;
+    gap: 2rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(240,240,240,0.5);
+    pointer-events: none;
+    will-change: transform, opacity, filter;
+    transform-origin: right center;
+  }
+
+  /* ── Scroll Container ── */
+  .scroll-container {
+    position: relative;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(124,106,247,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    color: rgba(240,240,240,0.45);
+    max-width: 480px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+  }
+
+  .scroll-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(240,240,240,0.3);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: hintBob 2s ease-in-out infinite;
+  }
+
+  .scroll-hint-arrow {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, rgba(240,240,240,0.3));
+  }
+
+  @keyframes hintBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* ── Content Blocks ── */
+  .block {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8rem 2rem 8rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .block-inner {
+    max-width: 680px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Block themes */
+  .block:nth-child(1) { background: linear-gradient(160deg, #0f0f1a 0%, #1a0f2e 100%); }
+  .block:nth-child(2) { background: linear-gradient(160deg, #0a1a0f 0%, #0f2e1a 100%); }
+  .block:nth-child(3) { background: linear-gradient(160deg, #1a0a0a 0%, #2e0f1a 100%); }
+  .block:nth-child(4) { background: linear-gradient(160deg, #0a0f1a 0%, #0f1a2e 100%); }
+  .block:nth-child(5) { background: linear-gradient(160deg, #1a1a0a 0%, #2e2e0f 100%); }
+  .block:nth-child(6) { background: linear-gradient(160deg, #0f1a1a 0%, #1a2e2e 100%); }
+  .block:nth-child(7) { background: linear-gradient(160deg, #1a0f1a 0%, #2e1a2e 100%); }
+
+  .block-number {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0.4;
+    font-family: var(--mono);
+  }
+
+  .block-effect-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.3em 0.8em;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    opacity: 0.6;
+  }
+
+  .block:nth-child(1) .block-effect-label { color: var(--accent); }
+  .block:nth-child(2) .block-effect-label { color: var(--accent3); }
+  .block:nth-child(3) .block-effect-label { color: var(--accent2); }
+  .block:nth-child(4) .block-effect-label { color: #6ab4f7; }
+  .block:nth-child(5) .block-effect-label { color: #f7d06a; }
+  .block:nth-child(6) .block-effect-label { color: #6af7c8; }
+  .block:nth-child(7) .block-effect-label { color: #f76af7; }
+
+  .block-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  .block-body {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: rgba(240,240,240,0.5);
+    max-width: 520px;
+  }
+
+  /* Decorative bg shapes */
+  .block-deco {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.06;
+  }
+
+  .block:nth-child(1) .block-deco { width: 600px; height: 600px; background: var(--accent); top: -200px; right: -200px; }
+  .block:nth-child(2) .block-deco { width: 500px; height: 500px; background: var(--accent3); bottom: -150px; left: -150px; }
+  .block:nth-child(3) .block-deco { width: 700px; height: 700px; background: var(--accent2); top: -300px; left: -200px; }
+  .block:nth-child(4) .block-deco { width: 550px; height: 550px; background: #6ab4f7; bottom: -200px; right: -150px; }
+  .block:nth-child(5) .block-deco { width: 600px; height: 600px; background: #f7d06a; top: -250px; right: -250px; }
+  .block:nth-child(6) .block-deco { width: 500px; height: 500px; background: var(--accent3); bottom: -100px; left: -200px; }
+  .block:nth-child(7) .block-deco { width: 650px; height: 650px; background: #f76af7; top: -200px; right: -300px; }
+
+  /* ── Effect indicator ── */
+  .effect-indicator {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
+    padding: 0.6rem 1.2rem;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(240,240,240,0.5);
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+
+  .effect-indicator-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+
+  .effect-indicator-name {
+    color: rgba(240,240,240,0.9);
+    font-weight: 600;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--bg);
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .footer-text {
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    opacity: 0.15;
+  }
+</style>
+</head>
+<body>
+
+<!-- Fixed Logo (will animate on collision) -->
+<div class="fixed-logo" id="fixedLogo">STUDIO</div>
+
+<!-- Fixed Nav (will animate on collision) -->
+<div class="fixed-nav" id="fixedNav">
+  <span>Work</span>
+  <span>About</span>
+  <span>Contact</span>
+</div>
+
+<!-- Effect indicator -->
+<div class="effect-indicator" id="effectIndicator">
+  <div class="effect-indicator-dot" id="indicatorDot"></div>
+  <span>Scroll to see effects</span>
+  <span class="effect-indicator-name" id="indicatorName"></span>
+</div>
+
+<div class="scroll-container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Context-Aware Animation</div>
+    <h1 class="hero-title">Fixed<br>Elements<br>React</h1>
+    <p class="hero-sub">As you scroll, the fixed logo and nav detect collisions with content blocks and trigger unique animations for each section.</p>
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-hint-arrow"></div>
+    </div>
+  </div>
+
+  <!-- Block 1: Scale -->
+  <div class="block" data-effect="scale">
+    <div class="block-deco"></div>
+    <div class="block-inner">
+      <div class="block-number">Effect 01 / 07</div>
+      <div class="block-effect-label">Scale Shrink</div>
+      <h2 class="block-title">The logo<br>shrinks away</h2>
+      <p class="block-body">When this block overlaps the fixed logo, it scales down to nothing — a subtle acknowledgment that the content has taken center stage. Watch the top-left corner as you scroll through.</p>
+    </div>
+  </div>
+
+  <!-- Block 2: Blur -->
+  <div class="block" data-effect="blur">
+    <div class="block-deco"></div>
+    <div class="block-inner">
+      <div class="block-number">Effect 02 / 07</div>
+      <div class="block-effect-label">Blur Fade</div>
+      <h2 class="block-title">Dissolves<br>into fog</h2>
+      <p class="block-body">The logo blurs and fades simultaneously, as if retreating into a soft haze. The transition feels organic — like a camera losing focus on a distant subject.</p>
+    </div>
+  </div>
+
+  <!-- Block 3: Slide Up -->
+  <div class="block" data-effect="slideUp">
+    <div class="block-deco"></div>
+    <div class="block-inner">
+      <div class="block-number">Effect 03 / 07</div>
+      <div class="block-effect-label">Slide Up</div>
+      <h2 class="block-title">Pushed<br>off screen</h2>
+      <p class="block-body">The logo gets pushed upward and out of view, as if the rising content is physically displacing it. A mechanical, satisfying motion that implies spatial hierarchy.</p>
+    </div>
+  </div>
+
+  <!-- Block 4: Chars Scatter -->
+  <div class="block" data-effect="charsScatter">
+    <div class="block-deco"></div>
+    <div class="block-inner">
+      <div class="block-number">Effect 04 / 07</div>
+      <div class="block-effect-label">Chars Scatter</div>
+      <h2 class="block-title">Letters<br>fall apart</h2>
+      <p class="block-body">Each character of the logo scatters independently — falling, rotating, fading. When the block leaves, the letters reassemble in a satisfying reverse cascade.</p>
+    </div>
+  </div>
+
+  <!-- Block 5: Rotate Exit -->
+  <div class="block" data-effect="rotate">
+    <div class="block-deco"></div>
+    <div class="block-inner">
+      <div class="block-number">Effect 05 / 07</div>
+      <div class="block-effect-label">Rotate Exit</div>
+      <h2 class="block-title">Spins<br>and leaves</h2>
+      <p class="block-body">The logo pivots from its baseline and rotates out of frame — a dramatic, theatrical exit that commands attention before disappearing entirely.</p>
+    </div>
+  </div>
+
+  <!-- Block 6: Move Away -->
+  <div class="block" data-effect="moveAway">
+    <div class="block-deco"></div>
+    <div class="block-inner">
+      <div class="block-number">Effect 06 / 07</div>
+      <div class="block-effect-label">Move Away</div>
+      <h2 class="block-title">Slides<br>off left</h2>
+      <p class="block-body">The logo translates horizontally off the left edge of the viewport — a clean, directional exit that feels like the content is sweeping it aside.</p>
+    </div>
+  </div>
+
+  <!-- Block 7: Chars Shuffle -->
+  <div class="block" data-effect="charsShuffle">
+    <div class="block-deco"></div>
+    <div class="block-inner">
+      <div class="block-number">Effect 07 / 07</div>
+      <div class="block-effect-label">Chars Shuffle</div>
+      <h2 class="block-title">Scrambles<br>then returns</h2>
+      <p class="block-body">The letters scramble into random characters, then decode back to the original word — a cryptographic reveal that makes the logo feel alive and intelligent.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-text">Context-Aware Animation</div>
+  </div>
+
+</div><!-- /scroll-container -->
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Targets ──────────────────────────────────────────────────────────────
+  const logo = document.getElementById('fixedLogo');
+  const nav  = document.getElementById('fixedNav');
+  const fixedEls = [logo, nav];
+
+  const indicatorDot  = document.getElementById('indicatorDot');
+  const indicatorName = document.getElementById('indicatorName');
+
+  // ── Char splitting ────────────────────────────────────────────────────────
+  function splitChars(el) {
+    if (el.dataset.split === '1') return;
+    const text = el.textContent;
+    el.innerHTML = '';
+    for (const ch of text) {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = ch === ' ' ? '\u00a0' : ch;
+      el.appendChild(span);
+    }
+    el.dataset.split = '1';
+  }
+
+  function unsplitChars(el) {
+    if (el.dataset.split !== '1') return;
+    el.textContent = Array.from(el.querySelectorAll('.char'))
+      .map(s => s.textContent === '\u00a0' ? ' ' : s.textContent).join('');
+    delete el.dataset.split;
+  }
+
+  // ── Transition helper ─────────────────────────────────────────────────────
+  function applyTransition(el, props, duration = 0.5, easing = 'cubic-bezier(0.4,0,0.2,1)') {
+    const dur = duration * 1000;
+    const keys = Object.keys(props);
+    el.style.transition = keys.map(k => `${k} ${dur}ms ${easing}`).join(', ');
+    // Force reflow
+    void el.offsetWidth;
+    Object.assign(el.style, props);
+  }
+
+  function resetStyle(el) {
+    el.style.transition = '';
+    el.style.transform = '';
+    el.style.opacity = '';
+    el.style.filter = '';
+    el.style.clipPath = '';
+  }
+
+  // ── Char animation helpers ────────────────────────────────────────────────
+  function animateCharsOut(el, direction = 'end') {
+    splitChars(el);
+    const chars = Array.from(el.querySelectorAll('.char'));
+    const ordered = direction === 'end' ? [...chars].reverse() : chars;
+    ordered.forEach((ch, i) => {
+      ch.style.transition = '';
+      ch.style.display = 'inline-block';
+      setTimeout(() => {
+        ch.style.transition = `opacity 60ms ease, transform 120ms cubic-bezier(0.4,0,1,1)`;
+        ch.style.opacity = '0';
+        ch.style.transform = `translateY(${-8 - Math.random() * 12}px) rotate(${(Math.random()-0.5)*30}deg)`;
+      }, i * 30);
+    });
+  }
+
+  function animateCharsIn(el) {
+    if (el.dataset.split !== '1') return;
+    const chars = Array.from(el.querySelectorAll('.char'));
+    chars.forEach((ch, i) => {
+      setTimeout(() => {
+        ch.style.transition = `opacity 80ms ease, transform 150ms cubic-bezier(0,0,0.2,1)`;
+        ch.style.opacity = '1';
+        ch.style.transform = '';
+      }, i * 25);
+    });
+    // After all chars restored, unsplit
+    setTimeout(() => unsplitChars(el), chars.length * 25 + 200);
+  }
+
+  function shuffleCharsIn(el) {
+    splitChars(el);
+    const chars = Array.from(el.querySelectorAll('.char'));
+    const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const originals = chars.map(c => c.textContent);
+
+    chars.forEach((ch, i) => {
+      ch.style.opacity = '0';
+      ch.style.display = 'inline-block';
+      const delay = i * 40;
+      // Two scramble frames
+      setTimeout(() => {
+        ch.style.transition = 'opacity 30ms';
+        ch.style.opacity = '1';
+        ch.textContent = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+      }, delay);
+      setTimeout(() => {
+        ch.textContent = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+      }, delay + 40);
+      // Restore
+      setTimeout(() => {
+        ch.textContent = originals[i];
+      }, delay + 80);
+    });
+
+    setTimeout(() => unsplitChars(el), chars.length * 40 + 120);
+  }
+
+  // ── Effect definitions ────────────────────────────────────────────────────
+  const EFFECTS = [
+    {
+      name: 'Scale Shrink',
+      color: '#7c6af7',
+      onEnter(el) {
+        applyTransition(el, { transform: 'scale(0)', opacity: '0' }, 0.45, 'cubic-bezier(0.4,0,1,1)');
+      },
+      onLeave(el) {
+        applyTransition(el, { transform: 'scale(1)', opacity: '1' }, 0.5, 'cubic-bezier(0,0,0.2,1)');
+        setTimeout(() => resetStyle(el), 550);
+      }
+    },
+    {
+      name: 'Blur Fade',
+      color: '#6af7c8',
+      onEnter(el) {
+        applyTransition(el, { filter: 'blur(12px)', opacity: '0' }, 0.5);
+      },
+      onLeave(el) {
+        applyTransition(el, { filter: 'blur(0px)', opacity: '1' }, 0.5);
+        setTimeout(() => resetStyle(el), 550);
+      }
+    },
+    {
+      name: 'Slide Up',
+      color: '#f76a8a',
+      onEnter(el) {
+        applyTransition(el, { transform: 'translateY(-120%)', opacity: '0' }, 0.45, 'cubic-bezier(0.4,0,1,1)');
+      },
+      onLeave(el) {
+        applyTransition(el, { transform: 'translateY(0)', opacity: '1' }, 0.5, 'cubic-bezier(0,0,0.2,1)');
+        setTimeout(() => resetStyle(el), 550);
+      }
+    },
+    {
+      name: 'Chars Scatter',
+      color: '#6ab4f7',
+      onEnter(el) {
+        animateCharsOut(el, 'end');
+      },
+      onLeave(el) {
+        animateCharsIn(el);
+      }
+    },
+    {
+      name: 'Rotate Exit',
+      color: '#f7d06a',
+      onEnter(el) {
+        el.style.transformOrigin = '0% 100%';
+        applyTransition(el, { transform: 'rotate(-90deg) translateX(-20px)', opacity: '0' }, 0.55, 'cubic-bezier(0.4,0,1,1)');
+      },
+      onLeave(el) {
+        applyTransition(el, { transform: 'rotate(0deg) translateX(0)', opacity: '1' }, 0.5, 'cubic-bezier(0,0,0.2,1)');
+        setTimeout(() => { resetStyle(el); el.style.transformOrigin = ''; }, 550);
+      }
+    },
+    {
+      name: 'Move Away',
+      color: '#6af7c8',
+      onEnter(el) {
+        const dist = el.offsetWidth + el.getBoundingClientRect().left + 20;
+        applyTransition(el, { transform: `translateX(-${dist}px)`, opacity: '0' }, 0.45, 'cubic-bezier(0.4,0,1,1)');
+      },
+      onLeave(el) {
+        applyTransition(el, { transform: 'translateX(0)', opacity: '1' }, 0.5, 'cubic-bezier(0,0,0.2,1)');
+        setTimeout(() => resetStyle(el), 550);
+      }
+    },
+    {
+      name: 'Chars Shuffle',
+      color: '#f76af7',
+      onEnter(el) {
+        // Scramble out
+        splitChars(el);
+        const chars = Array.from(el.querySelectorAll('.char'));
+        const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        chars.forEach((ch, i) => {
+          ch.style.display = 'inline-block';
+          setTimeout(() => {
+            ch.style.transition = 'opacity 40ms';
+            ch.textContent = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+          }, i * 30);
+          setTimeout(() => {
+            ch.style.opacity = '0';
+          }, i * 30 + 60);
+        });
+      },
+      onLeave(el) {
+        shuffleCharsIn(el);
+      }
+    }
+  ];
+
+  // ── Intersection detection ────────────────────────────────────────────────
+  const blocks = Array.from(document.querySelectorAll('.block'));
+
+  // Track active state per fixed element
+  const state = new Map(fixedEls.map(el => [el, { active: false, effectIdx: -1 }]));
+
+  function getEffectForBlock(block) {
+    return blocks.indexOf(block);
+  }
+
+  function isOverlapping(fixedEl, block) {
+    const fr = fixedEl.getBoundingClientRect();
+    const br = block.getBoundingClientRect();
+    return !(fr.bottom < br.top || fr.top > br.bottom || fr.right < br.left || fr.left > br.right);
+  }
+
+  function updateIndicator(effectIdx) {
+    if (effectIdx >= 0 && effectIdx < EFFECTS.length) {
+      const eff = EFFECTS[effectIdx];
+      indicatorDot.style.background = eff.color;
+      indicatorName.textContent = eff.name;
+    } else {
+      indicatorDot.style.background = 'var(--accent)';
+      indicatorName.textContent = '';
+    }
+  }
+
+  function checkCollisions() {
+    let anyActive = false;
+    let activeEffectIdx = -1;
+
+    blocks.forEach((block, idx) => {
+      const effectIdx = idx % EFFECTS.length;
+      const effect = EFFECTS[effectIdx];
+
+      fixedEls.forEach(el => {
+        const s = state.get(el);
+        const overlapping = isOverlapping(el, block);
+
+        if (overlapping && !s.active) {
+          s.active = true;
+          s.effectIdx = effectIdx;
+          effect.onEnter(el);
+        } else if (!overlapping && s.active && s.effectIdx === effectIdx) {
+          s.active = false;
+          s.effectIdx = -1;
+          effect.onLeave(el);
+        }
+      });
+
+      if (isOverlapping(logo, block)) {
+        anyActive = true;
+        activeEffectIdx = effectIdx;
+      }
+    });
+
+    updateIndicator(anyActive ? activeEffectIdx : -1);
+  }
+
+  // ── Scroll listener (rAF throttled) ──────────────────────────────────────
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        checkCollisions();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', () => {
+    checkCollisions();
+  });
+
+  // Initial check
+  checkCollisions();
+
+})();
+</script>
+</body>
+</html>

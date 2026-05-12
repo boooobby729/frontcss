@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 tympanus.net/codrops (Context-Aware Animation for Fixed Elements)
+- 效果名称：上下文感知固定元素动画 (Context-Aware Animation for Fixed Elements)
+- 效果描述：页面中有固定定位的标题/Logo，当滚动内容块与固定元素发生"碰撞"时，固定元素根据当前内容块的主题触发不同的隐藏/变形动画（共7种变体）：① scale 缩小消失 ② blur 模糊消失 ③ slideUp 向上推出 ④ charsScatter 字符逐个散开 ⑤ rotate+xPercent 旋转移出 ⑥ move away 平移消失 ⑦ chars shuffle 字符乱码后复原。内容块离开时固定元素以对应的反向动画恢复原位。整体呈现出内容与固定UI元素之间的"感知"互动感。
+- 实现原理：IntersectionObserver 检测固定元素与各内容块的重叠状态，根据内容块索引选择对应动画效果；每种效果定义 onEnter/onLeave 回调，用 CSS transition 或 Web Animations API 驱动；字符散开效果将文本拆分为单个 span，逐字符做 opacity/transform 动画；零依赖纯 JS + CSS，无需 GSAP/ScrollTrigger
+- 状态：已实现 → `85-context-aware-animation.html`，已集成到 `index.html`
+
 ## 2026-05-13 tympanus.net/codrops (Repeating Image Transition)
 - 效果名称：重复图像帧过渡 (Repeating Image Transition)
 - 效果描述：点击网格中的图片时，在图片原始位置和目标面板之间生成多个"中间帧"（mover 元素），每帧依次用 clip-path inset 动画出现/消失，形成图像沿路径"飞行"的视觉效果。支持 linear/sine 路径、随机旋转、wobble 抖动等参数。整体呈现出电影胶片/画廊网格的高级质感。

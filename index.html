@@ -355,6 +355,38 @@ a{text-decoration:none;color:inherit}
       </div>
       <div class="cat-info"><h3>Spirograph</h3><span class="cat-count">4 变体</span></div>
     </a>
+    <a href="84-repeating-image-transition.html" class="cat-card">
+      <div class="cat-visual" style="background:#0a0a0a;overflow:hidden;position:relative">
+        <style>
+          .rit-prev{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:2px}
+          .rit-cell{position:relative;overflow:hidden}
+          .rit-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+          .rit-cell:nth-child(1) .rit-bg{background:linear-gradient(135deg,#1a0533,#4a0080)}
+          .rit-cell:nth-child(2) .rit-bg{background:linear-gradient(135deg,#003366,#0066cc)}
+          .rit-cell:nth-child(3) .rit-bg{background:linear-gradient(135deg,#1a3300,#336600)}
+          .rit-cell:nth-child(4) .rit-bg{background:linear-gradient(135deg,#330000,#660033)}
+          .rit-cell:nth-child(5) .rit-bg{background:linear-gradient(135deg,#1a1a00,#4d4d00)}
+          .rit-cell:nth-child(6) .rit-bg{background:linear-gradient(135deg,#001a33,#004466)}
+          .rit-mover{position:absolute;inset:0;background:linear-gradient(135deg,#6600cc,#cc0066);clip-path:inset(0 100% 0 0);animation:rit-fly 2.4s ease-in-out infinite}
+          .rit-cell:nth-child(1) .rit-mover{animation-delay:0s}
+          .rit-cell:nth-child(2) .rit-mover{animation-delay:.2s}
+          .rit-cell:nth-child(3) .rit-mover{animation-delay:.4s}
+          .rit-cell:nth-child(4) .rit-mover{animation-delay:.6s}
+          .rit-cell:nth-child(5) .rit-mover{animation-delay:.8s}
+          .rit-cell:nth-child(6) .rit-mover{animation-delay:1s}
+          @keyframes rit-fly{0%,20%{clip-path:inset(0 100% 0 0)}45%,55%{clip-path:inset(0 0% 0 0)}80%,100%{clip-path:inset(0 0 0 100%)}}
+        </style>
+        <div class="rit-prev">
+          <div class="rit-cell"><div class="rit-bg"></div><div class="rit-mover"></div></div>
+          <div class="rit-cell"><div class="rit-bg"></div><div class="rit-mover"></div></div>
+          <div class="rit-cell"><div class="rit-bg"></div><div class="rit-mover"></div></div>
+          <div class="rit-cell"><div class="rit-bg"></div><div class="rit-mover"></div></div>
+          <div class="rit-cell"><div class="rit-bg"></div><div class="rit-mover"></div></div>
+          <div class="rit-cell"><div class="rit-bg"></div><div class="rit-mover"></div></div>
+        </div>
+      </div>
+      <div class="cat-info"><h3>重复图像过渡</h3><span class="cat-count">4 变体</span></div>
+    </a>
 </div>
 <script>
 

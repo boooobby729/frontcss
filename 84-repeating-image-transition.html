@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>84 · Repeating Image Transition</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080808;
+    --fg: #f0f0f0;
+    --accent: #c8ff00;
+    --card-w: 200px;
+    --card-h: 260px;
+    --panel-w: 420px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    background: linear-gradient(to bottom, rgba(8,8,8,.95) 0%, transparent 100%);
+  }
+  .header-title {
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    opacity: .5;
+  }
+  .header-variants {
+    display: flex;
+    gap: 8px;
+  }
+  .variant-btn {
+    padding: 6px 14px;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--fg);
+    font-size: 11px;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .variant-btn:hover, .variant-btn.active {
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+  }
+
+  /* ── Scene wrapper ── */
+  .scene {
+    display: none;
+    min-height: 100vh;
+    padding: 100px 40px 60px;
+  }
+  .scene.active { display: block; }
+
+  /* ── Scene heading ── */
+  .scene-heading {
+    margin-bottom: 48px;
+  }
+  .scene-heading h1 {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .scene-heading p {
+    font-size: 13px;
+    opacity: .4;
+    letter-spacing: .05em;
+  }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--card-w));
+    gap: 12px;
+    position: relative;
+  }
+
+  .grid-item {
+    width: var(--card-w);
+    height: var(--card-h);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    transition: transform .3s cubic-bezier(.25,.46,.45,.94);
+  }
+  .grid-item:hover { transform: scale(1.03); }
+  .grid-item.clicked { pointer-events: none; }
+
+  .grid-item-img {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: transform .4s ease;
+  }
+  .grid-item:hover .grid-item-img { transform: scale(1.06); }
+
+  .grid-item-label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 24px 12px 10px;
+    background: linear-gradient(transparent, rgba(0,0,0,.7));
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .grid-item:hover .grid-item-label { opacity: 1; }
+
+  /* ── Panel ── */
+  .panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: var(--panel-w);
+    height: 100vh;
+    background: #111;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    clip-path: inset(0% 100% 0% 0%);
+    pointer-events: none;
+    transition: none;
+  }
+  .panel.open {
+    pointer-events: auto;
+  }
+
+  .panel-img {
+    width: 100%;
+    height: 55%;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+  }
+
+  .panel-body {
+    padding: 32px 28px;
+    flex: 1;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity .4s ease, transform .4s ease;
+  }
+  .panel.open .panel-body {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .panel-tag {
+    font-size: 10px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .panel-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin-bottom: 16px;
+    line-height: 1.1;
+  }
+  .panel-desc {
+    font-size: 13px;
+    line-height: 1.7;
+    opacity: .55;
+    margin-bottom: 28px;
+  }
+  .panel-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 11px;
+    opacity: .35;
+    letter-spacing: .05em;
+  }
+  .panel-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.1);
+    border: none;
+    color: var(--fg);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+    z-index: 10;
+  }
+  .panel-close:hover { background: rgba(255,255,255,.2); }
+
+  /* ── Mover (flying frame) ── */
+  .mover {
+    position: fixed;
+    background-size: cover;
+    background-position: center;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 500;
+    will-change: clip-path, transform, opacity;
+  }
+
+  /* ── Overlay dim ── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 250;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .4s ease;
+  }
+  .overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ── Variant 2: Sine path ── */
+  #scene2 .grid {
+    --card-w: 180px;
+    --card-h: 240px;
+  }
+
+  /* ── Variant 3: Rotation + Wobble ── */
+  #scene3 .grid {
+    --card-w: 160px;
+    --card-h: 220px;
+  }
+
+  /* ── Variant 4: Minimal / text-heavy ── */
+  #scene4 {
+    --card-w: 240px;
+    --card-h: 300px;
+  }
+  #scene4 .grid-item-img {
+    filter: grayscale(1);
+    transition: filter .4s, transform .4s;
+  }
+  #scene4 .grid-item:hover .grid-item-img {
+    filter: grayscale(0);
+  }
+
+  /* ── Info bar ── */
+  .info-bar {
+    position: fixed;
+    bottom: 24px; left: 40px;
+    font-size: 11px;
+    opacity: .3;
+    letter-spacing: .05em;
+    z-index: 100;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <span class="header-title">Repeating Image Transition</span>
+  <div class="header-variants">
+    <button class="variant-btn active" data-scene="1">① Linear</button>
+    <button class="variant-btn" data-scene="2">② Sine Wave</button>
+    <button class="variant-btn" data-scene="3">③ Rotation</button>
+    <button class="variant-btn" data-scene="4">④ Grayscale</button>
+  </div>
+</header>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Panel -->
+<div class="panel" id="panel">
+  <button class="panel-close" id="panelClose">×</button>
+  <div class="panel-img" id="panelImg"></div>
+  <div class="panel-body">
+    <div class="panel-tag" id="panelTag">Collection</div>
+    <h2 class="panel-title" id="panelTitle">—</h2>
+    <p class="panel-desc" id="panelDesc">A carefully curated piece from the archive. Each work represents a unique moment captured in time, exploring the intersection of light, form, and emotion.</p>
+    <div class="panel-meta">
+      <span id="panelMeta1">Series A</span>
+      <span id="panelMeta2">2024</span>
+      <span id="panelMeta3">Limited</span>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 1: Linear path -->
+<section class="scene active" id="scene1">
+  <div class="scene-heading">
+    <h1>LINEAR</h1>
+    <p>effect 01 · straight linear paths · smooth easing · clean timing</p>
+  </div>
+  <div class="grid" id="grid1"></div>
+</section>
+
+<!-- Scene 2: Sine wave path -->
+<section class="scene" id="scene2">
+  <div class="scene-heading">
+    <h1>SINE WAVE</h1>
+    <p>effect 02 · curved sine paths · organic movement · fluid transitions</p>
+  </div>
+  <div class="grid" id="grid2"></div>
+</section>
+
+<!-- Scene 3: Rotation + Wobble -->
+<section class="scene" id="scene3">
+  <div class="scene-heading">
+    <h1>ROTATION</h1>
+    <p>effect 03 · random rotation · positional wobble · chaotic energy</p>
+  </div>
+  <div class="grid" id="grid3"></div>
+</section>
+
+<!-- Scene 4: Grayscale reveal -->
+<section class="scene" id="scene4">
+  <div class="scene-heading">
+    <h1>GRAYSCALE</h1>
+    <p>effect 04 · monochrome grid · color reveal on transition · editorial feel</p>
+  </div>
+  <div class="grid" id="grid4"></div>
+</section>
+
+<div class="info-bar">Click any image to trigger transition · ESC to close</div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+const PALETTE = [
+  '#1a1a2e','#16213e','#0f3460','#533483',
+  '#e94560','#f5a623','#7ed321','#4a90e2',
+  '#9b59b6','#e67e22','#1abc9c','#e74c3c',
+  '#2ecc71','#3498db','#f39c12','#8e44ad',
+  '#d35400','#27ae60','#2980b9','#c0392b',
+];
+
+const LABELS = [
+  'Drift — A04','Veil — K18','Ember — M45','Gleam — S12',
+  'Bloom — J29','Whisper — V07','Trace — N05','Flicker — Q52',
+  'Grain — H71','Pulse — B90','Mist — I38','Shard — U22',
+  'Vapor — X79','Alow — F13','Flux — N48','Sore — U65',
+  'Echo — R33','Haze — T61','Loom — W84','Crest — D17',
+];
+
+const DESCS = [
+  'A study in negative space and light diffusion.',
+  'Exploring the boundary between form and void.',
+  'Textural investigation of surface and depth.',
+  'Chromatic resonance captured at peak moment.',
+  'The geometry of shadow in motion.',
+  'Ephemeral structures built from pure light.',
+];
+
+// Generate gradient-based placeholder images using canvas
+function makeGradientURL(i) {
+  const c = document.createElement('canvas');
+  c.width = 400; c.height = 520;
+  const ctx = c.getContext('2d');
+  const col1 = PALETTE[i % PALETTE.length];
+  const col2 = PALETTE[(i + 7) % PALETTE.length];
+  const col3 = PALETTE[(i + 13) % PALETTE.length];
+  const g = ctx.createLinearGradient(0, 0, c.width, c.height);
+  g.addColorStop(0, col1);
+  g.addColorStop(0.5, col2);
+  g.addColorStop(1, col3);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, c.width, c.height);
+  // Add subtle noise texture
+  for (let j = 0; j < 3000; j++) {
+    const x = Math.random() * c.width;
+    const y = Math.random() * c.height;
+    const a = Math.random() * 0.08;
+    ctx.fillStyle = `rgba(255,255,255,${a})`;
+    ctx.fillRect(x, y, 1, 1);
+  }
+  // Add geometric accent
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(c.width * 0.5, c.height * 0.4, c.width * 0.3, 0, Math.PI * 2);
+  ctx.stroke();
+  // Label text
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = 'bold 28px Helvetica Neue, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(LABELS[i % LABELS.length].split('—')[0].trim(), c.width / 2, c.height * 0.55);
+  return c.toDataURL();
+}
+
+// Pre-generate images
+const IMAGES = Array.from({length: 20}, (_, i) => makeGradientURL(i));
+
+// ─── Build grids ─────────────────────────────────────────────────────────────
+function buildGrid(gridEl, count = 16) {
+  gridEl.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const item = document.createElement('div');
+    item.className = 'grid-item';
+    item.dataset.index = i;
+    item.dataset.label = LABELS[i % LABELS.length];
+    item.dataset.img = IMAGES[i % IMAGES.length];
+
+    const img = document.createElement('div');
+    img.className = 'grid-item-img';
+    img.style.backgroundImage = `url(${IMAGES[i % IMAGES.length]})`;
+
+    const label = document.createElement('div');
+    label.className = 'grid-item-label';
+    label.textContent = LABELS[i % LABELS.length];
+
+    item.appendChild(img);
+    item.appendChild(label);
+    gridEl.appendChild(item);
+  }
+}
+
+buildGrid(document.getElementById('grid1'), 16);
+buildGrid(document.getElementById('grid2'), 14);
+buildGrid(document.getElementById('grid3'), 18);
+buildGrid(document.getElementById('grid4'), 12);
+
+// ─── Animation Engine ────────────────────────────────────────────────────────
+const lerp = (a, b, t) => a + (b - a) * t;
+
+let isAnimating = false;
+let currentScene = 1;
+
+const panel = document.getElementById('panel');
+const panelImg = document.getElementById('panelImg');
+const panelTitle = document.getElementById('panelTitle');
+const panelTag = document.getElementById('panelTag');
+const panelDesc = document.getElementById('panelDesc');
+const overlay = document.getElementById('overlay');
+
+// Config per scene
+const CONFIGS = {
+  1: { steps: 7, stepDuration: 280, stepInterval: 55, rotationRange: 0, wobble: 0, pathMotion: 'linear', direction: 'top-bottom' },
+  2: { steps: 8, stepDuration: 300, stepInterval: 50, rotationRange: 0, wobble: 0, pathMotion: 'sine', sineAmp: 60, sineFreq: Math.PI, direction: 'left-right' },
+  3: { steps: 6, stepDuration: 260, stepInterval: 60, rotationRange: 18, wobble: 12, pathMotion: 'linear', direction: 'top-bottom' },
+  4: { steps: 9, stepDuration: 320, stepInterval: 45, rotationRange: 0, wobble: 0, pathMotion: 'linear', direction: 'bottom-top' },
+};
+
+function getClipPaths(direction) {
+  switch (direction) {
+    case 'bottom-top': return { from: 'inset(0% 0% 100% 0%)', reveal: 'inset(0% 0% 0% 0%)', hide: 'inset(100% 0% 0% 0%)' };
+    case 'left-right': return { from: 'inset(0% 100% 0% 0%)', reveal: 'inset(0% 0% 0% 0%)', hide: 'inset(0% 0% 0% 100%)' };
+    case 'right-left': return { from: 'inset(0% 0% 0% 100%)', reveal: 'inset(0% 0% 0% 0%)', hide: 'inset(0% 100% 0% 0%)' };
+    case 'top-bottom': default: return { from: 'inset(100% 0% 0% 0%)', reveal: 'inset(0% 0% 0% 0%)', hide: 'inset(0% 0% 100% 0%)' };
+  }
+}
+
+function generatePath(startRect, endRect, cfg) {
+  const steps = cfg.steps + 2;
+  const path = [];
+  const sc = { x: startRect.left + startRect.width / 2, y: startRect.top + startRect.height / 2 };
+  const ec = { x: endRect.left + endRect.width / 2, y: endRect.top + endRect.height / 2 };
+
+  for (let i = 0; i < steps; i++) {
+    const t = i / (steps - 1);
+    const w = lerp(startRect.width, endRect.width, t);
+    const h = lerp(startRect.height, endRect.height, t);
+    const cx = lerp(sc.x, ec.x, t);
+    const cy = lerp(sc.y, ec.y, t);
+    const sine = cfg.pathMotion === 'sine'
+      ? Math.sin(t * (cfg.sineFreq || Math.PI)) * (cfg.sineAmp || 50)
+      : 0;
+    const wx = (Math.random() - 0.5) * (cfg.wobble || 0) * 2;
+    const wy = (Math.random() - 0.5) * (cfg.wobble || 0) * 2;
+    path.push({ left: cx - w / 2 + wx, top: cy - h / 2 + sine + wy, width: w, height: h });
+  }
+  return path.slice(1, -1);
+}
+
+function animateMover(mover, clips, cfg, delay) {
+  return new Promise(resolve => {
+    // Phase 1: enter (hide → reveal)
+    setTimeout(() => {
+      mover.style.transition = `clip-path ${cfg.stepDuration}ms cubic-bezier(.4,0,.2,1)`;
+      mover.style.clipPath = clips.reveal;
+      mover.style.opacity = '1';
+
+      // Phase 2: exit (reveal → from) after pause
+      setTimeout(() => {
+        mover.style.clipPath = clips.from;
+        setTimeout(resolve, cfg.stepDuration);
+      }, cfg.stepDuration + 80);
+    }, delay);
+  });
+}
+
+function triggerTransition(item, cfg) {
+  if (isAnimating) return;
+  isAnimating = true;
+
+  const imgURL = item.dataset.img;
+  const label = item.dataset.label;
+  const idx = parseInt(item.dataset.index);
+
+  // Set panel content
+  panelImg.style.backgroundImage = `url(${imgURL})`;
+  panelTitle.textContent = label;
+  panelTag.textContent = `Series ${String.fromCharCode(65 + (idx % 8))} · ${2020 + (idx % 5)}`;
+  panelDesc.textContent = DESCS[idx % DESCS.length];
+
+  const clips = getClipPaths(cfg.direction);
+
+  // Dim other grid items
+  const allItems = item.closest('.grid').querySelectorAll('.grid-item');
+  allItems.forEach(el => {
+    if (el !== item) {
+      el.style.transition = 'opacity .3s ease, transform .3s ease';
+      el.style.opacity = '0.15';
+      el.style.transform = 'scale(0.95)';
+    }
+  });
+
+  // Get rects
+  const startRect = item.querySelector('.grid-item-img').getBoundingClientRect();
+
+  // Position panel (left or right based on item position)
+  const itemCenterX = startRect.left + startRect.width / 2;
+  const panelOnRight = itemCenterX < window.innerWidth / 2;
+  panel.style.left = panelOnRight ? 'auto' : '0';
+  panel.style.right = panelOnRight ? '0' : 'auto';
+
+  // Animate panel clip-path open
+  const panelClipDir = panelOnRight ? 'left-right' : 'right-left';
+  const panelClips = getClipPaths(panelClipDir);
+  panel.style.clipPath = panelClips.hide;
+  panel.style.transition = 'none';
+
+  const endRect = panel.getBoundingClientRect();
+  const path = generatePath(startRect, endRect, cfg);
+
+  // Create movers
+  const movers = path.map((step, i) => {
+    const m = document.createElement('div');
+    m.className = 'mover';
+    m.style.cssText = `
+      left: ${step.left}px;
+      top: ${step.top}px;
+      width: ${step.width}px;
+      height: ${step.height}px;
+      background-image: url(${imgURL});
+      clip-path: ${clips.hide};
+      opacity: 0.5;
+      border-radius: 4px;
+      transform: rotate(${(Math.random() - 0.5) * (cfg.rotationRange || 0) * 2}deg);
+    `;
+    document.body.appendChild(m);
+    return m;
+  });
+
+  // Animate movers sequentially
+  movers.forEach((m, i) => {
+    const delay = i * cfg.stepInterval;
+    setTimeout(() => {
+      m.style.transition = `clip-path ${cfg.stepDuration}ms cubic-bezier(.4,0,.2,1), opacity ${cfg.stepDuration}ms ease`;
+      m.style.clipPath = clips.reveal;
+      m.style.opacity = '1';
+      setTimeout(() => {
+        m.style.clipPath = clips.from;
+        setTimeout(() => m.remove(), cfg.stepDuration + 50);
+      }, cfg.stepDuration + 80);
+    }, delay);
+  });
+
+  // Reveal panel after movers start
+  const panelDelay = cfg.steps * cfg.stepInterval + cfg.stepDuration * 0.5;
+  setTimeout(() => {
+    panel.style.transition = `clip-path ${cfg.stepDuration * 1.8}ms cubic-bezier(.4,0,.2,1)`;
+    panel.style.clipPath = panelClips.reveal;
+    panel.classList.add('open');
+    overlay.classList.add('visible');
+
+    setTimeout(() => {
+      isAnimating = false;
+    }, cfg.stepDuration * 2);
+  }, panelDelay);
+}
+
+function closePanel() {
+  if (isAnimating) return;
+  panel.style.transition = 'clip-path .35s cubic-bezier(.4,0,.2,1)';
+  const panelOnRight = panel.style.right === '0px' || panel.style.right === '0';
+  const dir = panelOnRight ? 'right-left' : 'left-right';
+  const clips = getClipPaths(dir);
+  panel.style.clipPath = clips.hide;
+  panel.classList.remove('open');
+  overlay.classList.remove('visible');
+
+  // Restore grid items
+  const activeScene = document.querySelector('.scene.active');
+  if (activeScene) {
+    activeScene.querySelectorAll('.grid-item').forEach(el => {
+      el.style.transition = 'opacity .4s ease, transform .4s ease';
+      el.style.opacity = '';
+      el.style.transform = '';
+    });
+  }
+}
+
+// ─── Event Listeners ─────────────────────────────────────────────────────────
+document.querySelectorAll('.grid').forEach(grid => {
+  grid.addEventListener('click', e => {
+    const item = e.target.closest('.grid-item');
+    if (!item) return;
+    const sceneEl = item.closest('.scene');
+    const sceneNum = parseInt(sceneEl.id.replace('scene', ''));
+    const cfg = CONFIGS[sceneNum];
+    triggerTransition(item, cfg);
+  });
+});
+
+document.getElementById('panelClose').addEventListener('click', closePanel);
+overlay.addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+// ─── Variant switching ────────────────────────────────────────────────────────
+document.querySelectorAll('.variant-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const n = parseInt(btn.dataset.scene);
+    if (n === currentScene) return;
+
+    // Close panel if open
+    if (panel.classList.contains('open')) closePanel();
+
+    document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+    document.getElementById(`scene${n}`).classList.add('active');
+    currentScene = n;
+  });
+});
+</script>
+</body>
+</html>

@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 tympanus.net/codrops (Repeating Image Transition)
+- 效果名称：重复图像帧过渡 (Repeating Image Transition)
+- 效果描述：点击网格中的图片时，在图片原始位置和目标面板之间生成多个"中间帧"（mover 元素），每帧依次用 clip-path inset 动画出现/消失，形成图像沿路径"飞行"的视觉效果。支持 linear/sine 路径、随机旋转、wobble 抖动等参数。整体呈现出电影胶片/画廊网格的高级质感。
+- 实现原理：JS 计算起点（grid item）和终点（panel）的 BoundingRect，在两者之间线性插值生成 N 个 mover div，每个 mover 用 GSAP timeline 依次执行 clip-path: inset(hide→reveal→from) 动画，stepInterval 控制每帧延迟，形成连续的"帧飞行"效果；最终 panel 用 clip-path reveal 展开；纯 CSS clip-path + GSAP，无需 Canvas/WebGL
+- 状态：已实现 → 84-repeating-image-transition.html
+
 ## 2026-05-13 linear.app (Spirograph)
 - 效果名称：Spirograph 万花筒几何图形 (Spirograph Mathematical Curves)
 - 效果描述：基于滚圆（hypotrochoid）数学公式生成的螺旋花瓣图案，从简单圆形演化到复杂密集花瓣。包含 4 个变体：① 演化序列（Circle→Loops→Star→Petals→Dense 5阶段展示）② 交互式参数控制（实时调节 R/r/d/花瓣数）③ 12种图案画廊（网格展示不同参数组合）④ 逐笔绘制动画（实时描绘螺旋轨迹，自动切换图案）

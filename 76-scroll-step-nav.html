@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>76 · Scroll Step Navigator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #000;
+    --fg: #fff;
+    --dim: rgba(255,255,255,0.25);
+    --line: rgba(255,255,255,0.1);
+    --accent: #fff;
+    --nav-w: 220px;
+    --gap: 120px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .logo {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .page-header .badge {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 48px 80px;
+    position: relative;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 1px; height: 80px;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3));
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-size: clamp(48px, 7vw, 96px);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.0;
+    max-width: 800px;
+    margin-bottom: 28px;
+  }
+  .hero h1 span { color: rgba(255,255,255,0.35); }
+  .hero p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.5);
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
+  .hero-scroll-hint {
+    font-size: 12px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+
+  /* ── Main layout ── */
+  .showcase {
+    position: relative;
+    padding: 0 48px 200px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── Left sticky nav ── */
+  .step-nav {
+    position: sticky;
+    top: 50%;
+    transform: translateY(-50%);
+    float: left;
+    width: var(--nav-w);
+    padding: 0;
+    z-index: 10;
+  }
+  .step-nav-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    cursor: pointer;
+    padding: 12px 0;
+    transition: opacity 0.3s ease;
+  }
+  .step-item:not(.active) { opacity: 0.3; }
+  .step-item:hover:not(.active) { opacity: 0.55; }
+
+  /* connector line + dot */
+  .step-line-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 12px;
+    flex-shrink: 0;
+    padding-top: 6px;
+  }
+  .step-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--dim);
+    flex-shrink: 0;
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .step-item.active .step-dot {
+    background: var(--fg);
+    box-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 20px rgba(255,255,255,0.2);
+    transform: scale(1.4);
+  }
+  .step-connector {
+    width: 1px;
+    flex: 1;
+    min-height: 40px;
+    background: rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .step-connector::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 0%;
+    background: rgba(255,255,255,0.4);
+    transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .step-item.active .step-connector::after,
+  .step-item.passed .step-connector::after {
+    height: 100%;
+  }
+  .step-item:last-child .step-connector { display: none; }
+
+  .step-label {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .step-num {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.4);
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s ease;
+  }
+  .step-item.active .step-num { color: rgba(255,255,255,0.6); }
+  .step-name {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    transition: color 0.3s ease;
+  }
+  .step-item:not(.active) .step-name { color: rgba(255,255,255,0.4); }
+
+  /* ── Right content ── */
+  .content-area {
+    margin-left: calc(var(--nav-w) + 80px);
+  }
+
+  .section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 0;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 20px;
+  }
+  .section h2 {
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    max-width: 560px;
+  }
+  .section p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 40px;
+  }
+
+  /* ── UI Mock Cards ── */
+  .mock-card {
+    background: #0d0d0d;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    max-width: 600px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  }
+  .mock-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .mock-dot.r { background: #ff5f57; }
+  .mock-dot.y { background: #febc2e; }
+  .mock-dot.g { background: #28c840; }
+  .mock-title-text {
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+    margin-left: 8px;
+    letter-spacing: 0.02em;
+  }
+  .mock-body { padding: 20px; }
+
+  /* Mock: Issue list */
+  .mock-issue-list { display: flex; flex-direction: column; gap: 2px; }
+  .mock-issue {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .mock-issue:hover { background: rgba(255,255,255,0.04); }
+  .mock-issue-icon {
+    width: 16px; height: 16px; border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px;
+  }
+  .mock-issue-icon.todo { background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2); }
+  .mock-issue-icon.prog { background: rgba(99,102,241,0.3); border: 1.5px solid #6366f1; }
+  .mock-issue-icon.done { background: rgba(34,197,94,0.2); border: 1.5px solid #22c55e; }
+  .mock-issue-icon.risk { background: rgba(239,68,68,0.2); border: 1.5px solid #ef4444; }
+  .mock-issue-text { font-size: 13px; color: rgba(255,255,255,0.7); flex: 1; }
+  .mock-issue-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* Mock: Gantt */
+  .mock-gantt { padding: 8px 0; }
+  .mock-gantt-header {
+    display: flex;
+    gap: 0;
+    margin-bottom: 12px;
+    padding: 0 0 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .mock-month {
+    flex: 1;
+    font-size: 10px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .mock-gantt-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .mock-gantt-label {
+    width: 100px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    flex-shrink: 0;
+  }
+  .mock-gantt-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mock-gantt-bar {
+    position: absolute;
+    top: 0; height: 100%;
+    border-radius: 3px;
+    animation: barGrow 1s cubic-bezier(0.4,0,0.2,1) both;
+  }
+  @keyframes barGrow {
+    from { transform: scaleX(0); transform-origin: left; }
+    to { transform: scaleX(1); transform-origin: left; }
+  }
+  .bar-blue { background: linear-gradient(90deg, #6366f1, #818cf8); }
+  .bar-green { background: linear-gradient(90deg, #22c55e, #4ade80); }
+  .bar-orange { background: linear-gradient(90deg, #f97316, #fb923c); }
+  .bar-purple { background: linear-gradient(90deg, #a855f7, #c084fc); }
+
+  /* Mock: Code diff */
+  .mock-diff { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; line-height: 1.6; }
+  .mock-diff-row {
+    display: flex;
+    gap: 0;
+    padding: 2px 0;
+  }
+  .mock-diff-row.add { background: rgba(34,197,94,0.08); }
+  .mock-diff-row.del { background: rgba(239,68,68,0.08); }
+  .mock-diff-ln {
+    width: 32px;
+    color: rgba(255,255,255,0.15);
+    text-align: right;
+    padding-right: 12px;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .mock-diff-sign {
+    width: 16px;
+    flex-shrink: 0;
+  }
+  .mock-diff-row.add .mock-diff-sign { color: #22c55e; }
+  .mock-diff-row.del .mock-diff-sign { color: #ef4444; }
+  .mock-diff-code { color: rgba(255,255,255,0.7); }
+  .mock-diff-row.add .mock-diff-code { color: rgba(134,239,172,0.9); }
+  .mock-diff-row.del .mock-diff-code { color: rgba(252,165,165,0.7); }
+  .kw { color: #c084fc; }
+  .fn { color: #60a5fa; }
+  .str { color: #86efac; }
+  .cm { color: rgba(255,255,255,0.25); font-style: italic; }
+
+  /* Mock: Analytics */
+  .mock-analytics { display: flex; flex-direction: column; gap: 16px; }
+  .mock-metric-row { display: flex; gap: 12px; }
+  .mock-metric {
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .mock-metric-label { font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 8px; letter-spacing: 0.04em; }
+  .mock-metric-value { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; color: var(--fg); }
+  .mock-metric-delta {
+    font-size: 11px;
+    margin-top: 4px;
+    color: #22c55e;
+  }
+  .mock-metric-delta.neg { color: #ef4444; }
+  .mock-sparkline {
+    height: 40px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    margin-top: 12px;
+  }
+  .mock-spark-bar {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    background: rgba(99,102,241,0.4);
+    animation: sparkGrow 0.8s cubic-bezier(0.4,0,0.2,1) both;
+  }
+  @keyframes sparkGrow {
+    from { transform: scaleY(0); transform-origin: bottom; }
+    to { transform: scaleY(1); transform-origin: bottom; }
+  }
+
+  /* Mock: Agent chat */
+  .mock-chat { display: flex; flex-direction: column; gap: 12px; }
+  .mock-msg {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .mock-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .mock-avatar.agent { background: rgba(99,102,241,0.3); color: #818cf8; border: 1px solid rgba(99,102,241,0.4); }
+  .mock-avatar.user { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+  .mock-bubble {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+    max-width: 380px;
+  }
+  .mock-bubble.agent-bubble {
+    background: rgba(99,102,241,0.1);
+    border-color: rgba(99,102,241,0.2);
+    color: rgba(199,210,254,0.9);
+  }
+  .mock-code-block {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  /* ── Variant 2: Horizontal tabs ── */
+  .variant-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    margin-bottom: 32px;
+    padding-top: 80px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .tabs-showcase {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 48px 120px;
+  }
+  .tabs-header {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 48px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-header::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 14px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+    letter-spacing: -0.01em;
+  }
+  .tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 1px;
+    background: var(--fg);
+    transform: scaleX(0);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .tab-btn.active { color: var(--fg); }
+  .tab-btn.active::after { transform: scaleX(1); }
+  .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.6); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeUp 0.4s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tab-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .tab-text h3 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .tab-text p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.7;
+  }
+  .tab-visual {
+    background: #0d0d0d;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 24px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Variant 3: Number counter nav ── */
+  .counter-showcase {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 48px 120px;
+  }
+  .counter-nav {
+    display: flex;
+    gap: 0;
+    margin-bottom: 64px;
+    position: relative;
+  }
+  .counter-nav::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-50%);
+    z-index: 0;
+  }
+  .counter-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+  }
+  .counter-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    background: #0d0d0d;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+    letter-spacing: -0.02em;
+  }
+  .counter-step.active .counter-num {
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+    box-shadow: 0 0 20px rgba(255,255,255,0.3);
+  }
+  .counter-step.passed .counter-num {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .counter-step-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+    text-align: center;
+    transition: color 0.3s ease;
+    letter-spacing: -0.01em;
+  }
+  .counter-step.active .counter-step-label { color: rgba(255,255,255,0.7); }
+
+  .counter-content {
+    position: relative;
+    min-height: 280px;
+  }
+  .counter-panel {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .counter-panel.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    position: relative;
+  }
+  .counter-panel h3 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .counter-panel p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.7;
+    max-width: 560px;
+    margin-bottom: 32px;
+  }
+  .counter-progress {
+    display: flex;
+    gap: 6px;
+    margin-top: 32px;
+  }
+  .counter-prog-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .counter-prog-dot.active {
+    background: var(--fg);
+    width: 20px;
+    border-radius: 3px;
+  }
+
+  /* ── Section titles ── */
+  .section-title-block {
+    text-align: center;
+    padding: 80px 48px 48px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .section-title-block h2 {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .section-title-block p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.6;
+  }
+
+  /* ── Footer ── */
+  .page-footer {
+    text-align: center;
+    padding: 80px 48px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.2);
+    font-size: 13px;
+  }
+  .page-footer a { color: rgba(255,255,255,0.4); text-decoration: none; }
+  .page-footer a:hover { color: var(--fg); }
+
+  /* clearfix */
+  .showcase::after { content: ''; display: table; clear: both; }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <a class="logo" href="#">Scroll Step Navigator</a>
+  <span class="badge">Effect 76 · linear.app inspired</span>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     VARIANT 1 — Sticky Side Nav (Linear style)
+════════════════════════════════════════════ -->
+<section class="hero">
+  <p class="hero-eyebrow">Variant 01 · Sticky Side Navigation</p>
+  <h1>Scroll to <span>navigate</span><br>the story</h1>
+  <p>Left-side chapter numbers stay fixed as you scroll. Each section animates in with a smooth fade-up, while the active step glows and the connector line fills progressively.</p>
+  <span class="hero-scroll-hint">↓ Scroll to explore</span>
+</section>
+
+<div class="showcase" id="showcase">
+  <!-- Sticky left nav -->
+  <nav class="step-nav" id="stepNav">
+    <div class="step-nav-inner">
+      <div class="step-item active" data-step="0" onclick="scrollToSection(0)">
+        <div class="step-line-wrap">
+          <div class="step-dot"></div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-label">
+          <span class="step-num">1.0</span>
+          <span class="step-name">Intake</span>
+        </div>
+      </div>
+      <div class="step-item" data-step="1" onclick="scrollToSection(1)">
+        <div class="step-line-wrap">
+          <div class="step-dot"></div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-label">
+          <span class="step-num">2.0</span>
+          <span class="step-name">Plan</span>
+        </div>
+      </div>
+      <div class="step-item" data-step="2" onclick="scrollToSection(2)">
+        <div class="step-line-wrap">
+          <div class="step-dot"></div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-label">
+          <span class="step-num">3.0</span>
+          <span class="step-name">Build</span>
+        </div>
+      </div>
+      <div class="step-item" data-step="3" onclick="scrollToSection(3)">
+        <div class="step-line-wrap">
+          <div class="step-dot"></div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-label">
+          <span class="step-num">4.0</span>
+          <span class="step-name">Review</span>
+        </div>
+      </div>
+      <div class="step-item" data-step="4" onclick="scrollToSection(4)">
+        <div class="step-line-wrap">
+          <div class="step-dot"></div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-label">
+          <span class="step-num">5.0</span>
+          <span class="step-name">Monitor</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Right content sections -->
+  <div class="content-area">
+
+    <!-- Section 1: Intake -->
+    <div class="section" id="section-0">
+      <p class="section-eyebrow">1.0 · Intake</p>
+      <h2>Capture every idea, instantly</h2>
+      <p>Turn conversations and customer feedback into actionable issues that are routed, labeled, and prioritized for the right team — automatically.</p>
+      <div class="mock-card">
+        <div class="mock-titlebar">
+          <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+          <span class="mock-title-text">Issues · All teams</span>
+        </div>
+        <div class="mock-body">
+          <div class="mock-issue-list">
+            <div class="mock-issue">
+              <div class="mock-issue-icon prog"></div>
+              <span class="mock-issue-text">Implement dark mode toggle</span>
+              <span class="mock-issue-tag">UI</span>
+            </div>
+            <div class="mock-issue">
+              <div class="mock-issue-icon todo"></div>
+              <span class="mock-issue-text">Fix memory leak in dashboard</span>
+              <span class="mock-issue-tag">Bug</span>
+            </div>
+            <div class="mock-issue">
+              <div class="mock-issue-icon risk"></div>
+              <span class="mock-issue-text">API rate limiting — urgent</span>
+              <span class="mock-issue-tag">Infra</span>
+            </div>
+            <div class="mock-issue">
+              <div class="mock-issue-icon done"></div>
+              <span class="mock-issue-text">Update onboarding flow</span>
+              <span class="mock-issue-tag">Growth</span>
+            </div>
+            <div class="mock-issue">
+              <div class="mock-issue-icon todo"></div>
+              <span class="mock-issue-text">Add keyboard shortcuts</span>
+              <span class="mock-issue-tag">UX</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Plan -->
+    <div class="section" id="section-1">
+      <p class="section-eyebrow">2.0 · Plan</p>
+      <h2>Roadmaps that move with your team</h2>
+      <p>Visualize timelines, track milestones, and keep every initiative aligned — from quarterly goals down to individual sprints.</p>
+      <div class="mock-card">
+        <div class="mock-titlebar">
+          <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+          <span class="mock-title-text">Roadmap · Q2 2026</span>
+        </div>
+        <div class="mock-body">
+          <div class="mock-gantt">
+            <div class="mock-gantt-header">
+              <span class="mock-month">MAR</span>
+              <span class="mock-month">APR</span>
+              <span class="mock-month">MAY</span>
+              <span class="mock-month">JUN</span>
+              <span class="mock-month">JUL</span>
+            </div>
+            <div class="mock-gantt-row">
+              <span class="mock-gantt-label">UI Refresh</span>
+              <div class="mock-gantt-track">
+                <div class="mock-gantt-bar bar-blue" style="left:0%;width:55%"></div>
+              </div>
+            </div>
+            <div class="mock-gantt-row">
+              <span class="mock-gantt-label">API v3</span>
+              <div class="mock-gantt-track">
+                <div class="mock-gantt-bar bar-purple" style="left:20%;width:40%"></div>
+              </div>
+            </div>
+            <div class="mock-gantt-row">
+              <span class="mock-gantt-label">Mobile App</span>
+              <div class="mock-gantt-track">
+                <div class="mock-gantt-bar bar-green" style="left:35%;width:50%"></div>
+              </div>
+            </div>
+            <div class="mock-gantt-row">
+              <span class="mock-gantt-label">Analytics</span>
+              <div class="mock-gantt-track">
+                <div class="mock-gantt-bar bar-orange" style="left:10%;width:30%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Build -->
+    <div class="section" id="section-2">
+      <p class="section-eyebrow">3.0 · Build</p>
+      <h2>AI agents that work alongside you</h2>
+      <p>Delegate entire issues end-to-end. Agents search your codebase, write code, open PRs, and keep you in the loop — all within your workflow.</p>
+      <div class="mock-card">
+        <div class="mock-titlebar">
+          <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+          <span class="mock-title-text">Codex Agent · ENG-2703</span>
+        </div>
+        <div class="mock-body">
+          <div class="mock-chat">
+            <div class="mock-msg">
+              <div class="mock-avatar user">J</div>
+              <div class="mock-bubble">@Codex can you fix the loading state bug? It shows a spinner forever when vehicle state is pending.</div>
+            </div>
+            <div class="mock-msg">
+              <div class="mock-avatar agent">AI</div>
+              <div class="mock-bubble agent-bubble">
+                On it! Searching the codebase for <code style="background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px;font-size:11px">useVehicleState</code>...
+                <div class="mock-code-block">
+                  <span style="color:#ef4444">- if (!isFullySynced) {</span><br>
+                  <span style="color:#22c55e">+ if (syncStatus === SyncStatus.PENDING) {</span><br>
+                  <span style="color:rgba(255,255,255,0.3)">    return &lt;ActivityIndicator /&gt;</span>
+                </div>
+              </div>
+            </div>
+            <div class="mock-msg">
+              <div class="mock-avatar agent">AI</div>
+              <div class="mock-bubble agent-bubble">PR opened: <span style="color:#818cf8">cursor/ENG-2703-render-sync</span> · 1 file changed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Review -->
+    <div class="section" id="section-3">
+      <p class="section-eyebrow">4.0 · Review</p>
+      <h2>Understand changes at a glance</h2>
+      <p>Structural diffs for human and agent output. Review, discuss, and merge — all without leaving your workflow.</p>
+      <div class="mock-card">
+        <div class="mock-titlebar">
+          <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+          <span class="mock-title-text">kinetic-ios/src/screens/HomeScreen.tsx</span>
+        </div>
+        <div class="mock-body">
+          <div class="mock-diff">
+            <div class="mock-diff-row"><span class="mock-diff-ln">06</span><span class="mock-diff-sign"> </span><span class="mock-diff-code"><span class="kw">export const</span> <span class="fn">HomeScreen</span> = () => {</span></div>
+            <div class="mock-diff-row del"><span class="mock-diff-ln">07</span><span class="mock-diff-sign">-</span><span class="mock-diff-code">  <span class="kw">const</span> { vehicleState, <span style="color:#fca5a5">isFullySynced</span> } = <span class="fn">useVehicleState</span>()</span></div>
+            <div class="mock-diff-row add"><span class="mock-diff-ln">07</span><span class="mock-diff-sign">+</span><span class="mock-diff-code">  <span class="kw">const</span> { vehicleState, <span style="color:#86efac">syncStatus</span> } = <span class="fn">useVehicleState</span>()</span></div>
+            <div class="mock-diff-row"><span class="mock-diff-ln">08</span><span class="mock-diff-sign"> </span><span class="mock-diff-code"></span></div>
+            <div class="mock-diff-row del"><span class="mock-diff-ln">09</span><span class="mock-diff-sign">-</span><span class="mock-diff-code">  <span class="kw">if</span> (<span style="color:#fca5a5">!isFullySynced</span>) {</span></div>
+            <div class="mock-diff-row add"><span class="mock-diff-ln">09</span><span class="mock-diff-sign">+</span><span class="mock-diff-code">  <span class="kw">if</span> (<span style="color:#86efac">syncStatus === SyncStatus.PENDING</span>) {</span></div>
+            <div class="mock-diff-row"><span class="mock-diff-ln">10</span><span class="mock-diff-sign"> </span><span class="mock-diff-code">    <span class="kw">return</span> &lt;<span class="fn">ActivityIndicator</span> size=<span class="str">"large"</span> /&gt;</span></div>
+            <div class="mock-diff-row"><span class="mock-diff-ln">11</span><span class="mock-diff-sign"> </span><span class="mock-diff-code">  }</span></div>
+            <div class="mock-diff-row"><span class="mock-diff-ln">15</span><span class="mock-diff-sign"> </span><span class="mock-diff-code">    &lt;<span class="fn">Dashboard</span> state={vehicleState} <span style="color:#86efac">syncStatus={syncStatus}</span> /&gt;</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Monitor -->
+    <div class="section" id="section-4">
+      <p class="section-eyebrow">5.0 · Monitor</p>
+      <h2>Understand progress at scale</h2>
+      <p>Project updates, analytics, and dashboards that surface what needs your attention — before it becomes a problem.</p>
+      <div class="mock-card">
+        <div class="mock-titlebar">
+          <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+          <span class="mock-title-text">Analytics · Last 30 days</span>
+        </div>
+        <div class="mock-body">
+          <div class="mock-analytics">
+            <div class="mock-metric-row">
+              <div class="mock-metric">
+                <div class="mock-metric-label">Issues Closed</div>
+                <div class="mock-metric-value">1,284</div>
+                <div class="mock-metric-delta">↑ 18% vs last month</div>
+              </div>
+              <div class="mock-metric">
+                <div class="mock-metric-label">Cycle Time</div>
+                <div class="mock-metric-value">3.2d</div>
+                <div class="mock-metric-delta">↓ 0.8d faster</div>
+              </div>
+              <div class="mock-metric">
+                <div class="mock-metric-label">Agent PRs</div>
+                <div class="mock-metric-value">47</div>
+                <div class="mock-metric-delta neg">↓ 3 blocked</div>
+              </div>
+            </div>
+            <div class="mock-sparkline">
+              <div class="mock-spark-bar" style="height:40%;animation-delay:0s"></div>
+              <div class="mock-spark-bar" style="height:55%;animation-delay:0.05s"></div>
+              <div class="mock-spark-bar" style="height:45%;animation-delay:0.1s"></div>
+              <div class="mock-spark-bar" style="height:70%;animation-delay:0.15s"></div>
+              <div class="mock-spark-bar" style="height:60%;animation-delay:0.2s"></div>
+              <div class="mock-spark-bar" style="height:80%;animation-delay:0.25s"></div>
+              <div class="mock-spark-bar" style="height:65%;animation-delay:0.3s"></div>
+              <div class="mock-spark-bar" style="height:90%;animation-delay:0.35s"></div>
+              <div class="mock-spark-bar" style="height:75%;animation-delay:0.4s"></div>
+              <div class="mock-spark-bar" style="height:100%;animation-delay:0.45s;background:rgba(99,102,241,0.7)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /showcase -->
+
+
+<!-- ═══════════════════════════════════════════
+     VARIANT 2 — Horizontal Tab Navigator
+════════════════════════════════════════════ -->
+<div class="section-title-block">
+  <p class="hero-eyebrow" style="margin-bottom:12px">Variant 02</p>
+  <h2>Horizontal Tab Navigator</h2>
+  <p>Tabs with an animated underline indicator. Clicking switches content with a fade-up animation.</p>
+</div>
+
+<div class="tabs-showcase">
+  <div class="tabs-header" id="tabsHeader">
+    <button class="tab-btn active" data-tab="0">Issues</button>
+    <button class="tab-btn" data-tab="1">Cycles</button>
+    <button class="tab-btn" data-tab="2">Roadmap</button>
+    <button class="tab-btn" data-tab="3">Insights</button>
+    <button class="tab-btn" data-tab="4">Agents</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-0">
+    <div class="tab-content-grid">
+      <div class="tab-text">
+        <h3>Track every issue, nothing slips</h3>
+        <p>Create, assign, and prioritize issues in seconds. Powerful filters and views keep your team focused on what matters most right now.</p>
+      </div>
+      <div class="tab-visual">
+        <div style="width:100%">
+          <div class="mock-issue-list">
+            <div class="mock-issue"><div class="mock-issue-icon prog"></div><span class="mock-issue-text">Redesign settings page</span><span class="mock-issue-tag">Design</span></div>
+            <div class="mock-issue"><div class="mock-issue-icon todo"></div><span class="mock-issue-text">Add 2FA support</span><span class="mock-issue-tag">Security</span></div>
+            <div class="mock-issue"><div class="mock-issue-icon done"></div><span class="mock-issue-text">Fix login redirect</span><span class="mock-issue-tag">Bug</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-1">
+    <div class="tab-content-grid">
+      <div class="tab-text">
+        <h3>Ship in focused sprints</h3>
+        <p>Time-boxed cycles keep your team in a rhythm. Automatically roll over unfinished work and track velocity over time.</p>
+      </div>
+      <div class="tab-visual">
+        <div style="width:100%;font-size:13px;color:rgba(255,255,255,0.5)">
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+            <span style="color:var(--fg);font-weight:600">Cycle 24 · May 12–26</span>
+            <span style="color:#22c55e">On track</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.05);border-radius:4px;height:6px;margin-bottom:8px">
+            <div style="background:linear-gradient(90deg,#6366f1,#818cf8);width:62%;height:100%;border-radius:4px"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span>32 / 52 issues closed</span>
+            <span>62%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-2">
+    <div class="tab-content-grid">
+      <div class="tab-text">
+        <h3>Roadmaps that stay in sync</h3>
+        <p>Connect issues to projects and milestones. See the big picture without losing sight of the details.</p>
+      </div>
+      <div class="tab-visual">
+        <div style="width:100%">
+          <div class="mock-gantt-row"><span class="mock-gantt-label">Q2 Launch</span><div class="mock-gantt-track"><div class="mock-gantt-bar bar-blue" style="left:0;width:70%"></div></div></div>
+          <div class="mock-gantt-row"><span class="mock-gantt-label">API v3</span><div class="mock-gantt-track"><div class="mock-gantt-bar bar-purple" style="left:30%;width:50%"></div></div></div>
+          <div class="mock-gantt-row"><span class="mock-gantt-label">Mobile</span><div class="mock-gantt-track"><div class="mock-gantt-bar bar-green" style="left:50%;width:40%"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-3">
+    <div class="tab-content-grid">
+      <div class="tab-text">
+        <h3>Data-driven decisions</h3>
+        <p>Velocity charts, cycle time trends, and burndown graphs give you the signal you need to improve continuously.</p>
+      </div>
+      <div class="tab-visual">
+        <div style="width:100%">
+          <div class="mock-metric-row">
+            <div class="mock-metric"><div class="mock-metric-label">Velocity</div><div class="mock-metric-value" style="font-size:22px">94pts</div><div class="mock-metric-delta">↑ 12%</div></div>
+            <div class="mock-metric"><div class="mock-metric-label">Avg Cycle</div><div class="mock-metric-value" style="font-size:22px">2.8d</div><div class="mock-metric-delta">↓ faster</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-4">
+    <div class="tab-content-grid">
+      <div class="tab-text">
+        <h3>Agents that get things done</h3>
+        <p>Assign issues to AI agents. They search your codebase, write code, open PRs, and report back — all within Linear.</p>
+      </div>
+      <div class="tab-visual">
+        <div style="width:100%;font-size:13px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(99,102,241,0.3);border:1px solid rgba(99,102,241,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;color:#818cf8">AI</div>
+            <span style="color:rgba(255,255,255,0.6)">Codex <span style="background:rgba(99,102,241,0.2);color:#818cf8;padding:1px 6px;border-radius:4px;font-size:10px;margin-left:4px">Agent</span></span>
+          </div>
+          <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.15);border-radius:10px;padding:12px;color:rgba(199,210,254,0.8);line-height:1.5">
+            Found the issue. Replacing <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;font-size:10px">isFullySynced</code> with <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;font-size:10px">syncStatus</code>. PR opened ✓
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     VARIANT 3 — Numbered Step Navigator
+════════════════════════════════════════════ -->
+<div class="section-title-block">
+  <p class="hero-eyebrow" style="margin-bottom:12px">Variant 03</p>
+  <h2>Numbered Step Navigator</h2>
+  <p>Circular numbered steps connected by a horizontal line. Click to jump between steps with a slide animation.</p>
+</div>
+
+<div class="counter-showcase">
+  <div class="counter-nav" id="counterNav">
+    <div class="counter-step active" data-counter="0" onclick="setCounter(0)">
+      <div class="counter-num">1</div>
+      <span class="counter-step-label">Create</span>
+    </div>
+    <div class="counter-step" data-counter="1" onclick="setCounter(1)">
+      <div class="counter-num">2</div>
+      <span class="counter-step-label">Assign</span>
+    </div>
+    <div class="counter-step" data-counter="2" onclick="setCounter(2)">
+      <div class="counter-num">3</div>
+      <span class="counter-step-label">Build</span>
+    </div>
+    <div class="counter-step" data-counter="3" onclick="setCounter(3)">
+      <div class="counter-num">4</div>
+      <span class="counter-step-label">Review</span>
+    </div>
+    <div class="counter-step" data-counter="4" onclick="setCounter(4)">
+      <div class="counter-num">5</div>
+      <span class="counter-step-label">Ship</span>
+    </div>
+  </div>
+
+  <div class="counter-content" id="counterContent">
+    <div class="counter-panel active" id="counter-0">
+      <h3>Create issues in seconds</h3>
+      <p>Capture ideas, bugs, and tasks instantly. Use natural language, paste from Slack, or let AI generate issues from your conversations. Every issue is automatically labeled and routed to the right team.</p>
+      <div class="counter-progress">
+        <div class="counter-prog-dot active" onclick="setCounter(0)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(1)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(2)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(3)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(4)"></div>
+      </div>
+    </div>
+    <div class="counter-panel" id="counter-1">
+      <h3>Assign to humans or agents</h3>
+      <p>Route issues to the right person — or delegate to an AI agent. Agents understand your codebase, pick up context from comments, and work autonomously while keeping you informed.</p>
+      <div class="counter-progress">
+        <div class="counter-prog-dot" onclick="setCounter(0)"></div>
+        <div class="counter-prog-dot active" onclick="setCounter(1)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(2)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(3)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(4)"></div>
+      </div>
+    </div>
+    <div class="counter-panel" id="counter-2">
+      <h3>Build with full context</h3>
+      <p>Every issue links to its branch, commits, and PRs. Developers get everything they need without switching tools. Agents search your codebase and write code that fits your patterns.</p>
+      <div class="counter-progress">
+        <div class="counter-prog-dot" onclick="setCounter(0)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(1)"></div>
+        <div class="counter-prog-dot active" onclick="setCounter(2)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(3)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(4)"></div>
+      </div>
+    </div>
+    <div class="counter-panel" id="counter-3">
+      <h3>Review with structural diffs</h3>
+      <p>Understand code changes at a glance. Structural diffs highlight what actually changed — not just line-by-line noise. Review, comment, and merge without leaving your workflow.</p>
+      <div class="counter-progress">
+        <div class="counter-prog-dot" onclick="setCounter(0)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(1)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(2)"></div>
+        <div class="counter-prog-dot active" onclick="setCounter(3)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(4)"></div>
+      </div>
+    </div>
+    <div class="counter-panel" id="counter-4">
+      <h3>Ship with confidence</h3>
+      <p>Automated checks, deployment tracking, and real-time status updates keep your team aligned at launch. Know exactly what shipped, when, and who's responsible.</p>
+      <div class="counter-progress">
+        <div class="counter-prog-dot" onclick="setCounter(0)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(1)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(2)"></div>
+        <div class="counter-prog-dot" onclick="setCounter(3)"></div>
+        <div class="counter-prog-dot active" onclick="setCounter(4)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  Effect 76 · Scroll Step Navigator · Inspired by <a href="https://linear.app" target="_blank">linear.app</a>
+</footer>
+
+<script>
+// ── Variant 1: Scroll-driven sticky nav ──────────────────────────────────────
+const sections = document.querySelectorAll('.section');
+const stepItems = document.querySelectorAll('.step-item');
+
+function updateNav(activeIdx) {
+  stepItems.forEach((item, i) => {
+    item.classList.remove('active', 'passed');
+    if (i === activeIdx) item.classList.add('active');
+    else if (i < activeIdx) item.classList.add('passed');
+  });
+}
+
+function scrollToSection(idx) {
+  const el = document.getElementById('section-' + idx);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// IntersectionObserver for section visibility (fade-in)
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+
+sections.forEach(s => fadeObserver.observe(s));
+
+// Scroll-based active nav update
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id; // "section-N"
+      const idx = parseInt(id.split('-')[1]);
+      updateNav(idx);
+    }
+  });
+}, {
+  threshold: 0.4,
+  rootMargin: '-20% 0px -20% 0px'
+});
+
+sections.forEach(s => navObserver.observe(s));
+
+// ── Variant 2: Tab navigator ─────────────────────────────────────────────────
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabPanels = document.querySelectorAll('.tab-panel');
+
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const idx = btn.dataset.tab;
+    tabBtns.forEach(b => b.classList.remove('active'));
+    tabPanels.forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + idx).classList.add('active');
+  });
+});
+
+// ── Variant 3: Counter step navigator ────────────────────────────────────────
+let currentCounter = 0;
+
+function setCounter(idx) {
+  const steps = document.querySelectorAll('.counter-step');
+  const panels = document.querySelectorAll('.counter-panel');
+
+  steps.forEach((s, i) => {
+    s.classList.remove('active', 'passed');
+    if (i === idx) s.classList.add('active');
+    else if (i < idx) s.classList.add('passed');
+  });
+
+  panels.forEach(p => p.classList.remove('active'));
+  document.getElementById('counter-' + idx).classList.add('active');
+  currentCounter = idx;
+}
+
+// Auto-advance counter every 4s
+setInterval(() => {
+  const next = (currentCounter + 1) % 5;
+  setCounter(next);
+}, 4000);
+</script>
+</body>
+</html>

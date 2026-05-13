@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grid Hover Preview — Frontend Effects</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --card-bg: #111118;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8e8f0;
+    --muted: rgba(232,232,240,0.45);
+    --accent: #7c6af7;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .page-header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 10px;
+  }
+  .page-header p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── Section labels ── */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto 80px;
+  }
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ══════════════════════════════════════════
+     VARIANT 1 — E-commerce Product Grid
+  ══════════════════════════════════════════ */
+  .grid-preview-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+  }
+
+  /* Grid of items */
+  .gp-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+
+  .gp-item {
+    position: relative;
+    padding: 28px 20px 24px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    user-select: none;
+  }
+  .gp-item:nth-child(4n) { border-right: none; }
+  .gp-item:nth-last-child(-n+4) { border-bottom: none; }
+
+  .gp-item-thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    transition: transform 0.35s ease;
+  }
+  .gp-item:hover .gp-item-thumb {
+    transform: scale(1.04);
+  }
+
+  .gp-item-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gp-item-price {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* Preview panel — absolutely positioned, clip-path animated */
+  .gp-preview {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: #16161f;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 36px;
+    pointer-events: none;
+    opacity: 0;
+    clip-path: polygon(50% 40%, 50% 40%, 50% 60%, 50% 60%);
+    transition:
+      clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.2s ease;
+    z-index: 10;
+  }
+  .gp-preview.active {
+    opacity: 1;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  }
+  /* Left-side preview (for right-column items) */
+  .gp-preview.left { left: 0; border-right: 1px solid var(--border); }
+  /* Right-side preview (for left-column items) */
+  .gp-preview.right { right: 0; border-left: 1px solid var(--border); }
+
+  .gp-preview-img {
+    width: 100%;
+    aspect-ratio: 1.2;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .gp-preview-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .gp-preview-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .gp-preview-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .gp-preview-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(124,106,247,0.15);
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  /* Dim other items when preview is active */
+  .gp-grid.has-preview .gp-item:not(.active-item) {
+    opacity: 0.35;
+    transform: scale(0.97);
+  }
+  .gp-grid.has-preview .gp-item.active-item {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* ══════════════════════════════════════════
+     VARIANT 2 — Photography Portfolio (dark)
+  ══════════════════════════════════════════ */
+  .photo-wrap {
+    background: #080810;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .photo-wrap .gp-item {
+    padding: 0;
+    border-color: rgba(255,255,255,0.05);
+  }
+  .photo-wrap .gp-item-thumb {
+    border-radius: 0;
+    aspect-ratio: 4/3;
+    margin-bottom: 0;
+    filter: grayscale(0.6);
+    transition: filter 0.3s ease, transform 0.35s ease;
+  }
+  .photo-wrap .gp-item:hover .gp-item-thumb {
+    filter: grayscale(0);
+  }
+  .photo-wrap .gp-item-meta {
+    padding: 12px 16px;
+  }
+  .photo-wrap .gp-item-name {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+  }
+  .photo-wrap .gp-item-price {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+  }
+  .photo-wrap .gp-preview {
+    background: #0d0d18;
+    border-color: rgba(255,255,255,0.05);
+  }
+  .photo-wrap .gp-preview-img {
+    aspect-ratio: 4/3;
+    border-radius: 8px;
+    filter: grayscale(0.2);
+  }
+  .photo-wrap .gp-preview-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+  }
+  .photo-wrap .gp-preview-price {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: rgba(255,255,255,0.4);
+  }
+  .photo-wrap .gp-preview-tag {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ══════════════════════════════════════════
+     VARIANT 3 — Food Menu (warm tones)
+  ══════════════════════════════════════════ */
+  .food-wrap {
+    background: #120d08;
+    border: 1px solid rgba(255,200,100,0.1);
+  }
+  .food-wrap .gp-item {
+    border-color: rgba(255,200,100,0.08);
+  }
+  .food-wrap .gp-item-thumb {
+    background: rgba(255,200,100,0.06);
+    border-radius: 12px;
+  }
+  .food-wrap .gp-preview {
+    background: #1a1208;
+    border-color: rgba(255,200,100,0.1);
+  }
+  .food-wrap .gp-preview-price {
+    color: #f5a623;
+  }
+  .food-wrap .gp-preview-tag {
+    background: rgba(245,166,35,0.12);
+    color: #f5a623;
+  }
+
+  /* ══════════════════════════════════════════
+     VARIANT 4 — Art Gallery (minimal white)
+  ══════════════════════════════════════════ */
+  .art-wrap {
+    background: #f8f8f6;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .art-wrap .gp-item {
+    border-color: rgba(0,0,0,0.06);
+  }
+  .art-wrap .gp-item-thumb {
+    background: rgba(0,0,0,0.04);
+    border-radius: 8px;
+  }
+  .art-wrap .gp-item-name { color: #111; }
+  .art-wrap .gp-item-price { color: rgba(0,0,0,0.4); }
+  .art-wrap .gp-preview {
+    background: #f0f0ee;
+    border-color: rgba(0,0,0,0.06);
+  }
+  .art-wrap .gp-preview-name { color: #111; }
+  .art-wrap .gp-preview-desc { color: rgba(0,0,0,0.5); }
+  .art-wrap .gp-preview-price { color: #111; font-size: 1.1rem; }
+  .art-wrap .gp-preview-tag {
+    background: rgba(0,0,0,0.06);
+    color: rgba(0,0,0,0.5);
+  }
+  .art-wrap .gp-grid.has-preview .gp-item:not(.active-item) {
+    opacity: 0.25;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Grid Hover Preview</h1>
+  <p>Hover a grid item to reveal an expanded preview panel with clip-path animation. Inspired by Codrops / awwwards showcase sites.</p>
+</div>
+
+<!-- ── VARIANT 1: E-commerce ── -->
+<div class="section">
+  <div class="section-label">01 — E-commerce Product Grid</div>
+  <div class="grid-preview-wrap" id="v1">
+    <div class="gp-grid" id="v1-grid">
+      <!-- items injected by JS -->
+    </div>
+    <div class="gp-preview left" id="v1-preview-left"></div>
+    <div class="gp-preview right" id="v1-preview-right"></div>
+  </div>
+</div>
+
+<!-- ── VARIANT 2: Photography ── -->
+<div class="section">
+  <div class="section-label">02 — Photography Portfolio</div>
+  <div class="grid-preview-wrap photo-wrap" id="v2">
+    <div class="gp-grid" id="v2-grid"></div>
+    <div class="gp-preview left" id="v2-preview-left"></div>
+    <div class="gp-preview right" id="v2-preview-right"></div>
+  </div>
+</div>
+
+<!-- ── VARIANT 3: Food Menu ── -->
+<div class="section">
+  <div class="section-label">03 — Restaurant Menu</div>
+  <div class="grid-preview-wrap food-wrap" id="v3">
+    <div class="gp-grid" id="v3-grid"></div>
+    <div class="gp-preview left" id="v3-preview-left"></div>
+    <div class="gp-preview right" id="v3-preview-right"></div>
+  </div>
+</div>
+
+<!-- ── VARIANT 4: Art Gallery ── -->
+<div class="section">
+  <div class="section-label">04 — Art Gallery (Light)</div>
+  <div class="grid-preview-wrap art-wrap" id="v4">
+    <div class="gp-grid" id="v4-grid"></div>
+    <div class="gp-preview left" id="v4-preview-left"></div>
+    <div class="gp-preview right" id="v4-preview-right"></div>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   Data sets for each variant
+───────────────────────────────────────────── */
+const datasets = {
+  v1: {
+    cols: 4,
+    items: [
+      { emoji: '🪑', name: 'Arc Chair', price: '$349', tag: 'Furniture', desc: 'Ergonomic design with premium oak frame and breathable mesh back. Perfect for long work sessions.' },
+      { emoji: '🛋️', name: 'Loft Sofa', price: '$1,290', tag: 'Furniture', desc: 'Modular 3-seat sofa in natural linen. Removable covers, solid beech legs.' },
+      { emoji: '🪴', name: 'Monstera XL', price: '$89', tag: 'Plants', desc: 'Mature Monstera Deliciosa, 80cm tall. Ships in ceramic pot with drainage tray.' },
+      { emoji: '💡', name: 'Glow Lamp', price: '$129', tag: 'Lighting', desc: 'Adjustable warm-white LED desk lamp with touch dimmer and USB-C charging port.' },
+      { emoji: '🖼️', name: 'Abstract No.7', price: '$220', tag: 'Art', desc: 'Giclée print on 300gsm cotton paper. Signed and numbered edition of 50.' },
+      { emoji: '🕯️', name: 'Cedar Candle', price: '$42', tag: 'Decor', desc: 'Hand-poured soy wax with cedarwood & vetiver. 60-hour burn time.' },
+      { emoji: '🪞', name: 'Arch Mirror', price: '$185', tag: 'Decor', desc: 'Full-length arched mirror with brushed brass frame. 160 × 60 cm.' },
+      { emoji: '📚', name: 'Oak Shelf', price: '$275', tag: 'Furniture', desc: 'Floating wall shelf in solid white oak. Holds up to 25 kg. Easy wall mount.' },
+    ]
+  },
+  v2: {
+    cols: 4,
+    items: [
+      { emoji: '🏔️', name: 'Alpine Silence', price: 'Landscape', tag: 'Nature', desc: 'Shot at 3,200m altitude during golden hour. Limited print run of 20.' },
+      { emoji: '🌊', name: 'Deep Current', price: 'Seascape', tag: 'Ocean', desc: 'Long exposure at 1/4s captures the motion of Atlantic waves at dusk.' },
+      { emoji: '🌆', name: 'City Pulse', price: 'Urban', tag: 'Architecture', desc: 'Aerial perspective of downtown intersections at blue hour, Tokyo.' },
+      { emoji: '🌿', name: 'Forest Floor', price: 'Macro', tag: 'Nature', desc: 'Extreme close-up of moss and lichen after morning rain. 1:1 magnification.' },
+      { emoji: '🏜️', name: 'Dune Shadow', price: 'Desert', tag: 'Landscape', desc: 'Sahara sand dunes at sunrise. The interplay of light and shadow.' },
+      { emoji: '🌸', name: 'Bloom Study', price: 'Botanical', tag: 'Flora', desc: 'Studio still life of cherry blossoms against seamless white background.' },
+      { emoji: '🌌', name: 'Milky Way', price: 'Astro', tag: 'Night Sky', desc: '30-second exposure from a dark-sky reserve in Atacama, Chile.' },
+      { emoji: '🦅', name: 'Free Fall', price: 'Wildlife', tag: 'Birds', desc: 'Peregrine falcon in a 240 km/h dive. 1/4000s shutter speed.' },
+    ]
+  },
+  v3: {
+    cols: 4,
+    items: [
+      { emoji: '🍝', name: 'Truffle Pasta', price: '$28', tag: 'Pasta', desc: 'Fresh tagliatelle with black truffle shavings, parmesan cream and crispy pancetta.' },
+      { emoji: '🥩', name: 'Wagyu Steak', price: '$68', tag: 'Grill', desc: 'A5 Wagyu ribeye, 200g. Served with roasted bone marrow and seasonal greens.' },
+      { emoji: '🍣', name: 'Omakase Set', price: '$95', tag: 'Sushi', desc: 'Chef\'s selection of 12 nigiri pieces. Sourced daily from Tsukiji market.' },
+      { emoji: '🥗', name: 'Garden Bowl', price: '$18', tag: 'Salad', desc: 'Heirloom tomatoes, burrata, basil oil, aged balsamic and sourdough croutons.' },
+      { emoji: '🍕', name: 'Margherita', price: '$22', tag: 'Pizza', desc: 'Neapolitan-style, wood-fired at 450°C. San Marzano tomato, fior di latte.' },
+      { emoji: '🦞', name: 'Lobster Bisque', price: '$34', tag: 'Soup', desc: 'Slow-cooked Maine lobster bisque with cognac cream and chive oil.' },
+      { emoji: '🍮', name: 'Crème Brûlée', price: '$14', tag: 'Dessert', desc: 'Classic vanilla custard with caramelised sugar crust. Served warm.' },
+      { emoji: '🍷', name: 'Sommelier Pick', price: '$16', tag: 'Wine', desc: 'Rotating selection of natural wines. Ask your server for today\'s pairing.' },
+    ]
+  },
+  v4: {
+    cols: 4,
+    items: [
+      { emoji: '🟥', name: 'Red Study I', price: '€ 1,200', tag: 'Oil on Canvas', desc: 'Exploration of saturated red fields. 80 × 80 cm. Signed verso.' },
+      { emoji: '🔵', name: 'Blue Void', price: '€ 950', tag: 'Acrylic', desc: 'Monochromatic blue composition with subtle texture. 60 × 90 cm.' },
+      { emoji: '⬛', name: 'Negative Space', price: '€ 780', tag: 'Ink on Paper', desc: 'Minimalist ink drawing exploring absence and presence. 50 × 70 cm.' },
+      { emoji: '🟡', name: 'Yellow Horizon', price: '€ 1,450', tag: 'Oil on Linen', desc: 'Warm yellow gradient evoking a desert horizon at noon. 100 × 60 cm.' },
+      { emoji: '🟢', name: 'Growth', price: '€ 620', tag: 'Watercolour', desc: 'Organic forms in emerald and sage. Framed in natural oak. 40 × 50 cm.' },
+      { emoji: '🟣', name: 'Dusk Ritual', price: '€ 1,100', tag: 'Mixed Media', desc: 'Layered pigment and resin on board. Deep violet and gold leaf. 70 × 70 cm.' },
+      { emoji: '🟠', name: 'Ember', price: '€ 890', tag: 'Pastel', desc: 'Soft pastel on velour paper. Warm orange tones, intimate scale. 30 × 40 cm.' },
+      { emoji: '⬜', name: 'White Noise', price: '€ 2,200', tag: 'Installation', desc: 'Textured white gesso on canvas, 12 layers. Light-reactive surface. 120 × 120 cm.' },
+    ]
+  }
+};
+
+/* ─────────────────────────────────────────────
+   Build a variant
+───────────────────────────────────────────── */
+function buildVariant(id, data) {
+  const grid = document.getElementById(`${id}-grid`);
+  const previewLeft = document.getElementById(`${id}-preview-left`);
+  const previewRight = document.getElementById(`${id}-preview-right`);
+  const cols = data.cols;
+  let hoverTimer = null;
+  let activeIndex = -1;
+
+  // Build grid items
+  data.items.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = 'gp-item';
+    el.dataset.index = i;
+
+    // For photo variant, add meta wrapper
+    const isPhoto = id === 'v2';
+    el.innerHTML = `
+      <div class="gp-item-thumb">${item.emoji}</div>
+      ${isPhoto
+        ? `<div class="gp-item-meta"><div class="gp-item-name">${item.name}</div><div class="gp-item-price">${item.price}</div></div>`
+        : `<div class="gp-item-name">${item.name}</div><div class="gp-item-price">${item.price}</div>`
+      }
+    `;
+
+    el.addEventListener('mouseenter', () => {
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => showPreview(i, el, item), 80);
+    });
+    el.addEventListener('mouseleave', () => {
+      clearTimeout(hoverTimer);
+    });
+
+    grid.appendChild(el);
+  });
+
+  // Leave grid → hide preview
+  grid.parentElement.addEventListener('mouseleave', () => {
+    clearTimeout(hoverTimer);
+    hidePreview();
+  });
+
+  function buildPreviewHTML(item) {
+    return `
+      <div class="gp-preview-tag">${item.tag}</div>
+      <div class="gp-preview-img">${item.emoji}</div>
+      <div class="gp-preview-name">${item.name}</div>
+      <div class="gp-preview-desc">${item.desc}</div>
+      <div class="gp-preview-price">${item.price}</div>
+    `;
+  }
+
+  function showPreview(index, el, item) {
+    if (activeIndex === index) return;
+    activeIndex = index;
+
+    const col = index % cols; // 0-based column
+    const isRightHalf = col >= cols / 2;
+
+    // Populate content
+    previewLeft.innerHTML = buildPreviewHTML(item);
+    previewRight.innerHTML = buildPreviewHTML(item);
+
+    // Show the correct panel
+    previewLeft.classList.remove('active');
+    previewRight.classList.remove('active');
+
+    if (isRightHalf) {
+      // Item is on right side → show preview on left
+      previewLeft.classList.add('active');
+    } else {
+      // Item is on left side → show preview on right
+      previewRight.classList.add('active');
+    }
+
+    // Dim other items
+    grid.classList.add('has-preview');
+    grid.querySelectorAll('.gp-item').forEach(item => item.classList.remove('active-item'));
+    el.classList.add('active-item');
+  }
+
+  function hidePreview() {
+    activeIndex = -1;
+    previewLeft.classList.remove('active');
+    previewRight.classList.remove('active');
+    grid.classList.remove('has-preview');
+    grid.querySelectorAll('.gp-item').forEach(item => item.classList.remove('active-item'));
+  }
+}
+
+// Init all variants
+Object.entries(datasets).forEach(([id, data]) => buildVariant(id, data));
+</script>
+</body>
+</html>

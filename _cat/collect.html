@@ -407,6 +407,41 @@ a{text-decoration:none;color:inherit}
 </div></div>
       <div class="card-info"><h3>Concentric Triangle + Conic Rainbow</h3></div>
     </a>
+    <a href="../95-grid-hover-preview.html" class="card" data-idx="50">
+      <div class="card-visual"><div style="width:100%;height:100%;background:#0a0a0f;overflow:hidden;position:relative">
+<style>
+@keyframes ghp-reveal {
+  0%   { clip-path: polygon(50% 40%, 50% 40%, 50% 60%, 50% 60%); opacity: 0; }
+  15%  { opacity: 1; }
+  55%  { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+  80%  { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+  100% { clip-path: polygon(50% 40%, 50% 40%, 50% 60%, 50% 60%); opacity: 0; }
+}
+@keyframes ghp-dim { 0%,100%{opacity:1} 25%,75%{opacity:0.2} }
+.ghp-outer { width:100%; height:100%; padding:10px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:3px; position:relative; }
+.ghp-cell { background:#1a1a28; border-radius:4px; position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+.ghp-cell .ghp-emoji { font-size:14px; line-height:1; }
+.ghp-cell .ghp-label { font-size:5px; color:rgba(255,255,255,.35); font-family:sans-serif; letter-spacing:.04em; }
+.ghp-cell:not(.ghp-active) { animation: ghp-dim 3.5s ease infinite; }
+.ghp-panel { position:absolute; right:0; top:0; width:50%; height:100%; background:#16161f; border-left:1px solid rgba(255,255,255,.08); border-radius:0 4px 4px 0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; animation: ghp-reveal 3.5s cubic-bezier(.22,1,.36,1) infinite; z-index:5; }
+.ghp-panel .ghp-big { font-size:22px; line-height:1; }
+.ghp-panel .ghp-pname { font-size:6px; font-weight:700; color:#e8e8f0; font-family:sans-serif; letter-spacing:.02em; }
+.ghp-panel .ghp-pprice { font-size:6px; color:#7c6af7; font-family:sans-serif; font-weight:600; }
+</style>
+<div class="ghp-outer">
+  <div class="ghp-cell ghp-active"><span class="ghp-emoji">🪑</span><span class="ghp-label">ARC CHAIR</span></div>
+  <div class="ghp-cell" style="animation-delay:.1s"><span class="ghp-emoji">🛋️</span><span class="ghp-label">LOFT SOFA</span></div>
+  <div class="ghp-cell" style="animation-delay:.2s"><span class="ghp-emoji">🪴</span><span class="ghp-label">MONSTERA</span></div>
+  <div class="ghp-cell" style="animation-delay:.15s"><span class="ghp-emoji">💡</span><span class="ghp-label">GLOW LAMP</span></div>
+  <div class="ghp-panel">
+    <span class="ghp-big">🪑</span>
+    <span class="ghp-pname">Arc Chair</span>
+    <span class="ghp-pprice">$349</span>
+  </div>
+</div>
+</div></div>
+      <div class="card-info"><h3>Grid Hover Preview</h3></div>
+    </a>
 </div>
 <script>
 

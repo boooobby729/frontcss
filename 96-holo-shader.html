@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>96 · Holographic Flow Shader</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+
+  .page-title {
+    text-align: center;
+    padding: 48px 24px 16px;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  /* ── Section layout ── */
+  .section {
+    padding: 60px 40px;
+    border-bottom: 1px solid #111;
+  }
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #e8e8e8;
+    margin-bottom: 8px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 32px;
+    max-width: 480px;
+    line-height: 1.6;
+  }
+
+  /* ── Variant 1: Full background ── */
+  #v1-canvas {
+    display: block;
+    width: 100%;
+    height: 360px;
+    border-radius: 16px;
+    cursor: crosshair;
+  }
+
+  /* ── Variant 2: Mouse distortion ── */
+  #v2-canvas {
+    display: block;
+    width: 100%;
+    height: 360px;
+    border-radius: 16px;
+    cursor: crosshair;
+  }
+  .mouse-hint {
+    text-align: center;
+    font-size: 12px;
+    color: #444;
+    margin-top: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Variant 3: Holo cards ── */
+  .cards-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .holo-card {
+    position: relative;
+    width: 200px;
+    height: 280px;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .holo-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  }
+  .holo-card canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .holo-card:hover canvas,
+  .holo-card.active canvas {
+    opacity: 1;
+  }
+  .card-base {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  }
+  .card-content {
+    position: relative;
+    z-index: 2;
+    padding: 24px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: auto;
+    margin-top: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .card-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+  }
+  .card-shine {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: linear-gradient(135deg,
+      rgba(255,255,255,0.08) 0%,
+      transparent 50%,
+      rgba(255,255,255,0.04) 100%);
+    pointer-events: none;
+  }
+
+  /* ── Variant 4: Holo text ── */
+  .holo-text-wrap {
+    text-align: center;
+    padding: 40px 0;
+    position: relative;
+  }
+  #v4-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+  }
+  .holo-text {
+    position: relative;
+    z-index: 2;
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    mix-blend-mode: normal;
+    line-height: 1.1;
+  }
+  .holo-text-container {
+    position: relative;
+    display: inline-block;
+  }
+  .holo-text-bg {
+    position: absolute;
+    inset: -20px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .holo-text-bg canvas {
+    width: 100%;
+    height: 100%;
+  }
+  .holo-text-mask {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    position: relative;
+    z-index: 2;
+    /* Use canvas as background via mix-blend-mode */
+    color: #fff;
+    mix-blend-mode: multiply;
+    background: #fff;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .text-demo-wrap {
+    position: relative;
+    display: inline-block;
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 20px 40px;
+  }
+  #v4-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .text-demo-label {
+    position: relative;
+    z-index: 2;
+    font-size: clamp(40px, 7vw, 88px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: transparent;
+    background: rgba(255,255,255,0.95);
+    -webkit-background-clip: text;
+    background-clip: text;
+    mix-blend-mode: overlay;
+  }
+  .text-demo-sub {
+    position: relative;
+    z-index: 2;
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    mix-blend-mode: normal;
+  }
+</style>
+</head>
+<body>
+
+<p class="page-title">96 · Holographic Flow Shader</p>
+
+<!-- ── Variant 1: Pure holo background ── -->
+<div class="section">
+  <p class="section-label">Variant 01</p>
+  <h2 class="section-title">全息流动背景</h2>
+  <p class="section-desc">fBm 分形噪声驱动的有机流动，HSL 色相映射产生彩虹光谱，模拟全息箔纸的光泽感。</p>
+  <canvas id="v1-canvas"></canvas>
+</div>
+
+<!-- ── Variant 2: Mouse distortion ── -->
+<div class="section">
+  <p class="section-label">Variant 02</p>
+  <h2 class="section-title">鼠标扰动流场</h2>
+  <p class="section-desc">鼠标位置作为 uniform 传入 shader，在光标附近产生旋涡扰动，离开后缓慢恢复。</p>
+  <canvas id="v2-canvas"></canvas>
+  <p class="mouse-hint">Move your cursor over the canvas</p>
+</div>
+
+<!-- ── Variant 3: Holo cards ── -->
+<div class="section">
+  <p class="section-label">Variant 03</p>
+  <h2 class="section-title">全息卡片</h2>
+  <p class="section-desc">悬停时全息光泽从卡片表面浮现，每张卡片有独立的 WebGL 上下文和色调偏移。</p>
+  <div class="cards-row" id="cards-row">
+    <div class="holo-card" data-hue="0">
+      <div class="card-base"></div>
+      <canvas class="card-canvas"></canvas>
+      <div class="card-shine"></div>
+      <div class="card-content">
+        <div class="card-icon">✦</div>
+        <div class="card-name">Aurora</div>
+        <div class="card-sub">Holographic Series</div>
+      </div>
+    </div>
+    <div class="holo-card" data-hue="120">
+      <div class="card-base" style="background:linear-gradient(135deg,#0d2818,#1a4a2e,#0a3020)"></div>
+      <canvas class="card-canvas"></canvas>
+      <div class="card-shine"></div>
+      <div class="card-content">
+        <div class="card-icon">◈</div>
+        <div class="card-name">Prism</div>
+        <div class="card-sub">Holographic Series</div>
+      </div>
+    </div>
+    <div class="holo-card" data-hue="240">
+      <div class="card-base" style="background:linear-gradient(135deg,#0d0d2e,#1a1a4a,#0a0a30)"></div>
+      <canvas class="card-canvas"></canvas>
+      <div class="card-shine"></div>
+      <div class="card-content">
+        <div class="card-icon">⬡</div>
+        <div class="card-name">Nebula</div>
+        <div class="card-sub">Holographic Series</div>
+      </div>
+    </div>
+    <div class="holo-card" data-hue="300">
+      <div class="card-base" style="background:linear-gradient(135deg,#2e0d2e,#4a1a4a,#300a30)"></div>
+      <canvas class="card-canvas"></canvas>
+      <div class="card-shine"></div>
+      <div class="card-content">
+        <div class="card-icon">⬟</div>
+        <div class="card-name">Spectra</div>
+        <div class="card-sub">Holographic Series</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Variant 4: Holo text ── -->
+<div class="section" style="border-bottom:none">
+  <p class="section-label">Variant 04</p>
+  <h2 class="section-title">全息文字</h2>
+  <p class="section-desc">全息流动作为文字背景，通过 mix-blend-mode 让文字呈现彩虹光泽。</p>
+  <div style="text-align:center; padding: 20px 0;">
+    <div class="text-demo-wrap">
+      <canvas id="v4-canvas"></canvas>
+      <div class="text-demo-label">HOLO</div>
+      <div class="text-demo-sub">Holographic Shader · WebGL2</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  Shared GLSL shader source
+// ─────────────────────────────────────────────
+
+const VERT_SRC = `#version 300 es
+in vec2 a_pos;
+out vec2 v_uv;
+void main() {
+  v_uv = a_pos * 0.5 + 0.5;
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+}`;
+
+// Core holo fragment shader
+// Uses fBm noise → hue rotation → RGB output
+const FRAG_SRC = `#version 300 es
+precision highp float;
+
+in vec2 v_uv;
+out vec4 fragColor;
+
+uniform float u_time;
+uniform vec2  u_resolution;
+uniform vec2  u_mouse;      // normalized 0..1, only used in v2
+uniform float u_mouse_str;  // 0..1 strength
+uniform float u_hue_shift;  // per-card hue offset (degrees)
+uniform float u_speed;
+
+// ── Hash / noise ──────────────────────────────
+vec2 hash2(vec2 p) {
+  p = vec2(dot(p, vec2(127.1, 311.7)),
+           dot(p, vec2(269.5, 183.3)));
+  return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(dot(hash2(i + vec2(0,0)), f - vec2(0,0)),
+                 dot(hash2(i + vec2(1,0)), f - vec2(1,0)), u.x),
+             mix(dot(hash2(i + vec2(0,1)), f - vec2(0,1)),
+                 dot(hash2(i + vec2(1,1)), f - vec2(1,1)), u.x), u.y);
+}
+
+// fBm – fractal Brownian motion
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  vec2  shift = vec2(100.0);
+  mat2  rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+  for (int i = 0; i < 5; i++) {
+    v += a * noise(p);
+    p  = rot * p * 2.0 + shift;
+    a *= 0.5;
+  }
+  return v * 0.5 + 0.5; // remap to 0..1
+}
+
+// ── HSL → RGB ─────────────────────────────────
+vec3 hsl2rgb(vec3 c) {
+  vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0,4,2), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+  return c.z + c.y * (rgb - 0.5) * (1.0 - abs(2.0 * c.z - 1.0));
+}
+
+void main() {
+  vec2 uv = v_uv;
+  float t  = u_time * u_speed;
+
+  // Mouse vortex distortion
+  vec2 mouse = u_mouse;
+  float mdist = length(uv - mouse);
+  float mstr  = u_mouse_str * smoothstep(0.5, 0.0, mdist);
+  vec2 mdir   = normalize(uv - mouse + 0.0001);
+  vec2 perp   = vec2(-mdir.y, mdir.x);
+  uv += perp * mstr * 0.08 * sin(mdist * 12.0 - t * 3.0);
+
+  // Domain warp: q = fbm(p), r = fbm(p + q)
+  vec2 p = uv * 3.0;
+  vec2 q = vec2(fbm(p + vec2(0.0, 0.0) + t * 0.3),
+                fbm(p + vec2(5.2, 1.3) + t * 0.25));
+  vec2 r = vec2(fbm(p + 4.0 * q + vec2(1.7, 9.2) + t * 0.15),
+                fbm(p + 4.0 * q + vec2(8.3, 2.8) + t * 0.12));
+
+  float f = fbm(p + 4.0 * r);
+
+  // ── Direct holographic RGB construction ──────────────────────────────
+  // Use three independent noise layers offset in time/space to drive R,G,B
+  // independently → produces the full cyan/teal/green/blue/purple spectrum
+
+  float hueShiftN = u_hue_shift / 360.0;
+
+  // Three noise fields with different phase offsets
+  vec2 p2 = uv * 2.8;
+  float n1 = fbm(p2 + vec2(0.0,  0.0) + t * 0.18 + hueShiftN * 3.0);
+  float n2 = fbm(p2 + vec2(3.7,  1.9) + t * 0.14 + hueShiftN * 2.0);
+  float n3 = fbm(p2 + vec2(1.3, -2.6) + t * 0.22 + hueShiftN * 1.5);
+
+  // Also use the domain-warped f for overall structure
+  // n1/n2/n3 are already 0..1
+
+  // Holographic color palette:
+  // Cyan  = high G+B, low R
+  // Teal  = mid G, high B
+  // Blue  = low G, high B
+  // Purple= high R+B, low G
+  // Green = high G, low R+B
+  // Mix these based on noise values
+
+  vec3 cyan    = vec3(0.4, 0.95, 1.0);
+  vec3 teal    = vec3(0.1, 0.85, 0.85);
+  vec3 blue    = vec3(0.3, 0.5,  1.0);
+  vec3 purple  = vec3(0.7, 0.3,  1.0);
+  vec3 green   = vec3(0.2, 1.0,  0.6);
+  vec3 pink    = vec3(1.0, 0.4,  0.8);
+
+  // Blend colors based on noise
+  vec3 col = cyan;
+  col = mix(col, teal,   smoothstep(0.3, 0.6, n1));
+  col = mix(col, blue,   smoothstep(0.4, 0.7, n2));
+  col = mix(col, purple, smoothstep(0.5, 0.8, n3));
+  col = mix(col, green,  smoothstep(0.6, 0.9, n1 * n2));
+  col = mix(col, pink,   smoothstep(0.65, 0.85, n2 * n3) * 0.5);
+
+  // Brighten overall (holo is bright/pastel)
+  col = mix(col, vec3(1.0), 0.25);
+
+  // White shimmer – the signature holo sparkle
+  float shimmer = fbm(uv * 5.5 + vec2(t * 0.35, -t * 0.22));
+  col = mix(col, vec3(1.0), pow(shimmer, 3.0) * 0.55);
+
+  // Fine-grain shimmer
+  float shimmer2 = fbm(uv * 10.0 - vec2(t * 0.18, t * 0.28));
+  col = mix(col, vec3(1.0), pow(shimmer2, 5.0) * 0.3);
+
+  // Vignette
+  float vig = 1.0 - 0.2 * length(v_uv - 0.5);
+  col *= vig;
+
+  fragColor = vec4(col, 1.0);
+}`;
+
+// ─────────────────────────────────────────────
+//  WebGL helper
+// ─────────────────────────────────────────────
+function createGL(canvas) {
+  const gl = canvas.getContext('webgl2', { antialias: true, alpha: false });
+  if (!gl) return null;
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT_SRC));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG_SRC));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  // Full-screen quad
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  const uniforms = {
+    time:      gl.getUniformLocation(prog, 'u_time'),
+    res:       gl.getUniformLocation(prog, 'u_resolution'),
+    mouse:     gl.getUniformLocation(prog, 'u_mouse'),
+    mouseStr:  gl.getUniformLocation(prog, 'u_mouse_str'),
+    hueShift:  gl.getUniformLocation(prog, 'u_hue_shift'),
+    speed:     gl.getUniformLocation(prog, 'u_speed'),
+  };
+
+  return { gl, prog, uniforms };
+}
+
+function resizeCanvas(canvas, w, h, dpr) {
+  canvas.width  = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width  = w + 'px';
+  canvas.style.height = h + 'px';
+}
+
+// ─────────────────────────────────────────────
+//  Variant 1 – Pure holo background
+// ─────────────────────────────────────────────
+(function initV1() {
+  const canvas = document.getElementById('v1-canvas');
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  resizeCanvas(canvas, W, H, dpr);
+
+  const ctx = createGL(canvas);
+  if (!ctx) return;
+  const { gl, uniforms } = ctx;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+
+  let t = 0;
+  function frame(ts) {
+    t = ts * 0.001;
+    gl.uniform1f(uniforms.time, t);
+    gl.uniform2f(uniforms.res, canvas.width, canvas.height);
+    gl.uniform2f(uniforms.mouse, 0.5, 0.5);
+    gl.uniform1f(uniforms.mouseStr, 0.0);
+    gl.uniform1f(uniforms.hueShift, 0.0);
+    gl.uniform1f(uniforms.speed, 0.35);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// ─────────────────────────────────────────────
+//  Variant 2 – Mouse distortion
+// ─────────────────────────────────────────────
+(function initV2() {
+  const canvas = document.getElementById('v2-canvas');
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  resizeCanvas(canvas, W, H, dpr);
+
+  const ctx = createGL(canvas);
+  if (!ctx) return;
+  const { gl, uniforms } = ctx;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+
+  let mx = 0.5, my = 0.5, targetMx = 0.5, targetMy = 0.5;
+  let mStr = 0, targetStr = 0;
+
+  canvas.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    targetMx = (e.clientX - r.left) / r.width;
+    targetMy = 1.0 - (e.clientY - r.top) / r.height;
+    targetStr = 1.0;
+  });
+  canvas.addEventListener('mouseleave', () => { targetStr = 0; });
+
+  function frame(ts) {
+    const t = ts * 0.001;
+    // Smooth mouse
+    mx += (targetMx - mx) * 0.06;
+    my += (targetMy - my) * 0.06;
+    mStr += (targetStr - mStr) * 0.05;
+
+    gl.uniform1f(uniforms.time, t);
+    gl.uniform2f(uniforms.res, canvas.width, canvas.height);
+    gl.uniform2f(uniforms.mouse, mx, my);
+    gl.uniform1f(uniforms.mouseStr, mStr);
+    gl.uniform1f(uniforms.hueShift, -20.0);
+    gl.uniform1f(uniforms.speed, 0.3);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// ─────────────────────────────────────────────
+//  Variant 3 – Holo cards
+// ─────────────────────────────────────────────
+(function initV3() {
+  const cards = document.querySelectorAll('.holo-card');
+  const dpr = Math.min(window.devicePixelRatio, 2);
+
+  cards.forEach((card, i) => {
+    const canvas = card.querySelector('.card-canvas');
+    const hueShift = parseFloat(card.dataset.hue) || 0;
+
+    // Size canvas to card
+    const W = card.offsetWidth || 200;
+    const H = card.offsetHeight || 280;
+    resizeCanvas(canvas, W, H, dpr);
+
+    const ctx = createGL(canvas);
+    if (!ctx) return;
+    const { gl, uniforms } = ctx;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+
+    let active = false;
+    let mx = 0.5, my = 0.5;
+
+    card.addEventListener('mouseenter', () => { active = true; });
+    card.addEventListener('mouseleave', () => { active = false; mx = 0.5; my = 0.5; });
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      mx = (e.clientX - r.left) / r.width;
+      my = 1.0 - (e.clientY - r.top) / r.height;
+    });
+
+    function frame(ts) {
+      const t = ts * 0.001;
+      gl.uniform1f(uniforms.time, t + i * 1.7);
+      gl.uniform2f(uniforms.res, canvas.width, canvas.height);
+      gl.uniform2f(uniforms.mouse, mx, my);
+      gl.uniform1f(uniforms.mouseStr, active ? 0.6 : 0.0);
+    gl.uniform1f(uniforms.hueShift, hueShift);
+    gl.uniform1f(uniforms.speed, 0.28);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+})();
+
+// ─────────────────────────────────────────────
+//  Variant 4 – Holo text
+// ─────────────────────────────────────────────
+(function initV4() {
+  const canvas = document.getElementById('v4-canvas');
+  const wrap = canvas.parentElement;
+  const dpr = Math.min(window.devicePixelRatio, 2);
+
+  function resize() {
+    const W = wrap.offsetWidth, H = wrap.offsetHeight;
+    resizeCanvas(canvas, W, H, dpr);
+    if (glCtx) glCtx.gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+
+  let glCtx = null;
+
+  // Wait for layout
+  requestAnimationFrame(() => {
+    resize();
+    glCtx = createGL(canvas);
+    if (!glCtx) return;
+    const { gl, uniforms } = glCtx;
+
+    function frame(ts) {
+      const t = ts * 0.001;
+      gl.uniform1f(uniforms.time, t);
+      gl.uniform2f(uniforms.res, canvas.width, canvas.height);
+      gl.uniform2f(uniforms.mouse, 0.5, 0.5);
+      gl.uniform1f(uniforms.mouseStr, 0.0);
+    gl.uniform1f(uniforms.hueShift, 60.0);
+    gl.uniform1f(uniforms.speed, 0.22);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+})();
+</script>
+</body>
+</html>

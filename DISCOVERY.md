@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 framer.com (Holo Shader)
+- 效果名称：全息流动光泽 (Holographic Flow Shader)
+- 效果描述：受 Framer Holo Shader 启发，用 WebGL2 实现的全息箔纸/液态金属流动效果。有机流动的彩虹光谱色彩，像光线在全息表面折射一样，颜色随时间缓慢流动变化。包含 4 种变体：① 纯全息流动背景（自动动画）② 鼠标扰动（鼠标移动影响流场方向）③ 全息卡片（应用在卡片/徽章上，悬停时激活）④ 全息文字遮罩（文字内部填充全息效果）
+- 实现原理：WebGL2 fragment shader，核心用 fBm（分形布朗运动）噪声生成有机流动形态，noise 值映射到 HSL 色相（0-360°）产生彩虹光谱，时间 uniform 驱动持续流动；鼠标位置作为 uniform 传入 shader 扰动流场；卡片变体用 canvas 覆盖在 DOM 元素上；文字遮罩用 CSS mix-blend-mode 实现
+- 状态：已实现 → 96-holo-shader.html
+
 ## 2026-05-13 vercel.com (Concentric Triangle + Conic Rainbow)
 - 效果名称：嵌套三角形彩虹光晕 (Concentric Triangle + Conic Rainbow Hero)
 - 效果描述：Vercel 首页 Hero 区域的标志性视觉效果。核心由两层叠加构成：① 彩虹光晕背景——conic-gradient 从底部70%处发散，黄/红/蓝/绿4色扇形覆盖全区域，配合 mix-blend-mode: hard-light 产生柔和的彩色光晕叠加效果，支持浅/深色双主题；② 同心嵌套三角形——由15层 SVG path 描述的等边三角形，每层顶点 Y 坐标步进约9px，opacity 从1.0线性衰减到0.07，底部有实心遮罩三角形制造"空心"错觉，呈现强烈的景深层次感。包含4种变体：① 浅色主题（白底橙/红/蓝/绿光晕）② 深色主题（黑底浓艳色光晕）③ 鼠标视差——光晕随鼠标位置偏移，三角形微旋转 ④ 彩虹旋转动画——conic-gradient 角度自动旋转360°循环。

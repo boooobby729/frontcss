@@ -442,6 +442,62 @@ a{text-decoration:none;color:inherit}
 </div></div>
       <div class="card-info"><h3>Grid Hover Preview</h3></div>
     </a>
+    <a href="../96-holo-shader.html" class="card" data-idx="51">
+      <div class="card-visual"><div style="width:100%;height:100%;background:#000;overflow:hidden;position:relative">
+<canvas id="holo-prev" style="width:100%;height:100%;display:block"></canvas>
+<script>
+(function(){
+  var c=document.getElementById('holo-prev');
+  if(!c)return;
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  c.width=Math.round(c.offsetWidth*dpr)||360;
+  c.height=Math.round(c.offsetHeight*dpr)||240;
+  var gl=c.getContext('webgl2');
+  if(!gl)return;
+  var vs=gl.createShader(gl.VERTEX_SHADER);
+  gl.shaderSource(vs,'#version 300 es\nin vec2 a;out vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0,1);}');
+  gl.compileShader(vs);
+  var fs=gl.createShader(gl.FRAGMENT_SHADER);
+  gl.shaderSource(fs,`#version 300 es
+precision highp float;
+in vec2 v;out vec4 o;
+uniform float t;
+vec2 h2(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return -1.+2.*fract(sin(p)*43758.5453);}
+float ns(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(dot(h2(i),f),dot(h2(i+vec2(1,0)),f-vec2(1,0)),u.x),mix(dot(h2(i+vec2(0,1)),f-vec2(0,1)),dot(h2(i+vec2(1,1)),f-vec2(1,1)),u.x),u.y);}
+float fbm(vec2 p){float r=0.,a=.5;mat2 m=mat2(.8,.6,-.6,.8);for(int i=0;i<5;i++){r+=a*ns(p);p=m*p*2.+100.;a*=.5;}return r*.5+.5;}
+void main(){
+  vec2 p=v*3.;float tt=t*.3;
+  vec2 q=vec2(fbm(p+tt*.4),fbm(p+vec2(5.2,1.3)+tt*.35));
+  vec2 r2=vec2(fbm(p+4.*q+vec2(1.7,9.2)+tt*.2),fbm(p+4.*q+vec2(8.3,2.8)+tt*.18));
+  float f=fbm(p+4.*r2);
+  vec2 p2=v*2.8;
+  float n1=fbm(p2+tt*.18),n2=fbm(p2+vec2(3.7,1.9)+tt*.14),n3=fbm(p2+vec2(1.3,-2.6)+tt*.22);
+  vec3 cy=vec3(.4,.95,1.),tl=vec3(.1,.85,.85),bl=vec3(.3,.5,1.),pu=vec3(.7,.3,1.),gn=vec3(.2,1.,.6);
+  vec3 col=cy;
+  col=mix(col,tl,smoothstep(.3,.6,n1));
+  col=mix(col,bl,smoothstep(.4,.7,n2));
+  col=mix(col,pu,smoothstep(.5,.8,n3));
+  col=mix(col,gn,smoothstep(.6,.9,n1*n2));
+  col=mix(col,vec3(1.),.22);
+  float sh=fbm(v*5.5+vec2(tt*.35,-tt*.22));
+  col=mix(col,vec3(1.),pow(sh,3.)*.5);
+  col*=1.-.2*length(v-.5);
+  o=vec4(col,1.);
+}`);
+  gl.compileShader(fs);
+  var pg=gl.createProgram();gl.attachShader(pg,vs);gl.attachShader(pg,fs);gl.linkProgram(pg);gl.useProgram(pg);
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var al=gl.getAttribLocation(pg,'a');gl.enableVertexAttribArray(al);gl.vertexAttribPointer(al,2,gl.FLOAT,false,0,0);
+  var tl2=gl.getUniformLocation(pg,'t');
+  gl.viewport(0,0,c.width,c.height);
+  function fr(ts){gl.uniform1f(tl2,ts*.001);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);}
+  requestAnimationFrame(fr);
+})();
+</script>
+</div></div>
+      <div class="card-info"><h3>Holo Shader</h3></div>
+    </a>
 </div>
 <script>
 

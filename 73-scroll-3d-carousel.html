@@ -78,7 +78,7 @@
 
   /* ─── Carousel Container ─── */
   .carousel-section {
-    height: 300vh; /* scrollable area */
+    height: 300vh;
     position: relative;
   }
 
@@ -112,19 +112,28 @@
     transition: box-shadow 0.3s;
   }
 
-  .carousel-card img {
+  .carousel-card .card-face {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    display: block;
+    background: var(--grad);
+    position: relative;
   }
 
-  .carousel-card::after {
+  /* Decorative pattern on cards */
+  .carousel-card .card-face::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6) 100%);
-    pointer-events: none;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 70% 80%, rgba(255,255,255,0.05) 0%, transparent 40%);
+  }
+
+  .carousel-card .card-face::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.4) 100%);
   }
 
   .carousel-card .card-info {
@@ -166,7 +175,7 @@
     transition: height 0.1s ease-out;
   }
 
-  /* ─── Second Demo: Horizontal Scroll Carousel ─── */
+  /* ─── Horizontal Scroll Carousel ─── */
   .h-section {
     padding: 6rem 0;
     overflow: hidden;
@@ -217,18 +226,25 @@
     transform: scale(1.05) translateY(-8px);
   }
 
-  .h-card img {
+  .h-card .card-face {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    display: block;
+    background: var(--grad);
+    position: relative;
+  }
+
+  .h-card .card-face::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 40% 30%, rgba(255,255,255,0.1) 0%, transparent 50%);
   }
 
   .h-card::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.7) 100%);
+    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.5) 100%);
     pointer-events: none;
   }
 
@@ -283,6 +299,21 @@
 <footer>073 — On-Scroll 3D Carousel</footer>
 
 <script>
+const GRADIENTS = [
+  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+  'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)',
+  'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
+  'linear-gradient(160deg, #0093E9 0%, #80D0C7 100%)',
+  'linear-gradient(160deg, #FBAB7E 0%, #F7CE68 100%)',
+  'linear-gradient(160deg, #8EC5FC 0%, #E0C3FC 100%)',
+  'linear-gradient(160deg, #D9AFD9 0%, #97D9E1 100%)',
+];
+
 const ITEMS = 8;
 const ring = document.getElementById('carouselRing');
 const section = document.getElementById('carouselSection');
@@ -301,16 +332,15 @@ const labels = [
 
 // Build carousel cards in a cylinder
 const angleStep = 360 / ITEMS;
-const radius = 500; // translateZ distance
+const radius = 500;
 
 for (let i = 0; i < ITEMS; i++) {
   const card = document.createElement('div');
   card.className = 'carousel-card';
   const angle = angleStep * i;
   card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
-  
   card.innerHTML = `
-    <img src="https://picsum.photos/seed/${i + 100}/560/760" alt="" loading="lazy">
+    <div class="card-face" style="--grad: ${GRADIENTS[i]}"></div>
     <div class="card-info">
       <h3>${labels[i].title}</h3>
       <span>${labels[i].sub}</span>
@@ -326,11 +356,8 @@ function updateCarousel() {
   const scrolled = -rect.top;
   const progress = Math.max(0, Math.min(1, scrolled / sectionHeight));
 
-  // Rotate the full ring based on scroll progress
   const rotation = progress * 360;
   ring.style.transform = `rotateY(${rotation}deg)`;
-
-  // Update progress bar
   progressFill.style.height = `${progress * 100}%`;
 
   requestAnimationFrame(updateCarousel);
@@ -340,14 +367,13 @@ requestAnimationFrame(updateCarousel);
 
 // ─── Horizontal Auto-Scroll Track ───
 const hTrack = document.getElementById('hTrack');
-const hItems = 12;
+const hCount = 12;
 
-for (let i = 0; i < hItems * 2; i++) {  // Double for seamless loop
+for (let i = 0; i < hCount * 2; i++) {
   const card = document.createElement('div');
   card.className = 'h-card';
-  const seed = (i % hItems) + 50;
   card.innerHTML = `
-    <img src="https://picsum.photos/seed/${seed}/500/680" alt="" loading="lazy">
+    <div class="card-face" style="--grad: ${GRADIENTS[i % GRADIENTS.length]}"></div>
     <span class="h-label">${labels[i % ITEMS].title}</span>
   `;
   hTrack.appendChild(card);

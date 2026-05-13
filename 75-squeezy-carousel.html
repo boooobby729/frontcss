@@ -80,15 +80,24 @@
     box-shadow: 0 20px 60px rgba(0,0,0,0.4);
   }
 
-  .carousel-card img {
+  .carousel-card .card-bg {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    display: block;
+    background: var(--grad);
+    position: relative;
     transition: transform 0.4s ease;
   }
 
-  .carousel-card:hover img {
+  .carousel-card .card-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 25% 25%, rgba(255,255,255,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(255,255,255,0.08) 0%, transparent 40%);
+  }
+
+  .carousel-card:hover .card-bg {
     transform: scale(1.05);
   }
 
@@ -215,11 +224,20 @@
     box-shadow: 0 15px 40px rgba(0,0,0,0.3);
   }
 
-  .stack-card img {
+  .stack-card .card-bg {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    display: block;
+    background: var(--grad);
+    position: relative;
+  }
+
+  .stack-card .card-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.12) 0%, transparent 60%),
+      radial-gradient(circle at 80% 70%, rgba(0,0,0,0.2) 0%, transparent 50%);
   }
 
   .stack-card::after {
@@ -299,11 +317,22 @@ const cardData = [
   { title: 'Rest', sub: 'Recharge & Reflect' },
 ];
 
+const GRADIENTS = [
+  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+  'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)',
+  'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
+];
+
 for (let i = 0; i < CARD_COUNT; i++) {
   const card = document.createElement('div');
   card.className = 'carousel-card';
   card.innerHTML = `
-    <img src="https://picsum.photos/seed/${i + 200}/640/880" alt="" loading="lazy">
+    <div class="card-bg" style="--grad: ${GRADIENTS[i]}"></div>
     <div class="info">
       <h3>${cardData[i].title}</h3>
       <span>${cardData[i].sub}</span>
@@ -398,7 +427,7 @@ for (let i = 0; i < stackCount; i++) {
   const card = document.createElement('div');
   card.className = 'stack-card';
   card.innerHTML = `
-    <img src="https://picsum.photos/seed/${i + 300}/1200/800" alt="" loading="lazy">
+    <div class="card-bg" style="--grad: ${GRADIENTS[i + CARD_COUNT]}"></div>
     <span class="stack-info">${stackData[i]}</span>
   `;
   stackContainer.appendChild(card);

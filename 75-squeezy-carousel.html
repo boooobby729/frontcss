@@ -1,608 +1,450 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>75 - Squeezy Carousel 挤压轮播</title>
+<title>Squeezy Carousel</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --text: #f5f5f5;
+    --accent: #6366f1;
+  }
 
   body {
-    background: #000;
-    color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
-  }
-
-  header {
-    padding: 48px 48px 0;
-  }
-
-  header h1 {
-    font-size: 13px;
-    font-weight: 500;
-    color: #666;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  header p {
-    font-size: 13px;
-    color: #444;
-  }
-
-  .demos {
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    gap: 80px;
-    padding: 48px 0 80px;
   }
 
-  .demo-section {
-    padding: 0 48px;
+  /* ─── Header ─── */
+  .header {
+    padding: 3rem 2rem 2rem;
+    text-align: center;
   }
 
-  .demo-label {
-    font-size: 11px;
-    color: #444;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
+  .header h1 {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  /* ── Squeezy Carousel ── */
-  .squeezy {
-    position: relative;
-    width: 100%;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #111;
+  .header p {
+    color: #555;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
   }
 
-  .squeezy canvas {
-    display: block;
-    width: 100%;
-    cursor: pointer;
-  }
-
-  /* 底部信息区 */
-  .squeezy-info {
-    position: relative;
-    height: 120px;
-    overflow: hidden;
-    background: #0a0a0a;
-    border-top: 1px solid #1a1a1a;
-  }
-
-  .squeezy-info-slide {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+  /* ─── Carousel Container ─── */
+  .carousel-wrap {
+    flex: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
   }
 
-  .squeezy-info-slide.active {
-    transform: translateX(0);
-    opacity: 1;
+  .carousel {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    height: 480px;
+    perspective: 1200px;
   }
 
-  .squeezy-info-slide.prev {
-    transform: translateX(-60px);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .squeezy-info-slide.next {
-    transform: translateX(60px);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .squeezy-info-text h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
-    line-height: 1.4;
-    margin-bottom: 4px;
-  }
-
-  .squeezy-info-text p {
-    font-size: 13px;
-    color: #666;
-    line-height: 1.5;
-  }
-
-  .squeezy-btn {
-    flex-shrink: 0;
-    margin-left: 32px;
-    padding: 10px 20px;
+  .carousel-card {
+    position: absolute;
+    width: 320px;
+    height: 440px;
+    top: 50%;
+    left: 50%;
     border-radius: 20px;
-    border: 1px solid #333;
-    background: transparent;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 500;
+    overflow: hidden;
     cursor: pointer;
-    white-space: nowrap;
-    transition: border-color 0.2s, background 0.2s;
+    transform-origin: center center;
+    transition:
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.6s ease,
+      filter 0.6s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
   }
 
-  .squeezy-btn:hover {
-    border-color: #666;
-    background: #1a1a1a;
+  .carousel-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
   }
 
-  /* 指示点 */
-  .squeezy-dots {
+  .carousel-card:hover img {
+    transform: scale(1.05);
+  }
+
+  .carousel-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+  }
+
+  .carousel-card .info {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 2;
+  }
+
+  .carousel-card .info h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .carousel-card .info span {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ─── Navigation Dots ─── */
+  .nav-dots {
     display: flex;
-    gap: 6px;
-    padding: 12px 32px;
-    background: #0a0a0a;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2rem;
   }
 
-  .squeezy-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 3px;
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
     background: #333;
+    border: none;
     cursor: pointer;
-    transition: width 0.3s ease, background 0.3s ease;
+    transition: all 0.3s;
   }
 
-  .squeezy-dot.active {
-    width: 20px;
-    background: #fff;
+  .nav-dot.active {
+    background: var(--accent);
+    transform: scale(1.4);
+  }
+
+  /* ─── Arrow Buttons ─── */
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #999;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    z-index: 50;
+  }
+
+  .nav-arrow:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .nav-arrow.prev { left: 0; }
+  .nav-arrow.next { right: 0; }
+
+  /* ─── Second carousel: Squish Stack ─── */
+  .section-2 {
+    padding: 4rem 2rem;
+  }
+
+  .section-2-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-2-header h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .section-2-header p {
+    color: #555;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .stack-carousel {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    height: 400px;
+    perspective: 800px;
+  }
+
+  .stack-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    transition:
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.5s ease;
+    cursor: pointer;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+  }
+
+  .stack-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .stack-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.6) 100%);
+    pointer-events: none;
+  }
+
+  .stack-card .stack-info {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 2;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 3rem;
+    font-size: 0.7rem;
+    color: #222;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 768px) {
+    .carousel-card { width: 240px; height: 340px; }
+    .carousel { height: 380px; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>75 · Squeezy Carousel</h1>
-  <p>挤压轮播 — 灵感来自 stripe.com，点击右侧卡片切换</p>
-</header>
-
-<div class="demos">
-
-  <!-- Demo 1: 渐变卡片版 -->
-  <div class="demo-section">
-    <div class="demo-label">渐变卡片版</div>
-    <div class="squeezy" id="squeezy1">
-      <canvas id="canvas1"></canvas>
-      <div class="squeezy-info" id="info1"></div>
-      <div class="squeezy-dots" id="dots1"></div>
-    </div>
-  </div>
-
-  <!-- Demo 2: 深色极简版 -->
-  <div class="demo-section">
-    <div class="demo-label">深色极简版</div>
-    <div class="squeezy" id="squeezy2">
-      <canvas id="canvas2"></canvas>
-      <div class="squeezy-info" id="info2"></div>
-      <div class="squeezy-dots" id="dots2"></div>
-    </div>
-  </div>
-
+<div class="header">
+  <h1>Squeezy Carousel</h1>
+  <p>Elastic card transitions with squeeze and spring physics</p>
 </div>
 
+<!-- Main Squeezy Carousel -->
+<div class="carousel-wrap">
+  <div class="carousel" id="carousel">
+    <button class="nav-arrow prev" onclick="navigate(-1)">‹</button>
+    <button class="nav-arrow next" onclick="navigate(1)">›</button>
+  </div>
+</div>
+
+<div class="nav-dots" id="navDots"></div>
+
+<!-- Second: Stack dismiss -->
+<section class="section-2">
+  <div class="section-2-header">
+    <h2>Squish Stack</h2>
+    <p>Click to dismiss with squish animation</p>
+  </div>
+  <div class="stack-carousel" id="stackCarousel"></div>
+</section>
+
+<footer>075 — Squeezy Carousel</footer>
+
 <script>
-// ── 工具函数 ──────────────────────────────────
-function lerp(a, b, t) { return a + (b - a) * t; }
-function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+// ─── Carousel 1: Elastic Spread ───
+const carousel = document.getElementById('carousel');
+const dotsContainer = document.getElementById('navDots');
+const CARD_COUNT = 5;
+let current = 0;
 
-// ── SqueezyCarousel 类 ────────────────────────
-class SqueezyCarousel {
-  constructor(canvasEl, infoEl, dotsEl, cards) {
-    this.canvas = canvasEl;
-    this.ctx = canvasEl.getContext('2d');
-    this.infoEl = infoEl;
-    this.dotsEl = dotsEl;
-    this.cards = cards;
-    this.active = 0;
-    this.prev = -1;
+const cards = [];
+const cardData = [
+  { title: 'Flow State', sub: 'Creative Process' },
+  { title: 'Deep Work', sub: 'Focus & Clarity' },
+  { title: 'Iteration', sub: 'Refine & Polish' },
+  { title: 'Shipping', sub: 'Launch & Learn' },
+  { title: 'Rest', sub: 'Recharge & Reflect' },
+];
 
-    // 每张卡片的当前宽度比例（0~1）
-    // 主卡片 55%，其余平均分剩余 45%
-    const n = cards.length;
-    const mainW = 0.55;
-    const sliceW = (1 - mainW) / (n - 1);
-    this.widths = cards.map((_, i) => i === 0 ? mainW : sliceW);
-    this.targetWidths = [...this.widths];
+for (let i = 0; i < CARD_COUNT; i++) {
+  const card = document.createElement('div');
+  card.className = 'carousel-card';
+  card.innerHTML = `
+    <img src="https://picsum.photos/seed/${i + 200}/640/880" alt="" loading="lazy">
+    <div class="info">
+      <h3>${cardData[i].title}</h3>
+      <span>${cardData[i].sub}</span>
+    </div>
+  `;
+  card.addEventListener('click', () => {
+    if (i !== current) goTo(i);
+  });
+  carousel.appendChild(card);
+  cards.push(card);
 
-    // 鼠标状态
-    this.hoverIndex = -1;
-    this.animating = false;
-
-    // 离屏 canvas 缓存（每张卡片的渐变/图案）
-    this.offscreens = cards.map(card => this._makeOffscreen(card));
-
-    this._setupDOM();
-    this._setupEvents();
-    this._resize();
-    this._loop();
-  }
-
-  _makeOffscreen(card) {
-    const oc = document.createElement('canvas');
-    oc.width = 800;
-    oc.height = 460;
-    const ctx = oc.getContext('2d');
-
-    if (card.gradient) {
-      const grd = ctx.createLinearGradient(
-        card.gradient[0] * 800, card.gradient[1] * 460,
-        card.gradient[2] * 800, card.gradient[3] * 460
-      );
-      card.colors.forEach(([stop, color]) => grd.addColorStop(stop, color));
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, 800, 460);
-
-      // 叠加噪点纹理感
-      if (card.lines) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-        ctx.lineWidth = 1;
-        for (let i = 0; i < 30; i++) {
-          const y = (i / 30) * 460 + Math.sin(i * 0.4) * 20;
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.bezierCurveTo(200, y - 40, 600, y + 40, 800, y);
-          ctx.stroke();
-        }
-      }
-
-      // 叠加底部渐变遮罩
-      const fade = ctx.createLinearGradient(0, 260, 0, 460);
-      fade.addColorStop(0, 'rgba(0,0,0,0)');
-      fade.addColorStop(1, 'rgba(0,0,0,0.5)');
-      ctx.fillStyle = fade;
-      ctx.fillRect(0, 0, 800, 460);
-    } else if (card.solid) {
-      ctx.fillStyle = card.solid;
-      ctx.fillRect(0, 0, 800, 460);
-
-      // 细网格纹理
-      ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-      ctx.lineWidth = 0.5;
-      for (let x = 0; x < 800; x += 40) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 460); ctx.stroke();
-      }
-      for (let y = 0; y < 460; y += 40) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(800, y); ctx.stroke();
-      }
-
-      // 中心光晕
-      if (card.glow) {
-        const g = ctx.createRadialGradient(400, 230, 0, 400, 230, 350);
-        g.addColorStop(0, card.glow + '44');
-        g.addColorStop(1, 'transparent');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, 800, 460);
-      }
-    }
-
-    // 标题文字
-    if (card.tag) {
-      ctx.font = '700 28px -apple-system, sans-serif';
-      ctx.fillStyle = card.tagColor || 'rgba(255,255,255,0.9)';
-      ctx.fillText(card.tag, 36, 60);
-    }
-
-    // 副标题
-    if (card.sub) {
-      ctx.font = '400 14px -apple-system, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      ctx.fillText(card.sub, 36, 90);
-    }
-
-    // 底部数字
-    if (card.stat) {
-      ctx.font = '700 48px -apple-system, sans-serif';
-      ctx.fillStyle = card.statColor || 'rgba(255,255,255,0.9)';
-      ctx.fillText(card.stat, 36, 400);
-      ctx.font = '400 13px -apple-system, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.fillText(card.statLabel || '', 36, 425);
-    }
-
-    return oc;
-  }
-
-  _setupDOM() {
-    // 信息区 slides
-    this.cards.forEach((card, i) => {
-      const slide = document.createElement('div');
-      slide.className = 'squeezy-info-slide' + (i === 0 ? ' active' : ' next');
-      slide.innerHTML = `
-        <div class="squeezy-info-text">
-          <h3>${card.title}</h3>
-          <p>${card.desc}</p>
-        </div>
-        <button class="squeezy-btn">${card.cta}</button>
-      `;
-      this.infoEl.appendChild(slide);
-    });
-    this.slides = this.infoEl.querySelectorAll('.squeezy-info-slide');
-
-    // 指示点
-    this.cards.forEach((_, i) => {
-      const dot = document.createElement('div');
-      dot.className = 'squeezy-dot' + (i === 0 ? ' active' : '');
-      dot.addEventListener('click', () => this._activate(i));
-      this.dotsEl.appendChild(dot);
-    });
-    this.dotEls = this.dotsEl.querySelectorAll('.squeezy-dot');
-  }
-
-  _setupEvents() {
-    this.canvas.addEventListener('mousemove', e => {
-      const rect = this.canvas.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) / rect.width;
-      let x = 0;
-      let found = -1;
-      for (let i = 0; i < this.widths.length; i++) {
-        if (mx >= x && mx < x + this.widths[i]) { found = i; break; }
-        x += this.widths[i];
-      }
-      this.hoverIndex = found;
-      this.canvas.style.cursor = (found !== -1 && found !== this.active) ? 'pointer' : 'default';
-    });
-
-    this.canvas.addEventListener('mouseleave', () => {
-      this.hoverIndex = -1;
-      this.canvas.style.cursor = 'default';
-    });
-
-    this.canvas.addEventListener('click', e => {
-      const rect = this.canvas.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) / rect.width;
-      let x = 0;
-      for (let i = 0; i < this.widths.length; i++) {
-        if (mx >= x && mx < x + this.widths[i]) {
-          if (i !== this.active) this._activate(i);
-          break;
-        }
-        x += this.widths[i];
-      }
-    });
-  }
-
-  _resize() {
-    const dpr = window.devicePixelRatio || 1;
-    const w = this.canvas.parentElement.clientWidth;
-    const h = Math.round(w * 0.42);
-    this.canvas.width = w * dpr;
-    this.canvas.height = h * dpr;
-    this.canvas.style.height = h + 'px';
-    this.ctx.scale(dpr, dpr);
-    this.W = w;
-    this.H = h;
-  }
-
-  _activate(idx) {
-    if (idx === this.active || this.animating) return;
-    this.prev = this.active;
-    this.active = idx;
-    this.animating = true;
-
-    // 更新目标宽度
-    const n = this.cards.length;
-    const mainW = 0.55;
-    const sliceW = (1 - mainW) / (n - 1);
-    this.targetWidths = this.cards.map((_, i) => i === idx ? mainW : sliceW);
-
-    // 更新信息区
-    this.slides.forEach((slide, i) => {
-      if (i === idx) {
-        slide.className = 'squeezy-info-slide active';
-      } else if (i === this.prev) {
-        slide.className = 'squeezy-info-slide prev';
-      } else {
-        slide.className = 'squeezy-info-slide next';
-      }
-    });
-
-    // 更新指示点
-    this.dotEls.forEach((dot, i) => {
-      dot.classList.toggle('active', i === idx);
-    });
-
-    // 动画结束
-    setTimeout(() => { this.animating = false; }, 700);
-  }
-
-  _draw() {
-    const ctx = this.ctx;
-    const W = this.W, H = this.H;
-    ctx.clearRect(0, 0, W, H);
-
-    let x = 0;
-    for (let i = 0; i < this.cards.length; i++) {
-      const w = this.widths[i] * W;
-      const oc = this.offscreens[i];
-      const isActive = i === this.active;
-      const isHover = i === this.hoverIndex && !isActive;
-
-      // 裁切并绘制卡片内容
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(x, 0, w, H);
-      ctx.clip();
-
-      // 绘制背景图（始终从 offscreen 左上角读取整张，缩放填充当前切片区域）
-      ctx.drawImage(oc, 0, 0, oc.width, oc.height, x, 0, w, H);
-
-      // hover 高亮蒙版
-      if (isHover) {
-        ctx.fillStyle = 'rgba(255,255,255,0.06)';
-        ctx.fillRect(x, 0, w, H);
-      }
-
-      // 切片分隔线
-      if (i > 0 && w > 2) {
-        ctx.fillStyle = 'rgba(0,0,0,0.4)';
-        ctx.fillRect(x, 0, 1.5, H);
-      }
-
-      // 非激活卡片：暗化遮罩（越窄越暗）
-      if (!isActive) {
-        const darkness = Math.max(0, 0.5 - this.widths[i] * 2);
-        if (darkness > 0) {
-          ctx.fillStyle = `rgba(0,0,0,${darkness})`;
-          ctx.fillRect(x, 0, w, H);
-        }
-      }
-
-      ctx.restore();
-      x += w;
-    }
-  }
-
-  _loop() {
-    const SPEED = 0.1;
-    // 插值宽度
-    let changed = false;
-    for (let i = 0; i < this.widths.length; i++) {
-      const diff = this.targetWidths[i] - this.widths[i];
-      if (Math.abs(diff) > 0.0001) {
-        this.widths[i] = lerp(this.widths[i], this.targetWidths[i], SPEED);
-        changed = true;
-      } else {
-        this.widths[i] = this.targetWidths[i];
-      }
-    }
-
-    // 归一化（防止累计误差）
-    const sum = this.widths.reduce((a, b) => a + b, 0);
-    if (Math.abs(sum - 1) > 0.001) {
-      const scale = 1 / sum;
-      for (let i = 0; i < this.widths.length; i++) this.widths[i] *= scale;
-    }
-
-    this._draw();
-    requestAnimationFrame(() => this._loop());
-  }
+  // Dots
+  const dot = document.createElement('button');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.addEventListener('click', () => goTo(i));
+  dotsContainer.appendChild(dot);
 }
 
-// ── 数据配置 ─────────────────────────────────
+function updatePositions() {
+  const dots = dotsContainer.querySelectorAll('.nav-dot');
+  
+  cards.forEach((card, i) => {
+    const offset = i - current;
+    const absOffset = Math.abs(offset);
+    
+    // Squeezy positioning: closer cards are larger, farther are squeezed
+    const translateX = offset * 200;
+    const translateZ = -absOffset * 100;
+    const rotateY = offset * -5;
+    const scale = 1 - absOffset * 0.1;
+    const opacity = absOffset > 2 ? 0 : 1 - absOffset * 0.2;
+    
+    // Squeeze effect: cards being pushed aside get compressed horizontally
+    const scaleX = absOffset === 0 ? 1 : 1 - absOffset * 0.05;
+    const scaleY = absOffset === 0 ? 1 : 1 + absOffset * 0.02; // Slightly stretch vertically
+    
+    card.style.transform = `
+      translate(-50%, -50%)
+      translateX(${translateX}px)
+      translateZ(${translateZ}px)
+      rotateY(${rotateY}deg)
+      scale(${scale})
+      scaleX(${scaleX})
+      scaleY(${scaleY})
+    `;
+    card.style.opacity = opacity;
+    card.style.zIndex = CARD_COUNT - absOffset;
+    card.style.filter = absOffset > 0 ? `brightness(${1 - absOffset * 0.15})` : 'none';
+    
+    // Update dots
+    dots[i].classList.toggle('active', i === current);
+  });
+}
 
-// Demo 1: 渐变卡片
-const cards1 = [
-  {
-    gradient: [0, 0, 1, 1],
-    colors: [[0, '#6b21a8'], [0.5, '#ec4899'], [1, '#f97316']],
-    lines: true,
-    tag: 'Annual Report 2025',
-    sub: 'stripe.com',
-    stat: 'US$1.9T',
-    statLabel: '年度支付处理额',
-    title: '2025 年，全球企业创造了 US$1.9 万亿的价值',
-    desc: '年度报告探讨了定义互联网经济的几大趋势，包括新兴企业增长迅猛、国际扩张迅速、稳定币进展。',
-    cta: '阅读报告 →',
-  },
-  {
-    gradient: [0, 1, 1, 0],
-    colors: [[0, '#1e3a5f'], [0.5, '#0e7490'], [1, '#06b6d4']],
-    lines: true,
-    tag: 'Black Friday 2025',
-    sub: '历史最佳单日业绩',
-    stat: '15万+',
-    statLabel: '商家创下历史纪录',
-    title: '15 万以上用户在 Stripe 上迎来历史最佳单日业绩',
-    desc: '从黑色星期五到网络星期一，Stripe 为商家处理了超过 US$400 亿的交易，同时保持了 99.9999% 正常运行时间。',
-    cta: '查看数据 →',
-  },
-  {
-    gradient: [1, 0, 0, 1],
-    colors: [[0, '#14532d'], [0.5, '#16a34a'], [1, '#4ade80']],
-    lines: true,
-    tag: 'Stablecoin 稳定币',
-    sub: '全球支付新基础设施',
-    stat: '$400B',
-    statLabel: 'BFCM 交易额',
-    title: 'Stripe 稳定币功能正式向全球 101 个国家开放',
-    desc: '企业现在可以在任何地方接受和发送稳定币付款，访问美元支持的账户，快速结算全球资金流动。',
-    cta: '了解更多 →',
-  },
-  {
-    gradient: [0, 0, 1, 1],
-    colors: [[0, '#1e1b4b'], [0.5, '#4338ca'], [1, '#818cf8']],
-    lines: true,
-    tag: 'AI Commerce',
-    sub: '智能体商务时代',
-    stat: '99.999%',
-    statLabel: '服务正常运行时间',
-    title: 'AI 智能体正在改变商务的运作方式',
-    desc: '从 AI 驱动的欺诈检测到智能化的支付路由，Stripe 为下一代商务提供基础设施支持。',
-    cta: '探索 AI 功能 →',
-  },
-];
+function goTo(index) {
+  current = Math.max(0, Math.min(CARD_COUNT - 1, index));
+  updatePositions();
+}
 
-// Demo 2: 深色极简
-const cards2 = [
-  {
-    solid: '#0d0d0d',
-    glow: '#6366f1',
-    tag: 'Design',
-    tagColor: '#818cf8',
-    sub: '设计系统 v3.0',
-    stat: '2,400+',
-    statLabel: '组件数量',
-    title: '全新设计系统 v3.0 正式发布',
-    desc: '超过 2,400 个组件，支持暗色模式、无障碍访问和响应式布局，覆盖所有主流设计工具。',
-    cta: '查看文档 →',
-  },
-  {
-    solid: '#0a0a0f',
-    glow: '#06b6d4',
-    tag: 'Performance',
-    tagColor: '#22d3ee',
-    sub: '性能优化报告',
-    stat: '3x',
-    statLabel: '渲染速度提升',
-    title: '核心渲染引擎完成重写，速度提升 3 倍',
-    desc: '全新的 Turbo 渲染引擎使用 WebGL 加速，在保持 60fps 的同时支持更复杂的动画效果。',
-    cta: '性能基准 →',
-  },
-  {
-    solid: '#0f0a00',
-    glow: '#f59e0b',
-    tag: 'Collaboration',
-    tagColor: '#fbbf24',
-    sub: '实时协作功能',
-    stat: '50ms',
-    statLabel: '全球平均延迟',
-    title: '实时多人协作功能全面升级',
-    desc: '基于 CRDT 算法的实时协作，支持全球 100 个节点同步，延迟低至 50ms，感受真正的无缝协作体验。',
-    cta: '开始协作 →',
-  },
-];
+function navigate(dir) {
+  goTo(current + dir);
+}
 
-// ── 初始化 ───────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  new SqueezyCarousel(
-    document.getElementById('canvas1'),
-    document.getElementById('info1'),
-    document.getElementById('dots1'),
-    cards1
-  );
+updatePositions();
 
-  new SqueezyCarousel(
-    document.getElementById('canvas2'),
-    document.getElementById('info2'),
-    document.getElementById('dots2'),
-    cards2
-  );
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft') navigate(-1);
+  if (e.key === 'ArrowRight') navigate(1);
 });
 
-window.addEventListener('resize', () => {
-  // 简单重新初始化（生产中可做更精细的 debounce）
-  location.reload();
+// Touch/swipe support
+let touchStartX = 0;
+carousel.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+}, { passive: true });
+carousel.addEventListener('touchend', e => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+}, { passive: true });
+
+// ─── Carousel 2: Stack Dismiss ───
+const stackContainer = document.getElementById('stackCarousel');
+const stackCount = 4;
+const stackCards = [];
+
+const stackData = [
+  'Momentum', 'Clarity', 'Purpose', 'Vision'
+];
+
+for (let i = 0; i < stackCount; i++) {
+  const card = document.createElement('div');
+  card.className = 'stack-card';
+  card.innerHTML = `
+    <img src="https://picsum.photos/seed/${i + 300}/1200/800" alt="" loading="lazy">
+    <span class="stack-info">${stackData[i]}</span>
+  `;
+  stackContainer.appendChild(card);
+  stackCards.push(card);
+}
+
+let stackTop = stackCount - 1;
+
+function updateStack() {
+  stackCards.forEach((card, i) => {
+    const offset = stackTop - i;
+    if (offset < 0) {
+      card.style.transform = 'translateX(120%) rotate(15deg)';
+      card.style.opacity = '0';
+    } else {
+      card.style.transform = `
+        translateY(${offset * 8}px)
+        scale(${1 - offset * 0.04})
+      `;
+      card.style.opacity = offset > 3 ? '0' : '1';
+      card.style.zIndex = stackCount - offset;
+    }
+  });
+}
+
+updateStack();
+
+stackCards.forEach((card, i) => {
+  card.addEventListener('click', () => {
+    if (i === stackTop) {
+      // Squish and dismiss top card
+      card.style.transform = 'translateX(120%) scaleX(0.7) scaleY(1.1) rotate(10deg)';
+      card.style.opacity = '0';
+      stackTop--;
+      
+      if (stackTop < 0) {
+        // Reset
+        setTimeout(() => {
+          stackTop = stackCount - 1;
+          updateStack();
+        }, 700);
+      } else {
+        setTimeout(updateStack, 100);
+      }
+    }
+  });
 });
 </script>
 </body>

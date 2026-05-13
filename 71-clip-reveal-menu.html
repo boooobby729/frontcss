@@ -8,568 +8,559 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #080808;
-    --text: #f0f0f0;
-    --muted: #555;
-    --accent1: #7c3aed;
-    --accent2: #0ea5e9;
-    --accent3: #f59e0b;
-    --accent4: #10b981;
-    --accent5: #ef4444;
+    --bg: #0a0a0a;
+    --text: #f5f5f5;
   }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
   }
 
-  /* ─── Page Layout ─── */
-  .page-header {
-    padding: 48px 60px 24px;
-    border-bottom: 1px solid #1a1a1a;
-  }
-  .page-header h1 {
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .page-header p {
-    font-size: 11px;
-    color: #333;
-    margin-top: 4px;
-    letter-spacing: .06em;
+  /* ─── Header ─── */
+  .header {
+    padding: 3rem 3rem 2rem;
+    text-align: center;
   }
 
-  .sections {
+  .header h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #fff, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header p {
+    color: #555;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  /* ─── Section ─── */
+  .demo {
+    padding: 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .demo-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 1.5rem;
     display: flex;
-    flex-direction: column;
-    gap: 0;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  .section {
-    padding: 60px;
-    border-bottom: 1px solid #111;
-  }
-  .section-label {
-    font-size: 11px;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: #333;
-    margin-bottom: 32px;
+  .demo-label::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-color, #6366f1);
   }
 
   /* ═══════════════════════════════════════
-     VARIANT 1 — Horizontal Clip Reveal
-     Hover → clip-path expands left→right
+     DEMO 1 — Horizontal Wipe Menu
   ═══════════════════════════════════════ */
-  .menu-h {
+  .menu-wipe {
     list-style: none;
-    border-top: 1px solid #1c1c1c;
   }
-  .menu-h li {
+
+  .menu-wipe li {
     position: relative;
-    border-bottom: 1px solid #1c1c1c;
+    border-bottom: 1px solid #1a1a1a;
     overflow: hidden;
   }
-  .menu-h li .bg {
+
+  .menu-wipe li:first-child { border-top: 1px solid #1a1a1a; }
+
+  .menu-wipe li .fill {
     position: absolute;
     inset: 0;
-    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
-    transition: clip-path 0.55s cubic-bezier(0.77, 0, 0.175, 1);
-    will-change: clip-path;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1);
   }
-  .menu-h li:hover .bg {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    transition: clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .menu-h li:nth-child(1) .bg { background: var(--accent1); }
-  .menu-h li:nth-child(2) .bg { background: var(--accent2); }
-  .menu-h li:nth-child(3) .bg { background: var(--accent3); }
-  .menu-h li:nth-child(4) .bg { background: var(--accent4); }
-  .menu-h li:nth-child(5) .bg { background: var(--accent5); }
 
-  .menu-h li a {
+  .menu-wipe li:hover .fill {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .menu-wipe li:nth-child(1) .fill { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+  .menu-wipe li:nth-child(2) .fill { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+  .menu-wipe li:nth-child(3) .fill { background: linear-gradient(90deg, #10b981, #14b8a6); }
+  .menu-wipe li:nth-child(4) .fill { background: linear-gradient(90deg, #f59e0b, #f97316); }
+  .menu-wipe li:nth-child(5) .fill { background: linear-gradient(90deg, #06b6d4, #0ea5e9); }
+
+  .menu-wipe li a {
     position: relative;
     z-index: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 22px 0;
+    padding: 1.5rem 0;
     text-decoration: none;
     color: var(--text);
-    font-size: clamp(28px, 4vw, 52px);
-    font-weight: 700;
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    font-weight: 800;
     letter-spacing: -0.02em;
-    transition: color 0.3s ease;
+    transition: padding-left 0.4s ease;
   }
-  .menu-h li:hover a { color: #fff; }
-  .menu-h li a .arrow {
-    font-size: 0.5em;
+
+  .menu-wipe li:hover a {
+    padding-left: 1.5rem;
+  }
+
+  .menu-wipe li .idx {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: #333;
+    transition: color 0.3s;
+  }
+
+  .menu-wipe li:hover .idx { color: rgba(255,255,255,0.5); }
+
+  .menu-wipe li .arrow {
+    margin-left: auto;
+    font-size: 1.5rem;
     opacity: 0;
-    transform: translateX(-12px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateX(-20px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .menu-h li:hover a .arrow {
+
+  .menu-wipe li:hover .arrow {
     opacity: 1;
     transform: translateX(0);
   }
-  .menu-h li a .num {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--muted);
-    letter-spacing: .06em;
-    align-self: flex-start;
-    margin-top: 8px;
-    transition: color 0.3s ease;
-  }
-  .menu-h li:hover a .num { color: rgba(255,255,255,0.5); }
 
   /* ═══════════════════════════════════════
-     VARIANT 2 — Direction-Aware Clip
-     Clip starts from the direction mouse enters
+     DEMO 2 — Direction-Aware Grid
   ═══════════════════════════════════════ */
-  .menu-dir {
+  .grid-reveal {
     list-style: none;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
+    gap: 3px;
   }
-  .menu-dir li {
+
+  .grid-reveal li {
     position: relative;
-    overflow: hidden;
     aspect-ratio: 4/3;
+    overflow: hidden;
     cursor: pointer;
+    border-radius: 8px;
   }
-  .menu-dir li .bg {
+
+  .grid-reveal li .fill {
     position: absolute;
     inset: 0;
     will-change: clip-path;
+    transition: clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .menu-dir li:nth-child(1) .bg { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
-  .menu-dir li:nth-child(2) .bg { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
-  .menu-dir li:nth-child(3) .bg { background: linear-gradient(135deg, #f59e0b, #f97316); }
-  .menu-dir li:nth-child(4) .bg { background: linear-gradient(135deg, #10b981, #059669); }
-  .menu-dir li:nth-child(5) .bg { background: linear-gradient(135deg, #ef4444, #dc2626); }
-  .menu-dir li:nth-child(6) .bg { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
-  .menu-dir li .content {
-    position: relative;
-    z-index: 1;
-    height: 100%;
+  .grid-reveal li:nth-child(1) .fill { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+  .grid-reveal li:nth-child(2) .fill { background: linear-gradient(135deg, #ec4899, #db2777); }
+  .grid-reveal li:nth-child(3) .fill { background: linear-gradient(135deg, #10b981, #059669); }
+  .grid-reveal li:nth-child(4) .fill { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .grid-reveal li:nth-child(5) .fill { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+  .grid-reveal li:nth-child(6) .fill { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+  .grid-reveal li .label {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 20px;
+    padding: 1rem;
+    z-index: 1;
     background: #111;
-    transition: background 0.4s ease;
+    transition: background 0.4s;
   }
-  .menu-dir li.active .content { background: transparent; }
-  .menu-dir li .content h3 {
-    font-size: 18px;
+
+  .grid-reveal li.active .label { background: transparent; }
+
+  .grid-reveal li .label h3 {
+    font-size: 1rem;
     font-weight: 700;
-    letter-spacing: -0.01em;
-    transition: color 0.3s ease;
   }
-  .menu-dir li .content p {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-    transition: color 0.3s ease;
+
+  .grid-reveal li .label span {
+    font-size: 0.7rem;
+    color: #555;
+    margin-top: 0.25rem;
+    transition: color 0.3s;
   }
-  .menu-dir li.active .content p { color: rgba(255,255,255,0.7); }
+
+  .grid-reveal li.active .label span { color: rgba(255,255,255,0.7); }
 
   /* ═══════════════════════════════════════
-     VARIANT 3 — Circle Clip Expand
-     Circular reveal from mouse position
+     DEMO 3 — Circle Expand from Cursor
   ═══════════════════════════════════════ */
-  .menu-circle {
+  .circle-menu {
     list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    border: 1px solid #1c1c1c;
     border-radius: 16px;
     overflow: hidden;
+    border: 1px solid #1a1a1a;
   }
-  .menu-circle li {
+
+  .circle-menu li {
     position: relative;
     overflow: hidden;
-    border-bottom: 1px solid #1c1c1c;
+    border-bottom: 1px solid #1a1a1a;
   }
-  .menu-circle li:last-child { border-bottom: none; }
-  .menu-circle li .bg {
+
+  .circle-menu li:last-child { border-bottom: none; }
+
+  .circle-menu li .fill {
     position: absolute;
     inset: 0;
-    clip-path: circle(0% at 50% 50%);
+    clip-path: circle(0% at var(--cx, 50%) var(--cy, 50%));
     transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: clip-path;
   }
-  .menu-circle li:hover .bg {
-    clip-path: circle(150% at var(--mx, 50%) var(--my, 50%));
-  }
-  .menu-circle li:nth-child(1) .bg { background: #1a0a2e; }
-  .menu-circle li:nth-child(2) .bg { background: #0a1a2e; }
-  .menu-circle li:nth-child(3) .bg { background: #0a2e1a; }
-  .menu-circle li:nth-child(4) .bg { background: #2e1a0a; }
 
-  .menu-circle li a {
+  .circle-menu li:hover .fill {
+    clip-path: circle(150% at var(--cx, 50%) var(--cy, 50%));
+  }
+
+  .circle-menu li:nth-child(1) .fill { background: rgba(99,102,241,0.2); }
+  .circle-menu li:nth-child(2) .fill { background: rgba(236,72,153,0.2); }
+  .circle-menu li:nth-child(3) .fill { background: rgba(16,185,129,0.2); }
+  .circle-menu li:nth-child(4) .fill { background: rgba(245,158,11,0.2); }
+
+  .circle-menu li a {
     position: relative;
     z-index: 1;
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 28px 32px;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
     text-decoration: none;
     color: var(--text);
-    transition: color 0.3s ease;
   }
-  .menu-circle li .icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+
+  .circle-menu li .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 1.2rem;
     flex-shrink: 0;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .menu-circle li:hover .icon { transform: scale(1.15) rotate(-5deg); }
-  .menu-circle li:nth-child(1) .icon { background: rgba(124,58,237,0.2); }
-  .menu-circle li:nth-child(2) .icon { background: rgba(14,165,233,0.2); }
-  .menu-circle li:nth-child(3) .icon { background: rgba(16,185,129,0.2); }
-  .menu-circle li:nth-child(4) .icon { background: rgba(245,158,11,0.2); }
-  .menu-circle li .text h3 { font-size: 18px; font-weight: 600; }
-  .menu-circle li .text p { font-size: 13px; color: var(--muted); margin-top: 2px; }
-  .menu-circle li .chevron {
+
+  .circle-menu li:nth-child(1) .icon { background: rgba(99,102,241,0.15); }
+  .circle-menu li:nth-child(2) .icon { background: rgba(236,72,153,0.15); }
+  .circle-menu li:nth-child(3) .icon { background: rgba(16,185,129,0.15); }
+  .circle-menu li:nth-child(4) .icon { background: rgba(245,158,11,0.15); }
+
+  .circle-menu li:hover .icon { transform: scale(1.15) rotate(-5deg); }
+
+  .circle-menu li .info h3 { font-size: 0.95rem; font-weight: 600; }
+  .circle-menu li .info p { font-size: 0.75rem; color: #555; margin-top: 2px; }
+
+  .circle-menu li .chevron {
     margin-left: auto;
-    font-size: 18px;
-    color: var(--muted);
-    transform: translateX(0);
-    transition: transform 0.3s ease, color 0.3s ease;
+    color: #333;
+    transition: transform 0.3s, color 0.3s;
   }
-  .menu-circle li:hover .chevron { transform: translateX(6px); color: var(--text); }
+
+  .circle-menu li:hover .chevron { transform: translateX(4px); color: #aaa; }
 
   /* ═══════════════════════════════════════
-     VARIANT 4 — Diagonal Clip Wipe
-     Parallelogram clip-path wipe
+     DEMO 4 — Diagonal Slash Wipe
   ═══════════════════════════════════════ */
-  .menu-diag {
+  .slash-menu {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
   }
-  .menu-diag li {
+
+  .slash-menu li {
     position: relative;
+    height: 72px;
+    border-radius: 10px;
     overflow: hidden;
-    height: 80px;
-    border-radius: 8px;
     cursor: pointer;
   }
-  .menu-diag li .bg {
+
+  .slash-menu li .fill {
     position: absolute;
     inset: 0;
-    clip-path: polygon(0 0, 0 0, -20px 100%, -20px 100%);
+    clip-path: polygon(-10% 0, -10% 0, -30% 100%, -30% 100%);
     transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1);
-    will-change: clip-path;
   }
-  .menu-diag li:hover .bg {
-    clip-path: polygon(0 0, calc(100% + 20px) 0, 100% 100%, -20px 100%);
+
+  .slash-menu li:hover .fill {
+    clip-path: polygon(-10% 0, 110% 0, 90% 100%, -30% 100%);
     transition: clip-path 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .menu-diag li:nth-child(1) .bg { background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 100%); }
-  .menu-diag li:nth-child(2) .bg { background: linear-gradient(90deg, #0ea5e9 0%, #06b6d4 100%); }
-  .menu-diag li:nth-child(3) .bg { background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%); }
-  .menu-diag li:nth-child(4) .bg { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
 
-  .menu-diag li .content {
+  .slash-menu li:nth-child(1) .fill { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+  .slash-menu li:nth-child(2) .fill { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+  .slash-menu li:nth-child(3) .fill { background: linear-gradient(135deg, #10b981, #14b8a6); }
+  .slash-menu li:nth-child(4) .fill { background: linear-gradient(135deg, #f59e0b, #f97316); }
+
+  .slash-menu li .content {
     position: relative;
     z-index: 1;
     height: 100%;
     display: flex;
     align-items: center;
-    padding: 0 28px;
+    padding: 0 1.5rem;
     background: #111;
-    border-radius: 8px;
-    transition: background 0.4s ease;
+    border-radius: 10px;
+    transition: background 0.4s;
   }
-  .menu-diag li:hover .content { background: transparent; }
-  .menu-diag li .content .label {
-    font-size: 22px;
+
+  .slash-menu li:hover .content { background: transparent; }
+
+  .slash-menu li .content .title {
+    font-size: 1.1rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
-    transition: letter-spacing 0.4s ease;
+    letter-spacing: -0.01em;
+    transition: letter-spacing 0.4s;
   }
-  .menu-diag li:hover .content .label { letter-spacing: 0.04em; }
-  .menu-diag li .content .tag {
+
+  .slash-menu li:hover .content .title { letter-spacing: 0.05em; }
+
+  .slash-menu li .content .badge {
     margin-left: auto;
-    font-size: 11px;
-    letter-spacing: .1em;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: #555;
     background: #1a1a1a;
-    padding: 4px 10px;
-    border-radius: 20px;
-    transition: background 0.3s ease, color 0.3s ease;
+    padding: 0.3rem 0.6rem;
+    border-radius: 1rem;
+    transition: all 0.3s;
   }
-  .menu-diag li:hover .content .tag {
+
+  .slash-menu li:hover .content .badge {
     background: rgba(255,255,255,0.15);
     color: #fff;
   }
 
-  /* ─── Two-column layout for sections 3 & 4 ─── */
-  .two-col {
+  /* ─── Two Column for Demo 3 & 4 ─── */
+  .split {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 60px;
+    gap: 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 3rem 3rem;
   }
-  @media (max-width: 900px) {
-    .two-col { grid-template-columns: 1fr; }
-    .section { padding: 40px 24px; }
-    .menu-h li a { font-size: 28px; }
+
+  @media (max-width: 768px) {
+    .split { grid-template-columns: 1fr; }
+    .grid-reveal { grid-template-columns: repeat(2, 1fr); }
+    .demo { padding: 2rem 1.5rem; }
   }
 </style>
 </head>
 <body>
 
-<div class="page-header">
-  <h1>Clip-Path Reveal Menu</h1>
-  <p>Hover interactions using clip-path animation · 4 variants · from tympanus.net/codrops</p>
+<div class="header">
+  <h1>Clip-Path Menu</h1>
+  <p>Four clip-path reveal patterns — hover to interact</p>
 </div>
 
-<div class="sections">
+<!-- Demo 1: Horizontal Wipe -->
+<div class="demo" style="--demo-color: #6366f1">
+  <div class="demo-label">01 — Horizontal Wipe</div>
+  <ul class="menu-wipe">
+    <li>
+      <div class="fill"></div>
+      <a href="#"><span>Design Systems</span><span class="arrow">→</span></a>
+      <span class="idx">01</span>
+    </li>
+    <li>
+      <div class="fill"></div>
+      <a href="#"><span>Motion Design</span><span class="arrow">→</span></a>
+      <span class="idx">02</span>
+    </li>
+    <li>
+      <div class="fill"></div>
+      <a href="#"><span>Interaction</span><span class="arrow">→</span></a>
+      <span class="idx">03</span>
+    </li>
+    <li>
+      <div class="fill"></div>
+      <a href="#"><span>Typography</span><span class="arrow">→</span></a>
+      <span class="idx">04</span>
+    </li>
+    <li>
+      <div class="fill"></div>
+      <a href="#"><span>Visual Identity</span><span class="arrow">→</span></a>
+      <span class="idx">05</span>
+    </li>
+  </ul>
+</div>
 
-  <!-- VARIANT 1: Horizontal Clip -->
-  <div class="section">
-    <div class="section-label">01 — Horizontal Clip Reveal</div>
-    <ul class="menu-h">
+<!-- Demo 2: Direction-Aware Grid -->
+<div class="demo" style="--demo-color: #ec4899">
+  <div class="demo-label">02 — Direction-Aware Grid</div>
+  <ul class="grid-reveal" id="gridReveal">
+    <li><div class="fill"></div><div class="label"><h3>Branding</h3><span>Visual Identity</span></div></li>
+    <li><div class="fill"></div><div class="label"><h3>Web</h3><span>Digital Experience</span></div></li>
+    <li><div class="fill"></div><div class="label"><h3>Motion</h3><span>Animation</span></div></li>
+    <li><div class="fill"></div><div class="label"><h3>3D</h3><span>Spatial UI</span></div></li>
+    <li><div class="fill"></div><div class="label"><h3>Type</h3><span>Font Systems</span></div></li>
+    <li><div class="fill"></div><div class="label"><h3>Illustration</h3><span>Custom Art</span></div></li>
+  </ul>
+</div>
+
+<!-- Demo 3 & 4 side by side -->
+<div class="split">
+  <div>
+    <div class="demo-label" style="--demo-color: #10b981; margin-bottom: 1.5rem;">03 — Circle Expand</div>
+    <ul class="circle-menu" id="circleMenu">
       <li>
-        <div class="bg"></div>
+        <div class="fill"></div>
         <a href="#">
-          <span class="num">01</span>
-          <span>Design Systems</span>
-          <span class="arrow">→</span>
+          <div class="icon">✦</div>
+          <div class="info"><h3>Components</h3><p>Reusable building blocks</p></div>
+          <span class="chevron">›</span>
         </a>
       </li>
       <li>
-        <div class="bg"></div>
+        <div class="fill"></div>
         <a href="#">
-          <span class="num">02</span>
-          <span>Motion Design</span>
-          <span class="arrow">→</span>
+          <div class="icon">◈</div>
+          <div class="info"><h3>Animations</h3><p>Micro-interactions</p></div>
+          <span class="chevron">›</span>
         </a>
       </li>
       <li>
-        <div class="bg"></div>
+        <div class="fill"></div>
         <a href="#">
-          <span class="num">03</span>
-          <span>Interaction</span>
-          <span class="arrow">→</span>
+          <div class="icon">⬡</div>
+          <div class="info"><h3>Layouts</h3><p>Grid & spacing</p></div>
+          <span class="chevron">›</span>
         </a>
       </li>
       <li>
-        <div class="bg"></div>
+        <div class="fill"></div>
         <a href="#">
-          <span class="num">04</span>
-          <span>Typography</span>
-          <span class="arrow">→</span>
-        </a>
-      </li>
-      <li>
-        <div class="bg"></div>
-        <a href="#">
-          <span class="num">05</span>
-          <span>Visual Identity</span>
-          <span class="arrow">→</span>
+          <div class="icon">◎</div>
+          <div class="info"><h3>Tokens</h3><p>Design variables</p></div>
+          <span class="chevron">›</span>
         </a>
       </li>
     </ul>
   </div>
-
-  <!-- VARIANT 2 & 3 side by side -->
-  <div class="section">
-    <div class="two-col">
-      <div>
-        <div class="section-label">02 — Direction-Aware Clip</div>
-        <ul class="menu-dir" id="menuDir">
-          <li><div class="bg"></div><div class="content"><h3>Branding</h3><p>Visual identity systems</p></div></li>
-          <li><div class="bg"></div><div class="content"><h3>Web Design</h3><p>Digital experiences</p></div></li>
-          <li><div class="bg"></div><div class="content"><h3>Motion</h3><p>Animation & transitions</p></div></li>
-          <li><div class="bg"></div><div class="content"><h3>3D Design</h3><p>Spatial interfaces</p></div></li>
-          <li><div class="bg"></div><div class="content"><h3>Typography</h3><p>Type systems & fonts</p></div></li>
-          <li><div class="bg"></div><div class="content"><h3>Illustration</h3><p>Custom artwork</p></div></li>
-        </ul>
-      </div>
-      <div>
-        <div class="section-label">03 — Circle Clip from Cursor</div>
-        <ul class="menu-circle" id="menuCircle">
-          <li>
-            <div class="bg"></div>
-            <a href="#">
-              <div class="icon">✦</div>
-              <div class="text"><h3>Components</h3><p>Reusable UI building blocks</p></div>
-              <span class="chevron">›</span>
-            </a>
-          </li>
-          <li>
-            <div class="bg"></div>
-            <a href="#">
-              <div class="icon">◈</div>
-              <div class="text"><h3>Animations</h3><p>Micro-interactions & transitions</p></div>
-              <span class="chevron">›</span>
-            </a>
-          </li>
-          <li>
-            <div class="bg"></div>
-            <a href="#">
-              <div class="icon">⬡</div>
-              <div class="text"><h3>Layouts</h3><p>Grid systems & spacing</p></div>
-              <span class="chevron">›</span>
-            </a>
-          </li>
-          <li>
-            <div class="bg"></div>
-            <a href="#">
-              <div class="icon">◎</div>
-              <div class="text"><h3>Tokens</h3><p>Design variables & themes</p></div>
-              <span class="chevron">›</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- VARIANT 4: Diagonal Clip -->
-  <div class="section">
-    <div class="section-label">04 — Diagonal Parallelogram Wipe</div>
-    <ul class="menu-diag">
+  <div>
+    <div class="demo-label" style="--demo-color: #f59e0b; margin-bottom: 1.5rem;">04 — Diagonal Slash</div>
+    <ul class="slash-menu">
       <li>
-        <div class="bg"></div>
-        <div class="content">
-          <span class="label">Brand Strategy</span>
-          <span class="tag">Strategy</span>
-        </div>
+        <div class="fill"></div>
+        <div class="content"><span class="title">Brand Strategy</span><span class="badge">Strategy</span></div>
       </li>
       <li>
-        <div class="bg"></div>
-        <div class="content">
-          <span class="label">UI / UX Design</span>
-          <span class="tag">Design</span>
-        </div>
+        <div class="fill"></div>
+        <div class="content"><span class="title">UI / UX Design</span><span class="badge">Design</span></div>
       </li>
       <li>
-        <div class="bg"></div>
-        <div class="content">
-          <span class="label">Frontend Dev</span>
-          <span class="tag">Code</span>
-        </div>
+        <div class="fill"></div>
+        <div class="content"><span class="title">Frontend Dev</span><span class="badge">Code</span></div>
       </li>
       <li>
-        <div class="bg"></div>
-        <div class="content">
-          <span class="label">Motion & 3D</span>
-          <span class="tag">Motion</span>
-        </div>
+        <div class="fill"></div>
+        <div class="content"><span class="title">Motion & 3D</span><span class="badge">Motion</span></div>
       </li>
     </ul>
   </div>
-
 </div>
 
 <script>
-// ─── Variant 2: Direction-Aware Clip ───────────────────────────────────────
-const dirItems = document.querySelectorAll('#menuDir li');
+// ─── Demo 2: Direction-Aware Clip ───
+const gridItems = document.querySelectorAll('#gridReveal li');
 
-function getDirection(e, el) {
+function getEdge(e, el) {
   const rect = el.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
   const w = rect.width;
   const h = rect.height;
-  // Determine which edge is closest
-  const top    = y / h;
-  const bottom = (h - y) / h;
-  const left   = x / w;
-  const right  = (w - x) / w;
-  const min = Math.min(top, bottom, left, right);
-  if (min === top)    return 'top';
-  if (min === bottom) return 'bottom';
-  if (min === left)   return 'left';
-  return 'right';
+  const edges = [
+    { edge: 'top', dist: y / h },
+    { edge: 'bottom', dist: (h - y) / h },
+    { edge: 'left', dist: x / w },
+    { edge: 'right', dist: (w - x) / w }
+  ];
+  return edges.sort((a, b) => a.dist - b.dist)[0].edge;
 }
 
-function getClipStart(dir) {
-  switch(dir) {
-    case 'top':    return 'polygon(0 0, 100% 0, 100% 0, 0 0)';
-    case 'bottom': return 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)';
-    case 'left':   return 'polygon(0 0, 0 0, 0 100%, 0 100%)';
-    case 'right':  return 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)';
-  }
-}
+const clipStart = {
+  top: 'polygon(0 0, 100% 0, 100% 0, 0 0)',
+  bottom: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)',
+  left: 'polygon(0 0, 0 0, 0 100%, 0 100%)',
+  right: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'
+};
 
-function getClipEnd(dir) {
-  switch(dir) {
-    case 'top':    return 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)';
-    case 'bottom': return 'polygon(0 0, 100% 0, 100% 0, 0 0)';
-    case 'left':   return 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)';
-    case 'right':  return 'polygon(0 0, 0 0, 0 100%, 0 100%)';
-  }
-}
+const clipEnd = {
+  top: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)',
+  bottom: 'polygon(0 0, 100% 0, 100% 0, 0 0)',
+  left: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)',
+  right: 'polygon(0 0, 0 0, 0 100%, 0 100%)'
+};
 
-dirItems.forEach(item => {
-  const bg = item.querySelector('.bg');
+gridItems.forEach(item => {
+  const fill = item.querySelector('.fill');
 
-  item.addEventListener('mouseenter', (e) => {
-    const dir = getDirection(e, item);
-    // Set start position instantly (no transition)
-    bg.style.transition = 'none';
-    bg.style.clipPath = getClipStart(dir);
-
-    // Force reflow
-    bg.offsetHeight;
-
-    // Animate to full reveal
-    bg.style.transition = 'clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1)';
-    bg.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
+  item.addEventListener('mouseenter', e => {
+    const edge = getEdge(e, item);
+    fill.style.transition = 'none';
+    fill.style.clipPath = clipStart[edge];
+    fill.offsetHeight; // reflow
+    fill.style.transition = 'clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1)';
+    fill.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
     item.classList.add('active');
   });
 
-  item.addEventListener('mouseleave', (e) => {
-    const dir = getDirection(e, item);
-    // Animate out in the direction mouse leaves (easeReverse: fast start)
-    bg.style.transition = 'clip-path 0.4s cubic-bezier(0.77, 0, 0.175, 1)';
-    bg.style.clipPath = getClipEnd(dir);
+  item.addEventListener('mouseleave', e => {
+    const edge = getEdge(e, item);
+    fill.style.transition = 'clip-path 0.4s cubic-bezier(0.77, 0, 0.175, 1)';
+    fill.style.clipPath = clipEnd[edge];
     item.classList.remove('active');
   });
 });
 
-// ─── Variant 3: Circle Clip from Cursor Position ──────────────────────────
-const circleItems = document.querySelectorAll('#menuCircle li');
+// ─── Demo 3: Circle from Cursor ───
+const circleItems = document.querySelectorAll('#circleMenu li');
 
 circleItems.forEach(item => {
-  const bg = item.querySelector('.bg');
-
-  item.addEventListener('mousemove', (e) => {
+  item.addEventListener('mousemove', e => {
     const rect = item.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
-    const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
-    item.style.setProperty('--mx', x + '%');
-    item.style.setProperty('--my', y + '%');
+    const cx = ((e.clientX - rect.left) / rect.width * 100).toFixed(1) + '%';
+    const cy = ((e.clientY - rect.top) / rect.height * 100).toFixed(1) + '%';
+    item.style.setProperty('--cx', cx);
+    item.style.setProperty('--cy', cy);
   });
 
-  item.addEventListener('mouseenter', (e) => {
+  item.addEventListener('mouseenter', e => {
     const rect = item.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
-    const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
-    item.style.setProperty('--mx', x + '%');
-    item.style.setProperty('--my', y + '%');
+    const cx = ((e.clientX - rect.left) / rect.width * 100).toFixed(1) + '%';
+    const cy = ((e.clientY - rect.top) / rect.height * 100).toFixed(1) + '%';
+    item.style.setProperty('--cx', cx);
+    item.style.setProperty('--cy', cy);
   });
 });
 </script>

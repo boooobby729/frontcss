@@ -3,615 +3,316 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>74 · Fluid Text Morph</title>
+<title>Fluid Text Morph</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #000;
-    --fg: #fff;
-    --accent1: #a78bfa;
-    --accent2: #34d399;
-    --accent3: #f472b6;
-    --accent4: #fb923c;
+    --bg: #050505;
+    --text: #ffffff;
   }
 
   body {
     background: var(--bg);
-    color: var(--fg);
-    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
   }
 
-  /* ── SVG Gooey Filter ── */
-  .svg-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
-
-  /* ── Section layout ── */
-  .section {
+  /* ─── Section Layout ─── */
+  .demo {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 40px;
+    padding: 4rem 2rem;
     position: relative;
+    overflow: hidden;
   }
 
-  .label {
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #555;
-    margin-bottom: 48px;
-    font-weight: 500;
-  }
-
-  /* ════════════════════════════════════════
-     VARIANT 1 · Hero Word Cycler
-  ════════════════════════════════════════ */
-  #v1 { background: #000; border-bottom: 1px solid #111; }
-
-  .hero-line {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .hero-static {
-    font-size: clamp(48px, 8vw, 96px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: #fff;
-    white-space: nowrap;
-  }
-
-  .morph-container {
-    position: relative;
-    display: inline-block;
-    /* No gooey filter on container — apply per-word blur only */
-  }
-
-  .morph-word {
-    font-size: clamp(48px, 8vw, 96px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
+  .demo-tag {
     position: absolute;
-    top: 0;
-    left: 0;
-    white-space: nowrap;
-    opacity: 0;
-    filter: blur(12px);
-    transition: opacity 0.7s ease, filter 0.7s ease;
-    background: linear-gradient(135deg, var(--accent1), var(--accent3));
+    top: 2rem;
+    left: 2rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #333;
+  }
+
+  /* ═══════════════════════════════════════
+     EFFECT 1 — SVG Filter Morph Text
+     Uses feTurbulence + feDisplacementMap
+  ═══════════════════════════════════════ */
+  .morph-1 {
+    font-size: clamp(4rem, 12vw, 10rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    text-align: center;
+    filter: url(#morphFilter);
+    transition: filter 0.3s;
+  }
+
+  .morph-1:hover {
+    filter: url(#morphFilterHover);
+  }
+
+  .morph-1 span {
+    display: inline-block;
+    background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .morph-word.active {
-    opacity: 1;
-    filter: blur(0px);
+  /* ═══════════════════════════════════════
+     EFFECT 2 — Blend Mode Text Reveal
+     Text cycles through words with blur morph
+  ═══════════════════════════════════════ */
+  .morph-2-container {
+    position: relative;
+    height: 8rem;
+    overflow: hidden;
   }
 
-  .morph-word.leaving {
-    opacity: 0;
-    filter: blur(14px);
-  }
-
-  /* Invisible sizer */
-  .morph-sizer {
-    font-size: clamp(48px, 8vw, 96px);
-    font-weight: 800;
+  .morph-2 {
+    font-size: clamp(3rem, 9vw, 7rem);
+    font-weight: 900;
     letter-spacing: -0.03em;
-    white-space: nowrap;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  /* ════════════════════════════════════════
-     VARIANT 2 · Gooey Blob Morph
-  ════════════════════════════════════════ */
-  #v2 { background: #050508; border-bottom: 1px solid #111; }
-
-  .blob-stage {
-    position: relative;
-    width: min(700px, 90vw);
-    height: 220px;
-    filter: url(#gooey-strong);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .blob-word {
-    position: absolute;
-    font-size: clamp(52px, 8vw, 96px);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    color: #fff;
-    opacity: 0;
-    transform: scale(0.75);
-    transition: opacity 0.55s ease, transform 0.55s ease, filter 0.55s ease;
-    filter: blur(10px);
-    white-space: nowrap;
-  }
-
-  .blob-word.active {
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0px);
-  }
-
-  .blob-word.leaving {
-    opacity: 0;
-    transform: scale(1.25);
-    filter: blur(14px);
-  }
-
-  .blob-sub {
-    margin-top: 32px;
-    font-size: 16px;
-    color: #444;
-    letter-spacing: 0.05em;
     text-align: center;
-  }
-
-  /* ════════════════════════════════════════
-     VARIANT 3 · Inline Keyword Morph
-  ════════════════════════════════════════ */
-  #v3 { background: #02020a; border-bottom: 1px solid #111; }
-
-  .prose-block {
-    max-width: 680px;
-    text-align: center;
-  }
-
-  .prose-text {
-    font-size: clamp(28px, 4vw, 48px);
-    font-weight: 700;
-    line-height: 1.3;
-    color: #888;
-    letter-spacing: -0.02em;
-  }
-
-  .inline-morph {
-    position: relative;
-    display: inline-block;
-    filter: url(#gooey);
-  }
-
-  .inline-word {
     position: absolute;
-    top: 0;
-    left: 0;
-    white-space: nowrap;
-    opacity: 0;
-    filter: blur(6px);
-    transition: opacity 0.5s ease, filter 0.5s ease;
-    font-weight: 800;
-    color: #fff;
-  }
-
-  .inline-word.active {
-    opacity: 1;
-    filter: blur(0px);
-  }
-
-  .inline-word.leaving {
-    opacity: 0;
-    filter: blur(8px);
-  }
-
-  .inline-sizer {
-    visibility: hidden;
-    pointer-events: none;
-    font-weight: 800;
-    color: #fff;
-  }
-
-  /* ════════════════════════════════════════
-     VARIANT 4 · Colorful Liquid Morph
-  ════════════════════════════════════════ */
-  #v4 { background: #000; }
-
-  .color-stage {
-    position: relative;
-    width: min(800px, 90vw);
-    height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    filter: url(#gooey-color);
-  }
-
-  .color-word {
-    position: absolute;
-    font-size: clamp(52px, 8.5vw, 100px);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    opacity: 0;
-    transform: scale(0.82) translateY(8px);
-    transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.55s cubic-bezier(0.4, 0, 0.2, 1),
-                filter 0.55s ease;
-    filter: blur(10px);
-    white-space: nowrap;
-  }
-
-  .color-word.active {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0px);
-  }
-
-  .color-word.leaving {
-    opacity: 0;
-    transform: scale(1.18) translateY(-6px);
-    filter: blur(14px);
-  }
-
-  /* Color palette per word */
-  .color-word:nth-child(1) { color: #a78bfa; }
-  .color-word:nth-child(2) { color: #34d399; }
-  .color-word:nth-child(3) { color: #f472b6; }
-  .color-word:nth-child(4) { color: #fb923c; }
-  .color-word:nth-child(5) { color: #60a5fa; }
-  .color-word:nth-child(6) { color: #fbbf24; }
-
-  .color-dots {
-    display: flex;
-    gap: 8px;
-    margin-top: 40px;
-  }
-
-  .color-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #333;
-    transition: background 0.3s ease, transform 0.3s ease;
-  }
-
-  .color-dot.active {
-    transform: scale(1.5);
-  }
-
-  /* ── Nav dots ── */
-  .nav {
-    position: fixed;
-    right: 24px;
+    width: 100%;
     top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 100;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    filter: blur(12px);
+    transition: opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease;
   }
 
-  .nav-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #333;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.3s;
+  .morph-2.active {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(1);
   }
 
-  .nav-dot.active {
-    background: #fff;
-    transform: scale(1.5);
+  .morph-2.exit {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translate(-50%, -50%) scale(0.95);
   }
 
-  /* ── Section title ── */
-  .section-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 16px;
+  .morph-2:nth-child(1) { color: #6366f1; }
+  .morph-2:nth-child(2) { color: #ec4899; }
+  .morph-2:nth-child(3) { color: #10b981; }
+  .morph-2:nth-child(4) { color: #f59e0b; }
+
+  /* ═══════════════════════════════════════
+     EFFECT 3 — Liquid Goo Merge
+     Two text layers with SVG goo filter
+  ═══════════════════════════════════════ */
+  .goo-wrap {
+    filter: url(#gooFilter);
   }
 
-  .section-desc {
-    font-size: 14px;
-    color: #444;
-    margin-top: 32px;
+  .goo-text {
+    font-size: clamp(4rem, 11vw, 9rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
     text-align: center;
-    max-width: 480px;
-    line-height: 1.6;
+    position: relative;
+  }
+
+  .goo-text .layer {
+    display: block;
+  }
+
+  .goo-text .layer:first-child {
+    color: #6366f1;
+    animation: gooFloat1 4s ease-in-out infinite;
+  }
+
+  .goo-text .layer:last-child {
+    color: #ec4899;
+    animation: gooFloat2 4s ease-in-out infinite;
+    margin-top: -0.2em;
+  }
+
+  @keyframes gooFloat1 {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    25% { transform: translateY(-5px) translateX(3px); }
+    75% { transform: translateY(5px) translateX(-3px); }
+  }
+
+  @keyframes gooFloat2 {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    25% { transform: translateY(5px) translateX(-3px); }
+    75% { transform: translateY(-5px) translateX(3px); }
+  }
+
+  /* ═══════════════════════════════════════
+     EFFECT 4 — Variable Font Weight Morph
+     Animate font-weight via CSS or JS
+  ═══════════════════════════════════════ */
+  .vf-text {
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 100;
+    letter-spacing: -0.02em;
+    text-align: center;
+    line-height: 1.1;
+    transition: font-weight 0.01s;
+  }
+
+  .vf-text .char {
+    display: inline-block;
+    animation: weightWave 3s ease-in-out infinite;
+    animation-delay: var(--d);
+    background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  @keyframes weightWave {
+    0%, 100% { font-weight: 100; transform: scaleY(1); }
+    50% { font-weight: 900; transform: scaleY(1.05); }
+  }
+
+  /* ─── Ambient background circles ─── */
+  .ambient {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .ambient-1 {
+    width: 400px;
+    height: 400px;
+    background: #6366f1;
+    top: 20%;
+    left: 10%;
+    animation: float 10s ease-in-out infinite;
+  }
+
+  .ambient-2 {
+    width: 300px;
+    height: 300px;
+    background: #ec4899;
+    bottom: 20%;
+    right: 15%;
+    animation: float 8s ease-in-out infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(30px, -20px); }
   }
 </style>
 </head>
 <body>
 
-<!-- SVG Filters -->
-<svg class="svg-filters" xmlns="http://www.w3.org/2000/svg">
+<!-- SVG Filters (hidden) -->
+<svg style="position: absolute; width: 0; height: 0;">
   <defs>
-    <!-- Standard gooey (inline morph) -->
-    <filter id="gooey" x="-30%" y="-80%" width="160%" height="260%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-      <feColorMatrix in="blur" mode="matrix"
-        values="1 0 0 0 0
-                0 1 0 0 0
-                0 0 1 0 0
-                0 0 0 18 -7"
-        result="gooey"/>
-      <feComposite in="SourceGraphic" in2="gooey" operator="atop"/>
+    <filter id="morphFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" seed="1">
+        <animate attributeName="baseFrequency" values="0.015;0.02;0.015" dur="6s" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
-
-    <!-- Strong gooey for big blobs -->
-    <filter id="gooey-strong" x="-40%" y="-80%" width="180%" height="260%">
+    <filter id="morphFilterHover">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" seed="2"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="gooFilter">
       <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
-      <feColorMatrix in="blur" mode="matrix"
-        values="1 0 0 0 0
-                0 1 0 0 0
-                0 0 1 0 0
-                0 0 0 18 -7"
-        result="gooey"/>
-      <feComposite in="SourceGraphic" in2="gooey" operator="atop"/>
-    </filter>
-
-    <!-- Color-preserving gooey -->
-    <filter id="gooey-color" x="-40%" y="-80%" width="180%" height="260%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur"/>
-      <feColorMatrix in="blur" mode="matrix"
-        values="1 0 0 0 0
-                0 1 0 0 0
-                0 0 1 0 0
-                0 0 0 18 -7"
-        result="gooey"/>
-      <feComposite in="SourceGraphic" in2="gooey" operator="atop"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo"/>
+      <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
     </filter>
   </defs>
 </svg>
 
-<!-- Nav -->
-<nav class="nav">
-  <div class="nav-dot active" onclick="scrollToSection(0)"></div>
-  <div class="nav-dot" onclick="scrollToSection(1)"></div>
-  <div class="nav-dot" onclick="scrollToSection(2)"></div>
-  <div class="nav-dot" onclick="scrollToSection(3)"></div>
-</nav>
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
 
-<!-- ══════════════════════════════════════
-     VARIANT 1 · Hero Word Cycler
-══════════════════════════════════════ -->
-<section class="section" id="v1">
-  <p class="label">Variant 01 · Hero Word Cycler</p>
+<!-- Effect 1: SVG Displacement Morph -->
+<section class="demo">
+  <span class="demo-tag">01 — Displacement Morph</span>
+  <div class="morph-1">
+    <span>FLUID</span>
+  </div>
+</section>
 
-  <div class="hero-line">
-    <span class="hero-static">We</span>
-    <div class="morph-container" id="morph1">
-      <span class="morph-sizer" id="morph1-sizer">Design</span>
-      <span class="morph-word active" data-index="0">Design</span>
-      <span class="morph-word" data-index="1">Build</span>
-      <span class="morph-word" data-index="2">Ship</span>
-      <span class="morph-word" data-index="3">Launch</span>
-      <span class="morph-word" data-index="4">Scale</span>
+<!-- Effect 2: Word Blur Cycle -->
+<section class="demo">
+  <span class="demo-tag">02 — Blur Morph Cycle</span>
+  <div class="morph-2-container" style="width: 100%;">
+    <div class="morph-2 active">Design</div>
+    <div class="morph-2">Create</div>
+    <div class="morph-2">Inspire</div>
+    <div class="morph-2">Evolve</div>
+  </div>
+</section>
+
+<!-- Effect 3: Goo Merge -->
+<section class="demo">
+  <span class="demo-tag">03 — Liquid Goo Merge</span>
+  <div class="goo-wrap">
+    <div class="goo-text">
+      <span class="layer">MERGE</span>
+      <span class="layer">BLEND</span>
     </div>
-    <span class="hero-static">Things.</span>
   </div>
-
-  <p class="section-desc">
-    SVG gooey filter (feGaussianBlur + feColorMatrix) 让文字边缘在切换时产生液态粘连感，
-    模拟液体凝固与融化的视觉效果。
-  </p>
 </section>
 
-<!-- ══════════════════════════════════════
-     VARIANT 2 · Gooey Blob Morph
-══════════════════════════════════════ -->
-<section class="section" id="v2">
-  <p class="label">Variant 02 · Gooey Blob Morph</p>
-
-  <div class="blob-stage" id="blob-stage">
-    <span class="blob-word active">CREATE</span>
-    <span class="blob-word">EXPLORE</span>
-    <span class="blob-word">IMAGINE</span>
-    <span class="blob-word">INSPIRE</span>
-    <span class="blob-word">EVOLVE</span>
-  </div>
-
-  <p class="blob-sub">Scale + blur 组合，配合强力 gooey 滤镜，文字从液态中凝固出现</p>
-
-  <p class="section-desc">
-    文字以 scale(0.7) + blur(12px) 状态入场，active 时归零，
-    离场时 scale(1.3) + blur(16px) 膨胀消散，gooey 滤镜让过渡期间的模糊边缘产生液态质感。
-  </p>
-</section>
-
-<!-- ══════════════════════════════════════
-     VARIANT 3 · Inline Keyword Morph
-══════════════════════════════════════ -->
-<section class="section" id="v3">
-  <p class="label">Variant 03 · Inline Keyword Morph</p>
-
-  <div class="prose-block">
-    <p class="prose-text">
-      The future of the web is
-      <span class="inline-morph" id="inline-morph">
-        <span class="inline-sizer" id="inline-sizer">immersive</span>
-        <span class="inline-word active">immersive</span>
-        <span class="inline-word">intelligent</span>
-        <span class="inline-word">expressive</span>
-        <span class="inline-word">fluid</span>
-        <span class="inline-word">alive</span>
-      </span>
-    </p>
-  </div>
-
-  <p class="section-desc">
-    行内关键词变形——文字嵌入句子中，宽度随词语长度平滑过渡，
-    gooey 滤镜让词语切换时产生液态融合感。
-  </p>
-</section>
-
-<!-- ══════════════════════════════════════
-     VARIANT 4 · Colorful Liquid Morph
-══════════════════════════════════════ -->
-<section class="section" id="v4">
-  <p class="label">Variant 04 · Colorful Liquid Morph</p>
-
-  <div class="color-stage" id="color-stage">
-    <span class="color-word active">PURPLE</span>
-    <span class="color-word">EMERALD</span>
-    <span class="color-word">PINK</span>
-    <span class="color-word">ORANGE</span>
-    <span class="color-word">BLUE</span>
-    <span class="color-word">GOLD</span>
-  </div>
-
-  <div class="color-dots" id="color-dots">
-    <div class="color-dot active" style="background:#a78bfa"></div>
-    <div class="color-dot" style="background:#34d399"></div>
-    <div class="color-dot" style="background:#f472b6"></div>
-    <div class="color-dot" style="background:#fb923c"></div>
-    <div class="color-dot" style="background:#60a5fa"></div>
-    <div class="color-dot" style="background:#fbbf24"></div>
-  </div>
-
-  <p class="section-desc">
-    每个词语有独立颜色，gooey-color 滤镜保留颜色信息，
-    切换时彩色液态边缘在黑色背景上产生发光融合效果。
-  </p>
+<!-- Effect 4: Variable Font Weight Wave -->
+<section class="demo">
+  <span class="demo-tag">04 — Weight Wave</span>
+  <div class="vf-text" id="vfText"></div>
 </section>
 
 <script>
-// ── Utility ──────────────────────────────────────────────
-function morphCycle(words, interval = 2200, overlap = 600) {
-  let current = 0;
+// ─── Effect 2: Word Cycle ───
+const words = document.querySelectorAll('.morph-2');
+let currentWord = 0;
 
-  function next() {
-    const prev = current;
-    current = (current + 1) % words.length;
-
-    // Mark leaving
-    words[prev].classList.remove('active');
-    words[prev].classList.add('leaving');
-
-    // After overlap, bring in next
-    setTimeout(() => {
-      words[current].classList.add('active');
-    }, overlap * 0.3);
-
-    // Clean up leaving class
-    setTimeout(() => {
-      words[prev].classList.remove('leaving');
-    }, overlap + 200);
-  }
-
-  return setInterval(next, interval);
-}
-
-// ── Variant 1: Hero Word Cycler ──────────────────────────
-const v1Words = document.querySelectorAll('#morph1 .morph-word');
-const v1Sizer = document.getElementById('morph1-sizer');
-// Sizer tracks current word width (not max), so no extra gap
-v1Sizer.textContent = v1Words[0].textContent;
-
-let v1Current = 0;
-function v1Next() {
-  const prev = v1Current;
-  v1Current = (v1Current + 1) % v1Words.length;
-
-  v1Words[prev].classList.remove('active');
-  v1Words[prev].classList.add('leaving');
-
-  // Update sizer to incoming word width
-  v1Sizer.textContent = v1Words[v1Current].textContent;
-
+function cycleWords() {
+  words[currentWord].classList.remove('active');
+  words[currentWord].classList.add('exit');
+  
+  currentWord = (currentWord + 1) % words.length;
+  words[currentWord].classList.remove('exit');
+  words[currentWord].classList.add('active');
+  
+  // Clean exit class after transition
   setTimeout(() => {
-    v1Words[v1Current].classList.add('active');
-  }, 150);
-
-  setTimeout(() => {
-    v1Words[prev].classList.remove('leaving');
-  }, 700);
-}
-setInterval(v1Next, 2200);
-
-// ── Variant 2: Blob Morph ────────────────────────────────
-const blobWords = document.querySelectorAll('#blob-stage .blob-word');
-morphCycle(Array.from(blobWords), 2200, 600);
-
-// ── Variant 3: Inline Morph ──────────────────────────────
-const inlineWords = document.querySelectorAll('#inline-morph .inline-word');
-const inlineSizer = document.getElementById('inline-sizer');
-let inlineCurrent = 0;
-
-function inlineNext() {
-  const prev = inlineCurrent;
-  inlineCurrent = (inlineCurrent + 1) % inlineWords.length;
-
-  // Update sizer to new word width
-  inlineSizer.textContent = inlineWords[inlineCurrent].textContent;
-
-  inlineWords[prev].classList.remove('active');
-  inlineWords[prev].classList.add('leaving');
-
-  setTimeout(() => {
-    inlineWords[inlineCurrent].classList.add('active');
-  }, 150);
-
-  setTimeout(() => {
-    inlineWords[prev].classList.remove('leaving');
+    words.forEach((w, i) => {
+      if (i !== currentWord) w.classList.remove('exit');
+    });
   }, 700);
 }
 
-setInterval(inlineNext, 2000);
+setInterval(cycleWords, 2500);
 
-// ── Variant 4: Colorful Morph ────────────────────────────
-const colorWords = document.querySelectorAll('#color-stage .color-word');
-const colorDots  = document.querySelectorAll('#color-dots .color-dot');
-let colorCurrent = 0;
+// ─── Effect 4: Variable Font Weight Wave ───
+const vfContainer = document.getElementById('vfText');
+const vfText = 'MORPHING';
 
-function colorNext() {
-  const prev = colorCurrent;
-  colorCurrent = (colorCurrent + 1) % colorWords.length;
-
-  colorWords[prev].classList.remove('active');
-  colorWords[prev].classList.add('leaving');
-  colorDots[prev].classList.remove('active');
-
-  setTimeout(() => {
-    colorWords[colorCurrent].classList.add('active');
-    colorDots[colorCurrent].classList.add('active');
-  }, 200);
-
-  setTimeout(() => {
-    colorWords[prev].classList.remove('leaving');
-  }, 750);
+for (let i = 0; i < vfText.length; i++) {
+  const span = document.createElement('span');
+  span.className = 'char';
+  span.textContent = vfText[i];
+  span.style.setProperty('--d', `${i * 150}ms`);
+  vfContainer.appendChild(span);
 }
-
-setInterval(colorNext, 2000);
-
-// ── Nav dots ─────────────────────────────────────────────
-const sections = [
-  document.getElementById('v1'),
-  document.getElementById('v2'),
-  document.getElementById('v3'),
-  document.getElementById('v4'),
-];
-const navDots = document.querySelectorAll('.nav-dot');
-
-function scrollToSection(i) {
-  sections[i].scrollIntoView({ behavior: 'smooth' });
-}
-
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const i = sections.indexOf(entry.target);
-      navDots.forEach(d => d.classList.remove('active'));
-      if (i >= 0) navDots[i].classList.add('active');
-    }
-  });
-}, { threshold: 0.5 });
-
-sections.forEach(s => observer.observe(s));
 </script>
 </body>
 </html>

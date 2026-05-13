@@ -1,631 +1,357 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>滚动驱动 3D 圆柱轮播 · On-Scroll 3D Carousel</title>
+<title>On-Scroll 3D Carousel</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --bg: #060606;
+    --text: #f5f5f5;
+    --accent: #6366f1;
+    --card-w: 280px;
+    --card-h: 380px;
+    --items: 8;
+  }
+
   body {
-    background: #000;
-    color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     overflow-x: hidden;
   }
 
-  /* ── Header ── */
-  .page-header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    padding: 22px 40px;
+  /* ─── Hero ─── */
+  .hero {
+    height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(to bottom, rgba(0,0,0,.85) 0%, transparent 100%);
-  }
-  .page-header h1 {
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.4);
-  }
-  .page-header .tag {
-    font-size: 11px;
-    padding: 4px 12px;
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 20px;
-    color: rgba(255,255,255,.35);
-    letter-spacing: .08em;
-  }
-
-  /* ── Section label ── */
-  .section-label {
+    justify-content: center;
     text-align: center;
-    padding: 130px 20px 70px;
-  }
-  .section-label .num {
-    font-size: 11px;
-    letter-spacing: .2em;
-    color: rgba(255,255,255,.25);
-    text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-  .section-label h2 {
-    font-size: clamp(32px, 5vw, 56px);
-    font-weight: 700;
-    letter-spacing: -.03em;
-    line-height: 1.05;
-  }
-  .section-label p {
-    margin-top: 16px;
-    font-size: 15px;
-    color: rgba(255,255,255,.4);
-    max-width: 440px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.65;
+    position: relative;
   }
 
-  /* ── Scroll scene ── */
-  .scroll-scene {
-    position: relative;
-    height: 300vh;
+  .hero h1 {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, #6366f1 60%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
   }
-  .sticky-wrap {
+
+  .hero p {
+    color: #555;
+    font-size: 1rem;
+    max-width: 400px;
+  }
+
+  .hero .scroll-cue {
+    position: absolute;
+    bottom: 2rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #333;
+  }
+
+  .hero .scroll-cue::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, #333, transparent);
+    margin: 0.5rem auto 0;
+    animation: fadeDown 2s ease-in-out infinite;
+  }
+
+  @keyframes fadeDown {
+    0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+  }
+
+  /* ─── Carousel Container ─── */
+  .carousel-section {
+    height: 300vh; /* scrollable area */
+    position: relative;
+  }
+
+  .carousel-sticky {
     position: sticky;
     top: 0;
     height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    perspective: 1200px;
     overflow: hidden;
   }
 
-  /* ── Background glow ── */
-  .bg-glow {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-  .bg-glow-inner {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 700px; height: 700px;
-    border-radius: 50%;
-    opacity: .6;
+  .carousel-ring {
+    position: relative;
+    width: var(--card-w);
+    height: var(--card-h);
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
   }
 
-  /* ── Carousel stage ── */
-  .carousel-stage {
-    perspective: 1100px;
-    perspective-origin: 50% 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-  }
-  .carousel {
-    position: relative;
-    transform-style: preserve-3d;
-    will-change: transform;
-  }
-  .carousel-cell {
+  .carousel-card {
     position: absolute;
-    border-radius: 18px;
+    width: var(--card-w);
+    height: var(--card-h);
+    border-radius: 16px;
     overflow: hidden;
     backface-visibility: hidden;
-    will-change: transform, filter;
-    box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    transition: box-shadow 0.3s;
   }
 
-  /* ── Scroll hint ── */
-  .scroll-hint {
+  .carousel-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .carousel-card::after {
+    content: '';
     position: absolute;
-    bottom: 70px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    transition: opacity .5s;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6) 100%);
     pointer-events: none;
   }
-  .scroll-hint.hidden { opacity: 0; }
-  .scroll-hint-text {
-    font-size: 10px;
-    letter-spacing: .2em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.25);
-  }
-  .scroll-hint-line {
-    width: 1px;
-    height: 44px;
-    background: linear-gradient(to bottom, rgba(255,255,255,.3), transparent);
-    animation: linePulse 1.8s ease-in-out infinite;
-  }
-  @keyframes linePulse {
-    0%,100% { opacity:.25; transform:scaleY(1); }
-    50% { opacity:.7; transform:scaleY(1.15); }
-  }
 
-  /* ── Angle display ── */
-  .angle-display {
+  .carousel-card .card-info {
     position: absolute;
-    top: 28px; right: 32px;
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
-    color: rgba(255,255,255,.2);
-    letter-spacing: .06em;
-    font-family: 'SF Mono', 'Fira Code', monospace;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    z-index: 2;
   }
 
-  /* ── Progress bar ── */
+  .carousel-card .card-info h3 {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .carousel-card .card-info span {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── Progress indicator ─── */
   .progress-bar {
     position: fixed;
-    bottom: 36px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    z-index: 50;
-    transition: opacity .3s;
+    top: 50%;
+    right: 2rem;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 120px;
+    background: #1a1a1a;
+    border-radius: 2px;
+    z-index: 100;
   }
-  .progress-track {
-    width: 100px;
-    height: 1px;
-    background: rgba(255,255,255,.12);
-    border-radius: 1px;
-    overflow: hidden;
-  }
+
   .progress-fill {
-    height: 100%;
-    background: rgba(255,255,255,.6);
-    border-radius: 1px;
-    width: 0%;
-  }
-  .progress-pct {
-    font-size: 10px;
-    color: rgba(255,255,255,.25);
-    letter-spacing: .1em;
-    font-variant-numeric: tabular-nums;
-    min-width: 30px;
-    font-family: 'SF Mono', monospace;
+    width: 100%;
+    height: 0%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: height 0.1s ease-out;
   }
 
-  /* ── Divider ── */
-  .divider {
-    height: 1px;
-    background: rgba(255,255,255,.05);
-    margin: 0 60px;
-  }
-
-  /* ── Static section (variants 3 & 4) ── */
-  .static-section {
-    height: 90vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+  /* ─── Second Demo: Horizontal Scroll Carousel ─── */
+  .h-section {
+    padding: 6rem 0;
     overflow: hidden;
   }
 
-  /* ── Footer ── */
-  .page-footer {
+  .h-section-header {
     text-align: center;
-    padding: 80px 20px;
-    font-size: 11px;
-    color: rgba(255,255,255,.15);
-    letter-spacing: .1em;
+    margin-bottom: 3rem;
+  }
+
+  .h-section-header h2 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .h-section-header p {
+    color: #555;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .h-track {
+    display: flex;
+    gap: 1.5rem;
+    padding: 2rem 3rem;
+    animation: scrollX 30s linear infinite;
+  }
+
+  .h-track:hover { animation-play-state: paused; }
+
+  @keyframes scrollX {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .h-card {
+    flex: 0 0 250px;
+    height: 340px;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .h-card:hover {
+    transform: scale(1.05) translateY(-8px);
+  }
+
+  .h-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .h-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+  }
+
+  .h-card .h-label {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 2;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* ─── Footer ─── */
+  footer {
+    text-align: center;
+    padding: 4rem;
+    font-size: 0.7rem;
+    color: #222;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 </style>
 </head>
 <body>
 
-<header class="page-header">
-  <h1>On-Scroll 3D Carousel</h1>
-  <span class="tag">CSS 3D · Scroll · Pure JS</span>
-</header>
-
-<!-- ═══════════════════════════════════════
-     01 — Scroll-Driven (Warm Tones)
-════════════════════════════════════════ -->
-<div class="section-label">
-  <div class="num">01 / 04</div>
-  <h2>Scroll-Driven<br>3D Carousel</h2>
-  <p>滚动页面，圆柱形排列的卡片在 3D 空间中旋转，中间卡片正面朝向你。</p>
+<div class="hero">
+  <h1>3D Carousel</h1>
+  <p>Scroll to rotate a cylindrical carousel in 3D perspective space</p>
+  <div class="scroll-cue">Scroll to spin</div>
 </div>
 
-<div class="scroll-scene" id="scene1">
-  <div class="sticky-wrap">
-    <div class="bg-glow">
-      <div class="bg-glow-inner" style="background:radial-gradient(ellipse,rgba(160,100,60,.18) 0%,transparent 70%)"></div>
-    </div>
-    <div class="carousel-stage">
-      <div class="carousel" id="carousel1" style="width:280px;height:380px;"></div>
-    </div>
-    <div class="scroll-hint" id="hint1">
-      <div class="scroll-hint-text">Scroll</div>
-      <div class="scroll-hint-line"></div>
-    </div>
-    <div class="angle-display" id="angle1">rotateY: 0°</div>
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<!-- Main 3D Cylinder Carousel -->
+<section class="carousel-section" id="carouselSection">
+  <div class="carousel-sticky">
+    <div class="carousel-ring" id="carouselRing"></div>
   </div>
-</div>
+</section>
 
-<div class="divider"></div>
-
-<!-- ═══════════════════════════════════════
-     02 — Dark Tech (More Cards)
-════════════════════════════════════════ -->
-<div class="section-label">
-  <div class="num">02 / 04</div>
-  <h2>Dark Tech<br>Cylinder</h2>
-  <p>10 张卡片，更大半径，深色科技风格，带发光边框与霓虹色调。</p>
-</div>
-
-<div class="scroll-scene" id="scene2">
-  <div class="sticky-wrap">
-    <div class="bg-glow">
-      <div class="bg-glow-inner" style="background:radial-gradient(ellipse,rgba(0,180,255,.1) 0%,transparent 70%)"></div>
-    </div>
-    <div class="carousel-stage">
-      <div class="carousel" id="carousel2" style="width:260px;height:360px;"></div>
-    </div>
-    <div class="scroll-hint" id="hint2">
-      <div class="scroll-hint-text">Scroll</div>
-      <div class="scroll-hint-line"></div>
-    </div>
-    <div class="angle-display" id="angle2">rotateY: 0°</div>
+<!-- Bonus: Auto-scroll horizontal track -->
+<section class="h-section">
+  <div class="h-section-header">
+    <h2>Infinite Scroll</h2>
+    <p>A bonus auto-scrolling horizontal carousel</p>
   </div>
-</div>
+  <div class="h-track" id="hTrack"></div>
+</section>
 
-<div class="divider"></div>
-
-<!-- ═══════════════════════════════════════
-     03 — Auto-Spin
-════════════════════════════════════════ -->
-<div class="section-label">
-  <div class="num">03 / 04</div>
-  <h2>Auto-Spin<br>Carousel</h2>
-  <p>CSS animation 驱动持续旋转，悬停时暂停，无需滚动。</p>
-</div>
-
-<div class="static-section" id="scene3">
-  <div class="bg-glow" style="position:absolute;inset:0;pointer-events:none;">
-    <div class="bg-glow-inner" style="background:radial-gradient(ellipse,rgba(120,60,200,.15) 0%,transparent 70%)"></div>
-  </div>
-  <div class="carousel-stage" style="perspective:1100px;width:700px;height:460px;">
-    <div class="carousel" id="carousel3" style="width:260px;height:360px;"></div>
-  </div>
-</div>
-
-<div class="divider"></div>
-
-<!-- ═══════════════════════════════════════
-     04 — Drag to Rotate
-════════════════════════════════════════ -->
-<div class="section-label">
-  <div class="num">04 / 04</div>
-  <h2>Drag to<br>Rotate</h2>
-  <p>鼠标拖拽旋转圆柱，松手后惯性滑动，支持触摸屏。</p>
-</div>
-
-<div class="static-section" id="scene4">
-  <div class="bg-glow" style="position:absolute;inset:0;pointer-events:none;">
-    <div class="bg-glow-inner" style="background:radial-gradient(ellipse,rgba(60,180,120,.12) 0%,transparent 70%)"></div>
-  </div>
-  <div class="carousel-stage" id="dragStage" style="perspective:1100px;width:700px;height:460px;cursor:grab;">
-    <div class="carousel" id="carousel4" style="width:280px;height:380px;"></div>
-  </div>
-  <div style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.2);">← Drag to rotate →</div>
-</div>
-
-<!-- Progress bar -->
-<div class="progress-bar" id="progressBar" style="opacity:0;">
-  <div class="progress-pct" id="progressPct">0%</div>
-  <div class="progress-track">
-    <div class="progress-fill" id="progressFill"></div>
-  </div>
-</div>
-
-<div class="page-footer">Inspired by Codrops · On-Scroll 3D Carousel · Pure HTML / CSS / JS</div>
+<footer>073 — On-Scroll 3D Carousel</footer>
 
 <script>
-// ─────────────────────────────────────────────
-// Card data
-// ─────────────────────────────────────────────
-const WARM_CARDS = [
-  { bg:'#2a1a0e', accent:'#d4956a', label:'Studio A', sub:'London' },
-  { bg:'#1e1208', accent:'#c8845a', label:'Atelier B', sub:'Paris' },
-  { bg:'#251508', accent:'#e0a070', label:'Gallery C', sub:'Milan' },
-  { bg:'#1a0f06', accent:'#b87850', label:'Studio D', sub:'Tokyo' },
-  { bg:'#2e1c0c', accent:'#daa060', label:'Maison E', sub:'New York' },
-  { bg:'#221408', accent:'#cc8c58', label:'Loft F', sub:'Berlin' },
-  { bg:'#1c1008', accent:'#d49060', label:'Space G', sub:'Seoul' },
-  { bg:'#28180a', accent:'#c07848', label:'House H', sub:'Sydney' },
+const ITEMS = 8;
+const ring = document.getElementById('carouselRing');
+const section = document.getElementById('carouselSection');
+const progressFill = document.getElementById('progressFill');
+
+const labels = [
+  { title: 'Perspective', sub: 'Depth & Space' },
+  { title: 'Rotation', sub: '3D Transform' },
+  { title: 'Parallax', sub: 'Layer Motion' },
+  { title: 'Reflect', sub: 'Mirror World' },
+  { title: 'Velocity', sub: 'Speed Flow' },
+  { title: 'Gravity', sub: 'Weight Sense' },
+  { title: 'Chromatic', sub: 'Color Shift' },
+  { title: 'Infinity', sub: 'Endless Loop' },
 ];
 
-const TECH_CARDS = [
-  { bg:'#050810', accent:'#00d4ff', label:'Neural Net', sub:'v2.4.1' },
-  { bg:'#080510', accent:'#a855f7', label:'Quantum', sub:'Core' },
-  { bg:'#040810', accent:'#06b6d4', label:'Cipher', sub:'Alpha' },
-  { bg:'#060510', accent:'#8b5cf6', label:'Nexus', sub:'Beta' },
-  { bg:'#040a10', accent:'#22d3ee', label:'Vertex', sub:'v1.0' },
-  { bg:'#060510', accent:'#c084fc', label:'Prism', sub:'Edge' },
-  { bg:'#040810', accent:'#38bdf8', label:'Flux', sub:'Node' },
-  { bg:'#080510', accent:'#818cf8', label:'Orbit', sub:'Hub' },
-  { bg:'#040810', accent:'#67e8f9', label:'Pulse', sub:'Grid' },
-  { bg:'#060510', accent:'#a78bfa', label:'Echo', sub:'Wave' },
-];
+// Build carousel cards in a cylinder
+const angleStep = 360 / ITEMS;
+const radius = 500; // translateZ distance
 
-// ─────────────────────────────────────────────
-// Build carousel
-// ─────────────────────────────────────────────
-function buildCarousel(el, cards, radius, w, h) {
-  el.innerHTML = '';
-  const n = cards.length;
-  const step = 360 / n;
-
-  cards.forEach((c, i) => {
-    const cell = document.createElement('div');
-    cell.className = 'carousel-cell';
-    cell.style.cssText = `
-      width:${w}px; height:${h}px;
-      left:${-w/2}px; top:${-h/2}px;
-      transform: rotateY(${i * step}deg) translateZ(${radius}px);
-      background: ${c.bg};
-    `;
-
-    // Inner SVG artwork
-    const uid = `g${Date.now()}_${i}`;
-    cell.innerHTML = `
-      <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="${uid}" cx="50%" cy="38%" r="55%">
-            <stop offset="0%" stop-color="${c.accent}" stop-opacity="0.28"/>
-            <stop offset="100%" stop-color="${c.bg}" stop-opacity="0"/>
-          </radialGradient>
-          <filter id="f${uid}" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="18" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-          </filter>
-        </defs>
-        <!-- Base -->
-        <rect width="${w}" height="${h}" fill="${c.bg}" rx="18"/>
-        <!-- Glow blob -->
-        <ellipse cx="${w/2}" cy="${h*0.38}" rx="${w*0.45}" ry="${h*0.3}"
-                 fill="${c.accent}" opacity="0.12" filter="url(#f${uid})"/>
-        <!-- Gradient overlay -->
-        <rect width="${w}" height="${h}" fill="url(#${uid})" rx="18"/>
-        <!-- Outer ring -->
-        <circle cx="${w/2}" cy="${h*0.42}" r="${Math.min(w,h)*0.28}"
-                fill="none" stroke="${c.accent}" stroke-width="0.7" opacity="0.25"/>
-        <!-- Inner ring -->
-        <circle cx="${w/2}" cy="${h*0.42}" r="${Math.min(w,h)*0.16}"
-                fill="none" stroke="${c.accent}" stroke-width="0.5" opacity="0.18"/>
-        <!-- Center dot -->
-        <circle cx="${w/2}" cy="${h*0.42}" r="3" fill="${c.accent}" opacity="0.5"/>
-        <!-- Cross hairs -->
-        <line x1="${w/2-Math.min(w,h)*0.32}" y1="${h*0.42}"
-              x2="${w/2+Math.min(w,h)*0.32}" y2="${h*0.42}"
-              stroke="${c.accent}" stroke-width="0.5" opacity="0.15"/>
-        <line x1="${w/2}" y1="${h*0.42-Math.min(w,h)*0.32}"
-              x2="${w/2}" y2="${h*0.42+Math.min(w,h)*0.32}"
-              stroke="${c.accent}" stroke-width="0.5" opacity="0.15"/>
-        <!-- Corner brackets -->
-        <path d="M18,18 L34,18 M18,18 L18,34" stroke="${c.accent}" stroke-width="1.2" opacity="0.35" fill="none" stroke-linecap="round"/>
-        <path d="M${w-18},18 L${w-34},18 M${w-18},18 L${w-18},34" stroke="${c.accent}" stroke-width="1.2" opacity="0.35" fill="none" stroke-linecap="round"/>
-        <path d="M18,${h-18} L34,${h-18} M18,${h-18} L18,${h-34}" stroke="${c.accent}" stroke-width="1.2" opacity="0.35" fill="none" stroke-linecap="round"/>
-        <path d="M${w-18},${h-18} L${w-34},${h-18} M${w-18},${h-18} L${w-18},${h-34}" stroke="${c.accent}" stroke-width="1.2" opacity="0.35" fill="none" stroke-linecap="round"/>
-        <!-- Big index number (watermark) -->
-        <text x="${w/2}" y="${h*0.48}" text-anchor="middle" dominant-baseline="middle"
-              font-family="-apple-system,sans-serif" font-size="${Math.min(w,h)*0.38}"
-              font-weight="800" fill="${c.accent}" opacity="0.07">${String(i+1).padStart(2,'0')}</text>
-        <!-- Bottom gradient fade -->
-        <defs>
-          <linearGradient id="fade${uid}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="55%" stop-color="${c.bg}" stop-opacity="0"/>
-            <stop offset="100%" stop-color="${c.bg}" stop-opacity="0.85"/>
-          </linearGradient>
-        </defs>
-        <rect width="${w}" height="${h}" fill="url(#fade${uid})" rx="18"/>
-        <!-- Label -->
-        <text x="20" y="${h-36}" font-family="-apple-system,sans-serif"
-              font-size="14" font-weight="600" fill="rgba(255,255,255,0.9)">${c.label}</text>
-        <text x="20" y="${h-18}" font-family="-apple-system,sans-serif"
-              font-size="11" font-weight="400" fill="rgba(255,255,255,0.4)">${c.sub}</text>
-      </svg>
-    `;
-    el.appendChild(cell);
-  });
+for (let i = 0; i < ITEMS; i++) {
+  const card = document.createElement('div');
+  card.className = 'carousel-card';
+  const angle = angleStep * i;
+  card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+  
+  card.innerHTML = `
+    <img src="https://picsum.photos/seed/${i + 100}/560/760" alt="" loading="lazy">
+    <div class="card-info">
+      <h3>${labels[i].title}</h3>
+      <span>${labels[i].sub}</span>
+    </div>
+  `;
+  ring.appendChild(card);
 }
 
-// ─────────────────────────────────────────────
-// Init carousels
-// ─────────────────────────────────────────────
-buildCarousel(document.getElementById('carousel1'), WARM_CARDS, 420, 280, 380);
-buildCarousel(document.getElementById('carousel2'), TECH_CARDS, 500, 260, 360);
-buildCarousel(document.getElementById('carousel3'), WARM_CARDS.slice(0,6), 360, 260, 360);
-buildCarousel(document.getElementById('carousel4'), TECH_CARDS.slice(0,8), 420, 280, 380);
+// Scroll-driven rotation
+function updateCarousel() {
+  const rect = section.getBoundingClientRect();
+  const sectionHeight = section.offsetHeight - window.innerHeight;
+  const scrolled = -rect.top;
+  const progress = Math.max(0, Math.min(1, scrolled / sectionHeight));
 
-// ─────────────────────────────────────────────
-// Auto-spin (variant 3)
-// ─────────────────────────────────────────────
-(function() {
-  const c = document.getElementById('carousel3');
-  let angle = 0;
-  let paused = false;
-  let raf;
+  // Rotate the full ring based on scroll progress
+  const rotation = progress * 360;
+  ring.style.transform = `rotateY(${rotation}deg)`;
 
-  function spin() {
-    if (!paused) {
-      angle -= 0.25;
-      const rx = Math.sin(angle * Math.PI / 180) * 3;
-      const rz = Math.cos(angle * Math.PI / 180) * 1.5;
-      c.style.transform = `rotateY(${angle}deg) rotateX(${rx}deg) rotateZ(${rz}deg)`;
-    }
-    raf = requestAnimationFrame(spin);
-  }
-  spin();
+  // Update progress bar
+  progressFill.style.height = `${progress * 100}%`;
 
-  c.addEventListener('mouseenter', () => paused = true);
-  c.addEventListener('mouseleave', () => paused = false);
-})();
+  requestAnimationFrame(updateCarousel);
+}
 
-// ─────────────────────────────────────────────
-// Drag to rotate (variant 4)
-// ─────────────────────────────────────────────
-(function() {
-  const stage = document.getElementById('dragStage');
-  const c = document.getElementById('carousel4');
-  let dragging = false;
-  let lastX = 0;
-  let rotY = 0;
-  let targetY = 0;
-  let vel = 0;
+requestAnimationFrame(updateCarousel);
 
-  function lerp(a, b, t) { return a + (b - a) * t; }
+// ─── Horizontal Auto-Scroll Track ───
+const hTrack = document.getElementById('hTrack');
+const hItems = 12;
 
-  function tick() {
-    if (!dragging) {
-      vel *= 0.93;
-      targetY += vel;
-    }
-    rotY = lerp(rotY, targetY, dragging ? 0.3 : 0.1);
-    const rx = Math.sin(rotY * Math.PI / 180) * 4;
-    const rz = Math.cos(rotY * Math.PI / 180) * 2;
-    c.style.transform = `rotateY(${rotY}deg) rotateX(${rx}deg) rotateZ(${rz}deg)`;
-    requestAnimationFrame(tick);
-  }
-  tick();
-
-  stage.addEventListener('mousedown', e => {
-    dragging = true; lastX = e.clientX; vel = 0;
-    stage.style.cursor = 'grabbing';
-  });
-  window.addEventListener('mousemove', e => {
-    if (!dragging) return;
-    const dx = e.clientX - lastX;
-    vel = dx * 0.45;
-    targetY += dx * 0.45;
-    lastX = e.clientX;
-  });
-  window.addEventListener('mouseup', () => {
-    dragging = false;
-    stage.style.cursor = 'grab';
-  });
-  stage.addEventListener('touchstart', e => {
-    dragging = true; lastX = e.touches[0].clientX; vel = 0;
-  }, { passive: true });
-  window.addEventListener('touchmove', e => {
-    if (!dragging) return;
-    const dx = e.touches[0].clientX - lastX;
-    vel = dx * 0.45;
-    targetY += dx * 0.45;
-    lastX = e.touches[0].clientX;
-  }, { passive: true });
-  window.addEventListener('touchend', () => { dragging = false; });
-})();
-
-// ─────────────────────────────────────────────
-// Scroll-driven animation (variants 1 & 2)
-// ─────────────────────────────────────────────
-(function() {
-  function lerp(a, b, t) { return a + (b - a) * t; }
-
-  const scenes = [
-    {
-      el: document.getElementById('scene1'),
-      carousel: document.getElementById('carousel1'),
-      cells: document.getElementById('carousel1').querySelectorAll('.carousel-cell'),
-      hint: document.getElementById('hint1'),
-      angleEl: document.getElementById('angle1'),
-      rotY: 0, rotX: 3, rotZ: 3,
-    },
-    {
-      el: document.getElementById('scene2'),
-      carousel: document.getElementById('carousel2'),
-      cells: document.getElementById('carousel2').querySelectorAll('.carousel-cell'),
-      hint: document.getElementById('hint2'),
-      angleEl: document.getElementById('angle2'),
-      rotY: 0, rotX: 3, rotZ: 3,
-    },
-  ];
-
-  const progressBar  = document.getElementById('progressBar');
-  const progressFill = document.getElementById('progressFill');
-  const progressPct  = document.getElementById('progressPct');
-
-  function getProgress(sceneEl) {
-    const rect = sceneEl.getBoundingClientRect();
-    const total = sceneEl.offsetHeight - window.innerHeight;
-    return Math.max(0, Math.min(1, -rect.top / total));
-  }
-
-  function isVisible(sceneEl) {
-    const r = sceneEl.getBoundingClientRect();
-    return r.top < window.innerHeight && r.bottom > 0;
-  }
-
-  function tick() {
-    let anyVisible = false;
-    let latestP = 0;
-
-    scenes.forEach(s => {
-      if (!isVisible(s.el)) return;
-      anyVisible = true;
-
-      const p = getProgress(s.el);
-      latestP = p;
-
-      // Target rotations
-      const tY = lerp(0, -180, p);
-      const tX = lerp(3, -3, p);
-      const tZ = lerp(3, -3, p);
-
-      // Smooth
-      s.rotY = lerp(s.rotY, tY, 0.07);
-      s.rotX = lerp(s.rotX, tX, 0.07);
-      s.rotZ = lerp(s.rotZ, tZ, 0.07);
-
-      s.carousel.style.transform =
-        `rotateY(${s.rotY.toFixed(2)}deg) ` +
-        `rotateX(${s.rotX.toFixed(2)}deg) ` +
-        `rotateZ(${s.rotZ.toFixed(2)}deg)`;
-
-      // Brightness: 2.2 → 0.75
-      const br = lerp(2.2, 0.75, p).toFixed(2);
-      s.cells.forEach(c => { c.style.filter = `brightness(${br})`; });
-
-      // Angle label
-      s.angleEl.textContent = `rotateY: ${Math.round(s.rotY)}°`;
-
-      // Scroll hint
-      if (p > 0.03) s.hint.classList.add('hidden');
-      else s.hint.classList.remove('hidden');
-    });
-
-    // Progress bar
-    if (anyVisible) {
-      progressBar.style.opacity = '1';
-      const pct = Math.round(latestP * 100);
-      progressFill.style.width = pct + '%';
-      progressPct.textContent = pct + '%';
-    } else {
-      progressBar.style.opacity = '0';
-    }
-
-    requestAnimationFrame(tick);
-  }
-
-  tick();
-})();
+for (let i = 0; i < hItems * 2; i++) {  // Double for seamless loop
+  const card = document.createElement('div');
+  card.className = 'h-card';
+  const seed = (i % hItems) + 50;
+  card.innerHTML = `
+    <img src="https://picsum.photos/seed/${seed}/500/680" alt="" loading="lazy">
+    <span class="h-label">${labels[i % ITEMS].title}</span>
+  `;
+  hTrack.appendChild(card);
+}
 </script>
 </body>
 </html>

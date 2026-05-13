@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>91 · Magnetic Tile Ripple 磁性格子涟漪</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #030308;
+    --accent: #4f8eff;
+  }
+
+  body {
+    background: var(--bg);
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    text-align: center;
+    padding: 60px 24px 40px;
+  }
+  .page-header h1 {
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .page-header p {
+    margin-top: 10px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Section wrapper ── */
+  .section {
+    padding: 60px 24px 80px;
+    max-width: 960px;
+    margin: 0 auto;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: clamp(18px, 3vw, 26px);
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 36px;
+    line-height: 1.7;
+  }
+
+  /* ── Grid stage ── */
+  .grid-stage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* ══════════════════════════════════════
+     VARIANT 1 — Magnetic Float
+     格子随鼠标距离上浮 + 缩放 + 蓝紫渐变色
+  ══════════════════════════════════════ */
+  #grid-float {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 5px;
+    padding: 20px;
+    cursor: none;
+    position: relative;
+    user-select: none;
+  }
+  #grid-float .tile {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.25s cubic-bezier(0.23,1,0.32,1),
+                background 0.25s ease,
+                box-shadow 0.25s ease,
+                border-color 0.25s ease;
+    will-change: transform;
+  }
+
+  /* ══════════════════════════════════════
+     VARIANT 2 — Color Ripple
+     色相按距离扩散形成彩虹涟漪
+  ══════════════════════════════════════ */
+  #grid-color {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+    padding: 20px;
+    cursor: crosshair;
+    position: relative;
+  }
+  #grid-color .tile {
+    width: 58px;
+    height: 58px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    will-change: background, transform;
+  }
+
+  /* ══════════════════════════════════════
+     VARIANT 3 — Flip Checkerboard
+     格子 3D 翻转，背面对比色，错落时序
+  ══════════════════════════════════════ */
+  #grid-flip {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    padding: 20px;
+    perspective: 800px;
+    perspective-origin: center center;
+  }
+  #grid-flip .tile-wrap {
+    width: 70px;
+    height: 70px;
+    perspective: 600px;
+    cursor: pointer;
+  }
+  #grid-flip .tile-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    will-change: transform;
+  }
+  #grid-flip .tile-front,
+  #grid-flip .tile-back {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #grid-flip .tile-front {
+    background: linear-gradient(135deg, rgba(79,142,255,0.12), rgba(147,100,255,0.12));
+    border: 1px solid rgba(79,142,255,0.2);
+  }
+  #grid-flip .tile-back {
+    background: linear-gradient(135deg, #4f8eff22, #9364ff33);
+    border: 1px solid rgba(147,100,255,0.35);
+    transform: rotateY(180deg);
+  }
+  #grid-flip .tile-wrap.flipped .tile-inner {
+    transform: rotateY(180deg);
+  }
+  /* Checker pattern - odd tiles have different initial look */
+  #grid-flip .tile-wrap:nth-child(odd) .tile-front {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.07);
+  }
+
+  /* ══════════════════════════════════════
+     VARIANT 4 — Click Explosion
+     点击时以鼠标为中心向外粒子爆炸
+  ══════════════════════════════════════ */
+  #grid-explode {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+    padding: 20px;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+  }
+  #grid-explode .tile {
+    width: 58px;
+    height: 58px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+    will-change: transform, opacity;
+    position: relative;
+  }
+  #grid-explode .tile.exploding {
+    animation: none;
+  }
+
+  /* custom cursor for float grid */
+  .cursor-dot {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: rgba(79,142,255,0.9);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease;
+    mix-blend-mode: screen;
+    display: none;
+  }
+  #grid-float:hover ~ .cursor-dot,
+  .grid-stage:hover .cursor-dot {
+    display: block;
+  }
+
+  /* ── hint text ── */
+  .hint {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    margin-top: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Responsive: scale down on small screen ── */
+  @media (max-width: 700px) {
+    #grid-float { grid-template-columns: repeat(8, 1fr); }
+    #grid-float .tile { width: 38px; height: 38px; }
+    #grid-color { grid-template-columns: repeat(7, 1fr); }
+    #grid-color .tile { width: 42px; height: 42px; }
+    #grid-flip { grid-template-columns: repeat(6, 1fr); }
+    #grid-flip .tile-wrap { width: 50px; height: 50px; }
+    #grid-explode { grid-template-columns: repeat(7, 1fr); }
+    #grid-explode .tile { width: 42px; height: 42px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Magnetic Tile Ripple</h1>
+  <p>磁性格子涟漪 · 4 Variants · Inspired by GSAP</p>
+</div>
+
+<!-- ═══════════════════════════════════════
+     VARIANT 1 — Magnetic Float
+════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label">Variant 01</div>
+  <div class="section-title">Magnetic Float</div>
+  <div class="section-desc">鼠标移入时，格子根据距离产生磁吸上浮 + 缩放 + 蓝紫渐变高亮</div>
+  <div class="grid-stage">
+    <div id="grid-float"></div>
+  </div>
+  <div class="hint">Move mouse over the grid</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     VARIANT 2 — Color Ripple
+════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label">Variant 02</div>
+  <div class="section-title">Color Ripple</div>
+  <div class="section-desc">以鼠标为原点，按距离渲染不同色相，形成实时彩虹涟漪</div>
+  <div class="grid-stage">
+    <div id="grid-color"></div>
+  </div>
+  <div class="hint">Move mouse over the grid</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     VARIANT 3 — Flip Checkerboard
+════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label">Variant 03</div>
+  <div class="section-title">Flip Checkerboard</div>
+  <div class="section-desc">鼠标悬停触发 3D 翻转，背面为发光蓝紫色，以涟漪时序错落翻转</div>
+  <div class="grid-stage">
+    <div id="grid-flip"></div>
+  </div>
+  <div class="hint">Hover or click to trigger wave</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     VARIANT 4 — Click Explosion
+════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label">Variant 04</div>
+  <div class="section-title">Click Explosion</div>
+  <div class="section-desc">点击任意位置，以点击坐标为中心向外爆发粒子扩散波</div>
+  <div class="grid-stage">
+    <div id="grid-explode"></div>
+  </div>
+  <div class="hint">Click anywhere on the grid</div>
+</section>
+
+<script>
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function buildGrid(container, cols, rows, tileClass = 'tile') {
+  const tiles = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const el = document.createElement('div');
+      el.className = tileClass;
+      el.dataset.row = r;
+      el.dataset.col = c;
+      container.appendChild(el);
+      tiles.push(el);
+    }
+  }
+  return tiles;
+}
+
+function getTileCenter(el) {
+  const rect = el.getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
+
+function dist(x1, y1, x2, y2) {
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+/* ══════════════════════════════════════
+   VARIANT 1 — Magnetic Float
+══════════════════════════════════════ */
+(function() {
+  const grid = document.getElementById('grid-float');
+  const COLS = window.innerWidth < 700 ? 8 : 12;
+  const ROWS = 6;
+  const RADIUS = 160; // px — influence radius
+  const MAX_LIFT = 18; // px up
+  const MAX_SCALE = 1.35;
+
+  grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+  const tiles = buildGrid(grid, COLS, ROWS);
+
+  // Custom cursor dot
+  const dot = document.createElement('div');
+  dot.className = 'cursor-dot';
+  document.body.appendChild(dot);
+
+  grid.addEventListener('mousemove', e => {
+    dot.style.display = 'block';
+    dot.style.left = e.clientX + 'px';
+    dot.style.top = e.clientY + 'px';
+
+    tiles.forEach(tile => {
+      const center = getTileCenter(tile);
+      const d = dist(e.clientX, e.clientY, center.x, center.y);
+      const strength = clamp(1 - d / RADIUS, 0, 1); // 0 at edge, 1 at center
+      const ease = strength * strength; // quadratic falloff
+
+      const lift = ease * MAX_LIFT;
+      const scale = 1 + ease * (MAX_SCALE - 1);
+      const alpha = lerp(0.04, 0.22, ease);
+      const blueAlpha = lerp(0, 0.45, ease);
+      const glowSize = ease * 20;
+      const glowAlpha = ease * 0.6;
+
+      tile.style.transform = `translateY(-${lift}px) scale(${scale})`;
+      tile.style.background = `linear-gradient(135deg,
+        rgba(79,142,255,${blueAlpha}),
+        rgba(147,100,255,${blueAlpha * 0.7}))`;
+      tile.style.borderColor = `rgba(79,142,255,${lerp(0.06, 0.5, ease)})`;
+      if (glowSize > 1) {
+        tile.style.boxShadow = `0 0 ${glowSize}px rgba(79,142,255,${glowAlpha})`;
+      } else {
+        tile.style.boxShadow = 'none';
+      }
+    });
+  });
+
+  grid.addEventListener('mouseleave', () => {
+    dot.style.display = 'none';
+    tiles.forEach(tile => {
+      tile.style.transform = '';
+      tile.style.background = '';
+      tile.style.borderColor = '';
+      tile.style.boxShadow = '';
+    });
+  });
+})();
+
+/* ══════════════════════════════════════
+   VARIANT 2 — Color Ripple
+══════════════════════════════════════ */
+(function() {
+  const grid = document.getElementById('grid-color');
+  const COLS = window.innerWidth < 700 ? 7 : 10;
+  const ROWS = 6;
+  const RADIUS = 200;
+
+  grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+  const tiles = buildGrid(grid, COLS, ROWS);
+
+  // Also run an auto-wave animation when idle
+  let autoWave = null;
+  let mouseActive = false;
+  let waveT = 0;
+
+  function startAutoWave() {
+    if (autoWave) return;
+    const rect = grid.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    autoWave = setInterval(() => {
+      if (mouseActive) return;
+      waveT += 0.04;
+      tiles.forEach(tile => {
+        const center = getTileCenter(tile);
+        const d = dist(cx, cy, center.x, center.y);
+        const phase = d * 0.012 - waveT;
+        const wave = (Math.sin(phase * Math.PI * 2) + 1) / 2; // 0~1
+        const hue = (d * 0.8 + waveT * 60) % 360;
+        const sat = 60 + wave * 30;
+        const light = 20 + wave * 25;
+        const alpha = 0.1 + wave * 0.55;
+        tile.style.background = `hsla(${hue},${sat}%,${light}%,${alpha})`;
+        tile.style.borderColor = `hsla(${hue},${sat}%,${light + 20}%,${alpha * 0.6})`;
+        tile.style.transform = `scale(${1 + wave * 0.08})`;
+      });
+    }, 30);
+  }
+
+  grid.addEventListener('mousemove', e => {
+    mouseActive = true;
+    tiles.forEach(tile => {
+      const center = getTileCenter(tile);
+      const d = dist(e.clientX, e.clientY, center.x, center.y);
+      const strength = clamp(1 - d / RADIUS, 0, 1);
+      const ease = strength ** 1.5;
+
+      const hue = (d * 1.2) % 360;
+      const sat = 50 + ease * 40;
+      const light = 15 + ease * 45;
+      const alpha = 0.05 + ease * 0.7;
+      const scale = 1 + ease * 0.15;
+
+      tile.style.background = `hsla(${hue},${sat}%,${light}%,${alpha})`;
+      tile.style.borderColor = `hsla(${hue},70%,70%,${alpha * 0.5})`;
+      tile.style.transform = `scale(${scale})`;
+      tile.style.boxShadow = ease > 0.3
+        ? `0 0 ${ease * 14}px hsla(${hue},80%,60%,${ease * 0.4})`
+        : 'none';
+    });
+  });
+
+  grid.addEventListener('mouseleave', () => {
+    mouseActive = false;
+    tiles.forEach(tile => {
+      tile.style.background = '';
+      tile.style.borderColor = '';
+      tile.style.transform = '';
+      tile.style.boxShadow = '';
+    });
+  });
+
+  // Start auto wave after short delay
+  setTimeout(startAutoWave, 500);
+})();
+
+/* ══════════════════════════════════════
+   VARIANT 3 — Flip Checkerboard
+══════════════════════════════════════ */
+(function() {
+  const grid = document.getElementById('grid-flip');
+  const COLS = window.innerWidth < 700 ? 6 : 8;
+  const ROWS = 4;
+  const FLIP_RADIUS = 180;
+
+  grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+
+  const wraps = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const wrap = document.createElement('div');
+      wrap.className = 'tile-wrap';
+      const inner = document.createElement('div');
+      inner.className = 'tile-inner';
+      const front = document.createElement('div');
+      front.className = 'tile-front';
+      const back = document.createElement('div');
+      back.className = 'tile-back';
+
+      // Checkerboard: odd cells have blue dot on back
+      if ((r + c) % 2 === 0) {
+        back.style.background = 'linear-gradient(135deg, #4f8eff33, #9364ff44)';
+        back.style.borderColor = 'rgba(79,142,255,0.4)';
+        back.style.boxShadow = '0 0 16px rgba(79,142,255,0.3)';
+      } else {
+        back.style.background = 'linear-gradient(135deg, #ff6b9d22, #ffb86c33)';
+        back.style.borderColor = 'rgba(255,107,157,0.3)';
+        back.style.boxShadow = '0 0 16px rgba(255,107,157,0.2)';
+      }
+
+      inner.appendChild(front);
+      inner.appendChild(back);
+      wrap.appendChild(inner);
+      grid.appendChild(wrap);
+      wraps.push(wrap);
+    }
+  }
+
+  // Track flip state
+  const flipped = new Set();
+  let rippleTimeouts = [];
+
+  function triggerRipple(originX, originY) {
+    rippleTimeouts.forEach(clearTimeout);
+    rippleTimeouts = [];
+
+    wraps.forEach((wrap, i) => {
+      const center = getTileCenter(wrap);
+      const d = dist(originX, originY, center.x, center.y);
+      const delay = d * 1.8; // ms per pixel
+
+      const t = setTimeout(() => {
+        if (flipped.has(i)) {
+          flipped.delete(i);
+          wrap.classList.remove('flipped');
+        } else {
+          flipped.add(i);
+          wrap.classList.add('flipped');
+        }
+      }, delay);
+      rippleTimeouts.push(t);
+    });
+  }
+
+  // Auto-trigger wave every few seconds
+  let autoTick = 0;
+  setInterval(() => {
+    const rect = grid.getBoundingClientRect();
+    // Alternate origin: left→right→center
+    const origins = [
+      { x: rect.left, y: rect.top + rect.height / 2 },
+      { x: rect.right, y: rect.top + rect.height / 2 },
+      { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
+    ];
+    const o = origins[autoTick % origins.length];
+    triggerRipple(o.x, o.y);
+    autoTick++;
+  }, 2800);
+
+  grid.addEventListener('mousemove', e => {
+    const rect = grid.getBoundingClientRect();
+    // Only flip tiles within radius on hover
+    wraps.forEach((wrap, i) => {
+      const center = getTileCenter(wrap);
+      const d = dist(e.clientX, e.clientY, center.x, center.y);
+      if (d < FLIP_RADIUS / 2.5) {
+        if (!flipped.has(i)) {
+          flipped.add(i);
+          wrap.classList.add('flipped');
+        }
+      } else {
+        if (flipped.has(i)) {
+          flipped.delete(i);
+          wrap.classList.remove('flipped');
+        }
+      }
+    });
+  });
+
+  grid.addEventListener('click', e => {
+    triggerRipple(e.clientX, e.clientY);
+  });
+
+  grid.addEventListener('mouseleave', () => {
+    setTimeout(() => {
+      wraps.forEach((wrap, i) => {
+        flipped.delete(i);
+        wrap.classList.remove('flipped');
+      });
+    }, 300);
+  });
+})();
+
+/* ══════════════════════════════════════
+   VARIANT 4 — Click Explosion
+══════════════════════════════════════ */
+(function() {
+  const grid = document.getElementById('grid-explode');
+  const COLS = window.innerWidth < 700 ? 7 : 10;
+  const ROWS = 6;
+
+  grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+  const tiles = buildGrid(grid, COLS, ROWS);
+
+  // Idle: subtle pulse animation
+  let idleFrame;
+  let idleT = 0;
+  function idlePulse() {
+    idleT += 0.015;
+    const rect = grid.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    tiles.forEach(tile => {
+      const center = getTileCenter(tile);
+      const d = dist(cx, cy, center.x, center.y);
+      const v = (Math.sin(d * 0.014 - idleT * Math.PI * 2) + 1) / 2;
+      const alpha = 0.03 + v * 0.1;
+      tile.style.background = `rgba(79,142,255,${alpha})`;
+      tile.style.borderColor = `rgba(79,142,255,${alpha * 1.5})`;
+    });
+    idleFrame = requestAnimationFrame(idlePulse);
+  }
+  idleFrame = requestAnimationFrame(idlePulse);
+
+  grid.addEventListener('click', e => {
+    cancelAnimationFrame(idleFrame);
+
+    // Stagger-launch each tile outward from click
+    const MAX_D = 350;
+    tiles.forEach(tile => {
+      const center = getTileCenter(tile);
+      const d = dist(e.clientX, e.clientY, center.x, center.y);
+      const delay = (d / MAX_D) * 200;
+      const strength = clamp(1 - d / MAX_D, 0, 1);
+      const ease = strength ** 1.5;
+
+      setTimeout(() => {
+        // direction from click to tile
+        const dx = center.x - e.clientX;
+        const dy = center.y - e.clientY;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const nx = dx / len;
+        const ny = dy / len;
+
+        const push = ease * 22;
+        const scale = 1 + ease * 0.6;
+
+        // Hue based on angle
+        const angle = Math.atan2(dy, dx);
+        const hue = ((angle / Math.PI + 1) * 180) % 360;
+
+        tile.style.transition = 'transform 0.18s cubic-bezier(0.23,1,0.32,1), background 0.18s ease, box-shadow 0.18s ease';
+        tile.style.transform = `translate(${nx * push}px, ${ny * push}px) scale(${scale})`;
+        tile.style.background = `hsla(${hue}, 80%, 45%, ${0.1 + ease * 0.55})`;
+        tile.style.borderColor = `hsla(${hue}, 80%, 70%, ${ease * 0.5})`;
+        tile.style.boxShadow = ease > 0.2
+          ? `0 0 ${ease * 18}px hsla(${hue},80%,60%,${ease * 0.5})`
+          : 'none';
+
+        // Snap back
+        setTimeout(() => {
+          tile.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), background 0.4s ease, box-shadow 0.4s ease';
+          tile.style.transform = '';
+          tile.style.background = '';
+          tile.style.borderColor = '';
+          tile.style.boxShadow = '';
+
+          // Restart idle after all settled
+          setTimeout(() => {
+            idleFrame = requestAnimationFrame(idlePulse);
+          }, 600);
+        }, 260 + delay);
+      }, delay);
+    });
+  });
+
+  // Hover: subtle magnetic float
+  grid.addEventListener('mousemove', e => {
+    tiles.forEach(tile => {
+      const center = getTileCenter(tile);
+      const d = dist(e.clientX, e.clientY, center.x, center.y);
+      const strength = clamp(1 - d / 120, 0, 1);
+      if (strength > 0) {
+        const ease = strength ** 2;
+        tile.style.transition = 'transform 0.2s ease, box-shadow 0.2s ease';
+        tile.style.transform = `scale(${1 + ease * 0.25}) translateY(-${ease * 8}px)`;
+        tile.style.boxShadow = `0 0 ${ease * 12}px rgba(79,142,255,${ease * 0.4})`;
+      }
+    });
+  });
+
+  grid.addEventListener('mouseleave', () => {
+    tiles.forEach(tile => {
+      tile.style.transition = 'transform 0.4s ease, box-shadow 0.4s ease';
+      tile.style.transform = '';
+      tile.style.boxShadow = '';
+    });
+  });
+})();
+</script>
+</body>
+</html>

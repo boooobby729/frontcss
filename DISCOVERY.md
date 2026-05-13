@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 gsap.com (Magnetic Tile Ripple)
+- 效果名称：磁性格子涟漪 (Magnetic Tile Ripple)
+- 效果描述：由 NxN 网格格子组成的交互区域，鼠标移入时以鼠标为中心向外扩散涟漪——每个格子根据与鼠标的距离产生不同强度的"磁吸"上浮、缩放、发光效果，格子带有蓝/紫渐变色。包含 4 种变体：① 磁性上浮（translateY + scale，距离越近浮起越高）② 颜色涟漪（鼠标为原点，不同半径渲染不同色相，形成彩虹波纹）③ 翻转棋盘（格子 rotateY/X 翻转，背面是对比色，错落时序）④ 粒子爆炸（点击时以鼠标为中心向外爆发）。灵感来自 gsap.com 首页 UI Interactions 蓝色棋盘格演示 + 装饰元素的散射动画。
+- 实现原理：JS 用二重循环生成 N×N div 格子，mousemove 事件计算鼠标到每个格子中心的欧氏距离，用 maxDist 归一化得到 0-1 强度值，再映射到 transform: translateY / scale / rotateY，CSS transition 控制平滑衰减；颜色涟漪用 hsl(distance*360/maxDist, 80%, 60%) 动态赋值；requestAnimationFrame 可选做自动波纹（sin波扫描）；点击爆炸用每格子单独的 setTimeout 延迟触发
+- 状态：已实现 → `91-magnetic-tile-ripple.html`，已集成到 `_cat/collect.html`
+
 ## 2026-05-13 codepen.io / css-tricks.com (Flowing Neon Border)
 - 效果名称：流动霓虹边框 (Flowing Neon Border / Animated CSS Border)
 - 效果描述：元素边框沿轮廓流动的动态光效，融合了多种流动边框变体：① 行军蚂蚁边框（SVG stroke-dasharray offset 动画，虚线沿路径循环流动）② 渐变光晕流动（conic-gradient 旋转，外圈 glow 效果，模拟彗星掠过）③ 霓虹多彩流动（多段彩色光点依次绕边框运动）④ 跟随鼠标的边框高亮（鼠标靠近边框哪一侧，哪一侧发光）⑤ 全形状适配（矩形/圆形/卡片均可）。深色背景，卡片/按钮为载体，视觉冲击力强。

@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 tympanus.net/codrops (SVG Blob Morph)
+- 效果名称：SVG 有机形态变形 (SVG Organic Blob Morph)
+- 效果描述：受 Codrops 文章「Reverse-Engineering Claude AI's Mascot Animations with SVG and GSAP」启发，实现 SVG 路径的有机形态变形动画。多个不规则 blob 形状在鼠标悬停/点击时流畅变形，配合颜色渐变和缩放，呈现出生命感十足的有机动态效果。包含 4 种变体：① 单色 blob 呼吸动画（自动循环变形）② 多 blob 鼠标追踪（跟随鼠标位置变形）③ 点击触发形态切换（多种预设形状间切换）④ 文字遮罩 blob（blob 形状作为文字的 clip-path 遮罩）
+- 实现原理：SVG path 的 d 属性用 cubic bezier 曲线描述有机形状，JS 在多组预设路径数据之间用线性插值或 GSAP morphSVG 实现平滑过渡；呼吸动画用 CSS animation 或 requestAnimationFrame 驱动 scale/path 变化；鼠标追踪用 mousemove 事件计算偏移量驱动 translate；颜色渐变用 SVG linearGradient/radialGradient 动态修改 stop-color
+- 状态：已实现 → 89-svg-blob-morph.html，已集成到 index.html
+
 ## 2026-05-13 tympanus.net/codrops (On-Scroll Layout Formations)
 - 效果名称：滚动布局变形 (On-Scroll Layout Formations)
 - 效果描述：页面滚动时，网格/列表布局在多种排列方式之间流畅切换（如从单列变为多列网格、从网格变为全屏轮播等），每种布局有独特的进入/退出动画。

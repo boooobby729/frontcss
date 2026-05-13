@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>89 · SVG Organic Blob Morph</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #060608;
+    --surface: #0e0e14;
+    --border: rgba(255,255,255,0.06);
+    --text: #e8e8f0;
+    --muted: rgba(232,232,240,0.4);
+    --accent1: #7c6aff;
+    --accent2: #ff6ab0;
+    --accent3: #6affcc;
+    --accent4: #ffb86a;
+  }
+
+  html, body {
+    width: 100%; min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    padding: 48px 48px 0;
+    display: flex; align-items: baseline; gap: 16px;
+  }
+  .page-header h1 {
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 700; letter-spacing: -0.5px;
+  }
+  .page-header p {
+    font-size: 13px; color: var(--muted);
+  }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    padding: 32px 2px 2px;
+  }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+    .page-header { padding: 32px 24px 0; }
+  }
+
+  .cell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 40px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 24px;
+    min-height: 480px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cell-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+    align-self: flex-start;
+  }
+  .cell-title {
+    font-size: 18px; font-weight: 600;
+    align-self: flex-start;
+  }
+  .cell-desc {
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+    align-self: flex-start;
+  }
+  .canvas-wrap {
+    flex: 1; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+
+  /* ── Variant 1: Breathing Blob ── */
+  #blob1-svg {
+    width: 260px; height: 260px;
+    overflow: visible;
+    cursor: pointer;
+  }
+  .blob1-path {
+    transition: filter 0.3s;
+  }
+  #blob1-svg:hover .blob1-path {
+    filter: brightness(1.2);
+  }
+
+  /* ── Variant 2: Mouse Tracker ── */
+  #tracker-wrap {
+    width: 100%; height: 100%;
+    position: relative;
+    cursor: none;
+  }
+  .tracker-blob {
+    position: absolute;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+  .tracker-blob svg {
+    overflow: visible;
+  }
+  #cursor-dot {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    mix-blend-mode: difference;
+    transition: transform 0.1s;
+  }
+
+  /* ── Variant 3: Shape Switcher ── */
+  #switcher-wrap {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 24px;
+    width: 100%;
+  }
+  #switcher-svg {
+    width: 220px; height: 220px;
+    overflow: visible;
+    cursor: pointer;
+  }
+  .shape-btns {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  }
+  .shape-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .shape-btn:hover, .shape-btn.active {
+    border-color: var(--accent1);
+    color: var(--accent1);
+    background: rgba(124,106,255,0.1);
+  }
+
+  /* ── Variant 4: Text Mask Blob ── */
+  #mask-wrap {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  #mask-svg {
+    width: 100%; height: 200px;
+    overflow: visible;
+  }
+  .mask-text {
+    font-size: clamp(48px, 8vw, 72px);
+    font-weight: 900;
+    letter-spacing: -2px;
+    fill: white;
+  }
+
+  /* ── Hint text ── */
+  .hint {
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>SVG Organic Blob Morph</h1>
+  <p>Inspired by Claude AI mascot animations · SVG path interpolation</p>
+</header>
+
+<div class="grid">
+
+  <!-- ── Variant 1: Breathing Blob ── -->
+  <div class="cell">
+    <span class="cell-label">01 · Auto</span>
+    <div class="cell-title">Breathing Blob</div>
+    <div class="cell-desc">Organic shape continuously morphs through a sequence of forms, simulating a living, breathing entity.</div>
+    <div class="canvas-wrap">
+      <svg id="blob1-svg" viewBox="-130 -130 260 260">
+        <defs>
+          <radialGradient id="grad1" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#a78bff"/>
+            <stop offset="60%" stop-color="#7c6aff"/>
+            <stop offset="100%" stop-color="#4a3aaa"/>
+          </radialGradient>
+          <filter id="glow1">
+            <feGaussianBlur stdDeviation="8" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Glow layer -->
+        <path class="blob1-glow" fill="rgba(124,106,255,0.15)" filter="url(#glow1)"/>
+        <!-- Main blob -->
+        <path class="blob1-path" fill="url(#grad1)"/>
+        <!-- Highlight -->
+        <path class="blob1-highlight" fill="rgba(255,255,255,0.12)"/>
+      </svg>
+    </div>
+    <span class="hint">Click to pause / resume</span>
+  </div>
+
+  <!-- ── Variant 2: Mouse Tracker ── -->
+  <div class="cell" id="cell2">
+    <span class="cell-label">02 · Interactive</span>
+    <div class="cell-title">Mouse Follower</div>
+    <div class="cell-desc">Multiple blobs trail the cursor with elastic lag, each morphing independently as they follow.</div>
+    <div class="canvas-wrap" id="tracker-wrap">
+      <div id="cursor-dot"></div>
+      <!-- Blobs injected by JS -->
+    </div>
+    <span class="hint">Move your mouse over this area</span>
+  </div>
+
+  <!-- ── Variant 3: Shape Switcher ── -->
+  <div class="cell">
+    <span class="cell-label">03 · Click</span>
+    <div class="cell-title">Shape Switcher</div>
+    <div class="cell-desc">Click a preset to morph the blob into a different organic form. Each transition uses smooth cubic interpolation.</div>
+    <div class="canvas-wrap">
+      <div id="switcher-wrap">
+        <svg id="switcher-svg" viewBox="-110 -110 220 220">
+          <defs>
+            <radialGradient id="grad3" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#ff9de2"/>
+              <stop offset="50%" stop-color="#ff6ab0"/>
+              <stop offset="100%" stop-color="#c0396e"/>
+            </radialGradient>
+            <filter id="glow3">
+              <feGaussianBlur stdDeviation="6" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path id="switcher-glow" fill="rgba(255,106,176,0.2)" filter="url(#glow3)"/>
+          <path id="switcher-path" fill="url(#grad3)"/>
+        </svg>
+        <div class="shape-btns">
+          <button class="shape-btn active" data-shape="0">Blob</button>
+          <button class="shape-btn" data-shape="1">Star</button>
+          <button class="shape-btn" data-shape="2">Cloud</button>
+          <button class="shape-btn" data-shape="3">Flower</button>
+          <button class="shape-btn" data-shape="4">Amoeba</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Variant 4: Text Mask Blob ── -->
+  <div class="cell">
+    <span class="cell-label">04 · Mask</span>
+    <div class="cell-title">Blob Text Mask</div>
+    <div class="cell-desc">A morphing blob acts as a clip-path mask over gradient text, revealing and concealing letters as it breathes.</div>
+    <div class="canvas-wrap" id="mask-wrap">
+      <svg id="mask-svg" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6affcc"/>
+            <stop offset="50%" stop-color="#7c6aff"/>
+            <stop offset="100%" stop-color="#ff6ab0"/>
+          </linearGradient>
+          <clipPath id="blobClip">
+            <path id="mask-blob-path"/>
+          </clipPath>
+          <filter id="glow4">
+            <feGaussianBlur stdDeviation="12" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Background dim text -->
+        <text class="mask-text" x="300" y="148" text-anchor="middle"
+              fill="rgba(255,255,255,0.06)">MORPH</text>
+        <!-- Glow blob -->
+        <path id="mask-glow-path" fill="rgba(106,255,204,0.08)" filter="url(#glow4)"/>
+        <!-- Clipped colored text -->
+        <text class="mask-text" x="300" y="148" text-anchor="middle"
+              fill="url(#textGrad)" clip-path="url(#blobClip)">MORPH</text>
+        <!-- Blob outline -->
+        <path id="mask-outline-path" fill="none" stroke="rgba(106,255,204,0.3)" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <span class="hint">Blob continuously morphs over the text</span>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// UTILITY: SVG path generation from control points
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Generate a smooth closed SVG path from an array of [x, y] points
+ * using Catmull-Rom → cubic bezier conversion
+ */
+function pointsToPath(pts) {
+  const n = pts.length;
+  let d = '';
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n];
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % n];
+    const p3 = pts[(i + 2) % n];
+    if (i === 0) d += `M ${p1[0].toFixed(2)},${p1[1].toFixed(2)} `;
+    // Catmull-Rom control points
+    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += `C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2[0].toFixed(2)},${p2[1].toFixed(2)} `;
+  }
+  return d + 'Z';
+}
+
+/**
+ * Generate blob control points from radii array
+ * @param {number[]} radii - radius for each control point
+ * @param {number} cx - center x
+ * @param {number} cy - center y
+ * @param {number} n - number of points
+ */
+function blobPoints(radii, cx = 0, cy = 0) {
+  const n = radii.length;
+  return radii.map((r, i) => {
+    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+    return [cx + Math.cos(angle) * r, cy + Math.sin(angle) * r];
+  });
+}
+
+/**
+ * Interpolate between two arrays of points
+ */
+function lerpPoints(a, b, t) {
+  return a.map((p, i) => [
+    p[0] + (b[i][0] - p[0]) * t,
+    p[1] + (b[i][1] - p[1]) * t
+  ]);
+}
+
+/**
+ * Ease in-out cubic
+ */
+function easeInOut(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+// ═══════════════════════════════════════════════════════════
+// VARIANT 1: Breathing Blob
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const N = 12; // control points
+  const mainPath = document.querySelector('.blob1-path');
+  const glowPath = document.querySelector('.blob1-glow');
+  const hlPath   = document.querySelector('.blob1-highlight');
+  const svg      = document.getElementById('blob1-svg');
+
+  // Generate a set of blob shapes
+  function makeShape(seed, baseR, variance) {
+    const radii = [];
+    for (let i = 0; i < N; i++) {
+      // Deterministic pseudo-random using seed
+      const s = Math.sin(seed * 127.1 + i * 311.7) * 43758.5453;
+      const r = baseR + (s - Math.floor(s) - 0.5) * variance * 2;
+      radii.push(r);
+    }
+    return blobPoints(radii);
+  }
+
+  // Pre-generate 6 keyframe shapes
+  const shapes = [0,1,2,3,4,5].map(s => makeShape(s, 90, 28));
+
+  let currentIdx = 0;
+  let nextIdx = 1;
+  let t = 0;
+  let paused = false;
+  let raf;
+
+  // Highlight shape (smaller, offset)
+  function makeHighlight(pts) {
+    const sub = pts.slice(0, 6).map(p => [p[0] * 0.55 - 18, p[1] * 0.55 - 22]);
+    return sub;
+  }
+
+  function tick() {
+    if (!paused) {
+      t += 0.004;
+      if (t >= 1) {
+        t = 0;
+        currentIdx = nextIdx;
+        nextIdx = (nextIdx + 1) % shapes.length;
+      }
+    }
+    const et = easeInOut(t);
+    const pts = lerpPoints(shapes[currentIdx], shapes[nextIdx], et);
+    const path = pointsToPath(pts);
+    mainPath.setAttribute('d', path);
+    glowPath.setAttribute('d', path);
+
+    // Highlight: interpolate a smaller version
+    const hlPts = makeHighlight(pts);
+    if (hlPts.length >= 4) hlPath.setAttribute('d', pointsToPath(hlPts));
+
+    raf = requestAnimationFrame(tick);
+  }
+
+  tick();
+
+  svg.addEventListener('click', () => { paused = !paused; });
+})();
+
+// ═══════════════════════════════════════════════════════════
+// VARIANT 2: Mouse Follower Blobs
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const wrap = document.getElementById('tracker-wrap');
+  const dot  = document.getElementById('cursor-dot');
+  const N = 10;
+
+  // Create 3 trailing blobs
+  const blobDefs = [
+    { size: 160, color: ['#a78bff','#7c6aff','#4a3aaa'], delay: 0,   opacity: 0.9 },
+    { size: 110, color: ['#ff9de2','#ff6ab0','#c0396e'], delay: 0.12, opacity: 0.75 },
+    { size:  75, color: ['#6affcc','#3ad4a0','#1a8060'], delay: 0.22, opacity: 0.65 },
+  ];
+
+  const blobs = blobDefs.map((def, idx) => {
+    const div = document.createElement('div');
+    div.className = 'tracker-blob';
+    div.style.cssText = `left:50%;top:50%;width:${def.size}px;height:${def.size}px;opacity:${def.opacity};`;
+
+    const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgEl.setAttribute('viewBox', '-80 -80 160 160');
+    svgEl.style.cssText = `width:${def.size}px;height:${def.size}px;overflow:visible;`;
+
+    const gradId = `trackerGrad${idx}`;
+    const filtId = `trackerFilt${idx}`;
+    svgEl.innerHTML = `
+      <defs>
+        <radialGradient id="${gradId}" cx="38%" cy="32%" r="68%">
+          <stop offset="0%" stop-color="${def.color[0]}"/>
+          <stop offset="55%" stop-color="${def.color[1]}"/>
+          <stop offset="100%" stop-color="${def.color[2]}"/>
+        </radialGradient>
+        <filter id="${filtId}">
+          <feGaussianBlur stdDeviation="5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path class="tb-glow" fill="rgba(124,106,255,0.15)" filter="url(#${filtId})"/>
+      <path class="tb-main" fill="url(#${gradId})"/>
+    `;
+
+    div.appendChild(svgEl);
+    wrap.appendChild(div);
+
+    // Blob animation state
+    const shapes = [0,1,2,3,4].map(s => {
+      const radii = [];
+      for (let i = 0; i < N; i++) {
+        const v = Math.sin((s * 91.3 + idx * 47.1) * 127.1 + i * 311.7) * 43758.5453;
+        radii.push(60 + (v - Math.floor(v) - 0.5) * 30);
+      }
+      return blobPoints(radii);
+    });
+
+    return {
+      div, svgEl,
+      mainPath: svgEl.querySelector('.tb-main'),
+      glowPath: svgEl.querySelector('.tb-glow'),
+      x: wrap.offsetWidth / 2,
+      y: wrap.offsetHeight / 2,
+      targetX: wrap.offsetWidth / 2,
+      targetY: wrap.offsetHeight / 2,
+      delay: def.delay,
+      shapes,
+      t: 0,
+      ci: 0,
+      ni: 1,
+    };
+  });
+
+  let mouseX = wrap.offsetWidth / 2;
+  let mouseY = wrap.offsetHeight / 2;
+  let isInside = false;
+
+  wrap.addEventListener('mousemove', e => {
+    const rect = wrap.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+    dot.style.left = mouseX + 'px';
+    dot.style.top  = mouseY + 'px';
+    isInside = true;
+  });
+  wrap.addEventListener('mouseleave', () => { isInside = false; });
+
+  function tick() {
+    blobs.forEach((b, i) => {
+      // Elastic follow with delay
+      const lag = 1 - b.delay;
+      const speed = 0.06 * (1 - i * 0.015);
+      if (isInside) {
+        b.targetX = mouseX;
+        b.targetY = mouseY;
+      }
+      b.x += (b.targetX - b.x) * speed;
+      b.y += (b.targetY - b.y) * speed;
+
+      b.div.style.left = b.x + 'px';
+      b.div.style.top  = b.y + 'px';
+
+      // Morph
+      b.t += 0.005 + i * 0.002;
+      if (b.t >= 1) { b.t = 0; b.ci = b.ni; b.ni = (b.ni + 1) % b.shapes.length; }
+      const pts = lerpPoints(b.shapes[b.ci], b.shapes[b.ni], easeInOut(b.t));
+      const path = pointsToPath(pts);
+      b.mainPath.setAttribute('d', path);
+      b.glowPath.setAttribute('d', path);
+    });
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+// ═══════════════════════════════════════════════════════════
+// VARIANT 3: Shape Switcher
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const switcherPath = document.getElementById('switcher-path');
+  const switcherGlow = document.getElementById('switcher-glow');
+  const btns = document.querySelectorAll('.shape-btn');
+  const N = 16;
+
+  // Preset shapes (radii arrays, N=16 points)
+  const presets = {
+    0: [85,78,90,82,88,75,92,80,86,79,91,83,87,76,89,81], // Blob
+    1: [95,55,95,55,95,55,95,55,95,55,95,55,95,55,95,55], // Star
+    2: [88,92,85,90,88,92,85,90,88,92,85,90,88,92,85,90], // Cloud
+    3: [90,60,90,60,90,60,90,60,90,60,90,60,90,60,90,60], // Flower
+    4: [70,95,65,100,72,88,98,68,75,92,62,97,80,85,70,95], // Amoeba
+  };
+
+  let currentPts = blobPoints(presets[0]);
+  let targetPts  = blobPoints(presets[0]);
+  let t = 1;
+  let activeShape = 0;
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.shape);
+      if (idx === activeShape) return;
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentPts = lerpPoints(currentPts, targetPts, easeInOut(Math.min(t, 1)));
+      targetPts  = blobPoints(presets[idx]);
+      t = 0;
+      activeShape = idx;
+    });
+  });
+
+  function tick() {
+    if (t < 1) t = Math.min(t + 0.025, 1);
+    const pts = lerpPoints(currentPts, targetPts, easeInOut(t));
+    const path = pointsToPath(pts);
+    switcherPath.setAttribute('d', path);
+    switcherGlow.setAttribute('d', path);
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+// ═══════════════════════════════════════════════════════════
+// VARIANT 4: Text Mask Blob
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const maskBlobPath    = document.getElementById('mask-blob-path');
+  const maskGlowPath    = document.getElementById('mask-glow-path');
+  const maskOutlinePath = document.getElementById('mask-outline-path');
+  const N = 14;
+
+  // Large blob that sweeps across the text (centered at 300,100)
+  const shapes = [0,1,2,3,4,5,6].map(s => {
+    const radii = [];
+    for (let i = 0; i < N; i++) {
+      const v = Math.sin(s * 73.1 * 127.1 + i * 311.7) * 43758.5453;
+      radii.push(110 + (v - Math.floor(v) - 0.5) * 50);
+    }
+    return blobPoints(radii, 300, 100);
+  });
+
+  let ci = 0, ni = 1, t = 0;
+
+  function tick() {
+    t += 0.003;
+    if (t >= 1) { t = 0; ci = ni; ni = (ni + 1) % shapes.length; }
+    const pts = lerpPoints(shapes[ci], shapes[ni], easeInOut(t));
+    const path = pointsToPath(pts);
+    maskBlobPath.setAttribute('d', path);
+    maskGlowPath.setAttribute('d', path);
+    maskOutlinePath.setAttribute('d', path);
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+</body>
+</html>

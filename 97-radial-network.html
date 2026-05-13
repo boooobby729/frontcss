@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radial Network Burst — Stripe Style</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #fff;
+    min-height: 100vh;
+  }
+
+  .page-title {
+    text-align: center;
+    padding: 48px 24px 12px;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+  }
+
+  .page-title h1 {
+    font-size: 28px;
+    font-weight: 300;
+    color: #eee;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    text-transform: none;
+  }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    padding: 32px 24px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  .card:nth-child(1) { grid-column: 1 / 2; aspect-ratio: 4/3; }
+  .card:nth-child(2) { grid-column: 2 / 3; aspect-ratio: 4/3; }
+  .card:nth-child(3) { grid-column: 1 / 2; aspect-ratio: 4/3; }
+  .card:nth-child(4) { grid-column: 2 / 3; aspect-ratio: 4/3; }
+
+  .card canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .card-label {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .card-label h2 {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .card-label p {
+    font-size: 12px;
+    opacity: 0.6;
+    font-weight: 400;
+  }
+
+  /* variant-specific label colors */
+  .card:nth-child(1) .card-label h2 { color: #1a1f36; }
+  .card:nth-child(1) .card-label p  { color: #3c4257; }
+  .card:nth-child(2) .card-label h2 { color: #e8f4fd; }
+  .card:nth-child(2) .card-label p  { color: #a0c8e8; }
+  .card:nth-child(3) .card-label h2 { color: #1a1f36; }
+  .card:nth-child(3) .card-label p  { color: #3c4257; }
+  .card:nth-child(4) .card-label h2 { color: #f0e8ff; }
+  .card:nth-child(4) .card-label p  { color: #c4a8e8; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>Radial Network Burst</h1>
+  <span>Stripe-style animated ray network — Canvas 2D</span>
+</div>
+
+<div class="grid">
+
+  <!-- Variant 1: Classic Stripe blue-white -->
+  <div class="card" id="card1">
+    <canvas id="c1"></canvas>
+    <div class="card-label">
+      <h2>Classic Light</h2>
+      <p>Stripe original · warm-to-cool gradient</p>
+    </div>
+  </div>
+
+  <!-- Variant 2: Dark cosmic -->
+  <div class="card" id="card2">
+    <canvas id="c2"></canvas>
+    <div class="card-label">
+      <h2>Cosmic Dark</h2>
+      <p>Space edition · glowing rays</p>
+    </div>
+  </div>
+
+  <!-- Variant 3: Pulse nodes -->
+  <div class="card" id="card3">
+    <canvas id="c3"></canvas>
+    <div class="card-label">
+      <h2>Pulse Nodes</h2>
+      <p>Light bg · ripple on each node</p>
+    </div>
+  </div>
+
+  <!-- Variant 4: Mouse interactive -->
+  <div class="card" id="card4">
+    <canvas id="c4"></canvas>
+    <div class="card-label">
+      <h2>Interactive</h2>
+      <p>Move mouse · rays follow cursor</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// Utility helpers
+// ─────────────────────────────────────────────
+function resize(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width  = rect.width  * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width  = rect.width  + 'px';
+  canvas.style.height = rect.height + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { w: rect.width, h: rect.height, ctx, dpr };
+}
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// ─────────────────────────────────────────────
+// Ray definition factory
+// ─────────────────────────────────────────────
+function makeRays(count, seed) {
+  const rays = [];
+  // Distribute angles: fan from ~180° to ~360° (upper half + wide spread)
+  // Stripe uses a fan that spreads left-right from a bottom-center origin
+  for (let i = 0; i < count; i++) {
+    const t = i / (count - 1);
+    // Spread angle from -100° to +100° (measured from straight-up = -90°)
+    const spreadDeg = lerp(-110, 110, t);
+    const angleDeg  = -90 + spreadDeg;          // 0° = right, -90° = up
+    const angleRad  = angleDeg * Math.PI / 180;
+
+    // Vary ray length
+    const lengthFactor = 0.5 + 0.5 * Math.abs(Math.sin(i * 1.37 + seed));
+
+    // Number of nodes along this ray
+    const nodeCount = 1 + Math.floor(Math.random() * 3);
+    const nodes = [];
+    for (let n = 0; n < nodeCount; n++) {
+      nodes.push({
+        t: 0.3 + (n + 1) * (0.6 / (nodeCount + 1)),   // 0-1 along ray
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 1.0,
+        size: 2 + Math.random() * 2.5,
+      });
+    }
+
+    rays.push({
+      angle: angleRad,
+      length: lengthFactor,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.3 + Math.random() * 0.5,
+      curve: (Math.random() - 0.5) * 0.08,  // slight bezier curve
+      nodes,
+      width: 0.4 + Math.random() * 0.8,
+    });
+  }
+  return rays;
+}
+
+// ─────────────────────────────────────────────
+// Variant 1 — Classic Stripe Light
+// ─────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('c1');
+  let dim = resize(canvas);
+  window.addEventListener('resize', () => { dim = resize(canvas); });
+
+  const RAYS = makeRays(52, 42);
+
+  function draw(t) {
+    const { ctx, w, h } = dim;
+    ctx.clearRect(0, 0, w, h);
+
+    // Background: light blue-white radial gradient
+    const bg = ctx.createRadialGradient(w * 0.5, h * 1.05, 0, w * 0.5, h * 0.5, w * 0.8);
+    bg.addColorStop(0,   '#f0e8d8');   // warm cream at bottom
+    bg.addColorStop(0.3, '#ddeeff');   // light blue
+    bg.addColorStop(1,   '#eef4ff');   // near white
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    // Origin: bottom-center with slight upward offset
+    const ox = w * 0.5;
+    const oy = h * 1.02;
+
+    // Glow halo at origin
+    const glow = ctx.createRadialGradient(ox, oy, 0, ox, oy, h * 0.35);
+    glow.addColorStop(0,   'rgba(255,200,80,0.55)');
+    glow.addColorStop(0.3, 'rgba(255,160,60,0.18)');
+    glow.addColorStop(1,   'rgba(255,160,60,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    RAYS.forEach(ray => {
+      const breath = 0.92 + 0.08 * Math.sin(t * ray.speed + ray.phase);
+      const maxLen = Math.sqrt(w * w + h * h) * 0.72 * ray.length * breath;
+
+      const ex = ox + Math.cos(ray.angle) * maxLen;
+      const ey = oy + Math.sin(ray.angle) * maxLen;
+
+      // Control point for slight curve
+      const mx = (ox + ex) * 0.5 + Math.sin(ray.angle + Math.PI / 2) * maxLen * ray.curve;
+      const my = (oy + ey) * 0.5 + Math.cos(ray.angle + Math.PI / 2) * maxLen * ray.curve;
+
+      // Color: warm yellow → slate blue
+      const tNorm = (ray.angle + Math.PI) / (Math.PI * 2);
+      const grad = ctx.createLinearGradient(ox, oy, ex, ey);
+      grad.addColorStop(0,   'rgba(255,190,60,0.9)');
+      grad.addColorStop(0.25,'rgba(180,140,200,0.7)');
+      grad.addColorStop(0.6, 'rgba(100,140,220,0.5)');
+      grad.addColorStop(1,   'rgba(100,140,220,0)');
+
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.quadraticCurveTo(mx, my, ex, ey);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = ray.width * breath;
+      ctx.stroke();
+
+      // Nodes
+      ray.nodes.forEach(nd => {
+        const np = nd.t * breath;
+        // Interpolate along quadratic bezier
+        const bx = (1-np)*(1-np)*ox + 2*(1-np)*np*mx + np*np*ex;
+        const by = (1-np)*(1-np)*oy + 2*(1-np)*np*my + np*np*ey;
+        const pulse = 0.8 + 0.2 * Math.sin(t * nd.speed * 1.5 + nd.phase);
+        const r = nd.size * pulse;
+        const alpha = 0.6 + 0.3 * pulse;
+
+        // Node color shifts warm→cool based on position
+        const nc = nd.t < 0.4
+          ? `rgba(255,180,60,${alpha})`
+          : `rgba(80,140,255,${alpha})`;
+
+        ctx.beginPath();
+        ctx.arc(bx, by, r, 0, Math.PI * 2);
+        ctx.fillStyle = nc;
+        ctx.fill();
+
+        // Small white core
+        ctx.beginPath();
+        ctx.arc(bx, by, r * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${alpha * 0.7})`;
+        ctx.fill();
+      });
+    });
+
+    requestAnimationFrame(ts => draw(ts / 1000));
+  }
+
+  requestAnimationFrame(ts => draw(ts / 1000));
+})();
+
+// ─────────────────────────────────────────────
+// Variant 2 — Cosmic Dark with glow
+// ─────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('c2');
+  let dim = resize(canvas);
+  window.addEventListener('resize', () => { dim = resize(canvas); });
+
+  const RAYS = makeRays(58, 77);
+
+  function draw(t) {
+    const { ctx, w, h } = dim;
+    ctx.clearRect(0, 0, w, h);
+
+    // Deep space background
+    const bg = ctx.createRadialGradient(w * 0.5, h, 0, w * 0.5, h * 0.3, w * 0.9);
+    bg.addColorStop(0,   '#1a0e2e');
+    bg.addColorStop(0.4, '#0d1830');
+    bg.addColorStop(1,   '#060c1a');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    // Scatter subtle stars
+    ctx.save();
+    for (let s = 0; s < 80; s++) {
+      const sx = (((s * 137.5) % 1) * w);
+      const sy = (((s * 97.3 + 13) % 1) * h * 0.8);
+      const sa = 0.2 + 0.4 * Math.sin(t * 0.3 + s);
+      ctx.beginPath();
+      ctx.arc(sx, sy, 0.6, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${sa})`;
+      ctx.fill();
+    }
+    ctx.restore();
+
+    const ox = w * 0.5;
+    const oy = h * 1.0;
+
+    // Central glow
+    const glow = ctx.createRadialGradient(ox, oy, 0, ox, oy, h * 0.5);
+    glow.addColorStop(0,   'rgba(255,140,60,0.7)');
+    glow.addColorStop(0.2, 'rgba(180,80,255,0.3)');
+    glow.addColorStop(0.6, 'rgba(40,80,200,0.15)');
+    glow.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    RAYS.forEach(ray => {
+      const breath = 0.9 + 0.1 * Math.sin(t * ray.speed + ray.phase);
+      const maxLen = Math.sqrt(w * w + h * h) * 0.68 * ray.length * breath;
+
+      const ex = ox + Math.cos(ray.angle) * maxLen;
+      const ey = oy + Math.sin(ray.angle) * maxLen;
+      const mx = (ox + ex) * 0.5 + Math.sin(ray.angle + Math.PI / 2) * maxLen * ray.curve;
+      const my = (oy + ey) * 0.5 + Math.cos(ray.angle + Math.PI / 2) * maxLen * ray.curve;
+
+      // Glow effect: draw twice, wider + blurred first
+      ctx.save();
+      ctx.filter = 'blur(2px)';
+      const gradG = ctx.createLinearGradient(ox, oy, ex, ey);
+      gradG.addColorStop(0,   'rgba(255,160,60,0.6)');
+      gradG.addColorStop(0.3, 'rgba(160,80,255,0.4)');
+      gradG.addColorStop(0.7, 'rgba(60,120,255,0.2)');
+      gradG.addColorStop(1,   'rgba(60,120,255,0)');
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.quadraticCurveTo(mx, my, ex, ey);
+      ctx.strokeStyle = gradG;
+      ctx.lineWidth = ray.width * 3;
+      ctx.stroke();
+      ctx.filter = 'none';
+      ctx.restore();
+
+      // Core line
+      const grad = ctx.createLinearGradient(ox, oy, ex, ey);
+      grad.addColorStop(0,   'rgba(255,200,100,1)');
+      grad.addColorStop(0.3, 'rgba(180,100,255,0.8)');
+      grad.addColorStop(0.7, 'rgba(80,160,255,0.5)');
+      grad.addColorStop(1,   'rgba(80,160,255,0)');
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.quadraticCurveTo(mx, my, ex, ey);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = ray.width * 0.8;
+      ctx.stroke();
+
+      // Nodes
+      ray.nodes.forEach(nd => {
+        const np = nd.t;
+        const bx = (1-np)*(1-np)*ox + 2*(1-np)*np*mx + np*np*ex;
+        const by = (1-np)*(1-np)*oy + 2*(1-np)*np*my + np*np*ey;
+        const pulse = 0.7 + 0.3 * Math.sin(t * nd.speed * 2 + nd.phase);
+        const r = nd.size * 1.2 * pulse;
+
+        // Outer glow ring
+        ctx.save();
+        ctx.filter = 'blur(3px)';
+        ctx.beginPath();
+        ctx.arc(bx, by, r * 2, 0, Math.PI * 2);
+        ctx.fillStyle = nd.t < 0.4
+          ? `rgba(255,160,60,0.3)`
+          : `rgba(100,160,255,0.3)`;
+        ctx.fill();
+        ctx.filter = 'none';
+        ctx.restore();
+
+        ctx.beginPath();
+        ctx.arc(bx, by, r, 0, Math.PI * 2);
+        ctx.fillStyle = nd.t < 0.4
+          ? `rgba(255,200,100,0.95)`
+          : `rgba(140,200,255,0.95)`;
+        ctx.fill();
+      });
+    });
+
+    requestAnimationFrame(ts => draw(ts / 1000));
+  }
+  requestAnimationFrame(ts => draw(ts / 1000));
+})();
+
+// ─────────────────────────────────────────────
+// Variant 3 — Pulse Nodes (Light bg, ripples)
+// ─────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('c3');
+  let dim = resize(canvas);
+  window.addEventListener('resize', () => { dim = resize(canvas); });
+
+  const RAYS = makeRays(46, 13);
+
+  // Pulse events
+  const pulses = [];
+  function triggerPulse(x, y, color) {
+    pulses.push({ x, y, r: 0, maxR: 30 + Math.random() * 20, alpha: 0.7, color, speed: 60 + Math.random() * 40 });
+  }
+  let lastPulseTime = 0;
+
+  function draw(t) {
+    const { ctx, w, h } = dim;
+    ctx.clearRect(0, 0, w, h);
+
+    // Soft ivory background
+    const bg = ctx.createRadialGradient(w * 0.5, h * 1.0, 0, w * 0.5, h * 0.3, w * 0.85);
+    bg.addColorStop(0,   '#fef6e8');
+    bg.addColorStop(0.35,'#e8f0ff');
+    bg.addColorStop(1,   '#f5f5ff');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    const ox = w * 0.5;
+    const oy = h * 1.02;
+
+    // Warm center halo
+    const glow = ctx.createRadialGradient(ox, oy, 0, ox, oy, h * 0.4);
+    glow.addColorStop(0,   'rgba(255,180,60,0.5)');
+    glow.addColorStop(0.4, 'rgba(255,120,40,0.12)');
+    glow.addColorStop(1,   'rgba(255,120,40,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw ripple pulses
+    for (let i = pulses.length - 1; i >= 0; i--) {
+      const p = pulses[i];
+      p.r += p.speed / 60;
+      p.alpha *= 0.96;
+      if (p.r > p.maxR || p.alpha < 0.01) { pulses.splice(i, 1); continue; }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.strokeStyle = p.color.replace(')', `,${p.alpha})`).replace('rgb', 'rgba');
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    RAYS.forEach((ray, ri) => {
+      const breath = 0.93 + 0.07 * Math.sin(t * ray.speed + ray.phase);
+      const maxLen = Math.sqrt(w * w + h * h) * 0.70 * ray.length * breath;
+
+      const ex = ox + Math.cos(ray.angle) * maxLen;
+      const ey = oy + Math.sin(ray.angle) * maxLen;
+      const mx = (ox + ex) * 0.5 + Math.sin(ray.angle + Math.PI / 2) * maxLen * ray.curve;
+      const my = (oy + ey) * 0.5 + Math.cos(ray.angle + Math.PI / 2) * maxLen * ray.curve;
+
+      const grad = ctx.createLinearGradient(ox, oy, ex, ey);
+      grad.addColorStop(0,   'rgba(255,160,50,0.85)');
+      grad.addColorStop(0.35,'rgba(160,120,220,0.6)');
+      grad.addColorStop(0.7, 'rgba(80,140,230,0.4)');
+      grad.addColorStop(1,   'rgba(80,140,230,0)');
+
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.quadraticCurveTo(mx, my, ex, ey);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = ray.width * 0.9;
+      ctx.stroke();
+
+      ray.nodes.forEach(nd => {
+        const np = nd.t;
+        const bx = (1-np)*(1-np)*ox + 2*(1-np)*np*mx + np*np*ex;
+        const by = (1-np)*(1-np)*oy + 2*(1-np)*np*my + np*np*ey;
+        const pulse = 0.8 + 0.2 * Math.sin(t * nd.speed * 1.8 + nd.phase);
+        const r = nd.size * pulse;
+        const isWarm = nd.t < 0.45;
+        const col = isWarm ? '255,160,60' : '80,140,255';
+
+        // Random pulse trigger
+        const phaseFrac = (t * nd.speed * 0.5 + nd.phase) % (Math.PI * 2);
+        if (phaseFrac < 0.05 && t - lastPulseTime > 0.1) {
+          triggerPulse(bx, by, `rgb(${col})`);
+          lastPulseTime = t;
+        }
+
+        ctx.beginPath();
+        ctx.arc(bx, by, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${col},0.85)`;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(bx, by, r * 0.45, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,0.8)`;
+        ctx.fill();
+      });
+    });
+
+    requestAnimationFrame(ts => draw(ts / 1000));
+  }
+  requestAnimationFrame(ts => draw(ts / 1000));
+})();
+
+// ─────────────────────────────────────────────
+// Variant 4 — Interactive: rays follow mouse
+// ─────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('c4');
+  let dim = resize(canvas);
+  window.addEventListener('resize', () => { dim = resize(canvas); });
+
+  const RAYS = makeRays(50, 99);
+
+  let mouseX = -9999, mouseY = -9999;
+  let targetX = -9999, targetY = -9999;
+
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+  });
+  canvas.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
+
+  function draw(t) {
+    const { ctx, w, h } = dim;
+    ctx.clearRect(0, 0, w, h);
+
+    // Deep purple-indigo gradient
+    const bg = ctx.createLinearGradient(0, 0, w, h);
+    bg.addColorStop(0,   '#0d0820');
+    bg.addColorStop(0.5, '#120e2a');
+    bg.addColorStop(1,   '#080518');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    const ox = w * 0.5;
+    const oy = h * 1.02;
+
+    // Mouse influence: smooth lerp
+    if (mouseX > 0) {
+      targetX = lerp(targetX === -9999 ? mouseX : targetX, mouseX, 0.06);
+      targetY = lerp(targetY === -9999 ? mouseY : targetY, mouseY, 0.06);
+    } else {
+      targetX = -9999;
+    }
+
+    // Central core glow
+    const glow = ctx.createRadialGradient(ox, oy, 0, ox, oy, h * 0.45);
+    glow.addColorStop(0,   'rgba(255,180,80,0.65)');
+    glow.addColorStop(0.25,'rgba(120,60,220,0.3)');
+    glow.addColorStop(0.7, 'rgba(40,60,180,0.1)');
+    glow.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    RAYS.forEach(ray => {
+      const breath = 0.91 + 0.09 * Math.sin(t * ray.speed + ray.phase);
+      const maxLen = Math.sqrt(w * w + h * h) * 0.65 * ray.length * breath;
+
+      // Mouse bending: pull ray angle slightly toward cursor
+      let finalAngle = ray.angle;
+      if (targetX > 0) {
+        const mAngle = Math.atan2(targetY - oy, targetX - ox);
+        const diff = mAngle - ray.angle;
+        const wrappedDiff = ((diff + Math.PI) % (Math.PI * 2)) - Math.PI;
+        // Only bend rays within ~70deg of mouse
+        const influence = clamp(1 - Math.abs(wrappedDiff) / (Math.PI * 0.7), 0, 1);
+        finalAngle = ray.angle + wrappedDiff * influence * 0.22;
+      }
+
+      const ex = ox + Math.cos(finalAngle) * maxLen;
+      const ey = oy + Math.sin(finalAngle) * maxLen;
+      const mx = (ox + ex) * 0.5 + Math.sin(finalAngle + Math.PI / 2) * maxLen * ray.curve;
+      const my = (oy + ey) * 0.5 + Math.cos(finalAngle + Math.PI / 2) * maxLen * ray.curve;
+
+      // Glow pass
+      ctx.save();
+      ctx.filter = 'blur(2.5px)';
+      const gradG = ctx.createLinearGradient(ox, oy, ex, ey);
+      gradG.addColorStop(0,   'rgba(255,200,80,0.5)');
+      gradG.addColorStop(0.4, 'rgba(140,80,255,0.3)');
+      gradG.addColorStop(1,   'rgba(60,120,255,0)');
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.quadraticCurveTo(mx, my, ex, ey);
+      ctx.strokeStyle = gradG;
+      ctx.lineWidth = ray.width * 3.5;
+      ctx.stroke();
+      ctx.filter = 'none';
+      ctx.restore();
+
+      // Core line
+      const grad = ctx.createLinearGradient(ox, oy, ex, ey);
+      grad.addColorStop(0,   'rgba(255,220,100,1)');
+      grad.addColorStop(0.3, 'rgba(160,100,255,0.85)');
+      grad.addColorStop(0.65,'rgba(80,160,255,0.55)');
+      grad.addColorStop(1,   'rgba(80,160,255,0)');
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.quadraticCurveTo(mx, my, ex, ey);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = ray.width * 0.9;
+      ctx.stroke();
+
+      // Nodes
+      ray.nodes.forEach(nd => {
+        const np = nd.t;
+        const bx = (1-np)*(1-np)*ox + 2*(1-np)*np*mx + np*np*ex;
+        const by = (1-np)*(1-np)*oy + 2*(1-np)*np*my + np*np*ey;
+        const pulse = 0.75 + 0.25 * Math.sin(t * nd.speed * 2.5 + nd.phase);
+        const r = nd.size * 1.1 * pulse;
+        const col = nd.t < 0.4 ? '255,200,80' : '120,180,255';
+
+        ctx.save();
+        ctx.filter = 'blur(2px)';
+        ctx.beginPath();
+        ctx.arc(bx, by, r * 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${col},0.25)`;
+        ctx.fill();
+        ctx.filter = 'none';
+        ctx.restore();
+
+        ctx.beginPath();
+        ctx.arc(bx, by, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${col},0.9)`;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(bx, by, r * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.fill();
+      });
+    });
+
+    // Cursor highlight
+    if (targetX > 0) {
+      const cg = ctx.createRadialGradient(targetX, targetY, 0, targetX, targetY, 50);
+      cg.addColorStop(0, 'rgba(255,255,255,0.12)');
+      cg.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = cg;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    requestAnimationFrame(ts => draw(ts / 1000));
+  }
+  requestAnimationFrame(ts => draw(ts / 1000));
+})();
+</script>
+</body>
+</html>

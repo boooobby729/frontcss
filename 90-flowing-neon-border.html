@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flowing Neon Border</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 64px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .section {
+    max-width: 960px;
+    margin: 0 auto 80px;
+  }
+  .section-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #444;
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .demo-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ─── VARIANT 1: Marching Ants (SVG stroke dashoffset) ─── */
+  .ant-card {
+    position: relative;
+    width: 200px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .ant-card svg.border-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .ant-card .card-label {
+    font-size: 0.78rem;
+    color: #888;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ant-card .card-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* Marching ants rect */
+  .ant-rect {
+    fill: none;
+    stroke-width: 1.5;
+    rx: 12;
+    ry: 12;
+    stroke-dasharray: 12 6;
+    animation: march 2s linear infinite;
+  }
+  .ant-rect.white { stroke: rgba(255,255,255,0.5); }
+  .ant-rect.cyan  { stroke: #00e5ff; filter: drop-shadow(0 0 4px #00e5ff88); animation-direction: reverse; animation-duration: 1.5s; }
+  .ant-rect.violet{ stroke: #a855f7; filter: drop-shadow(0 0 4px #a855f788); }
+
+  @keyframes march {
+    to { stroke-dashoffset: -36; }
+  }
+
+  /* ─── VARIANT 2: Conic Gradient Comet Border ─── */
+  .comet-card {
+    position: relative;
+    width: 200px;
+    height: 120px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    background: #0a0a0a;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .comet-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    padding: 2px;
+    background: conic-gradient(
+      from var(--angle, 0deg),
+      transparent 0deg,
+      transparent 200deg,
+      #fff 240deg,
+      var(--comet-color, #00e5ff) 270deg,
+      transparent 300deg,
+      transparent 360deg
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: comet-spin 2.4s linear infinite;
+    z-index: -1;
+  }
+  .comet-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: #0a0a0a;
+    z-index: -1;
+  }
+  @property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+  @keyframes comet-spin {
+    to { --angle: 360deg; }
+  }
+
+  .comet-card .card-label { font-size: 0.78rem; color: #666; letter-spacing: 0.06em; text-transform: uppercase; position: relative; z-index: 1; }
+  .comet-card .card-value { font-size: 1.6rem; font-weight: 700; color: #fff; position: relative; z-index: 1; }
+
+  .comet-cyan  { --comet-color: #00e5ff; }
+  .comet-violet{ --comet-color: #a855f7; animation-duration: 1.8s !important; }
+  .comet-amber { --comet-color: #f59e0b; animation-duration: 3s !important; }
+
+  /* ─── VARIANT 3: Neon Multicolor Light Points ─── */
+  .neon-card {
+    position: relative;
+    width: 200px;
+    height: 120px;
+    border-radius: 14px;
+    background: #080808;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    overflow: hidden;
+    border: 1px solid #1a1a1a;
+  }
+  .neon-card .card-label { font-size: 0.78rem; color: #555; letter-spacing: 0.06em; text-transform: uppercase; position: relative; z-index: 1; }
+  .neon-card .card-value { font-size: 1.6rem; font-weight: 700; color: #fff; position: relative; z-index: 1; }
+
+  .neon-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* ─── VARIANT 4: Mouse-Aware Edge Glow ─── */
+  .mouse-card {
+    position: relative;
+    width: 220px;
+    height: 130px;
+    border-radius: 14px;
+    background: #080808;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    --glow-top: 0;
+    --glow-right: 0;
+    --glow-bottom: 0;
+    --glow-left: 0;
+  }
+  .mouse-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1.5px;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,229,255, calc(var(--glow-top) * 0.9)) 0%,
+      rgba(168,85,247, calc(var(--glow-right) * 0.8)) 50%,
+      rgba(0,229,255, calc(var(--glow-bottom) * 0.9)) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: background 0.05s;
+  }
+  .mouse-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    box-shadow:
+      0 0 calc(var(--glow-top) * 20px) calc(var(--glow-top) * 4px) rgba(0,229,255,0.25),
+      calc(var(--glow-right) * 12px) 0 calc(var(--glow-right) * 20px) calc(var(--glow-right) * 2px) rgba(168,85,247,0.25),
+      0 calc(var(--glow-bottom) * 12px) calc(var(--glow-bottom) * 20px) calc(var(--glow-bottom) * 2px) rgba(0,229,255,0.25),
+      calc(var(--glow-left) * -12px) 0 calc(var(--glow-left) * 20px) calc(var(--glow-left) * 2px) rgba(168,85,247,0.25);
+    pointer-events: none;
+    transition: box-shadow 0.05s;
+  }
+  .mouse-card .card-label { font-size: 0.78rem; color: #555; letter-spacing: 0.06em; text-transform: uppercase; position: relative; z-index: 1; }
+  .mouse-card .card-value { font-size: 1.6rem; font-weight: 700; color: #fff; position: relative; z-index: 1; }
+
+  /* ─── VARIANT 5: Button Neon Flow ─── */
+  .neon-btn-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .neon-btn {
+    position: relative;
+    padding: 14px 36px;
+    border-radius: 100px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .neon-btn .btn-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 100px;
+    background: #0d0d0d;
+    z-index: 0;
+  }
+  .neon-btn .btn-border {
+    position: absolute;
+    inset: -2px;
+    border-radius: 100px;
+    padding: 2px;
+    background: conic-gradient(
+      from var(--btn-angle, 0deg),
+      transparent 0deg,
+      transparent 160deg,
+      rgba(255,255,255,0.15) 200deg,
+      var(--btn-color, #00e5ff) 240deg,
+      rgba(255,255,255,0.3) 260deg,
+      var(--btn-color, #00e5ff) 280deg,
+      rgba(255,255,255,0.15) 310deg,
+      transparent 340deg,
+      transparent 360deg
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 0;
+    animation: btn-comet 2s linear infinite;
+  }
+  .neon-btn .btn-label {
+    position: relative;
+    z-index: 1;
+  }
+  .neon-btn .btn-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 0;
+  }
+  .neon-btn:hover .btn-glow {
+    opacity: 1;
+  }
+
+  @property --btn-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+  @keyframes btn-comet {
+    to { --btn-angle: 360deg; }
+  }
+
+  .neon-btn.cyan-btn  { --btn-color: #00e5ff; }
+  .neon-btn.cyan-btn .btn-glow  { background: radial-gradient(ellipse at 50% 50%, rgba(0,229,255,0.12) 0%, transparent 70%); }
+  .neon-btn.violet-btn { --btn-color: #a855f7; animation-duration: 1.6s; }
+  .neon-btn.violet-btn .btn-glow { background: radial-gradient(ellipse at 50% 50%, rgba(168,85,247,0.12) 0%, transparent 70%); }
+  .neon-btn.amber-btn { --btn-color: #f59e0b; animation-duration: 2.8s; }
+  .neon-btn.amber-btn .btn-glow { background: radial-gradient(ellipse at 50% 50%, rgba(245,158,11,0.12) 0%, transparent 70%); }
+
+  /* ─── Description boxes ─── */
+  .desc {
+    font-size: 0.75rem;
+    color: #3a3a3a;
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.7;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>
+</head>
+<body>
+
+<h1>Flowing Neon Border</h1>
+<p class="subtitle">Animated CSS Border Effects · 5 Variants</p>
+
+<!-- ─── VARIANT 1 ─── -->
+<section class="section">
+  <div class="section-title">01 · Marching Ants — SVG stroke-dashoffset</div>
+  <div class="demo-row">
+
+    <div class="ant-card">
+      <svg class="border-svg" viewBox="0 0 200 120" preserveAspectRatio="none">
+        <rect class="ant-rect white" x="1" y="1" width="198" height="118" rx="12" ry="12"/>
+      </svg>
+      <span class="card-label">Visitors</span>
+      <span class="card-value">12,840</span>
+    </div>
+
+    <div class="ant-card">
+      <svg class="border-svg" viewBox="0 0 200 120" preserveAspectRatio="none">
+        <rect class="ant-rect cyan" x="1" y="1" width="198" height="118" rx="12" ry="12"/>
+      </svg>
+      <span class="card-label">Revenue</span>
+      <span class="card-value">$9,320</span>
+    </div>
+
+    <div class="ant-card">
+      <svg class="border-svg" viewBox="0 0 200 120" preserveAspectRatio="none">
+        <rect class="ant-rect violet" x="1" y="1" width="198" height="118" rx="12" ry="12"/>
+      </svg>
+      <span class="card-label">Uptime</span>
+      <span class="card-value">99.97%</span>
+    </div>
+
+  </div>
+  <p class="desc">SVG &lt;rect&gt; 配合 stroke-dasharray + stroke-dashoffset CSS animation，虚线沿路径持续循环移动，速度与方向各自独立。</p>
+</section>
+
+<!-- ─── VARIANT 2 ─── -->
+<section class="section">
+  <div class="section-title">02 · Conic Gradient Comet — @property + conic-gradient</div>
+  <div class="demo-row">
+
+    <div class="comet-card comet-cyan">
+      <span class="card-label">Requests</span>
+      <span class="card-value">4.2M</span>
+    </div>
+
+    <div class="comet-card comet-violet">
+      <span class="card-label">Models</span>
+      <span class="card-value">138</span>
+    </div>
+
+    <div class="comet-card comet-amber">
+      <span class="card-label">Latency</span>
+      <span class="card-value">42ms</span>
+    </div>
+
+  </div>
+  <p class="desc">CSS @property 定义可动画的 --angle 属性，::before 伪元素用 conic-gradient 绘制彗星弧光，mask 裁出仅边框部分可见。</p>
+</section>
+
+<!-- ─── VARIANT 3 ─── -->
+<section class="section">
+  <div class="section-title">03 · Neon Light Points — JS + requestAnimationFrame</div>
+  <div class="demo-row" id="neon-row">
+
+    <div class="neon-card" id="neon-a">
+      <span class="card-label">Packages</span>
+      <span class="card-value">2,048</span>
+    </div>
+
+    <div class="neon-card" id="neon-b">
+      <span class="card-label">Stars</span>
+      <span class="card-value">18.4k</span>
+    </div>
+
+    <div class="neon-card" id="neon-c">
+      <span class="card-label">Builds</span>
+      <span class="card-value">99.2%</span>
+    </div>
+
+  </div>
+  <p class="desc">多个彩色光点 JS 驱动沿四条边依次运动，每点携带对应颜色的 box-shadow 发光；各点随机偏移延迟，产生密集流光感。</p>
+</section>
+
+<!-- ─── VARIANT 4 ─── -->
+<section class="section">
+  <div class="section-title">04 · Mouse-Aware Edge Glow — mousemove + CSS custom properties</div>
+  <div class="demo-row">
+    <div class="mouse-card" id="mouse-card">
+      <span class="card-label">Hover the edges</span>
+      <span class="card-value">AI Studio</span>
+    </div>
+    <div class="mouse-card" id="mouse-card-2" style="--glow-top:0;--glow-right:0;--glow-bottom:0;--glow-left:0;">
+      <span class="card-label" style="color:#555">Interactive</span>
+      <span class="card-value" style="font-size:1.2rem">Proximity Glow</span>
+    </div>
+  </div>
+  <p class="desc">mousemove 事件计算鼠标与卡片各边的相对距离，动态写入 CSS 自定义属性，驱动各边的 gradient 强度与 box-shadow 扩散半径。</p>
+</section>
+
+<!-- ─── VARIANT 5 ─── -->
+<section class="section">
+  <div class="section-title">05 · Button Neon Flow — Pill Buttons with Animated Border</div>
+  <div class="demo-row">
+    <div class="neon-btn-wrap">
+      <button class="neon-btn cyan-btn">
+        <span class="btn-bg"></span>
+        <span class="btn-border"></span>
+        <span class="btn-glow"></span>
+        <span class="btn-label">Get Started</span>
+      </button>
+      <button class="neon-btn violet-btn" style="--btn-angle:180deg">
+        <span class="btn-bg"></span>
+        <span class="btn-border"></span>
+        <span class="btn-glow"></span>
+        <span class="btn-label">Deploy Now</span>
+      </button>
+      <button class="neon-btn amber-btn" style="--btn-angle:90deg">
+        <span class="btn-bg"></span>
+        <span class="btn-border"></span>
+        <span class="btn-glow"></span>
+        <span class="btn-label">View Docs</span>
+      </button>
+    </div>
+  </div>
+  <p class="desc">胶囊按钮边框的彗星流光效果，三种颜色各自相位偏移，悬停时中心出现辐射状发光晕圈。</p>
+</section>
+
+<script>
+/* ───────────────────────────────────────────
+   VARIANT 3: Neon Light Points
+─────────────────────────────────────────── */
+(function () {
+  const configs = [
+    { id: 'neon-a', colors: ['#00e5ff', '#00bcd4', '#4dd0e1'] },
+    { id: 'neon-b', colors: ['#a855f7', '#7c3aed', '#c084fc'] },
+    { id: 'neon-c', colors: ['#f59e0b', '#ef4444', '#10b981'] },
+  ];
+
+  configs.forEach(({ id, colors }) => {
+    const card = document.getElementById(id);
+    const W = card.offsetWidth;
+    const H = card.offsetHeight;
+    // Perimeter = top + right + bottom + left
+    const perimeter = 2 * (W + H);
+    const dotCount = 3;
+    const radius = 12; // border-radius px (visual approximation)
+
+    const dots = [];
+    for (let i = 0; i < dotCount; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'neon-dot';
+      const color = colors[i % colors.length];
+      dot.style.background = color;
+      dot.style.boxShadow = `0 0 8px 3px ${color}99, 0 0 20px 6px ${color}44`;
+      dot.style.width = '8px';
+      dot.style.height = '8px';
+      dot.style.borderRadius = '50%';
+      dot.style.zIndex = '2';
+      card.appendChild(dot);
+
+      // staggered start position along perimeter
+      const startT = (i / dotCount) * perimeter;
+      dots.push({ el: dot, t: startT, speed: 220 + i * 30 }); // px/s
+    }
+
+    let last = null;
+    function animate(ts) {
+      if (!last) last = ts;
+      const dt = (ts - last) / 1000;
+      last = ts;
+
+      dots.forEach(d => {
+        d.t = (d.t + d.speed * dt) % perimeter;
+        // Map t → (x, y) along rectangle perimeter (clockwise from top-left)
+        const cW = card.offsetWidth;
+        const cH = card.offsetHeight;
+        const perim = 2 * (cW + cH);
+        const t = d.t % perim;
+        let x, y;
+        if (t < cW) {
+          // top edge
+          x = t; y = 0;
+        } else if (t < cW + cH) {
+          // right edge
+          x = cW; y = t - cW;
+        } else if (t < 2 * cW + cH) {
+          // bottom edge
+          x = cW - (t - cW - cH); y = cH;
+        } else {
+          // left edge
+          x = 0; y = cH - (t - 2 * cW - cH);
+        }
+        // offset to center the dot
+        d.el.style.left = (x - 4) + 'px';
+        d.el.style.top  = (y - 4) + 'px';
+      });
+
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  });
+})();
+
+/* ───────────────────────────────────────────
+   VARIANT 4: Mouse-Aware Edge Glow
+─────────────────────────────────────────── */
+(function () {
+  const cards = [
+    document.getElementById('mouse-card'),
+    document.getElementById('mouse-card-2'),
+  ];
+
+  function handleMove(card, e) {
+    const rect = card.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const W = rect.width;
+    const H = rect.height;
+
+    // Proximity to each edge [0..1], peaks at 0 on the edge, fades into card
+    const proximity = 80; // px influence radius
+    const top    = Math.max(0, 1 - my / proximity);
+    const bottom = Math.max(0, 1 - (H - my) / proximity);
+    const left   = Math.max(0, 1 - mx / proximity);
+    const right  = Math.max(0, 1 - (W - mx) / proximity);
+
+    card.style.setProperty('--glow-top',    top.toFixed(3));
+    card.style.setProperty('--glow-bottom', bottom.toFixed(3));
+    card.style.setProperty('--glow-left',   left.toFixed(3));
+    card.style.setProperty('--glow-right',  right.toFixed(3));
+  }
+
+  function handleLeave(card) {
+    card.style.setProperty('--glow-top', '0');
+    card.style.setProperty('--glow-bottom', '0');
+    card.style.setProperty('--glow-left', '0');
+    card.style.setProperty('--glow-right', '0');
+  }
+
+  cards.forEach(card => {
+    card.addEventListener('mousemove', e => handleMove(card, e));
+    card.addEventListener('mouseleave', () => handleLeave(card));
+  });
+})();
+</script>
+</body>
+</html>

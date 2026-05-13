@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 codepen.io / css-tricks.com (Flowing Neon Border)
+- 效果名称：流动霓虹边框 (Flowing Neon Border / Animated CSS Border)
+- 效果描述：元素边框沿轮廓流动的动态光效，融合了多种流动边框变体：① 行军蚂蚁边框（SVG stroke-dasharray offset 动画，虚线沿路径循环流动）② 渐变光晕流动（conic-gradient 旋转，外圈 glow 效果，模拟彗星掠过）③ 霓虹多彩流动（多段彩色光点依次绕边框运动）④ 跟随鼠标的边框高亮（鼠标靠近边框哪一侧，哪一侧发光）⑤ 全形状适配（矩形/圆形/卡片均可）。深色背景，卡片/按钮为载体，视觉冲击力强。
+- 实现原理：① 行军蚂蚁：用 SVG rect/path 的 stroke-dasharray + stroke-dashoffset CSS animation 实现；② 渐变流动：::before/::after 伪元素 + conic-gradient + CSS @keyframes rotate + overflow:hidden + border-radius 裁剪；③ 霓虹彩光：多个绝对定位 span 模拟光点，用 JS/CSS animation 按延迟依次沿四边运动（top→right→bottom→left），配合 box-shadow 发光；④ 鼠标感知：mousemove 事件计算鼠标与边框各边的距离，动态修改 CSS 自定义属性控制各边发光强度
+- 状态：已实现 → 90-flowing-neon-border.html，待集成到 index.html
+
 ## 2026-05-13 tympanus.net/codrops (SVG Blob Morph)
 - 效果名称：SVG 有机形态变形 (SVG Organic Blob Morph)
 - 效果描述：受 Codrops 文章「Reverse-Engineering Claude AI's Mascot Animations with SVG and GSAP」启发，实现 SVG 路径的有机形态变形动画。多个不规则 blob 形状在鼠标悬停/点击时流畅变形，配合颜色渐变和缩放，呈现出生命感十足的有机动态效果。包含 4 种变体：① 单色 blob 呼吸动画（自动循环变形）② 多 blob 鼠标追踪（跟随鼠标位置变形）③ 点击触发形态切换（多种预设形状间切换）④ 文字遮罩 blob（blob 形状作为文字的 clip-path 遮罩）

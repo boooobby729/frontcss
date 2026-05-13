@@ -4,7 +4,7 @@
 - Effect: Isometric Build Animation
 - Description: SVG isometric geometry with layered build animation. Inspired by Linear FIG 0.2/0.3/0.4. 4 variants: stacked cube tower, block stacking with bounce, staircase expand, explode-reassemble.
 - Tech: SVG path for isometric faces, stroke-dashoffset draw animation, CSS scaleY layer reveal, JS staggered timing
-- Status: pending
+- Status: 已实现 → 92-isometric-build.html，已集成到 collect.html
 
 
 ## 2026-05-13 gsap.com (Magnetic Tile Ripple)
@@ -17,7 +17,7 @@
 - 效果名称：流动霓虹边框 (Flowing Neon Border / Animated CSS Border)
 - 效果描述：元素边框沿轮廓流动的动态光效，融合了多种流动边框变体：① 行军蚂蚁边框（SVG stroke-dasharray offset 动画，虚线沿路径循环流动）② 渐变光晕流动（conic-gradient 旋转，外圈 glow 效果，模拟彗星掠过）③ 霓虹多彩流动（多段彩色光点依次绕边框运动）④ 跟随鼠标的边框高亮（鼠标靠近边框哪一侧，哪一侧发光）⑤ 全形状适配（矩形/圆形/卡片均可）。深色背景，卡片/按钮为载体，视觉冲击力强。
 - 实现原理：① 行军蚂蚁：用 SVG rect/path 的 stroke-dasharray + stroke-dashoffset CSS animation 实现；② 渐变流动：::before/::after 伪元素 + conic-gradient + CSS @keyframes rotate + overflow:hidden + border-radius 裁剪；③ 霓虹彩光：多个绝对定位 span 模拟光点，用 JS/CSS animation 按延迟依次沿四边运动（top→right→bottom→left），配合 box-shadow 发光；④ 鼠标感知：mousemove 事件计算鼠标与边框各边的距离，动态修改 CSS 自定义属性控制各边发光强度
-- 状态：已实现 → 90-flowing-neon-border.html，待集成到 index.html
+- 状态：已实现 → 90-flowing-neon-border.html，已集成到 index.html（Collect 数量 46→48）
 
 ## 2026-05-13 tympanus.net/codrops (SVG Blob Morph)
 - 效果名称：SVG 有机形态变形 (SVG Organic Blob Morph)

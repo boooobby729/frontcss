@@ -340,6 +340,37 @@ a{text-decoration:none;color:inherit}
       <div class="card-visual"><div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">F</div></div>
       <div class="card-info"><h3>Flowing Neon Border</h3></div>
     </a>
+    <a href="../93-grid-preview.html" class="card" data-idx="48">
+      <div class="card-visual"><div style="width:100%;height:100%;background:#f5f0eb;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
+<style>
+@keyframes gp-open {
+  0%   { clip-path: polygon(50% 40%, 50% 40%, 50% 60%, 50% 60%); opacity: 0; }
+  20%  { opacity: 1; }
+  60%  { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+  80%  { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+  100% { clip-path: polygon(50% 40%, 50% 40%, 50% 60%, 50% 60%); opacity: 0; }
+}
+@keyframes gp-fade {
+  0%,100% { opacity: 1; }
+  30%,70%  { opacity: 0.25; }
+}
+.gp-wrap { width: 100%; height: 100%; position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; padding: 10px; }
+.gp-item { background: #e8e0d5; border-radius: 3px; position: relative; overflow: hidden; }
+.gp-item span { position: absolute; bottom: 4px; left: 5px; font-size: 5px; font-family: sans-serif; color: #888; letter-spacing: .03em; }
+.gp-preview { position: absolute; inset: 0; background: #1a1a1a; border-radius: 3px; animation: gp-open 3s cubic-bezier(.76,0,.24,1) infinite; }
+.gp-preview::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, #c8b89a 0%, #8a7560 100%); opacity: .9; }
+.gp-item:not(.gp-active) { animation: gp-fade 3s ease infinite; }
+.gp-item.gp-active { z-index: 2; }
+</style>
+<div class="gp-wrap">
+  <div class="gp-item gp-active"><span>ITEM 01</span><div class="gp-preview"></div></div>
+  <div class="gp-item" style="animation-delay:.1s"><span>ITEM 02</span></div>
+  <div class="gp-item" style="animation-delay:.2s"><span>ITEM 03</span></div>
+  <div class="gp-item" style="animation-delay:.15s"><span>ITEM 04</span></div>
+</div>
+</div></div>
+      <div class="card-info"><h3>Grid to Full Preview</h3></div>
+    </a>
 </div>
 <script>
 

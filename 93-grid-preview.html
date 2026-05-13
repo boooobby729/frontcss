@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>93 · Grid to Full Preview</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.page-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  padding: 0.9rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: inherit;
+  border-bottom: 1px solid rgba(128,128,128,0.15);
+  backdrop-filter: blur(8px);
+}
+.page-header h1 {
+  font-size: 0.7rem;
+  font-family: sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  opacity: 0.45;
+}
+.variant-tabs {
+  display: flex;
+  gap: 1.5rem;
+  font-family: sans-serif;
+  font-size: 0.7rem;
+}
+.variant-tabs button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.3;
+  letter-spacing: 0.05em;
+  transition: opacity 0.2s;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid transparent;
+  font-family: inherit;
+  font-size: inherit;
+}
+.variant-tabs button.active,
+.variant-tabs button:hover { opacity: 1; border-bottom-color: currentColor; }
+
+/* ── Variant wrapper ── */
+.variant { display: none; min-height: 100vh; }
+.variant.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* ── Shop nav ── */
+.shop-nav {
+  position: absolute;
+  top: 3.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1.5rem;
+  font-family: sans-serif;
+  font-size: 1rem;
+  z-index: 10;
+  white-space: nowrap;
+}
+.shop-nav span {
+  opacity: 0.3;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.shop-nav span sup { font-size: 0.55em; }
+.shop-nav span.active, .shop-nav span:hover { opacity: 1; }
+
+/* ── Grid stage ── */
+.grid-stage {
+  position: relative;
+  width: min(92vw, 920px);
+  height: min(78vh, 580px);
+  overflow: hidden;
+  padding: 1.2rem;
+}
+
+/* ── Products grid ── */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1.8vw;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.product-item {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  background: #ccc;
+  transition:
+    opacity 0.42s var(--ease-in-out),
+    transform 0.42s var(--ease-in-out);
+}
+.product-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.5s var(--ease-out);
+}
+.product-item:hover img { transform: scale(1.05); }
+
+.product-cta {
+  position: absolute;
+  top: 50%; left: 0; right: 0;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.72);
+  color: #fff;
+  text-align: center;
+  padding: 0.55rem;
+  font-family: sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.product-item:hover .product-cta { opacity: 1; }
+
+/* ── Preview panel (overlays the grid) ── */
+.preview-panel {
+  position: absolute;
+  inset: 1.2rem;
+  z-index: 2;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1.8vw;
+}
+
+.preview-slot {
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.05s;
+}
+.preview-slot.left  { grid-column: 1 / span 2; grid-row: 1 / span 2; }
+.preview-slot.right { grid-column: 3 / span 2; grid-row: 1 / span 2; }
+
+.preview-inner {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  clip-path: polygon(50% 45%, 50% 45%, 50% 55%, 50% 55%);
+  transition: clip-path 0.58s var(--ease-in-out), opacity 0.28s ease;
+  opacity: 0;
+}
+.preview-inner.open {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  opacity: 1;
+}
+
+.preview-img {
+  width: 100%;
+  height: calc(100% - 2.2rem);
+  object-fit: cover;
+  display: block;
+}
+
+.preview-meta {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 0.45rem 0.3rem;
+  display: flex;
+  justify-content: space-between;
+  font-family: sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.preview-meta.visible { opacity: 1; }
+
+/* ══════════════════════════════════════════
+   VARIANT THEMES
+══════════════════════════════════════════ */
+
+/* V1 — E-Commerce (Light) */
+.v1 { background: #efefef; color: #111; }
+.v1 .product-item { background: #ddd; }
+.v1 .preview-inner { background: #efefef; }
+.v1 .preview-meta { color: #111; }
+
+/* V2 — Photography (Dark) */
+.v2 { background: #0c0c0c; color: #e0e0e0; }
+.v2 .product-item { background: #1c1c1c; }
+.v2 .preview-inner { background: #0c0c0c; }
+.v2 .preview-meta { color: #e0e0e0; }
+.v2 .shop-nav { color: #e0e0e0; }
+.v2 .page-header { background: rgba(12,12,12,0.85); color: #e0e0e0; }
+.v2 .variant-tabs button { color: #e0e0e0; }
+.v2 .product-cta { background: rgba(255,255,255,0.12); backdrop-filter: blur(6px); }
+
+/* V3 — Food Menu (Warm) */
+.v3 { background: #f4ede0; color: #2a1a08; }
+.v3 .product-item { background: #e5d8c8; }
+.v3 .preview-inner { background: #f4ede0; }
+.v3 .preview-meta { color: #2a1a08; }
+.v3 .shop-nav { color: #2a1a08; }
+
+/* V4 — Art Gallery (White) */
+.v4 { background: #fff; color: #000; }
+.v4 .product-item { background: #f2f2f2; }
+.v4 .preview-inner { background: #fff; }
+.v4 .preview-meta { color: #000; font-size: 0.75rem; }
+.v4 .shop-nav { font-family: Georgia, serif; font-size: 1.1rem; color: #000; }
+.v4 .product-cta { display: none; }
+
+/* ── Footer ── */
+.effect-label {
+  position: fixed;
+  bottom: 1rem; left: 1.5rem;
+  font-family: sans-serif;
+  font-size: 0.62rem;
+  opacity: 0.3;
+  letter-spacing: 0.04em;
+  z-index: 100;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>93 · Grid to Full Preview</h1>
+  <div class="variant-tabs">
+    <button class="active" data-v="1">E-Commerce</button>
+    <button data-v="2">Photography</button>
+    <button data-v="3">Food Menu</button>
+    <button data-v="4">Art Gallery</button>
+  </div>
+</header>
+
+<!-- ══ V1: E-Commerce ══ -->
+<section class="variant v1 active" id="v1">
+  <nav class="shop-nav">
+    <span class="active">All <sup>8</sup></span>
+    <span>Chairs <sup>2</sup></span>
+    <span>Tables <sup>1</sup></span>
+    <span>Decoration <sup>3</sup></span>
+    <span>Cabinets <sup>2</sup></span>
+  </nav>
+  <div class="grid-stage">
+    <div class="products-grid js-grid">
+      <div class="product-item" data-col="0" data-row="0" data-name="Candle Stand" data-price="€ 28"
+           data-img="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Add to cart</div>
+      </div>
+      <div class="product-item" data-col="1" data-row="0" data-name="Cow Vase" data-price="€ 40"
+           data-img="https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Add to cart</div>
+      </div>
+      <div class="product-item" data-col="2" data-row="0" data-name="Blue Shelf" data-price="€ 120"
+           data-img="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Add to cart</div>
+      </div>
+      <div class="product-item" data-col="3" data-row="0" data-name="Side Table" data-price="€ 85"
+           data-img="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Add to cart</div>
+      </div>
+      <div class="product-item" data-col="0" data-row="1" data-name="Lounge Chair" data-price="€ 340"
+           data-img="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Add to cart</div>
+      </div>
+      <div class="product-item" data-col="1" data-row="1" data-name="Glass Cabinet" data-price="€ 290"
+           data-img="https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Add to cart</div>
+      </div>
+      <div class="product-item" data-col="2" data-row="1" data-name="Wall Clock" data-price="€ 65"
+           data-img="https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Add to cart</div>
+      </div>
+      <div class="product-item" data-col="3" data-row="1" data-name="Shell Chair" data-price="€ 195"
+           data-img="https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Add to cart</div>
+      </div>
+    </div>
+    <div class="preview-panel js-preview">
+      <div class="preview-slot left js-slot-left">
+        <div class="preview-inner js-inner-left">
+          <img class="preview-img js-img-left" src="" alt="">
+          <div class="preview-meta js-meta">
+            <span class="js-name"></span>
+            <span class="js-price"></span>
+          </div>
+        </div>
+      </div>
+      <div class="preview-slot right js-slot-right">
+        <div class="preview-inner js-inner-right">
+          <img class="preview-img js-img-right" src="" alt="">
+          <div class="preview-meta js-meta">
+            <span class="js-name"></span>
+            <span class="js-price"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ V2: Photography ══ -->
+<section class="variant v2" id="v2">
+  <nav class="shop-nav">
+    <span class="active">All <sup>8</sup></span>
+    <span>Portrait <sup>3</sup></span>
+    <span>Landscape <sup>2</sup></span>
+    <span>Abstract <sup>3</sup></span>
+  </nav>
+  <div class="grid-stage">
+    <div class="products-grid js-grid">
+      <div class="product-item" data-col="0" data-row="0" data-name="Solitude" data-price="Print from € 80"
+           data-img="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">View print</div>
+      </div>
+      <div class="product-item" data-col="1" data-row="0" data-name="Emergence" data-price="Print from € 95"
+           data-img="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">View print</div>
+      </div>
+      <div class="product-item" data-col="2" data-row="0" data-name="Horizon" data-price="Print from € 120"
+           data-img="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">View print</div>
+      </div>
+      <div class="product-item" data-col="3" data-row="0" data-name="Stillness" data-price="Print from € 75"
+           data-img="https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">View print</div>
+      </div>
+      <div class="product-item" data-col="0" data-row="1" data-name="Drift" data-price="Print from € 110"
+           data-img="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">View print</div>
+      </div>
+      <div class="product-item" data-col="1" data-row="1" data-name="Fracture" data-price="Print from € 90"
+           data-img="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">View print</div>
+      </div>
+      <div class="product-item" data-col="2" data-row="1" data-name="Void" data-price="Print from € 85"
+           data-img="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">View print</div>
+      </div>
+      <div class="product-item" data-col="3" data-row="1" data-name="Cascade" data-price="Print from € 130"
+           data-img="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">View print</div>
+      </div>
+    </div>
+    <div class="preview-panel js-preview">
+      <div class="preview-slot left js-slot-left">
+        <div class="preview-inner js-inner-left">
+          <img class="preview-img js-img-left" src="" alt="">
+          <div class="preview-meta js-meta">
+            <span class="js-name"></span>
+            <span class="js-price"></span>
+          </div>
+        </div>
+      </div>
+      <div class="preview-slot right js-slot-right">
+        <div class="preview-inner js-inner-right">
+          <img class="preview-img js-img-right" src="" alt="">
+          <div class="preview-meta js-meta">
+            <span class="js-name"></span>
+            <span class="js-price"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ V3: Food Menu ══ -->
+<section class="variant v3" id="v3">
+  <nav class="shop-nav">
+    <span class="active">All <sup>8</sup></span>
+    <span>Starters <sup>2</sup></span>
+    <span>Mains <sup>3</sup></span>
+    <span>Desserts <sup>3</sup></span>
+  </nav>
+  <div class="grid-stage">
+    <div class="products-grid js-grid">
+      <div class="product-item" data-col="0" data-row="0" data-name="Burrata" data-price="€ 14"
+           data-img="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Order now</div>
+      </div>
+      <div class="product-item" data-col="1" data-row="0" data-name="Tartare" data-price="€ 18"
+           data-img="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Order now</div>
+      </div>
+      <div class="product-item" data-col="2" data-row="0" data-name="Pasta al Nero" data-price="€ 22"
+           data-img="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Order now</div>
+      </div>
+      <div class="product-item" data-col="3" data-row="0" data-name="Grilled Sea Bass" data-price="€ 32"
+           data-img="https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Order now</div>
+      </div>
+      <div class="product-item" data-col="0" data-row="1" data-name="Tiramisu" data-price="€ 10"
+           data-img="https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Order now</div>
+      </div>
+      <div class="product-item" data-col="1" data-row="1" data-name="Panna Cotta" data-price="€ 9"
+           data-img="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Order now</div>
+      </div>
+      <div class="product-item" data-col="2" data-row="1" data-name="Risotto" data-price="€ 24"
+           data-img="https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Order now</div>
+      </div>
+      <div class="product-item" data-col="3" data-row="1" data-name="Chocolate Fondant" data-price="€ 12"
+           data-img="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=500&fit=crop" alt="">
+        <div class="product-cta">Order now</div>
+      </div>
+    </div>
+    <div class="preview-panel js-preview">
+      <div class="preview-slot left js-slot-left">
+        <div class="preview-inner js-inner-left">
+          <img class="preview-img js-img-left" src="" alt="">
+          <div class="preview-meta js-meta">
+            <span class="js-name"></span>
+            <span class="js-price"></span>
+          </div>
+        </div>
+      </div>
+      <div class="preview-slot right js-slot-right">
+        <div class="preview-inner js-inner-right">
+          <img class="preview-img js-img-right" src="" alt="">
+          <div class="preview-meta js-meta">
+            <span class="js-name"></span>
+            <span class="js-price"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ V4: Art Gallery ══ -->
+<section class="variant v4" id="v4">
+  <nav class="shop-nav">
+    <span class="active">Works <sup>8</sup></span>
+    <span>Painting <sup>3</sup></span>
+    <span>Sculpture <sup>2</sup></span>
+    <span>Digital <sup>3</sup></span>
+  </nav>
+  <div class="grid-stage">
+    <div class="products-grid js-grid">
+      <div class="product-item" data-col="0" data-row="0" data-name="Composition I" data-price="€ 4,200"
+           data-img="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=500&fit=crop" alt="">
+      </div>
+      <div class="product-item" data-col="1" data-row="0" data-name="Study in Blue" data-price="€ 3,800"
+           data-img="https://images.unsplash.com/photo-1549490349-8643362247b5?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?w=400&h=500&fit=crop" alt="">
+      </div>
+      <div class="product-item" data-col="2" data-row="0" data-name="Untitled No. 7" data-price="€ 5,600"
+           data-img="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=400&h=500&fit=crop" alt="">
+      </div>
+      <div class="product-item" data-col="3" data-row="0" data-name="Form & Void" data-price="€ 2,900"
+           data-img="https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=400&h=500&fit=crop" alt="">
+      </div>
+      <div class="product-item" data-col="0" data-row="1" data-name="Emergence II" data-price="€ 6,100"
+           data-img="https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=400&h=500&fit=crop" alt="">
+      </div>
+      <div class="product-item" data-col="1" data-row="1" data-name="Chromatic Study" data-price="€ 3,400"
+           data-img="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=500&fit=crop" alt="">
+      </div>
+      <div class="product-item" data-col="2" data-row="1" data-name="Tension" data-price="€ 4,800"
+           data-img="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=500&fit=crop" alt="">
+      </div>
+      <div class="product-item" data-col="3" data-row="1" data-name="Dissolution" data-price="€ 7,200"
+           data-img="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=600&h=750&fit=crop">
+        <img src="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=400&h=500&fit=crop" alt="">
+      </div>
+    </div>
+    <div class="preview-panel js-preview">
+      <div class="preview-slot left js-slot-left">
+        <div class="preview-inner js-inner-left">
+          <img class="preview-img js-img-left" src="" alt="">
+          <div class="preview-meta js-meta">
+            <span class="js-name"></span>
+            <span class="js-price"></span>
+          </div>
+        </div>
+      </div>
+      <div class="preview-slot right js-slot-right">
+        <div class="preview-inner js-inner-right">
+          <img class="preview-img js-img-right" src="" alt="">
+          <div class="preview-meta js-meta">
+            <span class="js-name"></span>
+            <span class="js-price"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="effect-label">93 · Grid to Full Preview · hover to reveal</div>
+
+<script>
+(function () {
+  // ─── Variant tab switching ─────────────────────────────────────────────
+  document.querySelectorAll('.variant-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.variant-tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const id = 'v' + btn.dataset.v;
+      document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    });
+  });
+
+  // ─── Grid Preview Engine ───────────────────────────────────────────────
+  function initGridPreview(stage) {
+    const grid      = stage.querySelector('.js-grid');
+    const items     = Array.from(grid.querySelectorAll('.product-item'));
+    const panel     = stage.querySelector('.js-preview');
+    const slotLeft  = stage.querySelector('.js-slot-left');
+    const slotRight = stage.querySelector('.js-slot-right');
+    const innerLeft = stage.querySelector('.js-inner-left');
+    const innerRight= stage.querySelector('.js-inner-right');
+    const imgLeft   = stage.querySelector('.js-img-left');
+    const imgRight  = stage.querySelector('.js-img-right');
+
+    // Each slot has its own meta
+    const metaLeft  = slotLeft.querySelector('.js-meta');
+    const metaRight = slotRight.querySelector('.js-meta');
+    const nameLeft  = slotLeft.querySelector('.js-name');
+    const priceLeft = slotLeft.querySelector('.js-price');
+    const nameRight = slotRight.querySelector('.js-name');
+    const priceRight= slotRight.querySelector('.js-price');
+
+    let activeItem  = null;
+    let hoverTimer  = null;
+    let isOpen      = false;
+    let closeTimer  = null;
+
+    function isLeftCol(item) {
+      return parseInt(item.dataset.col) < 2;
+    }
+
+    function openPreview(item) {
+      clearTimeout(closeTimer);
+      if (activeItem === item && isOpen) return;
+      activeItem = item;
+      isOpen = true;
+
+      const onLeft = isLeftCol(item);
+      // Left-col items → preview on RIGHT slot; right-col items → preview on LEFT slot
+      const activeInner = onLeft ? innerRight : innerLeft;
+      const activeImg   = onLeft ? imgRight   : imgLeft;
+      const activeMeta  = onLeft ? metaRight  : metaLeft;
+      const activeName  = onLeft ? nameRight  : nameLeft;
+      const activePrice = onLeft ? priceRight : priceLeft;
+      const activeSlot  = onLeft ? slotRight  : slotLeft;
+
+      // Collapse the other slot if open
+      const otherInner = onLeft ? innerLeft : innerRight;
+      const otherSlot  = onLeft ? slotLeft  : slotRight;
+      otherInner.classList.remove('open');
+      otherSlot.style.opacity = '0';
+
+      // Set content
+      activeImg.src = item.dataset.img || item.querySelector('img').src;
+      activeName.textContent  = item.dataset.name  || '';
+      activePrice.textContent = item.dataset.price || '';
+      activeMeta.classList.remove('visible');
+
+      // Show slot
+      activeSlot.style.opacity = '1';
+      panel.style.pointerEvents = 'auto';
+
+      // Determine clip-path start: collapse toward the item's side
+      // Item on left → preview on right → start from left edge of right slot
+      const startX = onLeft ? '0%' : '100%';
+      activeInner.style.transition = 'none';
+      activeInner.style.clipPath = `polygon(${startX} 40%, ${startX} 40%, ${startX} 60%, ${startX} 60%)`;
+      activeInner.style.opacity = '0';
+
+      // Force reflow
+      activeInner.offsetHeight;
+
+      // Animate open
+      activeInner.style.transition = 'clip-path 0.58s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.25s ease';
+      activeInner.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)';
+      activeInner.style.opacity = '1';
+
+      // Fade out other items
+      items.forEach((it, i) => {
+        if (it === item) return;
+        const col = parseInt(it.dataset.col);
+        const row = parseInt(it.dataset.row);
+        const dx = col < 2 ? '-2.5vw' : '2.5vw';
+        const dy = row === 0 ? '-1.5vw' : '1.5vw';
+        it.style.transition = 'opacity 0.38s ease, transform 0.38s ease';
+        it.style.opacity = '0.07';
+        it.style.transform = `translate(${dx}, ${dy})`;
+      });
+
+      // Fade in meta
+      setTimeout(() => {
+        activeMeta.classList.add('visible');
+      }, 320);
+    }
+
+    function closePreview() {
+      if (!isOpen) return;
+      isOpen = false;
+      activeItem = null;
+
+      // Collapse both inners
+      [innerLeft, innerRight].forEach(inner => {
+        inner.style.transition = 'clip-path 0.48s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.25s ease 0.18s';
+        inner.style.clipPath = 'polygon(50% 45%, 50% 45%, 50% 55%, 50% 55%)';
+        inner.style.opacity = '0';
+      });
+
+      // Hide meta
+      [metaLeft, metaRight].forEach(m => m.classList.remove('visible'));
+
+      // Restore items
+      items.forEach(it => {
+        it.style.transition = 'opacity 0.38s ease, transform 0.38s ease';
+        it.style.opacity = '1';
+        it.style.transform = 'translate(0, 0)';
+      });
+
+      closeTimer = setTimeout(() => {
+        panel.style.pointerEvents = 'none';
+        slotLeft.style.opacity  = '0';
+        slotRight.style.opacity = '0';
+      }, 500);
+    }
+
+    // ── Events ──
+    items.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(() => openPreview(item), 90);
+      });
+      item.addEventListener('mouseleave', () => {
+        clearTimeout(hoverTimer);
+      });
+    });
+
+    grid.addEventListener('mouseleave', () => {
+      clearTimeout(hoverTimer);
+      closePreview();
+    });
+
+    // Prevent close when moving into preview panel
+    panel.addEventListener('mouseenter', () => {
+      clearTimeout(closeTimer);
+    });
+    panel.addEventListener('mouseleave', () => {
+      closePreview();
+    });
+  }
+
+  // Init all grid stages
+  document.querySelectorAll('.grid-stage').forEach(stage => initGridPreview(stage));
+
+  // ─── Shop nav filter (visual only) ────────────────────────────────────
+  document.querySelectorAll('.shop-nav').forEach(nav => {
+    nav.querySelectorAll('span').forEach(span => {
+      span.addEventListener('click', () => {
+        nav.querySelectorAll('span').forEach(s => s.classList.remove('active'));
+        span.classList.add('active');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

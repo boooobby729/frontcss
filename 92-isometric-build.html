@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isometric Build Animation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #080810;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    text-align: center;
+    padding: 60px 20px 20px;
+  }
+  header h1 {
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  header p {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #444;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    max-width: 1100px;
+    margin: 40px auto 0;
+    padding: 0 20px 60px;
+  }
+
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: #0c0c1a;
+    border: 1px solid #181830;
+    border-radius: 16px;
+    padding: 32px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    transition: border-color 0.3s, background 0.3s;
+    overflow: hidden;
+  }
+  .card:hover { border-color: #2a2a50; background: #0e0e20; }
+
+  .card-fig {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #2a2a50;
+    align-self: flex-start;
+  }
+
+  .svg-wrap {
+    width: 240px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  svg.iso { overflow: visible; }
+
+  .card-info { align-self: flex-start; }
+  .card-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #ccc;
+    margin-bottom: 4px;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: #3a3a5a;
+    line-height: 1.6;
+  }
+
+  .replay-btn {
+    padding: 5px 16px;
+    background: transparent;
+    border: 1px solid #1e1e38;
+    border-radius: 20px;
+    color: #444;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .replay-btn:hover { border-color: #4444aa; color: #888; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Isometric Build Animation</h1>
+  <p>Inspired by Linear · SVG wireframe geometry · Pure CSS / JS</p>
+</header>
+
+<div class="grid">
+
+  <div class="card" id="card1">
+    <span class="card-fig">FIG 0.1</span>
+    <div class="svg-wrap">
+      <svg class="iso" id="svg1" width="200" height="190" viewBox="0 0 200 190"></svg>
+    </div>
+    <div class="card-info">
+      <div class="card-title">Stacked Cube Tower</div>
+      <div class="card-desc">Cubes build up layer by layer with stroke-draw animation</div>
+    </div>
+    <button class="replay-btn" onclick="event.stopPropagation();buildTower()">&#8635; Replay</button>
+  </div>
+
+  <div class="card" id="card2">
+    <span class="card-fig">FIG 0.2</span>
+    <div class="svg-wrap">
+      <svg class="iso" id="svg2" width="240" height="190" viewBox="0 0 240 190"></svg>
+    </div>
+    <div class="card-info">
+      <div class="card-title">Block Drop &amp; Stack</div>
+      <div class="card-desc">Blocks fall from above and land with a bounce easing</div>
+    </div>
+    <button class="replay-btn" onclick="event.stopPropagation();buildBlocks()">&#8635; Replay</button>
+  </div>
+
+  <div class="card" id="card3">
+    <span class="card-fig">FIG 0.3</span>
+    <div class="svg-wrap">
+      <svg class="iso" id="svg3" width="240" height="200" viewBox="0 0 240 200"></svg>
+    </div>
+    <div class="card-info">
+      <div class="card-title">Staircase Expand</div>
+      <div class="card-desc">Steps rise diagonally with cascading draw timing</div>
+    </div>
+    <button class="replay-btn" onclick="event.stopPropagation();buildStairs()">&#8635; Replay</button>
+  </div>
+
+  <div class="card" id="card4">
+    <span class="card-fig">FIG 0.4</span>
+    <div class="svg-wrap">
+      <svg class="iso" id="svg4" width="240" height="190" viewBox="0 0 240 190"></svg>
+    </div>
+    <div class="card-info">
+      <div class="card-title">Explode &amp; Reassemble</div>
+      <div class="card-desc">Geometry shatters apart then snaps back together</div>
+    </div>
+    <button class="replay-btn" onclick="event.stopPropagation();resetExplode()">&#8635; Replay</button>
+  </div>
+
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   ISOMETRIC MATH
+   isoPoint(col, row, layer, cx, cy, U) -> {x, y}
+   col = right axis, row = left axis, layer = up axis
+───────────────────────────────────────────────────────────── */
+function isoPoint(col, row, layer, cx, cy, U) {
+  return {
+    x: cx + (col - row) * U,
+    y: cy + (col + row) * U * 0.5 - layer * U
+  };
+}
+
+function facePath(col, row, layer, face, cx, cy, U) {
+  const p = (c, r, l) => isoPoint(c, r, l, cx, cy, U);
+  let pts;
+  if (face === 'top') {
+    pts = [p(col,row,layer+1), p(col+1,row,layer+1), p(col+1,row+1,layer+1), p(col,row+1,layer+1)];
+  } else if (face === 'left') {
+    pts = [p(col,row+1,layer), p(col,row+1,layer+1), p(col+1,row+1,layer+1), p(col+1,row+1,layer)];
+  } else { // right
+    pts = [p(col+1,row,layer), p(col+1,row,layer+1), p(col+1,row+1,layer+1), p(col+1,row+1,layer)];
+  }
+  return `M${pts[0].x},${pts[0].y} L${pts[1].x},${pts[1].y} L${pts[2].x},${pts[2].y} L${pts[3].x},${pts[3].y} Z`;
+}
+
+function makePath(svg, d, stroke, opacity, strokeW) {
+  opacity = opacity === undefined ? 1 : opacity;
+  strokeW = strokeW === undefined ? 1 : strokeW;
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  el.setAttribute('d', d);
+  el.setAttribute('fill', 'none');
+  el.setAttribute('stroke', stroke);
+  el.setAttribute('stroke-width', strokeW);
+  el.setAttribute('opacity', opacity);
+  svg.appendChild(el);
+  return el;
+}
+
+function drawStroke(el, dur, delay) {
+  const len = el.getTotalLength ? el.getTotalLength() : 150;
+  el.style.strokeDasharray = len;
+  el.style.strokeDashoffset = len;
+  el.style.transition = 'none';
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      el.style.transition = 'stroke-dashoffset ' + dur + 'ms cubic-bezier(0.4,0,0.2,1)';
+      el.style.strokeDashoffset = 0;
+    }, delay);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   VARIANT 1 — Stacked Cube Tower  (2x2 base, 4 layers)
+══════════════════════════════════════════════════════════ */
+function buildTower() {
+  const svg = document.getElementById('svg1');
+  svg.innerHTML = '';
+  const cx = 100, cy = 155, U = 26;
+  const colors = { top: '#d0d0ff', left: '#7070bb', right: '#4040aa' };
+
+  const cubes = [];
+  for (let layer = 0; layer < 4; layer++) {
+    for (let col = 0; col < 2; col++) {
+      for (let row = 0; row < 2; row++) {
+        cubes.push({ col: col - 1, row: row - 1, layer });
+      }
+    }
+  }
+  cubes.sort(function(a, b) {
+    return a.layer - b.layer || (a.col + a.row) - (b.col + b.row);
+  });
+
+  cubes.forEach(function(c, i) {
+    const baseDelay = c.layer * 260 + (c.col + c.row + 2) * 40;
+    ['right', 'left', 'top'].forEach(function(face, fi) {
+      const d = facePath(c.col, c.row, c.layer, face, cx, cy, U);
+      const el = makePath(svg, d, colors[face]);
+      drawStroke(el, 200, baseDelay + fi * 25);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   VARIANT 2 — Block Drop & Stack
+══════════════════════════════════════════════════════════ */
+function buildBlocks() {
+  const svg = document.getElementById('svg2');
+  svg.innerHTML = '';
+  const cx = 120, cy = 150, U = 28;
+  const colors = { top: '#a0ffb0', left: '#44aa55', right: '#226633' };
+
+  const blocks = [
+    { col: -2, row: -2, layer: 0, w: 3, d: 3 },
+    { col: -1, row: -1, layer: 1, w: 2, d: 2 },
+    { col:  0, row:  0, layer: 2, w: 1, d: 1 },
+    { col: -2, row:  1, layer: 1, w: 1, d: 1 },
+    { col:  1, row: -2, layer: 1, w: 1, d: 1 },
+  ];
+
+  blocks.forEach(function(b, bi) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    svg.appendChild(g);
+
+    for (let dc = 0; dc < b.w; dc++) {
+      for (let dr = 0; dr < b.d; dr++) {
+        ['right', 'left', 'top'].forEach(function(face) {
+          const d = facePath(b.col + dc, b.row + dr, b.layer, face, cx, cy, U);
+          const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          el.setAttribute('d', d);
+          el.setAttribute('fill', 'none');
+          el.setAttribute('stroke', colors[face]);
+          el.setAttribute('stroke-width', '1');
+          g.appendChild(el);
+        });
+      }
+    }
+
+    const delay = bi * 200;
+    g.style.transform = 'translateY(-50px)';
+    g.style.opacity = '0';
+    setTimeout(function() {
+      g.style.transition = 'transform 480ms cubic-bezier(0.34,1.4,0.64,1), opacity 150ms ease';
+      g.style.transform = 'translateY(0)';
+      g.style.opacity = '1';
+    }, delay + 80);
+
+    g.querySelectorAll('path').forEach(function(el, pi) {
+      drawStroke(el, 250, delay + pi * 15 + 80);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   VARIANT 3 — Staircase Expand
+   Staircase goes along the ROW axis (not col), so steps spread
+   left-AND-down in iso space, making the height difference clearly
+   visible as a "riser" face between each step.
+   Step s: col fixed=0, row=s, height=STEPS-s (tallest on left)
+══════════════════════════════════════════════════════════ */
+function buildStairs() {
+  const svg = document.getElementById('svg3');
+  svg.innerHTML = '';
+  const U = 26;
+  const cx = 130, cy = 148;
+  const W = 3; // width of each step (col units)
+
+  const cTop = '#ffd090', cLeft = '#cc7733', cRight = '#884422';
+
+  function pt(col, row, layer) {
+    return {
+      x: cx + (col - row) * U,
+      y: cy + (col + row) * U * 0.5 - layer * U
+    };
+  }
+
+  function poly(points, stroke, op) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    el.setAttribute('points', points.map(function(p){return p.x+','+p.y;}).join(' '));
+    el.setAttribute('fill', 'none');
+    el.setAttribute('stroke', stroke);
+    el.setAttribute('stroke-width', '1');
+    el.setAttribute('opacity', op === undefined ? 1 : op);
+    svg.appendChild(el);
+    return el;
+  }
+
+  function drawPoly(el, delay) {
+    const len = el.getTotalLength ? el.getTotalLength() : 200;
+    el.style.strokeDasharray = len;
+    el.style.strokeDashoffset = len;
+    el.style.transition = 'none';
+    requestAnimationFrame(function() {
+      setTimeout(function() {
+        el.style.transition = 'stroke-dashoffset 220ms cubic-bezier(0.4,0,0.2,1)';
+        el.style.strokeDashoffset = 0;
+      }, delay);
+    });
+  }
+
+  // 5 steps along ROW axis: row=0..4, height decreases (5,4,3,2,1)
+  // col is fixed at 0..W-1 (width)
+  // In iso: row axis goes left-down, so steps spread left-to-right visually
+  // Height difference creates visible riser faces between steps
+  const STEPS = 5;
+  for (let s = 0; s < STEPS; s++) {
+    const r = s;          // row position
+    const h = STEPS - s;  // height: 5,4,3,2,1 (tallest first)
+    const delay = s * 200;
+
+    // TOP FACE: (0,r,h)..(W,r,h)..(W,r+1,h)..(0,r+1,h)
+    {
+      const el = poly(
+        [pt(0,r,h), pt(W,r,h), pt(W,r+1,h), pt(0,r+1,h)],
+        cTop
+      );
+      drawPoly(el, delay);
+    }
+
+    // RIGHT FACE (col=W side): full height, always exposed
+    for (let l = 0; l < h; l++) {
+      const op = (l === h - 1) ? 1 : 0.3;
+      const el = poly(
+        [pt(W,r,l), pt(W,r,l+1), pt(W,r+1,l+1), pt(W,r+1,l)],
+        cRight, op
+      );
+      drawPoly(el, delay + 15 + l * 10);
+    }
+
+    // RISER FACE: the step face between this step and next (row=r, front)
+    // Only visible for steps 1..4 (not the first/tallest step)
+    // This is the face at row=r, from height h to h+1 (previous step height)
+    if (s > 0) {
+      const prevH = h + 1;
+      const el = poly(
+        [pt(0,r,h), pt(0,r,prevH), pt(W,r,prevH), pt(W,r,h)],
+        cLeft
+      );
+      drawPoly(el, delay + 30);
+    }
+  }
+
+  // Draw the left face of the tallest step (s=0, row=0)
+  // This is the back-left face at col=0
+  {
+    const h = STEPS;
+    for (let l = 0; l < h; l++) {
+      const op = (l === h - 1) ? 1 : 0.25;
+      const el = poly(
+        [pt(0,0,l), pt(0,0,l+1), pt(0,1,l+1), pt(0,1,l)],
+        cLeft, op
+      );
+      drawPoly(el, l * 12);
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   VARIANT 4 — Explode & Reassemble  (3x3x2 cluster)
+══════════════════════════════════════════════════════════ */
+let explodeTimers = [];
+
+function resetExplode() {
+  explodeTimers.forEach(function(t) { clearTimeout(t); });
+  explodeTimers = [];
+  buildExplode();
+}
+
+function buildExplode() {
+  const svg = document.getElementById('svg4');
+  svg.innerHTML = '';
+  const cx = 120, cy = 145, U = 24;
+  const colors = { top: '#ffb0d0', left: '#cc4488', right: '#882255' };
+
+  const cubes = [];
+  for (let col = -1; col <= 1; col++) {
+    for (let row = -1; row <= 1; row++) {
+      for (let layer = 0; layer < 2; layer++) {
+        cubes.push({ col: col, row: row, layer: layer });
+      }
+    }
+  }
+  cubes.sort(function(a, b) {
+    return (a.col + a.row) - (b.col + b.row) || a.layer - b.layer;
+  });
+
+  const groups = cubes.map(function(cube, i) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    svg.appendChild(g);
+
+    ['right', 'left', 'top'].forEach(function(face) {
+      const d = facePath(cube.col, cube.row, cube.layer, face, cx, cy, U);
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      el.setAttribute('d', d);
+      el.setAttribute('fill', 'none');
+      el.setAttribute('stroke', colors[face]);
+      el.setAttribute('stroke-width', '1');
+      g.appendChild(el);
+    });
+
+    g.querySelectorAll('path').forEach(function(el, pi) {
+      drawStroke(el, 180, i * 35 + pi * 15);
+    });
+
+    return { g: g, cube: cube };
+  });
+
+  // Phase 2: explode outward
+  const t1 = setTimeout(function() {
+    groups.forEach(function(item) {
+      const cube = item.cube;
+      const g = item.g;
+      const dx = cube.col * 58 + cube.row * (-12);
+      const dy = cube.col * 20 + cube.row * 24 + cube.layer * (-38);
+      g.style.transition = 'transform 420ms cubic-bezier(0.4,0,0.8,0.5), opacity 420ms ease';
+      g.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      g.style.opacity = '0.18';
+    });
+  }, 1100);
+  explodeTimers.push(t1);
+
+  // Phase 3: reassemble with spring
+  const t2 = setTimeout(function() {
+    groups.forEach(function(item) {
+      item.g.style.transition = 'transform 600ms cubic-bezier(0.34,1.4,0.64,1), opacity 300ms ease';
+      item.g.style.transform = 'translate(0,0)';
+      item.g.style.opacity = '1';
+    });
+  }, 1750);
+  explodeTimers.push(t2);
+
+  // Loop
+  const t3 = setTimeout(function() { buildExplode(); }, 3400);
+  explodeTimers.push(t3);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   AUTO-START
+───────────────────────────────────────────────────────────── */
+window.addEventListener('load', function() {
+  buildTower();
+  setTimeout(buildBlocks, 150);
+  setTimeout(buildStairs, 300);
+  setTimeout(buildExplode, 450);
+});
+
+document.getElementById('card1').addEventListener('click', buildTower);
+document.getElementById('card2').addEventListener('click', buildBlocks);
+document.getElementById('card3').addEventListener('click', buildStairs);
+document.getElementById('card4').addEventListener('click', resetExplode);
+</script>
+</body>
+</html>

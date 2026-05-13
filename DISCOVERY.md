@@ -1,5 +1,12 @@
 ## 前端效果采集记录
 
+## 2026-05-13 linear.app (Isometric Build Animation)
+- Effect: Isometric Build Animation
+- Description: SVG isometric geometry with layered build animation. Inspired by Linear FIG 0.2/0.3/0.4. 4 variants: stacked cube tower, block stacking with bounce, staircase expand, explode-reassemble.
+- Tech: SVG path for isometric faces, stroke-dashoffset draw animation, CSS scaleY layer reveal, JS staggered timing
+- Status: pending
+
+
 ## 2026-05-13 gsap.com (Magnetic Tile Ripple)
 - 效果名称：磁性格子涟漪 (Magnetic Tile Ripple)
 - 效果描述：由 NxN 网格格子组成的交互区域，鼠标移入时以鼠标为中心向外扩散涟漪——每个格子根据与鼠标的距离产生不同强度的"磁吸"上浮、缩放、发光效果，格子带有蓝/紫渐变色。包含 4 种变体：① 磁性上浮（translateY + scale，距离越近浮起越高）② 颜色涟漪（鼠标为原点，不同半径渲染不同色相，形成彩虹波纹）③ 翻转棋盘（格子 rotateY/X 翻转，背面是对比色，错落时序）④ 粒子爆炸（点击时以鼠标为中心向外爆发）。灵感来自 gsap.com 首页 UI Interactions 蓝色棋盘格演示 + 装饰元素的散射动画。

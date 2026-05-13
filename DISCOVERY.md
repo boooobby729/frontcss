@@ -1,5 +1,11 @@
 ## 前端效果采集记录
 
+## 2026-05-13 vercel.com (Concentric Triangle + Conic Rainbow)
+- 效果名称：嵌套三角形彩虹光晕 (Concentric Triangle + Conic Rainbow Hero)
+- 效果描述：Vercel 首页 Hero 区域的标志性视觉效果。核心由两层叠加构成：① 彩虹光晕背景——conic-gradient 从底部70%处发散，黄/红/蓝/绿4色扇形覆盖全区域，配合 mix-blend-mode: hard-light 产生柔和的彩色光晕叠加效果，支持浅/深色双主题；② 同心嵌套三角形——由15层 SVG path 描述的等边三角形，每层顶点 Y 坐标步进约9px，opacity 从1.0线性衰减到0.07，底部有实心遮罩三角形制造"空心"错觉，呈现强烈的景深层次感。包含4种变体：① 浅色主题（白底橙/红/蓝/绿光晕）② 深色主题（黑底浓艳色光晕）③ 鼠标视差——光晕随鼠标位置偏移，三角形微旋转 ④ 彩虹旋转动画——conic-gradient 角度自动旋转360°循环。
+- 实现原理：背景层用一个绝对定位 div + CSS conic-gradient + mix-blend-mode:hard-light；三角形层用 SVG，JS 动态生成15个 path 元素，顶点坐标按步长递增，opacity 线性插值；鼠标视差用 mousemove 事件驱动 CSS custom property --offset-x/y，影响 conic-gradient 的 at 位置；旋转动画用 @keyframes 驱动 --angle CSS 变量从180deg → 540deg
+- 状态：已实现 → 94-concentric-triangle.html
+
 ## 2026-05-13 linear.app (Isometric Build Animation)
 - Effect: Isometric Build Animation
 - Description: SVG isometric geometry with layered build animation. Inspired by Linear FIG 0.2/0.3/0.4. 4 variants: stacked cube tower, block stacking with bounce, staircase expand, explode-reassemble.

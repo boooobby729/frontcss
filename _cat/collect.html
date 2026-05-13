@@ -371,6 +371,42 @@ a{text-decoration:none;color:inherit}
 </div></div>
       <div class="card-info"><h3>Grid to Full Preview</h3></div>
     </a>
+    <a href="../94-concentric-triangle.html" class="card" data-idx="49">
+      <div class="card-visual"><div style="width:100%;height:100%;background:#ffffff;overflow:hidden;position:relative">
+<style>
+@property --ct-angle { syntax: '<angle>'; inherits: false; initial-value: 180deg; }
+@keyframes ct-spin { from { --ct-angle: 180deg; } to { --ct-angle: 540deg; } }
+.ct-wrap { width:100%; height:100%; position:relative; overflow:hidden; background:#fff; }
+.ct-rainbow {
+  position:absolute; inset:0; mix-blend-mode:hard-light;
+  background-color:#fff;
+  background-image: conic-gradient(from var(--ct-angle) at 50% 70%, rgba(255,255,255,0) 0deg, #eec32d 72deg, #ec4b4b 144deg, #709ab9 216deg, #4dffbf 288deg, rgba(255,255,255,0) 360deg);
+  animation: ct-spin 4s linear infinite;
+}
+.ct-grid {
+  position:absolute; inset:0;
+  background-image: linear-gradient(rgba(100,100,100,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(100,100,100,.12) 1px, transparent 1px);
+  background-size: 25% 33%;
+}
+</style>
+<div class="ct-wrap">
+  <div class="ct-rainbow"></div>
+  <div class="ct-grid"></div>
+  <svg viewBox="0 0 120 70" style="position:absolute;inset:0;width:100%;height:100%" fill="none">
+    <path fill="#ffffff" d="M48.5 65.04h23L60 45.12z"/>
+    <path stroke="#111" opacity="1"   d="M71.5 65.04 L60 45.12 L48.5 65.04"/>
+    <path stroke="#111" opacity="0.87" d="M71.5 65.04 L60 46.03 L48.5 65.04"/>
+    <path stroke="#111" opacity="0.73" d="M71.5 65.04 L60 46.94 L48.5 65.04"/>
+    <path stroke="#111" opacity="0.6"  d="M71.5 65.04 L60 47.85 L48.5 65.04"/>
+    <path stroke="#111" opacity="0.47" d="M71.5 65.04 L60 48.76 L48.5 65.04"/>
+    <path stroke="#111" opacity="0.33" d="M71.5 65.04 L60 49.67 L48.5 65.04"/>
+    <path stroke="#111" opacity="0.2"  d="M71.5 65.04 L60 50.58 L48.5 65.04"/>
+    <path stroke="#111" opacity="0.1"  d="M71.5 65.04 L60 51.49 L48.5 65.04"/>
+  </svg>
+</div>
+</div></div>
+      <div class="card-info"><h3>Concentric Triangle + Conic Rainbow</h3></div>
+    </a>
 </div>
 <script>
 

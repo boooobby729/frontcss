@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>94 · Concentric Triangle + Conic Rainbow</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f5f5;
+  --fg: #111111;
+  --yellow: #eec32d;
+  --red: #ec4b4b;
+  --blue: #709ab9;
+  --cyan: #4dffbf;
+  --angle: 180deg;
+  --ox: 50%;
+  --oy: 70%;
+}
+
+body {
+  background: #0a0a0a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #fff;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* ── Page Header ── */
+.page-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(10,10,10,0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.page-header a {
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  font-size: 13px;
+}
+.page-header a:hover { color: #fff; }
+.page-header h1 {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Sections ── */
+.section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem 4rem;
+  position: relative;
+}
+
+.section-label {
+  position: absolute;
+  top: 5.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+}
+.section-desc {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* ── Triangle Hero Container ── */
+.hero-wrap {
+  position: relative;
+  width: min(680px, 90vw);
+  aspect-ratio: 1200 / 700;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+/* Light theme base must be white for hard-light to work correctly */
+.theme-light,
+.theme-parallax { background: #ffffff; }
+.theme-dark,
+.theme-animated { background: #000000; }
+
+/* Rainbow layer */
+.rainbow {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: hard-light;
+}
+
+/* Light theme rainbow */
+.theme-light .rainbow {
+  background-color: #ffffff;
+  background-image: conic-gradient(
+    from var(--angle) at var(--ox) var(--oy),
+    rgba(255,255,255,0) 0deg,
+    var(--yellow) 72deg,
+    var(--red) 144deg,
+    var(--blue) 216deg,
+    var(--cyan) 288deg,
+    rgba(255,255,255,0) 360deg
+  );
+}
+
+/* Dark theme rainbow */
+.theme-dark .rainbow {
+  --yellow: #ffce20cc;
+  --red: #c50000cc;
+  --blue: #0059abcc;
+  --cyan: #0fffa9cc;
+  background-color: #000000;
+  background-image: conic-gradient(
+    from var(--angle) at var(--ox) var(--oy),
+    rgba(0,0,0,0) 0deg,
+    var(--yellow) 72deg,
+    var(--red) 144deg,
+    var(--blue) 216deg,
+    var(--cyan) 288deg,
+    rgba(0,0,0,0) 360deg
+  );
+}
+
+/* Parallax theme rainbow */
+.theme-parallax .rainbow {
+  background-color: #ffffff;
+  background-image: conic-gradient(
+    from var(--angle) at var(--ox) var(--oy),
+    rgba(250,250,250,0) 0deg,
+    var(--yellow) 72deg,
+    var(--red) 144deg,
+    var(--blue) 216deg,
+    var(--cyan) 288deg,
+    rgba(250,250,250,0) 360deg
+  );
+  transition: background-image 0.05s linear;
+}
+
+/* Animated theme rainbow */
+@keyframes spin-conic {
+  from { --angle: 180deg; }
+  to   { --angle: 540deg; }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 180deg;
+}
+
+.theme-animated .rainbow {
+  background-color: #000000;
+  background-image: conic-gradient(
+    from var(--angle) at var(--ox) var(--oy),
+    rgba(0,0,0,0) 0deg,
+    #ffce20cc 72deg,
+    #c50000cc 144deg,
+    #0059abcc 216deg,
+    #0fffa9cc 288deg,
+    rgba(0,0,0,0) 360deg
+  );
+  animation: spin-conic 6s linear infinite;
+}
+
+/* Grid overlay */
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(100,100,100,0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100,100,100,0.15) 1px, transparent 1px);
+  background-size: calc(100% / 8) calc(100% / 5);
+}
+
+/* Triangle SVG */
+.triangle-svg {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Parallax wrapper */
+.theme-parallax .triangle-svg {
+  transition: transform 0.15s ease-out;
+}
+
+/* ── Variant Labels ── */
+.variant-row {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 3.5rem;
+}
+.variant-dot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+}
+.variant-dot span {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ── Divider ── */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+
+/* ── Info badge ── */
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 1.5rem;
+  cursor: default;
+}
+.info-badge b { color: rgba(255,255,255,0.7); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <a href="javascript:history.back()">← Back</a>
+  <h1>94 · Concentric Triangle + Conic Rainbow</h1>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     VARIANT 1: Light Theme (Original Vercel)
+════════════════════════════════════════════ -->
+<section class="section">
+  <span class="section-label">01 — Light Theme</span>
+
+  <div class="hero-wrap theme-light" id="v1">
+    <div class="rainbow"></div>
+    <div class="grid-overlay"></div>
+    <svg class="triangle-svg" fill="none" viewBox="0 0 1200 700" id="svg-v1"></svg>
+  </div>
+
+  <div class="info-badge">
+    <b>conic-gradient</b> · mix-blend-mode: hard-light · 15-layer SVG triangle
+  </div>
+  <span class="section-desc">Inspired by vercel.com hero section</span>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════
+     VARIANT 2: Dark Theme
+════════════════════════════════════════════ -->
+<section class="section">
+  <span class="section-label">02 — Dark Theme</span>
+
+  <div class="hero-wrap theme-dark" id="v2">
+    <div class="rainbow"></div>
+    <div class="grid-overlay"></div>
+    <svg class="triangle-svg" fill="none" viewBox="0 0 1200 700" id="svg-v2"></svg>
+  </div>
+
+  <div class="info-badge">
+    <b>Dark</b> · deeper saturation · high-contrast glow
+  </div>
+  <span class="section-desc">Dark variant with richer, more saturated colors</span>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════
+     VARIANT 3: Mouse Parallax
+════════════════════════════════════════════ -->
+<section class="section">
+  <span class="section-label">03 — Mouse Parallax</span>
+
+  <div class="hero-wrap theme-parallax" id="v3">
+    <div class="rainbow" id="rainbow-v3"></div>
+    <div class="grid-overlay"></div>
+    <svg class="triangle-svg" fill="none" viewBox="0 0 1200 700" id="svg-v3"></svg>
+  </div>
+
+  <div class="info-badge">
+    Move mouse over the card → <b>rainbow shifts</b> + triangle tilts
+  </div>
+  <span class="section-desc">mousemove → conic-gradient origin parallax + SVG rotate</span>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════
+     VARIANT 4: Animated Rotation
+════════════════════════════════════════════ -->
+<section class="section">
+  <span class="section-label">04 — Animated Rainbow Rotation</span>
+
+  <div class="hero-wrap theme-animated" id="v4">
+    <div class="rainbow"></div>
+    <div class="grid-overlay"></div>
+    <svg class="triangle-svg" fill="none" viewBox="0 0 1200 700" id="svg-v4"></svg>
+  </div>
+
+  <div class="info-badge">
+    <b>@property --angle</b> · CSS Houdini · 6s infinite rotation
+  </div>
+  <span class="section-desc">conic-gradient --angle rotates 180° → 540° in a loop</span>
+</section>
+
+
+<script>
+/* ─────────────────────────────────────────
+   Build SVG triangle layers
+   viewBox: 0 0 1200 700
+   Base triangle: apex=(600, 451.21), BL=(485, 650.4), BR=(715, 650.4)
+   15 layers, apex Y steps up ~9.12 px each layer
+   opacity: 1.0 → 0.07 (step ~0.067)
+───────────────────────────────────────── */
+function buildTriangle(svgEl, fgColor, maskColor) {
+  const LAYERS = 15;
+  const BLx = 485, BRx = 715, BY = 650.4;
+  const apexX = 600;
+  const apexYStart = 451.21;
+  const apexYStep = (578.82 - apexYStart) / (LAYERS - 1);
+  const opacityStart = 1.0;
+  const opacityStep = (1.0 - 0.07) / (LAYERS - 1);
+
+  // Fill mask: solid bg-colored triangle to create hollow concentric effect
+  const mask = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  mask.setAttribute('fill', maskColor || '#ffffff');
+  mask.setAttribute('d', `M${BLx} ${BY}h${BRx - BLx}L${apexX} ${apexYStart}z`);
+  svgEl.appendChild(mask);
+
+  // Draw lines from outermost to innermost
+  for (let i = 0; i < LAYERS; i++) {
+    const apexY = apexYStart + apexYStep * i;
+    const opacity = (opacityStart - opacityStep * i).toFixed(2);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('stroke', fgColor);
+    path.setAttribute('opacity', opacity);
+    path.setAttribute('d', `M${BRx} ${BY} L${apexX} ${apexY} L${BLx} ${BY}`);
+    svgEl.appendChild(path);
+  }
+}
+
+// V1: light theme → dark strokes, white mask (matching white bg)
+buildTriangle(document.getElementById('svg-v1'), '#111111', '#ffffff');
+
+// V2: dark theme → light strokes, black mask
+buildTriangle(document.getElementById('svg-v2'), '#ffffff', '#000000');
+
+// V3: parallax → dark strokes, white mask
+buildTriangle(document.getElementById('svg-v3'), '#111111', '#ffffff');
+
+// V4: animated → light strokes, black mask
+buildTriangle(document.getElementById('svg-v4'), '#ffffff', '#000000');
+
+
+/* ─────────────────────────────────────────
+   Parallax: V3 mouse interaction
+───────────────────────────────────────── */
+const v3Wrap = document.getElementById('v3');
+const rainbowV3 = document.getElementById('rainbow-v3');
+const svgV3 = document.getElementById('svg-v3');
+
+v3Wrap.addEventListener('mousemove', (e) => {
+  const rect = v3Wrap.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / rect.width;   // 0-1
+  const my = (e.clientY - rect.top)  / rect.height;  // 0-1
+
+  // Rainbow origin follows mouse (constrained to 30–70% range)
+  const ox = 30 + mx * 40;
+  const oy = 50 + my * 30;
+  rainbowV3.style.backgroundImage = `conic-gradient(
+    from 180deg at ${ox}% ${oy}%,
+    rgba(250,250,250,0) 0deg,
+    #eec32d 72deg,
+    #ec4b4b 144deg,
+    #709ab9 216deg,
+    #4dffbf 288deg,
+    rgba(250,250,250,0) 360deg
+  )`;
+
+  // Triangle tilts slightly toward mouse
+  const rotX = (my - 0.5) * -8;
+  const rotY = (mx - 0.5) * 8;
+  svgV3.style.transform = `perspective(600px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+});
+
+v3Wrap.addEventListener('mouseleave', () => {
+  rainbowV3.style.backgroundImage = `conic-gradient(
+    from 180deg at 50% 70%,
+    rgba(250,250,250,0) 0deg,
+    #eec32d 72deg,
+    #ec4b4b 144deg,
+    #709ab9 216deg,
+    #4dffbf 288deg,
+    rgba(250,250,250,0) 360deg
+  )`;
+  svgV3.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
+});
+</script>
+</body>
+</html>

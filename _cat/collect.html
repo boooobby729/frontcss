@@ -37,6 +37,8 @@ a{text-decoration:none;color:inherit}
 .card:hover .card-info{background:#161616}
 .card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
+.card:not(.in-view) .card-visual .stage{animation-play-state:paused !important}
+.card:not(.in-view) .card-visual .stage *{animation-play-state:paused !important}
 .card-info{padding:10px 14px 14px;background:#111}
 .card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
@@ -65,83 +67,83 @@ a{text-decoration:none;color:inherit}
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item active" title="Collect">Collect</a></div>
 <div class="card-grid">
     <a href="../46-collect.html" class="card" data-idx="0">
-      <div class="card-visual"><img src="../_thumbs/46-collect.png" alt="Collect 灵感收" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/46-collect.webp" alt="Collect 灵感收" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Collect 灵感收</h3></div>
     </a>
     <a href="../47-collect-text.html" class="card" data-idx="1">
-      <div class="card-visual"><img src="../_thumbs/47-collect-text.png" alt="Collect 文本变化" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/47-collect-text.webp" alt="Collect 文本变化" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Collect 文本变化</h3></div>
     </a>
     <a href="../48-colorful-quote-cards.html" class="card" data-idx="2">
-      <div class="card-visual"><img src="../_thumbs/48-colorful-quote-cards.png" alt="Colorful Quote Cards" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/48-colorful-quote-cards.webp" alt="Colorful Quote Cards" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Colorful Quote Cards</h3></div>
     </a>
     <a href="../49-keyboard-shortcuts.html" class="card" data-idx="3">
-      <div class="card-visual"><img src="../_thumbs/49-keyboard-shortcuts.png" alt="Keyboard Shortcut Visualizer" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/49-keyboard-shortcuts.webp" alt="Keyboard Shortcut Visualizer" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Keyboard Shortcut Visualizer</h3></div>
     </a>
     <a href="../50-particle-ray-burst.html" class="card" data-idx="4">
-      <div class="card-visual"><img src="../_thumbs/50-particle-ray-burst.png" alt="Particle Ray Burst 粒子光线放射" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/50-particle-ray-burst.webp" alt="Particle Ray Burst 粒子光线放射" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Particle Ray Burst 粒子光线放射</h3></div>
     </a>
     <a href="../51-terminal-text-scramble.html" class="card" data-idx="5">
-      <div class="card-visual"><img src="../_thumbs/51-terminal-text-scramble.png" alt="Terminal Text Scramble Hover" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/51-terminal-text-scramble.webp" alt="Terminal Text Scramble Hover" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Terminal Text Scramble Hover</h3></div>
     </a>
     <a href="../52-glassmorphism-floating-ui-cards.html" class="card" data-idx="6">
-      <div class="card-visual"><img src="../_thumbs/52-glassmorphism-floating-ui-cards.png" alt="毛玻璃浮动通知卡片 Glassmorphism Floating UI Cards" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/52-glassmorphism-floating-ui-cards.webp" alt="毛玻璃浮动通知卡片 Glassmorphism Floating UI Cards" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>毛玻璃浮动通知卡片 Glassmorphism Floating UI Cards</h3></div>
     </a>
     <a href="../53-diamond-icon-grid-spotlight.html" class="card" data-idx="7">
-      <div class="card-visual"><img src="../_thumbs/53-diamond-icon-grid-spotlight.png" alt="Diamond Icon Grid Spotlight · 菱形图标网格光晕追踪" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/53-diamond-icon-grid-spotlight.webp" alt="Diamond Icon Grid Spotlight · 菱形图标网格光晕追踪" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Diamond Icon Grid Spotlight · 菱形图标网格光晕追踪</h3></div>
     </a>
     <a href="../54-holographic-rainbow-card.html" class="card" data-idx="8">
-      <div class="card-visual"><img src="../_thumbs/54-holographic-rainbow-card.png" alt="全息彩虹卡片 Holographic Rainbow Card" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/54-holographic-rainbow-card.webp" alt="全息彩虹卡片 Holographic Rainbow Card" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>全息彩虹卡片 Holographic Rainbow Card</h3></div>
     </a>
     <a href="../55-contour-terrain-map.html" class="card" data-idx="9">
-      <div class="card-visual"><img src="../_thumbs/55-contour-terrain-map.png" alt="等高线地形波纹背景 Contour Terrain Map" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/55-contour-terrain-map.webp" alt="等高线地形波纹背景 Contour Terrain Map" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>等高线地形波纹背景 Contour Terrain Map</h3></div>
     </a>
     <a href="../56-clip-path-fullscreen-menu.html" class="card" data-idx="10">
-      <div class="card-visual"><img src="../_thumbs/56-clip-path-fullscreen-menu.png" alt="Clip-Path Fullscreen Menu" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/56-clip-path-fullscreen-menu.webp" alt="Clip-Path Fullscreen Menu" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Clip-Path Fullscreen Menu</h3></div>
     </a>
     <a href="../57-app-icon-galaxy.html" class="card" data-idx="11">
-      <div class="card-visual"><img src="../_thumbs/57-app-icon-galaxy.png" alt="App Icon Galaxy Grid" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/57-app-icon-galaxy.webp" alt="App Icon Galaxy Grid" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>App Icon Galaxy Grid</h3></div>
     </a>
     <a href="../58-scroll-3d-carousel.html" class="card" data-idx="12">
-      <div class="card-visual"><img src="../_thumbs/58-scroll-3d-carousel.png" alt="Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/58-scroll-3d-carousel.webp" alt="Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Scroll-Driven 3D Carousel · 滚动驱动 3D 轮播</h3></div>
     </a>
     <a href="../59-magnetic-button.html" class="card" data-idx="13">
-      <div class="card-visual"><img src="../_thumbs/59-magnetic-button.png" alt="磁力吸附按钮 Magnetic Button" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/59-magnetic-button.webp" alt="磁力吸附按钮 Magnetic Button" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>磁力吸附按钮 Magnetic Button</h3></div>
     </a>
     <a href="../60-conic-contour.html" class="card" data-idx="14">
-      <div class="card-visual"><img src="../_thumbs/60-conic-contour.png" alt="Conic Gradient Contour Lines" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/60-conic-contour.webp" alt="Conic Gradient Contour Lines" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Conic Gradient Contour Lines</h3></div>
     </a>
     <a href="../61-circular-score-cards.html" class="card" data-idx="15">
-      <div class="card-visual"><img src="../_thumbs/61-circular-score-cards.png" alt="Circular Score Cards · 圆形进度评分卡" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/61-circular-score-cards.webp" alt="Circular Score Cards · 圆形进度评分卡" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Circular Score Cards · 圆形进度评分卡</h3></div>
     </a>
     <a href="../62-svg-filter-text.html" class="card" data-idx="16">
-      <div class="card-visual"><img src="../_thumbs/62-svg-filter-text.png" alt="SVG Filter Text Distortion" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/62-svg-filter-text.webp" alt="SVG Filter Text Distortion" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>SVG Filter Text Distortion</h3></div>
     </a>
     <a href="../63-isometric-wireframe.html" class="card" data-idx="17">
-      <div class="card-visual"><img src="../_thumbs/63-isometric-wireframe.png" alt="Isometric Wireframe Geometry" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/63-isometric-wireframe.webp" alt="Isometric Wireframe Geometry" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Isometric Wireframe Geometry</h3></div>
     </a>
     <a href="../64-scroll-highlight-text.html" class="card" data-idx="18">
-      <div class="card-visual"><img src="../_thumbs/64-scroll-highlight-text.png" alt="Scroll Highlight Text — 滚动文字高亮墙" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/64-scroll-highlight-text.webp" alt="Scroll Highlight Text — 滚动文字高亮墙" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Scroll Highlight Text — 滚动文字高亮墙</h3></div>
     </a>
     <a href="../65-holographic-liquid.html" class="card" data-idx="19">
-      <div class="card-visual"><img src="../_thumbs/65-holographic-liquid.png" alt="Holographic Liquid Shader" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/65-holographic-liquid.webp" alt="Holographic Liquid Shader" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>Holographic Liquid Shader</h3></div>
     </a>
     <a href="../65-nested-triangle-glow.html" class="card" data-idx="20">
@@ -248,7 +250,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>Terminal Text Decode Hover</h3></div>
     </a>
     <a href="../89-svg-blob-morph.html" class="card" data-idx="44">
-      <div class="card-visual"><img src="../_thumbs/89-svg-blob-morph.png" alt="SVG Organic Blob Morph" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="card-visual"><img src="../_thumbs/89-svg-blob-morph.webp" alt="SVG Organic Blob Morph" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="card-info"><h3>SVG Organic Blob Morph</h3></div>
     </a>
     <a href="../90-flowing-neon-border.html" class="card" data-idx="45">

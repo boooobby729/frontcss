@@ -37,6 +37,8 @@ a{text-decoration:none;color:inherit}
 .card:hover .card-info{background:#161616}
 .card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
+.card:not(.in-view) .card-visual .stage{animation-play-state:paused !important}
+.card:not(.in-view) .card-visual .stage *{animation-play-state:paused !important}
 .card-info{padding:10px 14px 14px;background:#111}
 .card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
@@ -222,6 +224,20 @@ a{text-decoration:none;color:inherit}
   var active=scroll.querySelector('.nav-item.active');
   if(active)setTimeout(function(){active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})},100);
 })();
+
+// Lazy animation: only play when card is in viewport
+(function(){
+  if(!('IntersectionObserver' in window))return;
+  var cards=document.querySelectorAll('.card');
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('in-view');}
+      else{e.target.classList.remove('in-view');}
+    });
+  },{rootMargin:'200px 0px'});
+  cards.forEach(function(c){io.observe(c);});
+})();
+
 function createRipple(e){
     const btn=e.currentTarget,c=document.createElement('span');
     c.className='ripple-circle';

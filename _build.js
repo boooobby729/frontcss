@@ -1828,10 +1828,27 @@ const cardGridCss = `
 .card:hover .card-info{background:#161616}
 .card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
+.card:not(.in-view) .card-visual .stage{animation-play-state:paused !important}
+.card:not(.in-view) .card-visual .stage *{animation-play-state:paused !important}
 .card-info{padding:10px 14px 14px;background:#111}
 .card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
 @media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+`;
+
+const lazyAnimJs = `
+// Lazy animation: only play when card is in viewport
+(function(){
+  if(!('IntersectionObserver' in window))return;
+  var cards=document.querySelectorAll('.card');
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('in-view');}
+      else{e.target.classList.remove('in-view');}
+    });
+  },{rootMargin:'200px 0px'});
+  cards.forEach(function(c){io.observe(c);});
+})();
 `;
 
 // ============================================================
@@ -1883,6 +1900,7 @@ ${generateNavBar(cat.id, '../')}
 ${cards}</div>
 <` + `script>
 ${navJs}
+${lazyAnimJs}
 ${cat.scripts.map(s => s).join('\n')}
 
 // 复制给 AI - 卡片按钮
@@ -1943,10 +1961,10 @@ for (const cat of sortedIframe) {
   if (cat.effects.length > 0) {
     for (let i = 0; i < cat.effects.length; i++) {
       const eff = cat.effects[i];
-      const thumbFile = `${cat.id}_${i}.png`;
+      const thumbFile = `${cat.id}_${i}.webp`;
       const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
       const visual = thumbExists
-        ? `<img src="../_thumbs/${thumbFile}" alt="${eff.name}" style="width:100%;height:100%;object-fit:cover">`
+        ? `<img src="../_thumbs/${thumbFile}" alt="${eff.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover">`
         : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;padding:8px">${eff.name}</div>`;
       cards += `    <a href="../${eff._file}" class="card">
       <div class="card-visual">${visual}</div>
@@ -1954,10 +1972,10 @@ for (const cat of sortedIframe) {
     </a>\n`;
     }
   } else {
-    const thumbFile = `${cat.file.replace('.html', '.png')}`;
+    const thumbFile = `${cat.file.replace('.html', '.webp')}`;
     const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
     const visual = thumbExists
-      ? `<img src="../_thumbs/${thumbFile}" alt="${cat.title}" style="width:100%;height:100%;object-fit:cover">`
+      ? `<img src="../_thumbs/${thumbFile}" alt="${cat.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover">`
       : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${cat.title.charAt(0)}</div>`;
     cards += `    <a href="../${cat.file}" class="card">
       <div class="card-visual">${visual}</div>
@@ -1997,7 +2015,7 @@ if (sortedCollect.length > 0) {
   const collectCopyDataArr = [];
   for (let ci = 0; ci < sortedCollect.length; ci++) {
     const item = sortedCollect[ci];
-    const thumbFile = item.file.replace('.html', '.png');
+    const thumbFile = item.file.replace('.html', '.webp');
     const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
 
     // 自定义预览 map：key 为文件名，value 为 card-visual 内部 HTML + 可选的 card-visual style
@@ -2072,7 +2090,7 @@ if (sortedCollect.length > 0) {
       cardVisualStyle = customVisuals[item.file].style;
       visual = customVisuals[item.file].html;
     } else if (thumbExists) {
-      visual = `<img src="../_thumbs/${thumbFile}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover">`;
+      visual = `<img src="../_thumbs/${thumbFile}" alt="${item.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover">`;
     } else {
       visual = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${item.title.charAt(0)}</div>`;
     }
@@ -2189,7 +2207,7 @@ console.log(`📁 Generated ${sortedParsed.length + sortedIframe.length + (sorte
 // ============================================================
 let catCards = '';
 for (const cat of allCategories) {
-  const thumbFile = cat.type === 'collect' ? '46-collect.png' : `${cat.file?.replace('.html', '.png')}`;
+  const thumbFile = cat.type === 'collect' ? '46-collect.webp' : `${cat.file?.replace('.html', '.webp')}`;
   const thumbPath = path.join(dir, '_thumbs', thumbFile);
   const thumbExists = fs.existsSync(thumbPath);
   const href = `_cat/${cat.id}.html`;

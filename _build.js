@@ -947,13 +947,115 @@ const iframeCategories = [];
 const collectFiles = [];
 let totalEffects = 0;
 
+// 中文标题映射（覆盖英文/混合标题）
+const titleZhMap = {
+  '01-css-animations': 'CSS 动画',
+  '02-text-effects': '文字特效',
+  '03-hover-interactions': '悬停交互',
+  '04-scroll-effects': '滚动交互',
+  '05-background-effects': '背景特效',
+  '06-svg-animations': 'SVG 动画',
+  '07-3d-effects': '3D 效果',
+  '08-loading-animations': '加载动画',
+  '09-creative-layouts': '创意布局',
+  '10-canvas-effects': 'Canvas 特效',
+  '11-cursor-effects': '光标特效',
+  '12-page-transitions': '页面过渡',
+  '13-micro-interactions': '微交互',
+  '14-text-advanced': '高级文字',
+  '15-morphism-styles': '设计风格',
+  '16-creative-buttons': '创意按钮',
+  '17-image-effects': '图片特效',
+  '18-navigation-menus': '导航菜单',
+  '19-form-interactions': '表单交互',
+  '20-data-visualization': '数据可视化',
+  '21-liquid-metal': '液态金属',
+  '22-aurora-effects': '极光效果',
+  '23-glitch-effects': '故障效果',
+  '24-particle-effects': '粒子效果',
+  '25-parallax-effects': '视差滚动',
+  '26-noise-grain': '噪声纹理',
+  '27-light-effects': '光效',
+  '28-morphing-effects': '形变效果',
+  '29-audio-visualizer': '音频可视化',
+  '30-text-effects': '创意文字',
+  '31-cursor-interactions': '鼠标交互',
+  '32-3d-cards': '3D 卡片翻转',
+  '33-gradient-animations': '渐变色彩',
+  '34-spring-physics': '弹性物理',
+  '35-scroll-storytelling': '滚动叙事',
+  '36-liquid-backgrounds': '液态流体',
+  '37-page-transitions': '页面过渡动画',
+  '38-data-visualization': '数据可视化动画',
+  '39-hover-effects': '高级悬停',
+  '40-generative-art': '生成艺术',
+  '41-typography-animations': '排版动画',
+  '42-dark-mode-effects': '暗黑模式',
+  '43-glassmorphism-cards': '毛玻璃卡片',
+  '44-infinite-scrollers': '无限滚动',
+  '45-clip-path-animations': '裁剪路径动画',
+  '46-collect': '灵感收集',
+  '47-collect-text': '文本动效收集',
+  '48-colorful-quote-cards': '彩色引言卡片',
+  '49-keyboard-shortcuts': '键盘快捷键可视化',
+  '50-particle-ray-burst': '粒子光线放射',
+  '51-terminal-text-scramble': '终端字符解密',
+  '52-glassmorphism-floating-ui-cards': '毛玻璃浮动卡片',
+  '53-diamond-icon-grid-spotlight': '菱形图标网格光晕',
+  '54-holographic-rainbow-card': '全息彩虹卡片',
+  '55-contour-terrain-map': '等高线地形波纹',
+  '56-clip-path-fullscreen-menu': '裁剪路径全屏菜单',
+  '57-app-icon-galaxy': '应用图标星河',
+  '58-scroll-3d-carousel': '滚动驱动3D轮播',
+  '59-magnetic-button': '磁力吸附按钮',
+  '60-conic-contour': '锥形渐变等高线',
+  '61-circular-score-cards': '圆形进度评分卡',
+  '62-svg-filter-text': 'SVG滤镜文字扭曲',
+  '63-isometric-wireframe': '等距线框几何',
+  '64-scroll-highlight-text': '滚动文字高亮',
+  '65-holographic-liquid': '全息液态着色器',
+  '65-nested-triangle-glow': '嵌套三角形光晕',
+  '66-text-particle-explosion': '文字粒子爆炸',
+  '67-clip-path-wipes': '裁剪路径转场',
+  '68-repeating-image-transition': '图片帧重复过渡',
+  '69-scroll-3d-grid': '滚动3D交错网格',
+  '70-hero-letter-entrance': '电影级文字入场',
+  '71-clip-reveal-menu': '裁剪揭示菜单',
+  '72-glitch-text': '故障文字效果',
+  '73-scroll-3d-carousel': '滚动3D旋转木马',
+  '74-fluid-text-morph': '流体文字变形',
+  '75-squeezy-carousel': '挤压轮播',
+  '76-scroll-step-nav': '滚动步进导航',
+  '77-holo-shader': '全息着色器',
+  '78-svg-morph': 'SVG形状变形',
+  '79-physics-particles': '物理粒子游乐场',
+  '80-scroll-svg-filter-text': '滚动SVG滤镜文字',
+  '81-scroll-image-reveal': '滚动图片揭示',
+  '82-isometric-wireframe': '等距线框动画',
+  '83-spirograph': '螺旋线数学之美',
+  '84-repeating-image-transition': '重复图片过渡',
+  '85-context-aware-animation': '上下文感知动画',
+  '86-scroll-layout-formations': '滚动布局编队',
+  '87-scroll-3d-stack-motion': '滚动3D堆叠运动',
+  '88-terminal-text-decode': '终端文字解码',
+  '89-svg-blob-morph': 'SVG有机斑点变形',
+  '90-flowing-neon-border': '流动霓虹边框',
+  '91-magnetic-tile-ripple': '磁性格子涟漪',
+  '92-isometric-build': '等距搭建动画',
+  '93-grid-preview': '网格全屏预览',
+  '94-concentric-triangle': '同心三角彩虹',
+  '95-grid-hover-preview': '网格悬停预览',
+  '96-holo-shader': '全息流光着色器',
+  '97-radial-network': '放射网络爆发',
+};
+
 for (const file of files) {
   const result = parseSubPage(path.join(dir, file));
   if (!result) continue;
 
   const catId = file.replace('.html', '');
   const num = parseInt(file.slice(0, 2), 10);
-  const cleanTitle = result.title
+  const cleanTitle = titleZhMap[catId] || result.title
     .replace(/集$/, '')
     .replace(/效果$/, '')
     .replace(/\d+\s*[·\-]\s*/, '')
@@ -1012,7 +1114,7 @@ const allCategories = [
   ...sortedIframe.map(c => ({ id: c.id, file: c.file, title: c.title, count: c.effects.length, type: 'iframe' })),
 ];
 if (sortedCollect.length > 0) {
-  allCategories.push({ id: 'collect', file: null, title: 'Collect', count: sortedCollect.length, type: 'collect' });
+  allCategories.push({ id: 'collect', file: null, title: '灵感收集', count: sortedCollect.length, type: 'collect' });
 }
 
 // ============================================================

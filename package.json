@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/boooobby729/frontcss#readme",
   "devDependencies": {
+    "puppeteer": "^24.43.1",
     "puppeteer-core": "^24.42.0"
   }
 }

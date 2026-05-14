@@ -31,17 +31,24 @@ a{text-decoration:none;color:inherit}
 
 
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
-.card{background:#111;cursor:pointer;transition:background .15s;text-decoration:none;display:block}
+.card{background:#111;cursor:pointer;transition:background .15s;text-decoration:none;display:block;position:relative}
 .card:hover{background:#161616}
 .card:hover .card-visual,.card:hover .card-visual .stage{background:#161616 !important}
 .card:hover .card-info{background:#161616}
 .card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
-.card:not(.in-view) .card-visual .stage{animation-play-state:paused !important}
-.card:not(.in-view) .card-visual .stage *{animation-play-state:paused !important}
+.card-visual .stage,.card-visual .stage *{animation-play-state:paused !important}
+.card.is-playing .card-visual .stage,.card.is-playing .card-visual .stage *{animation-play-state:running !important}
 .card-info{padding:10px 14px 14px;background:#111}
 .card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
+.card .play-hint{position:absolute;top:8px;left:8px;z-index:10;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;pointer-events:none}
+.card .play-hint svg{width:10px;height:10px;fill:rgba(255,255,255,.8);margin-left:1px}
+.card:hover .play-hint{opacity:1}
+.card.is-playing .play-hint{opacity:0}
+.card.is-playing .card-visual{box-shadow:inset 0 0 0 1px rgba(102,126,234,.3)}
+.card-thumb:hover .card-visual img{transform:scale(1.08);filter:brightness(1.15)}
+.card-thumb .play-hint{background:rgba(0,0,0,.6)}
 @media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
 
 
@@ -180,6 +187,7 @@ a{text-decoration:none;color:inherit}
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item active" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
 <div class="card-grid">
     <a href="../_effects/134.html" class="card" data-idx="0">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s1" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -188,6 +196,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>圆形展开</h3><span class="tag">clip-path: circle()</span></div>
     </a>
     <a href="../_effects/135.html" class="card" data-idx="1">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s2" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -196,6 +205,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>对角擦除</h3><span class="tag">clip-path: polygon()</span></div>
     </a>
     <a href="../_effects/136.html" class="card" data-idx="2">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s3" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -204,6 +214,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>中间分裂</h3><span class="tag">clip-path: inset()</span></div>
     </a>
     <a href="../_effects/137.html" class="card" data-idx="3">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s4" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -212,6 +223,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>上滑切换</h3><span class="tag">translateY(-100%)</span></div>
     </a>
     <a href="../_effects/138.html" class="card" data-idx="4">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s5" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -220,6 +232,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>缩小消失</h3><span class="tag">scale(.8) + opacity</span></div>
     </a>
     <a href="../_effects/139.html" class="card" data-idx="5">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s6" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -228,6 +241,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>3D 翻页</h3><span class="tag">rotateY + perspective</span></div>
     </a>
     <a href="../_effects/140.html" class="card" data-idx="6">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s7" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -237,6 +251,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>百叶窗</h3><span class="tag">scaleY + stagger delay</span></div>
     </a>
     <a href="../_effects/141.html" class="card" data-idx="7">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s8" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -245,6 +260,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>菱形缩放</h3><span class="tag">polygon diamond + scale</span></div>
     </a>
     <a href="../_effects/142.html" class="card" data-idx="8">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s9" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -253,6 +269,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>圆形吸入</h3><span class="tag">circle() ease-in-out</span></div>
     </a>
     <a href="../_effects/143.html" class="card" data-idx="9">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s10" onclick="togglePixel(this)">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -262,6 +279,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>像素溶解</h3><span class="tag">grid cells + random delay</span></div>
     </a>
     <a href="../_effects/144.html" class="card" data-idx="10">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s11" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -270,6 +288,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>虹膜开合</h3><span class="tag">circle() 反向</span></div>
     </a>
     <a href="../_effects/145.html" class="card" data-idx="11">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s12" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -278,6 +297,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>左滑切换</h3><span class="tag">translateX 双页联动</span></div>
     </a>
     <a href="../_effects/146.html" class="card" data-idx="12">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s13" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -286,6 +306,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>旋转缩放</h3><span class="tag">rotate + scale + fade</span></div>
     </a>
     <a href="../_effects/147.html" class="card" data-idx="13">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s14" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -295,6 +316,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>幕布拉开</h3><span class="tag">scaleX 双侧</span></div>
     </a>
     <a href="../_effects/148.html" class="card" data-idx="14">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s15" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -304,6 +326,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>黑场过渡</h3><span class="tag">opacity overlay</span></div>
     </a>
     <a href="../_effects/149.html" class="card" data-idx="15">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s16" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -312,6 +335,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>上下分裂</h3><span class="tag">polygon 上半裁切</span></div>
     </a>
     <a href="../_effects/150.html" class="card" data-idx="16">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s17" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -320,6 +344,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>极速放大</h3><span class="tag">scale(3) + fade</span></div>
     </a>
     <a href="../_effects/151.html" class="card" data-idx="17">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s18" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -328,6 +353,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>交叉淡入</h3><span class="tag">opacity cross-fade</span></div>
     </a>
     <a href="../_effects/152.html" class="card" data-idx="18">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s19" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -336,6 +362,7 @@ a{text-decoration:none;color:inherit}
       <div class="card-info"><h3>开门效果</h3><span class="tag">rotateY perspective</span></div>
     </a>
     <a href="../_effects/153.html" class="card" data-idx="19">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage s20" onclick="this.classList.toggle('active')">
         <div class="page page-a">Page A</div>
         <div class="page page-b">Page B</div>
@@ -362,17 +389,63 @@ a{text-decoration:none;color:inherit}
   if(active)setTimeout(function(){active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})},100);
 })();
 
-// Lazy animation: only play when card is in viewport
+// Hover-to-play animation system with IntersectionObserver guard
 (function(){
-  if(!('IntersectionObserver' in window))return;
   var cards=document.querySelectorAll('.card');
-  var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){e.target.classList.add('in-view');}
-      else{e.target.classList.remove('in-view');}
+  if(!cards.length)return;
+  var visibleCards=new Set();
+  var activeCard=null;
+  var longPressTimer=null;
+
+  // IntersectionObserver: track which cards are in viewport (performance guard)
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){visibleCards.add(e.target);}
+        else{visibleCards.delete(e.target);e.target.classList.remove('is-playing');}
+      });
+    },{rootMargin:'100px 0px'});
+    cards.forEach(function(c){io.observe(c);});
+  }else{
+    cards.forEach(function(c){visibleCards.add(c);});
+  }
+
+  // Desktop: hover to play
+  cards.forEach(function(card){
+    card.addEventListener('mouseenter',function(){
+      if(!visibleCards.has(card))return;
+      if(activeCard&&activeCard!==card)activeCard.classList.remove('is-playing');
+      card.classList.add('is-playing');
+      activeCard=card;
     });
-  },{rootMargin:'200px 0px'});
-  cards.forEach(function(c){io.observe(c);});
+    card.addEventListener('mouseleave',function(){
+      card.classList.remove('is-playing');
+      if(activeCard===card)activeCard=null;
+    });
+  });
+
+  // Mobile: long-press to preview (400ms threshold)
+  var isTouchActive=false;
+  cards.forEach(function(card){
+    card.addEventListener('touchstart',function(){
+      isTouchActive=true;
+      longPressTimer=setTimeout(function(){
+        if(!isTouchActive)return;
+        if(activeCard&&activeCard!==card)activeCard.classList.remove('is-playing');
+        card.classList.add('is-playing');
+        activeCard=card;
+      },400);
+    });
+    card.addEventListener('touchend',function(){
+      isTouchActive=false;
+      clearTimeout(longPressTimer);
+      setTimeout(function(){card.classList.remove('is-playing');if(activeCard===card)activeCard=null;},1500);
+    });
+    card.addEventListener('touchmove',function(){
+      isTouchActive=false;
+      clearTimeout(longPressTimer);
+    });
+  });
 })();
 
 // Generate pixel dissolve grid

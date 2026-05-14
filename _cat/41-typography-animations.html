@@ -31,17 +31,24 @@ a{text-decoration:none;color:inherit}
 
 
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
-.card{background:#111;cursor:pointer;transition:background .15s;text-decoration:none;display:block}
+.card{background:#111;cursor:pointer;transition:background .15s;text-decoration:none;display:block;position:relative}
 .card:hover{background:#161616}
 .card:hover .card-visual,.card:hover .card-visual .stage{background:#161616 !important}
 .card:hover .card-info{background:#161616}
 .card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
-.card:not(.in-view) .card-visual .stage{animation-play-state:paused !important}
-.card:not(.in-view) .card-visual .stage *{animation-play-state:paused !important}
+.card-visual .stage,.card-visual .stage *{animation-play-state:paused !important}
+.card.is-playing .card-visual .stage,.card.is-playing .card-visual .stage *{animation-play-state:running !important}
 .card-info{padding:10px 14px 14px;background:#111}
 .card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
+.card .play-hint{position:absolute;top:8px;left:8px;z-index:10;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;pointer-events:none}
+.card .play-hint svg{width:10px;height:10px;fill:rgba(255,255,255,.8);margin-left:1px}
+.card:hover .play-hint{opacity:1}
+.card.is-playing .play-hint{opacity:0}
+.card.is-playing .card-visual{box-shadow:inset 0 0 0 1px rgba(102,126,234,.3)}
+.card-thumb:hover .card-visual img{transform:scale(1.08);filter:brightness(1.15)}
+.card-thumb .play-hint{background:rgba(0,0,0,.6)}
 @media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
 
 </style>
@@ -58,28 +65,34 @@ a{text-decoration:none;color:inherit}
 </nav>
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item active" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
 <div class="card-grid">
-    <a href="../_effects/455.html" class="card">
-      <div class="card-visual"><img src="../_thumbs/41-typography-animations_0.webp" alt="逐字错位揭示" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
+    <a href="../_effects/455.html" class="card card-thumb">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+      <div class="card-visual"><img src="../_thumbs/41-typography-animations_0.webp" alt="逐字错位揭示" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s"></div>
       <div class="card-info"><h3>逐字错位揭示</h3></div>
     </a>
-    <a href="../_effects/456.html" class="card">
-      <div class="card-visual"><img src="../_thumbs/41-typography-animations_1.webp" alt="波浪排版动画" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
+    <a href="../_effects/456.html" class="card card-thumb">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+      <div class="card-visual"><img src="../_thumbs/41-typography-animations_1.webp" alt="波浪排版动画" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s"></div>
       <div class="card-info"><h3>波浪排版动画</h3></div>
     </a>
-    <a href="../_effects/457.html" class="card">
-      <div class="card-visual"><img src="../_thumbs/41-typography-animations_2.webp" alt="弹性字重变化" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
+    <a href="../_effects/457.html" class="card card-thumb">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+      <div class="card-visual"><img src="../_thumbs/41-typography-animations_2.webp" alt="弹性字重变化" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s"></div>
       <div class="card-info"><h3>弹性字重变化</h3></div>
     </a>
-    <a href="../_effects/458.html" class="card">
-      <div class="card-visual"><img src="../_thumbs/41-typography-animations_3.webp" alt="环形文字动画" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
+    <a href="../_effects/458.html" class="card card-thumb">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+      <div class="card-visual"><img src="../_thumbs/41-typography-animations_3.webp" alt="环形文字动画" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s"></div>
       <div class="card-info"><h3>环形文字动画</h3></div>
     </a>
-    <a href="../_effects/459.html" class="card">
-      <div class="card-visual"><img src="../_thumbs/41-typography-animations_4.webp" alt="分屏标题动画" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
+    <a href="../_effects/459.html" class="card card-thumb">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+      <div class="card-visual"><img src="../_thumbs/41-typography-animations_4.webp" alt="分屏标题动画" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s"></div>
       <div class="card-info"><h3>分屏标题动画</h3></div>
     </a>
-    <a href="../_effects/460.html" class="card">
-      <div class="card-visual"><img src="../_thumbs/41-typography-animations_5.webp" alt="可变字体动态排版" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>
+    <a href="../_effects/460.html" class="card card-thumb">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+      <div class="card-visual"><img src="../_thumbs/41-typography-animations_5.webp" alt="可变字体动态排版" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s"></div>
       <div class="card-info"><h3>可变字体动态排版</h3></div>
     </a>
 </div>

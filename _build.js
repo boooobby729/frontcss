@@ -1822,32 +1822,85 @@ console.log(`📁 Generated ${effectIndex} standalone effect files in _effects/`
 // ============================================================
 const cardGridCss = `
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:48px}
-.card{background:#111;cursor:pointer;transition:background .15s;text-decoration:none;display:block}
+.card{background:#111;cursor:pointer;transition:background .15s;text-decoration:none;display:block;position:relative}
 .card:hover{background:#161616}
 .card:hover .card-visual,.card:hover .card-visual .stage{background:#161616 !important}
 .card:hover .card-info{background:#161616}
 .card-visual{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#111 !important}
 .card-visual .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px;background:#111 !important}
-.card:not(.in-view) .card-visual .stage{animation-play-state:paused !important}
-.card:not(.in-view) .card-visual .stage *{animation-play-state:paused !important}
+.card-visual .stage,.card-visual .stage *{animation-play-state:paused !important}
+.card.is-playing .card-visual .stage,.card.is-playing .card-visual .stage *{animation-play-state:running !important}
 .card-info{padding:10px 14px 14px;background:#111}
 .card-info h3{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-info .tag{display:block;font-size:.62rem;color:rgba(255,255,255,.25);margin-top:2px}
+.card .play-hint{position:absolute;top:8px;left:8px;z-index:10;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;pointer-events:none}
+.card .play-hint svg{width:10px;height:10px;fill:rgba(255,255,255,.8);margin-left:1px}
+.card:hover .play-hint{opacity:1}
+.card.is-playing .play-hint{opacity:0}
+.card.is-playing .card-visual{box-shadow:inset 0 0 0 1px rgba(102,126,234,.3)}
+.card-thumb:hover .card-visual img{transform:scale(1.08);filter:brightness(1.15)}
+.card-thumb .play-hint{background:rgba(0,0,0,.6)}
 @media(max-width:768px){.card-grid{grid-template-columns:repeat(2,1fr)}}
 `;
 
 const lazyAnimJs = `
-// Lazy animation: only play when card is in viewport
+// Hover-to-play animation system with IntersectionObserver guard
 (function(){
-  if(!('IntersectionObserver' in window))return;
   var cards=document.querySelectorAll('.card');
-  var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){e.target.classList.add('in-view');}
-      else{e.target.classList.remove('in-view');}
+  if(!cards.length)return;
+  var visibleCards=new Set();
+  var activeCard=null;
+  var longPressTimer=null;
+
+  // IntersectionObserver: track which cards are in viewport (performance guard)
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){visibleCards.add(e.target);}
+        else{visibleCards.delete(e.target);e.target.classList.remove('is-playing');}
+      });
+    },{rootMargin:'100px 0px'});
+    cards.forEach(function(c){io.observe(c);});
+  }else{
+    cards.forEach(function(c){visibleCards.add(c);});
+  }
+
+  // Desktop: hover to play
+  cards.forEach(function(card){
+    card.addEventListener('mouseenter',function(){
+      if(!visibleCards.has(card))return;
+      if(activeCard&&activeCard!==card)activeCard.classList.remove('is-playing');
+      card.classList.add('is-playing');
+      activeCard=card;
     });
-  },{rootMargin:'200px 0px'});
-  cards.forEach(function(c){io.observe(c);});
+    card.addEventListener('mouseleave',function(){
+      card.classList.remove('is-playing');
+      if(activeCard===card)activeCard=null;
+    });
+  });
+
+  // Mobile: long-press to preview (400ms threshold)
+  var isTouchActive=false;
+  cards.forEach(function(card){
+    card.addEventListener('touchstart',function(){
+      isTouchActive=true;
+      longPressTimer=setTimeout(function(){
+        if(!isTouchActive)return;
+        if(activeCard&&activeCard!==card)activeCard.classList.remove('is-playing');
+        card.classList.add('is-playing');
+        activeCard=card;
+      },400);
+    });
+    card.addEventListener('touchend',function(){
+      isTouchActive=false;
+      clearTimeout(longPressTimer);
+      setTimeout(function(){card.classList.remove('is-playing');if(activeCard===card)activeCard=null;},1500);
+    });
+    card.addEventListener('touchmove',function(){
+      isTouchActive=false;
+      clearTimeout(longPressTimer);
+    });
+  });
 })();
 `;
 
@@ -1866,6 +1919,7 @@ for (const cat of sortedParsed) {
     const stageAttrs = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
     const stageClass = eff.stageClass ? ` ${eff.stageClass}` : '';
     cards += `    <a href="../${eff._file}" class="card" data-idx="${ei}">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage${stageClass}"${stageAttrs}>${eff.stageHtml}</div></div>
       <div class="card-info"><h3>${eff.name}</h3>${eff.tag ? `<span class="tag">${eff.tag}</span>` : ''}</div>
     </a>\n`;
@@ -1964,9 +2018,10 @@ for (const cat of sortedIframe) {
       const thumbFile = `${cat.id}_${i}.webp`;
       const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
       const visual = thumbExists
-        ? `<img src="../_thumbs/${thumbFile}" alt="${eff.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover">`
+        ? `<img src="../_thumbs/${thumbFile}" alt="${eff.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s">`
         : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;padding:8px">${eff.name}</div>`;
-      cards += `    <a href="../${eff._file}" class="card">
+      cards += `    <a href="../${eff._file}" class="card card-thumb">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual">${visual}</div>
       <div class="card-info"><h3>${eff.name}</h3></div>
     </a>\n`;
@@ -1975,9 +2030,10 @@ for (const cat of sortedIframe) {
     const thumbFile = `${cat.file.replace('.html', '.webp')}`;
     const thumbExists = fs.existsSync(path.join(dir, '_thumbs', thumbFile));
     const visual = thumbExists
-      ? `<img src="../_thumbs/${thumbFile}" alt="${cat.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover">`
+      ? `<img src="../_thumbs/${thumbFile}" alt="${cat.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s">`
       : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${cat.title.charAt(0)}</div>`;
-    cards += `    <a href="../${cat.file}" class="card">
+    cards += `    <a href="../${cat.file}" class="card card-thumb">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual">${visual}</div>
       <div class="card-info"><h3>${cat.title}</h3></div>
     </a>\n`;
@@ -2090,12 +2146,13 @@ if (sortedCollect.length > 0) {
       cardVisualStyle = customVisuals[item.file].style;
       visual = customVisuals[item.file].html;
     } else if (thumbExists) {
-      visual = `<img src="../_thumbs/${thumbFile}" alt="${item.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover">`;
+      visual = `<img src="../_thumbs/${thumbFile}" alt="${item.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s">`;
     } else {
       visual = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${item.title.charAt(0)}</div>`;
     }
 
-    collectCardsHtml += `    <a href="../${item.file}" class="card" data-idx="${ci}">
+    collectCardsHtml += `    <a href="../${item.file}" class="card card-thumb" data-idx="${ci}">
+      <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"${cardVisualStyle}>${visual}</div>
       <div class="card-info"><h3>${item.title}</h3></div>
     </a>\n`;

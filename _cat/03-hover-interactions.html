@@ -60,6 +60,25 @@ a{text-decoration:none;color:inherit}
 .card .card-copy-btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 
+.fav-btn{position:absolute;top:8px;left:8px;z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;opacity:0;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.card:hover .fav-btn{opacity:1;pointer-events:auto}
+.fav-btn:hover{background:#fff;transform:scale(1.1);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.fav-btn.is-fav{opacity:1;pointer-events:auto;background:rgba(234,76,137,.1);border-color:rgba(234,76,137,.2)}
+.fav-btn svg{width:16px;height:16px;stroke:#9e9ea7;stroke-width:2;fill:none;transition:all .2s}
+.fav-btn:hover svg{stroke:#ea4c89}
+.fav-btn.is-fav svg{stroke:#ea4c89;fill:#ea4c89}
+.fav-btn-detail{position:fixed;top:64px;left:80px;z-index:201;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid #ebebed;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.fav-btn-detail:hover{background:#fef0f5;border-color:rgba(234,76,137,.3);transform:scale(1.1)}
+.fav-btn-detail.is-fav{background:rgba(234,76,137,.1);border-color:rgba(234,76,137,.3)}
+.fav-btn-detail svg{width:18px;height:18px;stroke:#9e9ea7;stroke-width:2;fill:none;transition:all .2s}
+.fav-btn-detail:hover svg{stroke:#ea4c89}
+.fav-btn-detail.is-fav svg{stroke:#ea4c89;fill:#ea4c89}
+.nav-fav-link{display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;font-size:.8rem;color:#6e6d7a;white-space:nowrap;transition:all .2s;text-decoration:none;flex-shrink:0;font-weight:500}
+.nav-fav-link:hover{color:#ea4c89;background:rgba(234,76,137,.06)}
+.nav-fav-link svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+.nav-fav-link .fav-count{font-size:.65rem;background:#ea4c89;color:#fff;border-radius:10px;padding:1px 6px;min-width:18px;text-align:center;font-weight:600}
+
+
 
   /* 1. Border Gradient Hover */
   .border-grad { width: 200px; height: 60px; position: relative; display: flex; align-items: center; justify-content: center;  border-radius: 12px; cursor: pointer; overflow: hidden; z-index: 0; }
@@ -219,132 +238,158 @@ a{text-decoration:none;color:inherit}
     <button class="nav-arrow" id="navLeft"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
     <div class="nav-scroll-wrap"><div class="nav-scroll"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item active" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div></div>
     <button class="nav-arrow" id="navRight"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+    <a href="../_fav.html" class="nav-fav-link"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="fav-count" style="display:none">0</span></a>
     <button class="nav-expand-btn" id="navExpand"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
   </div>
 </nav>
 <div class="nav-dropdown" id="navDropdown"><a href="../_cat/01-css-animations.html" class="nav-item" title="CSS 动画">CSS 动画</a><a href="../_cat/02-text-effects.html" class="nav-item" title="文字特效">文字特效</a><a href="../_cat/03-hover-interactions.html" class="nav-item active" title="悬停交互">悬停交互</a><a href="../_cat/06-svg-animations.html" class="nav-item" title="SVG 动画">SVG 动画</a><a href="../_cat/07-3d-effects.html" class="nav-item" title="3D">3D</a><a href="../_cat/08-loading-animations.html" class="nav-item" title="加载动画">加载动画</a><a href="../_cat/12-page-transitions.html" class="nav-item" title="页面过渡">页面过渡</a><a href="../_cat/13-micro-interactions.html" class="nav-item" title="微交互">微交互</a><a href="../_cat/14-text-advanced.html" class="nav-item" title="高级文字">高级文字</a><a href="../_cat/16-creative-buttons.html" class="nav-item" title="创意按钮">创意按钮</a><a href="../_cat/17-image-effects.html" class="nav-item" title="图片特效">图片特效</a><a href="../_cat/18-navigation-menus.html" class="nav-item" title="导航菜单动画">导航菜单动画</a><a href="../_cat/19-form-interactions.html" class="nav-item" title="表单交互动画">表单交互动画</a><a href="../_cat/20-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/04-scroll-effects.html" class="nav-item" title="滚动交互">滚动交互</a><a href="../_cat/05-background-effects.html" class="nav-item" title="背景特效">背景特效</a><a href="../_cat/09-creative-layouts.html" class="nav-item" title="创意布局">创意布局</a><a href="../_cat/10-canvas-effects.html" class="nav-item" title="Canvas / JS 特效">Canvas / JS 特效</a><a href="../_cat/11-cursor-effects.html" class="nav-item" title="光标特效">光标特效</a><a href="../_cat/15-morphism-styles.html" class="nav-item" title="设计风格">设计风格</a><a href="../_cat/21-liquid-metal.html" class="nav-item" title="液态金属">液态金属</a><a href="../_cat/22-aurora-effects.html" class="nav-item" title="极光">极光</a><a href="../_cat/23-glitch-effects.html" class="nav-item" title="故障">故障</a><a href="../_cat/24-particle-effects.html" class="nav-item" title="粒子">粒子</a><a href="../_cat/25-parallax-effects.html" class="nav-item" title="视差与滚动">视差与滚动</a><a href="../_cat/26-noise-grain.html" class="nav-item" title="噪声与纹理">噪声与纹理</a><a href="../_cat/27-light-effects.html" class="nav-item" title="光效">光效</a><a href="../_cat/28-morphing-effects.html" class="nav-item" title="形变 Morphing">形变 Morphing</a><a href="../_cat/29-audio-visualizer.html" class="nav-item" title="音频可视化">音频可视化</a><a href="../_cat/30-text-effects.html" class="nav-item" title="创意文字动效">创意文字动效</a><a href="../_cat/31-cursor-interactions.html" class="nav-item" title="鼠标交互">鼠标交互</a><a href="../_cat/32-3d-cards.html" class="nav-item" title="3D 卡片与翻转">3D 卡片与翻转</a><a href="../_cat/33-gradient-animations.html" class="nav-item" title="渐变与色彩动画">渐变与色彩动画</a><a href="../_cat/34-spring-physics.html" class="nav-item" title="弹性物理动画">弹性物理动画</a><a href="../_cat/35-scroll-storytelling.html" class="nav-item" title="滚动驱动叙事">滚动驱动叙事</a><a href="../_cat/36-liquid-backgrounds.html" class="nav-item" title="液态流体背景">液态流体背景</a><a href="../_cat/37-page-transitions.html" class="nav-item" title="页面过渡动画">页面过渡动画</a><a href="../_cat/38-data-visualization.html" class="nav-item" title="数据可视化动画">数据可视化动画</a><a href="../_cat/39-hover-effects.html" class="nav-item" title="高级悬停">高级悬停</a><a href="../_cat/40-generative-art.html" class="nav-item" title="生成艺术">生成艺术</a><a href="../_cat/41-typography-animations.html" class="nav-item" title="排版动画">排版动画</a><a href="../_cat/42-dark-mode-effects.html" class="nav-item" title="暗黑模式特效">暗黑模式特效</a><a href="../_cat/43-glassmorphism-cards.html" class="nav-item" title="毛玻璃卡片">毛玻璃卡片</a><a href="../_cat/44-infinite-scrollers.html" class="nav-item" title="无限滚动动画">无限滚动动画</a><a href="../_cat/45-clip-path-animations.html" class="nav-item" title="裁剪路径动画">裁剪路径动画</a><a href="../_cat/collect.html" class="nav-item" title="Collect">Collect</a></div>
 <div class="card-grid">
     <a href="../_effects/061.html" class="card" data-idx="0">
+      <button class="fav-btn" data-fav-id="061" data-fav-name="旋转渐变边框" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/061.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="border-grad"><span>Hover Me</span></div></div></div>
       <div class="card-info"><h3>旋转渐变边框</h3><span class="tag">conic-gradient + rotate</span></div>
     </a>
     <a href="../_effects/062.html" class="card" data-idx="1">
+      <button class="fav-btn" data-fav-id="062" data-fav-name="磁性按钮" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/062.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="magnetic-btn" onmousemove="const r=this.getBoundingClientRect();this.style.setProperty('--x',(event.clientX-r.left)/r.width*100+'%');this.style.setProperty('--y',(event.clientY-r.top)/r.height*100+'%')">Magnetic</div></div></div>
       <div class="card-info"><h3>磁性按钮</h3><span class="tag">radial-gradient + follow</span></div>
     </a>
     <a href="../_effects/063.html" class="card" data-idx="2">
+      <button class="fav-btn" data-fav-id="063" data-fav-name="下划线展开" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/063.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="reveal-line">Hover Underline</div></div></div>
       <div class="card-info"><h3>下划线展开</h3><span class="tag">::after width transition</span></div>
     </a>
     <a href="../_effects/064.html" class="card" data-idx="3">
+      <button class="fav-btn" data-fav-id="064" data-fav-name="3D 倾斜卡片" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/064.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="tilt-card"><span>Tilt Card</span></div></div></div>
       <div class="card-info"><h3>3D 倾斜卡片</h3><span class="tag">perspective + rotateXY</span></div>
     </a>
     <a href="../_effects/065.html" class="card" data-idx="4">
+      <button class="fav-btn" data-fav-id="065" data-fav-name="发光图标" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/065.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="glow-icon">&#9733;</div></div></div>
       <div class="card-info"><h3>发光图标</h3><span class="tag">box-shadow glow</span></div>
     </a>
     <a href="../_effects/066.html" class="card" data-idx="5">
+      <button class="fav-btn" data-fav-id="066" data-fav-name="滑动填充按钮" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/066.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><button class="slide-fill">Slide Fill</button></div></div>
       <div class="card-info"><h3>滑动填充按钮</h3><span class="tag">::before slide fill</span></div>
     </a>
     <a href="../_effects/067.html" class="card" data-idx="6">
+      <button class="fav-btn" data-fav-id="067" data-fav-name="图片缩放 + 遮罩" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/067.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="img-zoom"><div class="img-zoom-bg"></div><div class="img-zoom-overlay"><span>View More</span></div></div></div></div>
       <div class="card-info"><h3>图片缩放 + 遮罩</h3><span class="tag">scale + overlay fade</span></div>
     </a>
     <a href="../_effects/068.html" class="card" data-idx="7">
+      <button class="fav-btn" data-fav-id="068" data-fav-name="涟漪点击" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/068.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><button class="ripple-btn" onclick="const c=document.createElement('span');c.className='rp';const r=this.getBoundingClientRect();c.style.left=event.clientX-r.left+'px';c.style.top=event.clientY-r.top+'px';c.style.width=c.style.height='20px';this.appendChild(c);setTimeout(()=>c.remove(),600)">Click Me</button></div></div>
       <div class="card-info"><h3>涟漪点击</h3><span class="tag">JS ripple effect</span></div>
     </a>
     <a href="../_effects/069.html" class="card" data-idx="8">
+      <button class="fav-btn" data-fav-id="069" data-fav-name="交错列表" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/069.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="stagger-list"><div class="stagger-item">Item Alpha</div><div class="stagger-item">Item Beta</div><div class="stagger-item">Item Gamma</div><div class="stagger-item">Item Delta</div></div></div></div>
       <div class="card-info"><h3>交错列表</h3><span class="tag">stagger delay transition</span></div>
     </a>
     <a href="../_effects/070.html" class="card" data-idx="9">
+      <button class="fav-btn" data-fav-id="070" data-fav-name="形状变形" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/070.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="morph-shape"></div></div></div>
       <div class="card-info"><h3>形状变形</h3><span class="tag">border-radius morph</span></div>
     </a>
     <a href="../_effects/071.html" class="card" data-idx="10">
+      <button class="fav-btn" data-fav-id="071" data-fav-name="幕帘揭示" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/071.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="curtain"><div class="curtain-bg">REVEAL</div></div></div></div>
       <div class="card-info"><h3>幕帘揭示</h3><span class="tag">双侧 scaleX 收起</span></div>
     </a>
     <a href="../_effects/072.html" class="card" data-idx="11">
+      <button class="fav-btn" data-fav-id="072" data-fav-name="霓虹边框" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/072.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="neon-border">Neon Border</div></div></div>
       <div class="card-info"><h3>霓虹边框</h3><span class="tag">box-shadow 霓虹光</span></div>
     </a>
     <a href="../_effects/073.html" class="card" data-idx="12">
+      <button class="fav-btn" data-fav-id="073" data-fav-name="翻转揭示" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/073.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="flip-reveal"><div class="flip-reveal-inner"><div class="flip-reveal-front">Front</div><div class="flip-reveal-back">Back!</div></div></div></div></div>
       <div class="card-info"><h3>翻转揭示</h3><span class="tag">rotateY 3D 翻转</span></div>
     </a>
     <a href="../_effects/074.html" class="card" data-idx="13">
+      <button class="fav-btn" data-fav-id="074" data-fav-name="弹性放大" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/074.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="scale-up">Scale Up</div></div></div>
       <div class="card-info"><h3>弹性放大</h3><span class="tag">cubic-bezier 过冲</span></div>
     </a>
     <a href="../_effects/075.html" class="card" data-idx="14">
+      <button class="fav-btn" data-fav-id="075" data-fav-name="对角线扫过" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/075.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><button class="diag-swipe">Diagonal</button></div></div>
       <div class="card-info"><h3>对角线扫过</h3><span class="tag">rotate + translateY</span></div>
     </a>
     <a href="../_effects/076.html" class="card" data-idx="15">
+      <button class="fav-btn" data-fav-id="076" data-fav-name="图标旋转" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/076.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="icon-rotate">&#9881;</div></div></div>
       <div class="card-info"><h3>图标旋转</h3><span class="tag">rotate 360deg</span></div>
     </a>
     <a href="../_effects/077.html" class="card" data-idx="16">
+      <button class="fav-btn" data-fav-id="077" data-fav-name="文字滑动替换" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/077.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="text-slide"><span>Before Hover</span><span>After Hover!</span></div></div></div>
       <div class="card-info"><h3>文字滑动替换</h3><span class="tag">translateY 切换</span></div>
     </a>
     <a href="../_effects/078.html" class="card" data-idx="17">
+      <button class="fav-btn" data-fav-id="078" data-fav-name="阴影浮起" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/078.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="shadow-lift">Shadow Lift</div></div></div>
       <div class="card-info"><h3>阴影浮起</h3><span class="tag">translateY + shadow</span></div>
     </a>
     <a href="../_effects/079.html" class="card" data-idx="18">
+      <button class="fav-btn" data-fav-id="079" data-fav-name="边框绘制" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/079.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="border-draw">Draw Border</div></div></div>
       <div class="card-info"><h3>边框绘制</h3><span class="tag">四角边框展开</span></div>
     </a>
     <a href="../_effects/080.html" class="card" data-idx="19">
+      <button class="fav-btn" data-fav-id="080" data-fav-name="倾斜悬停" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/080.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="skew-box">Skew Hover</div></div></div>
       <div class="card-info"><h3>倾斜悬停</h3><span class="tag">skewX transform</span></div>
     </a>
     <a href="../_effects/081.html" class="card" data-idx="20">
+      <button class="fav-btn" data-fav-id="081" data-fav-name="颜色反转" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/081.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><button class="color-invert">Invert</button></div></div>
       <div class="card-info"><h3>颜色反转</h3><span class="tag">background 互换</span></div>
     </a>
     <a href="../_effects/082.html" class="card" data-idx="21">
+      <button class="fav-btn" data-fav-id="082" data-fav-name="聚光灯跟随" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/082.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="spotlight" onmousemove="const r=this.getBoundingClientRect();this.style.setProperty('--sx',(event.clientX-r.left)+'px');this.style.setProperty('--sy',(event.clientY-r.top)+'px')"><span>Spotlight</span></div></div></div>
       <div class="card-info"><h3>聚光灯跟随</h3><span class="tag">radial-gradient 跟随</span></div>
     </a>
     <a href="../_effects/083.html" class="card" data-idx="22">
+      <button class="fav-btn" data-fav-id="083" data-fav-name="脉冲环悬停" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/083.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><div class="pulse-hover"></div></div></div>
       <div class="card-info"><h3>脉冲环悬停</h3><span class="tag">伪元素 inset 展开</span></div>
     </a>
     <a href="../_effects/084.html" class="card" data-idx="23">
+      <button class="fav-btn" data-fav-id="084" data-fav-name="背景滑动" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/084.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><button class="bg-slide">Slide BG</button></div></div>
       <div class="card-info"><h3>背景滑动</h3><span class="tag">background-position</span></div>
     </a>
     <a href="../_effects/085.html" class="card" data-idx="24">
+      <button class="fav-btn" data-fav-id="085" data-fav-name="抖动按钮" data-fav-cat="悬停交互" data-fav-catid="03-hover-interactions" data-fav-file="_effects/085.html"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage"><button class="shake-hover">Shake!</button></div></div>
       <div class="card-info"><h3>抖动按钮</h3><span class="tag">shake animation</span></div>
@@ -425,6 +470,40 @@ a{text-decoration:none;color:inherit}
       clearTimeout(longPressTimer);
     });
   });
+})();
+
+
+// Favorites system
+(function(){
+  var FAV_KEY='bfx_favorites';
+  function getFavs(){try{return JSON.parse(localStorage.getItem(FAV_KEY))||[];}catch(e){return[];}}
+  function setFavs(arr){localStorage.setItem(FAV_KEY,JSON.stringify(arr));}
+  function isFav(id){return getFavs().some(function(f){return f.id===id;});}
+  function toggleFav(id,name,cat,catId,file){
+    var favs=getFavs();
+    var idx=favs.findIndex(function(f){return f.id===id;});
+    if(idx>-1){favs.splice(idx,1);}
+    else{favs.push({id:id,name:name,cat:cat,catId:catId,file:file,ts:Date.now()});}
+    setFavs(favs);
+    return idx===-1;
+  }
+  // Init card fav buttons
+  document.querySelectorAll('.fav-btn[data-fav-id]').forEach(function(btn){
+    var id=btn.getAttribute('data-fav-id');
+    if(isFav(id))btn.classList.add('is-fav');
+    btn.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var name=btn.getAttribute('data-fav-name')||'';
+      var cat=btn.getAttribute('data-fav-cat')||'';
+      var catId=btn.getAttribute('data-fav-catid')||'';
+      var file=btn.getAttribute('data-fav-file')||'';
+      var added=toggleFav(id,name,cat,catId,file);
+      btn.classList.toggle('is-fav',added);
+    });
+  });
+  // Update nav fav count
+  var countEl=document.querySelector('.fav-count');
+  if(countEl){var n=getFavs().length;countEl.textContent=n;countEl.style.display=n?'':'none';}
 })();
 
 

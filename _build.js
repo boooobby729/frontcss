@@ -1075,6 +1075,7 @@ function generateNavBar(activeCatId, pathPrefix) {
     <button class="nav-arrow" id="navLeft"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
     <div class="nav-scroll-wrap"><div class="nav-scroll">${items}</div></div>
     <button class="nav-arrow" id="navRight"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+    <a href="${pathPrefix}_fav.html" class="nav-fav-link"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="fav-count" style="display:none">0</span></a>
     <button class="nav-expand-btn" id="navExpand"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
   </div>
 </nav>
@@ -1395,6 +1396,97 @@ const catCopyBtnCss = `
 `;
 
 // ============================================================
+// 收藏功能 - CSS + JS
+// ============================================================
+const favBtnCss = `
+.fav-btn{position:absolute;top:8px;left:8px;z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;opacity:0;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.card:hover .fav-btn{opacity:1;pointer-events:auto}
+.fav-btn:hover{background:#fff;transform:scale(1.1);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.fav-btn.is-fav{opacity:1;pointer-events:auto;background:rgba(234,76,137,.1);border-color:rgba(234,76,137,.2)}
+.fav-btn svg{width:16px;height:16px;stroke:#9e9ea7;stroke-width:2;fill:none;transition:all .2s}
+.fav-btn:hover svg{stroke:#ea4c89}
+.fav-btn.is-fav svg{stroke:#ea4c89;fill:#ea4c89}
+.fav-btn-detail{position:fixed;top:64px;left:80px;z-index:201;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid #ebebed;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.fav-btn-detail:hover{background:#fef0f5;border-color:rgba(234,76,137,.3);transform:scale(1.1)}
+.fav-btn-detail.is-fav{background:rgba(234,76,137,.1);border-color:rgba(234,76,137,.3)}
+.fav-btn-detail svg{width:18px;height:18px;stroke:#9e9ea7;stroke-width:2;fill:none;transition:all .2s}
+.fav-btn-detail:hover svg{stroke:#ea4c89}
+.fav-btn-detail.is-fav svg{stroke:#ea4c89;fill:#ea4c89}
+.nav-fav-link{display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;font-size:.8rem;color:#6e6d7a;white-space:nowrap;transition:all .2s;text-decoration:none;flex-shrink:0;font-weight:500}
+.nav-fav-link:hover{color:#ea4c89;background:rgba(234,76,137,.06)}
+.nav-fav-link svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+.nav-fav-link .fav-count{font-size:.65rem;background:#ea4c89;color:#fff;border-radius:10px;padding:1px 6px;min-width:18px;text-align:center;font-weight:600}
+`;
+
+const favHeartSvg = '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+
+// 卡片上的收藏按钮 JS（用于 _cat/ 页面）
+const favCardJs = `
+// Favorites system
+(function(){
+  var FAV_KEY='bfx_favorites';
+  function getFavs(){try{return JSON.parse(localStorage.getItem(FAV_KEY))||[];}catch(e){return[];}}
+  function setFavs(arr){localStorage.setItem(FAV_KEY,JSON.stringify(arr));}
+  function isFav(id){return getFavs().some(function(f){return f.id===id;});}
+  function toggleFav(id,name,cat,catId,file){
+    var favs=getFavs();
+    var idx=favs.findIndex(function(f){return f.id===id;});
+    if(idx>-1){favs.splice(idx,1);}
+    else{favs.push({id:id,name:name,cat:cat,catId:catId,file:file,ts:Date.now()});}
+    setFavs(favs);
+    return idx===-1;
+  }
+  // Init card fav buttons
+  document.querySelectorAll('.fav-btn[data-fav-id]').forEach(function(btn){
+    var id=btn.getAttribute('data-fav-id');
+    if(isFav(id))btn.classList.add('is-fav');
+    btn.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var name=btn.getAttribute('data-fav-name')||'';
+      var cat=btn.getAttribute('data-fav-cat')||'';
+      var catId=btn.getAttribute('data-fav-catid')||'';
+      var file=btn.getAttribute('data-fav-file')||'';
+      var added=toggleFav(id,name,cat,catId,file);
+      btn.classList.toggle('is-fav',added);
+    });
+  });
+  // Update nav fav count
+  var countEl=document.querySelector('.fav-count');
+  if(countEl){var n=getFavs().length;countEl.textContent=n;countEl.style.display=n?'':'none';}
+})();
+`;
+
+// 详情页的收藏按钮 JS
+const favDetailJs = `
+// Favorites system - detail page
+(function(){
+  var FAV_KEY='bfx_favorites';
+  function getFavs(){try{return JSON.parse(localStorage.getItem(FAV_KEY))||[];}catch(e){return[];}}
+  function setFavs(arr){localStorage.setItem(FAV_KEY,JSON.stringify(arr));}
+  var btn=document.getElementById('favDetailBtn');
+  if(!btn)return;
+  var id=btn.getAttribute('data-fav-id');
+  var name=btn.getAttribute('data-fav-name')||'';
+  var cat=btn.getAttribute('data-fav-cat')||'';
+  var catId=btn.getAttribute('data-fav-catid')||'';
+  var file=btn.getAttribute('data-fav-file')||'';
+  var favs=getFavs();
+  if(favs.some(function(f){return f.id===id;}))btn.classList.add('is-fav');
+  btn.addEventListener('click',function(){
+    var favs=getFavs();
+    var idx=favs.findIndex(function(f){return f.id===id;});
+    if(idx>-1){favs.splice(idx,1);btn.classList.remove('is-fav');}
+    else{favs.push({id:id,name:name,cat:cat,catId:catId,file:file,ts:Date.now()});btn.classList.add('is-fav');}
+    setFavs(favs);
+    var countEl=document.querySelector('.fav-count');
+    if(countEl){var n=favs.length;countEl.textContent=n;countEl.style.display=n?'':'none';}
+  });
+  var countEl=document.querySelector('.fav-count');
+  if(countEl){var n=favs.length;countEl.textContent=n;countEl.style.display=n?'':'none';}
+})();
+`;
+
+// ============================================================
 // 生成独立效果详情页（_effects/） - 带专属控制面板
 // ============================================================
 const effectsDir = path.join(dir, '_effects');
@@ -1553,6 +1645,7 @@ body{background:#f8f7f4;color:#0d0c22;font-family:-apple-system,BlinkMacSystemFo
 ${navCss}
 ${ctrlCss}
 ${copyBtnCss}
+${favBtnCss}
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:56px;position:relative;overflow:hidden}
 .stage{width:100%;height:calc(100vh - 56px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 ${effectPageCss}
@@ -1561,6 +1654,7 @@ ${effectPageCss}
 <body>
 ${generateNavBar(cat.id, '../')}
 <a href="../_cat/${cat.id}.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<button class="fav-btn-detail" id="favDetailBtn" data-fav-id="${fileName.replace('.html','')}" data-fav-name="${eff.name.replace(/"/g, '&quot;')}" data-fav-cat="${cat.title.replace(/"/g, '&quot;')}" data-fav-catid="${cat.id}" data-fav-file="_effects/${fileName}">${favHeartSvg}</button>
 <button class="copy-ai-btn" id="copyAiBtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
 <div class="effect-main">
 <div class="${stageClass.trim()}"${stageAttrs}>${eff.stageHtml}</div>
@@ -1612,6 +1706,7 @@ ${navJs}
     document.body.removeChild(ta);
   }
 })();
+${favDetailJs}
 <` + `/script>
 </body>
 </html>`;
@@ -1745,6 +1840,7 @@ body{background:#f8f7f4;color:#0d0c22;font-family:-apple-system,BlinkMacSystemFo
 ${navCss}
 ${ctrlCss}
 ${copyBtnCss}
+${favBtnCss}
 .effect-main{flex:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:56px;position:relative;overflow:hidden}
 .stage{width:100%;height:calc(100vh - 56px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;${bgStyle}}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -1754,6 +1850,7 @@ ${allCss}
 <body>
 ${generateNavBar(cat.id, '../')}
 <a href="../_cat/${cat.id}.html" class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回</a>
+<button class="fav-btn-detail" id="favDetailBtn" data-fav-id="${fileName.replace('.html','')}" data-fav-name="${eff.name.replace(/"/g, '&quot;')}" data-fav-cat="${cat.title.replace(/"/g, '&quot;')}" data-fav-catid="${cat.id}" data-fav-file="_effects/${fileName}">${favHeartSvg}</button>
 <button class="copy-ai-btn" id="copyAiBtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
 <div class="effect-main">
 <div class="stage"${stageId}>${eff.demoHtml}</div>
@@ -1807,6 +1904,7 @@ ${navJs}
     document.body.removeChild(ta);
   }
 })();
+${favDetailJs}
 <` + `/script>
 </body>
 </html>`;
@@ -1918,7 +2016,9 @@ for (const cat of sortedParsed) {
     const eff = cat.effects[ei];
     const stageAttrs = eff.stageAttrs ? ` ${eff.stageAttrs}` : '';
     const stageClass = eff.stageClass ? ` ${eff.stageClass}` : '';
+    const favId = eff._file.replace('_effects/', '').replace('.html', '');
     cards += `    <a href="../${eff._file}" class="card" data-idx="${ei}">
+      <button class="fav-btn" data-fav-id="${favId}" data-fav-name="${eff.name.replace(/"/g, '&quot;')}" data-fav-cat="${cat.title.replace(/"/g, '&quot;')}" data-fav-catid="${cat.id}" data-fav-file="${eff._file}">${favHeartSvg}</button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"><div class="stage${stageClass}"${stageAttrs}>${eff.stageHtml}</div></div>
       <div class="card-info"><h3>${eff.name}</h3>${eff.tag ? `<span class="tag">${eff.tag}</span>` : ''}</div>
@@ -1945,6 +2045,7 @@ a{text-decoration:none;color:inherit}
 ${navCss}
 ${cardGridCss}
 ${catCopyBtnCss}
+${favBtnCss}
 ${cat.css}
 </style>
 </head>
@@ -1955,6 +2056,7 @@ ${cards}</div>
 <` + `script>
 ${navJs}
 ${lazyAnimJs}
+${favCardJs}
 ${cat.scripts.map(s => s).join('\n')}
 
 // 复制给 AI - 卡片按钮
@@ -2020,7 +2122,9 @@ for (const cat of sortedIframe) {
       const visual = thumbExists
         ? `<img src="../_thumbs/${thumbFile}" alt="${eff.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s">`
         : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;padding:8px">${eff.name}</div>`;
+      const favId = eff._file.replace('_effects/', '').replace('.html', '');
       cards += `    <a href="../${eff._file}" class="card card-thumb">
+      <button class="fav-btn" data-fav-id="${favId}" data-fav-name="${eff.name.replace(/"/g, '&quot;')}" data-fav-cat="${cat.title.replace(/"/g, '&quot;')}" data-fav-catid="${cat.id}" data-fav-file="${eff._file}">${favHeartSvg}</button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual">${visual}</div>
       <div class="card-info"><h3>${eff.name}</h3></div>
@@ -2032,7 +2136,9 @@ for (const cat of sortedIframe) {
     const visual = thumbExists
       ? `<img src="../_thumbs/${thumbFile}" alt="${cat.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .3s,filter .3s">`
       : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${cat.title.charAt(0)}</div>`;
+    const favId = cat.id;
     cards += `    <a href="../${cat.file}" class="card card-thumb">
+      <button class="fav-btn" data-fav-id="${favId}" data-fav-name="${cat.title.replace(/"/g, '&quot;')}" data-fav-cat="${cat.title.replace(/"/g, '&quot;')}" data-fav-catid="${cat.id}" data-fav-file="${cat.file}">${favHeartSvg}</button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual">${visual}</div>
       <div class="card-info"><h3>${cat.title}</h3></div>
@@ -2051,6 +2157,7 @@ body{background:#f8f7f4;color:#0d0c22;font-family:-apple-system,BlinkMacSystemFo
 a{text-decoration:none;color:inherit}
 ${navCss}
 ${cardGridCss}
+${favBtnCss}
 </style>
 </head>
 <body>
@@ -2059,6 +2166,7 @@ ${generateNavBar(cat.id, '../')}
 ${cards}</div>
 <` + `script>
 ${navJs}
+${favCardJs}
 <` + `/script>
 </body>
 </html>`;
@@ -2151,7 +2259,9 @@ if (sortedCollect.length > 0) {
       visual = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3);font-size:1.5rem;font-weight:700">${item.title.charAt(0)}</div>`;
     }
 
+    const collectFavId = `collect_${ci}`;
     collectCardsHtml += `    <a href="../${item.file}" class="card card-thumb" data-idx="${ci}">
+      <button class="fav-btn" data-fav-id="${collectFavId}" data-fav-name="${item.title.replace(/"/g, '&quot;')}" data-fav-cat="Collect" data-fav-catid="collect" data-fav-file="${item.file}">${favHeartSvg}</button>
       <div class="play-hint"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
       <div class="card-visual"${cardVisualStyle}>${visual}</div>
       <div class="card-info"><h3>${item.title}</h3></div>
@@ -2197,6 +2307,7 @@ a{text-decoration:none;color:inherit}
 ${navCss}
 ${cardGridCss}
 ${catCopyBtnCss}
+${favBtnCss}
 </style>
 </head>
 <body>
@@ -2205,6 +2316,7 @@ ${generateNavBar('collect', '../')}
 ${collectCardsHtml}</div>
 <` + `script>
 ${navJs}
+${favCardJs}
 
 // 复制给 AI - 卡片按钮
 (function(){
@@ -2293,6 +2405,7 @@ const indexHtml = `<!DOCTYPE html>
 body{background:#f8f7f4;color:#0d0c22;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
 a{text-decoration:none;color:inherit}
 ${navCss}
+${favBtnCss}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px;padding:24px;margin-top:56px}
 .cat-card{background:#fff;display:flex;flex-direction:column;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s}
 .cat-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(0,0,0,.12)}
@@ -2311,9 +2424,105 @@ ${generateNavBar('', '')}
 ${catCards}</div>
 <` + `script>
 ${navJs}
+// Init fav count in nav
+(function(){var c=document.querySelector('.fav-count');if(c){try{var n=JSON.parse(localStorage.getItem('bfx_favorites')||'[]').length;c.textContent=n;c.style.display=n?'':'none';}catch(e){}}})();
 <` + `/script>
 </body>
 </html>`;
 
 fs.writeFileSync('index.html', indexHtml);
 console.log(`\n📄 index.html: ${(Buffer.byteLength(indexHtml)/1024).toFixed(1)} KB`);
+
+// ============================================================
+// 收藏页面 (_fav.html) - 纯客户端渲染
+// ============================================================
+const favPageHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>我的收藏 - Bの宝库</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#f8f7f4;color:#0d0c22;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+${navCss}
+${favBtnCss}
+.fav-header{margin-top:76px;padding:0 24px;max-width:1400px;margin-left:auto;margin-right:auto;display:flex;align-items:center;gap:12px}
+.fav-header h1{font-size:1.3rem;font-weight:700;color:#0d0c22}
+.fav-header .fav-total{font-size:.8rem;color:#9e9ea7;font-weight:500}
+.fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;padding:24px;max-width:1400px;margin:16px auto 0}
+.fav-card{background:#fff;cursor:pointer;transition:transform .25s ease,box-shadow .25s ease;text-decoration:none;display:block;position:relative;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.fav-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(0,0,0,.12)}
+.fav-card-visual{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#1a1a2e}
+.fav-card-visual .fav-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.4);font-size:2.5rem;font-weight:800}
+.fav-card-info{padding:14px 16px 16px}
+.fav-card-info h3{font-size:.85rem;font-weight:600;color:#0d0c22;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fav-card-info .fav-card-cat{font-size:.7rem;color:#9e9ea7;margin-top:4px}
+.fav-remove{position:absolute;top:8px;right:8px;z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;opacity:0;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.fav-card:hover .fav-remove{opacity:1;pointer-events:auto}
+.fav-remove:hover{background:#fee2e2;border-color:#fca5a5}
+.fav-remove svg{width:14px;height:14px;stroke:#ef4444;stroke-width:2.5;fill:none}
+.fav-empty{text-align:center;padding:80px 24px;color:#9e9ea7}
+.fav-empty svg{width:64px;height:64px;stroke:#e0e0e0;stroke-width:1.5;fill:none;margin-bottom:16px}
+.fav-empty h2{font-size:1.1rem;color:#6e6d7a;font-weight:600;margin-bottom:8px}
+.fav-empty p{font-size:.85rem;color:#9e9ea7}
+@media(max-width:768px){.fav-grid{grid-template-columns:repeat(2,1fr);gap:12px;padding:12px}.fav-header{margin-top:68px;padding:0 12px}}
+</style>
+</head>
+<body>
+${generateNavBar('', '')}
+<div class="fav-header">
+  <h1>我的收藏</h1>
+  <span class="fav-total" id="favTotal"></span>
+</div>
+<div class="fav-grid" id="favGrid"></div>
+<div class="fav-empty" id="favEmpty" style="display:none">
+  <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  <h2>还没有收藏</h2>
+  <p>浏览效果时点击心形按钮即可收藏</p>
+</div>
+<` + `script>
+${navJs}
+// Favorites page renderer
+(function(){
+  var FAV_KEY='bfx_favorites';
+  function getFavs(){try{return JSON.parse(localStorage.getItem(FAV_KEY))||[];}catch(e){return[];}}
+  function setFavs(arr){localStorage.setItem(FAV_KEY,JSON.stringify(arr));}
+  function render(){
+    var favs=getFavs();
+    var grid=document.getElementById('favGrid');
+    var empty=document.getElementById('favEmpty');
+    var total=document.getElementById('favTotal');
+    var countEl=document.querySelector('.fav-count');
+    total.textContent=favs.length?favs.length+' 个效果':'';
+    if(countEl){countEl.textContent=favs.length;countEl.style.display=favs.length?'':'none';}
+    if(!favs.length){grid.innerHTML='';empty.style.display='';return;}
+    empty.style.display='none';
+    grid.innerHTML=favs.map(function(f,i){
+      return '<a href="'+f.file+'" class="fav-card">'
+        +'<button class="fav-remove" data-idx="'+i+'"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
+        +'<div class="fav-card-visual"><div class="fav-placeholder">'+f.name.charAt(0)+'</div></div>'
+        +'<div class="fav-card-info"><h3>'+f.name+'</h3><div class="fav-card-cat">'+f.cat+'</div></div>'
+        +'</a>';
+    }).join('');
+    // Bind remove buttons
+    grid.querySelectorAll('.fav-remove').forEach(function(btn){
+      btn.addEventListener('click',function(e){
+        e.preventDefault();e.stopPropagation();
+        var idx=parseInt(btn.getAttribute('data-idx'));
+        var favs=getFavs();
+        favs.splice(idx,1);
+        setFavs(favs);
+        render();
+      });
+    });
+  }
+  render();
+})();
+<` + `/script>
+</body>
+</html>`;
+
+fs.writeFileSync('_fav.html', favPageHtml);
+console.log(`📄 _fav.html: ${(Buffer.byteLength(favPageHtml)/1024).toFixed(1)} KB`);

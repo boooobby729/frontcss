@@ -478,13 +478,7 @@
       name: '\u6587\u5b57\u8f6e\u64ad\u5207\u6362 (\u6e10\u53d8\u5f69\u8272)',
       css: ".swap-container {\n  display: inline-block;\n  position: relative;\n  height: 1.2em;\n  overflow: hidden;\n  vertical-align: bottom;\n}\n.swap-track {\n  position: relative;\n  transition: transform .7s cubic-bezier(.22,1,.36,1);\n}\n.swap-word {\n  display: block;\n  height: 1.2em;\n  line-height: 1.2em;\n  font-weight: 800;\n  background: linear-gradient(135deg, #FFACE3, #FFF1AC, #79C9FF, #4A60D1);\n  background-size: 300% 300%;\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n  animation: gradientShift 6s ease infinite;\n  white-space: nowrap;\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50% }\n  50% { background-position: 100% 50% }\n  100% { background-position: 0% 50% }\n}",
       html: '<span class="swap-container">\n  <span class="swap-track" id="swapTrack">\n    <span class="swap-word">with you</span>\n    <span class="swap-word">for you</span>\n    <span class="swap-word">beside you</span>\n  </span>\n</span>',
-      js: "const track = document.getElementById('swapTrack');
-const words = track.querySelectorAll('.swap-word');
-let index = 0;
-setInterval(() => {
-  index = (index + 1) % words.length;
-  track.style.transform = 'translateY(-' + (index * 1.2) + 'em)';
-}, 2500);"
+      js: "const track = document.getElementById('swapTrack');\nconst words = track.querySelectorAll('.swap-word');\nlet index = 0;\nsetInterval(() => {\n  index = (index + 1) % words.length;\n  track.style.transform = 'translateY(-' + (index * 1.2) + 'em)';\n}, 2500);"
     },
     'reveal': {
       name: '\u9010\u5b57\u63ed\u793a (\u6a21\u7cca\u6de1\u5165)',

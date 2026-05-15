@@ -31,7 +31,6 @@
   }
   .back:hover{color:#fff}
 
-  /* ===== Hero 区域 ===== */
   .hero{
     text-align:center;
     padding:0 40px;
@@ -46,7 +45,6 @@
     line-height:1.15;
   }
 
-  /* ===== 可变字体波浪动画（Dia 风格） ===== */
   .wave-word{
     display:inline-flex;
     font-weight:800;
@@ -59,7 +57,6 @@
     will-change:font-weight;
   }
 
-  /* ===== 文字轮播区域 ===== */
   .swap-container{
     display:inline-block;
     position:relative;
@@ -93,7 +90,6 @@
     100%{background-position:0% 50%}
   }
 
-  /* ===== 副标题 ===== */
   .subtitle{
     margin-top:24px;
     font-size:clamp(.9rem,1.8vw,1.2rem);
@@ -103,14 +99,12 @@
     line-height:1.6;
   }
 
-  /* ===== 分隔线 ===== */
   .divider{
     width:60px;height:1px;
     background:rgba(255,255,255,.1);
     margin:48px auto;
   }
 
-  /* ===== 效果展示区 ===== */
   .demos{
     display:flex;
     flex-direction:column;
@@ -122,6 +116,11 @@
 
   .demo-section{
     text-align:center;
+    position:relative;
+    padding:32px 24px;
+    border-radius:16px;
+    background:rgba(255,255,255,.02);
+    border:1px solid rgba(255,255,255,.06);
   }
 
   .demo-label{
@@ -132,7 +131,34 @@
     margin-bottom:20px;
   }
 
-  /* === 效果1：逐字揭示 === */
+  .copy-btn{
+    position:absolute;
+    top:12px;right:12px;
+    display:flex;align-items:center;gap:4px;
+    padding:6px 12px;
+    border:none;border-radius:8px;
+    background:rgba(255,255,255,.08);
+    color:rgba(255,255,255,.5);
+    font-size:.72rem;
+    cursor:pointer;
+    transition:all .2s;
+    backdrop-filter:blur(8px);
+    z-index:10;
+  }
+  .copy-btn:hover{
+    background:rgba(234,76,137,.2);
+    color:#ea4c89;
+  }
+  .copy-btn.copied{
+    background:rgba(76,217,100,.15);
+    color:#4cd964;
+  }
+  .copy-btn svg{
+    width:14px;height:14px;
+    fill:none;stroke:currentColor;
+    stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+  }
+
   .reveal-text{
     font-size:clamp(1.8rem,4vw,3rem);
     font-weight:700;
@@ -157,7 +183,6 @@
     width:.3em;
   }
 
-  /* === 效果2：字重波浪 === */
   .weight-wave{
     font-size:clamp(2rem,5vw,3.5rem);
     color:#fff;
@@ -176,7 +201,6 @@
     will-change:font-weight;
   }
 
-  /* === 效果3：模糊切换 === */
   .blur-swap{
     font-size:clamp(2rem,5vw,3.5rem);
     font-weight:700;
@@ -210,7 +234,6 @@
     filter:blur(12px);
   }
 
-  /* === 效果4：打字机 + 光标 === */
   .typewriter{
     font-size:clamp(1.5rem,3.5vw,2.5rem);
     font-weight:600;
@@ -238,12 +261,8 @@
 
 <!-- Hero -->
 <div class="hero">
-  <div class="hero-line">
-    A browser that
-  </div>
-  <div class="hero-line">
-    <span class="wave-word" id="waveWord">works</span>
-  </div>
+  <div class="hero-line">A browser that</div>
+  <div class="hero-line"><span class="wave-word" id="waveWord">works</span></div>
   <div class="hero-line">
     <span class="swap-container" id="swapContainer">
       <span class="swap-track" id="swapTrack">
@@ -254,229 +273,292 @@
       </span>
     </span>
   </div>
-  <p class="subtitle">
-    Dia 风格文本动画效果集。可变字体波浪、<br>
-    文字轮播切换、逐字揭示、模糊过渡。
-  </p>
+  <p class="subtitle">Dia 风格文本动画效果集。可变字体波浪、<br>文字轮播切换、逐字揭示、模糊过渡。</p>
 </div>
 
 <div class="divider"></div>
 
-<!-- 效果展示 -->
 <div class="demos">
 
-  <!-- 效果1：逐字揭示 -->
-  <div class="demo-section">
+  <div class="demo-section" data-effect="wave-hero">
+    <button class="copy-btn" data-effect="wave-hero"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
+    <div class="demo-label">字重波浪 · Variable Font Wave (Dia)</div>
+    <div style="font-size:clamp(2.5rem,7vw,4rem)"><span class="wave-word" id="waveWordDemo">Dynamic</span></div>
+  </div>
+
+  <div class="demo-section" data-effect="swap">
+    <button class="copy-btn" data-effect="swap"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
+    <div class="demo-label">文字轮播 · Text Swap</div>
+    <div style="font-size:clamp(2rem,5vw,3.5rem);font-weight:300;color:rgba(255,255,255,.85)">
+      I love <span class="swap-container"><span class="swap-track" id="swapTrackDemo"><span class="swap-word">coding</span><span class="swap-word">designing</span><span class="swap-word">creating</span><span class="swap-word">building</span></span></span>
+    </div>
+  </div>
+
+  <div class="demo-section" data-effect="reveal">
+    <button class="copy-btn" data-effect="reveal"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
     <div class="demo-label">逐字揭示 · Blur Reveal</div>
     <div class="reveal-text" id="revealText"></div>
   </div>
 
-  <!-- 效果2：字重波浪 -->
-  <div class="demo-section">
+  <div class="demo-section" data-effect="weight">
+    <button class="copy-btn" data-effect="weight"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
     <div class="demo-label">字重波浪 · Weight Wave</div>
     <div class="weight-wave" id="weightWave"></div>
   </div>
 
-  <!-- 效果3：模糊切换 -->
-  <div class="demo-section">
+  <div class="demo-section" data-effect="blur">
+    <button class="copy-btn" data-effect="blur"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
     <div class="demo-label">模糊切换 · Blur Swap</div>
     <div class="blur-swap" id="blurSwap"></div>
   </div>
 
-  <!-- 效果4：打字机 -->
-  <div class="demo-section">
+  <div class="demo-section" data-effect="type">
+    <button class="copy-btn" data-effect="type"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制给 AI</button>
     <div class="demo-label">打字机 · Typewriter</div>
-    <div style="display:flex;justify-content:center">
-      <span class="typewriter" id="typewriter"></span><span class="typewriter"><span class="cursor"></span></span>
-    </div>
+    <div style="display:flex;justify-content:center"><span class="typewriter" id="typewriter"></span><span class="typewriter"><span class="cursor"></span></span></div>
   </div>
 
 </div>
 
 <script>
 (function(){
+  var DIA_COLORS = ['#FFACE3','#FFF1AC','#79C9FF','#4A60D1','#5092C7','#3C6AFF'];
 
-  /* ========== Dia 颜色 ========== */
-  const DIA_COLORS = ['#FFACE3','#FFF1AC','#79C9FF','#4A60D1','#5092C7','#3C6AFF'];
-
-  /* ========== 1. Hero 字重波浪（Dia 风格） ========== */
-  const waveWord = document.getElementById('waveWord');
-  const waveLetters = [];
-  const text = waveWord.textContent.trim();
+  // Hero wave
+  var waveWord = document.getElementById('waveWord');
+  var waveLetters = [];
+  var text = waveWord.textContent.trim();
   waveWord.textContent = '';
-  for(let i = 0; i < text.length; i++){
-    const span = document.createElement('span');
+  for(var i = 0; i < text.length; i++){
+    var span = document.createElement('span');
     span.className = 'letter';
     span.textContent = text[i];
     waveWord.appendChild(span);
     waveLetters.push(span);
   }
 
-  let wavePhase = 0;
+  // Demo wave
+  var waveWordDemo = document.getElementById('waveWordDemo');
+  var waveDemoLetters = [];
+  var dText = waveWordDemo.textContent.trim();
+  waveWordDemo.textContent = '';
+  for(var i = 0; i < dText.length; i++){
+    var span = document.createElement('span');
+    span.className = 'letter';
+    span.textContent = dText[i];
+    waveWordDemo.appendChild(span);
+    waveDemoLetters.push(span);
+  }
+
+  var wavePhase = 0;
   function animateWave(){
     wavePhase += 0.06;
-    for(let i = 0; i < waveLetters.length; i++){
-      // 正弦波控制字重 100-900
-      const val = Math.sin(wavePhase + i * 0.8);
-      const weight = Math.round(500 + val * 400);
-      waveLetters[i].style.fontWeight = weight;
+    for(var i = 0; i < waveLetters.length; i++){
+      var val = Math.sin(wavePhase + i * 0.8);
+      waveLetters[i].style.fontWeight = Math.round(500 + val * 400);
+    }
+    for(var i = 0; i < waveDemoLetters.length; i++){
+      var val = Math.sin(wavePhase + i * 0.8);
+      waveDemoLetters[i].style.fontWeight = Math.round(500 + val * 400);
     }
     requestAnimationFrame(animateWave);
   }
   animateWave();
 
-  /* ========== 2. Hero 文字轮播 ========== */
-  const swapTrack = document.getElementById('swapTrack');
-  const swapWords = swapTrack.querySelectorAll('.swap-word');
-  let swapIndex = 0;
-
-  setInterval(()=>{
+  // Hero swap
+  var swapTrack = document.getElementById('swapTrack');
+  var swapWords = swapTrack.querySelectorAll('.swap-word');
+  var swapIndex = 0;
+  setInterval(function(){
     swapIndex = (swapIndex + 1) % swapWords.length;
-    swapTrack.style.transform = `translateY(-${swapIndex * 1.2}em)`;
+    swapTrack.style.transform = 'translateY(-' + (swapIndex * 1.2) + 'em)';
   }, 2500);
 
-  /* ========== 3. 逐字揭示 ========== */
-  const revealEl = document.getElementById('revealText');
-  const revealPhrases = [
-    'Build something extraordinary.',
-    'Design with intention.',
-    'Create without limits.',
-    'Think beyond boundaries.'
-  ];
-  let revealIdx = 0;
+  // Demo swap
+  var swapTrackDemo = document.getElementById('swapTrackDemo');
+  var swapWordsDemo = swapTrackDemo.querySelectorAll('.swap-word');
+  var swapDemoIdx = 0;
+  setInterval(function(){
+    swapDemoIdx = (swapDemoIdx + 1) % swapWordsDemo.length;
+    swapTrackDemo.style.transform = 'translateY(-' + (swapDemoIdx * 1.2) + 'em)';
+  }, 2500);
 
+  // Reveal
+  var revealEl = document.getElementById('revealText');
+  var revealPhrases = ['Build something extraordinary.','Design with intention.','Create without limits.','Think beyond boundaries.'];
+  var revealIdx = 0;
   function doReveal(){
-    const phrase = revealPhrases[revealIdx];
+    var phrase = revealPhrases[revealIdx];
     revealEl.innerHTML = '';
-    const chars = [];
-    for(let i = 0; i < phrase.length; i++){
-      if(phrase[i] === ' '){
-        const sp = document.createElement('span');
-        sp.className = 'space';
-        revealEl.appendChild(sp);
-      } else {
-        const span = document.createElement('span');
-        span.className = 'char';
-        span.textContent = phrase[i];
-        revealEl.appendChild(span);
-        chars.push(span);
-      }
+    var chars = [];
+    for(var i = 0; i < phrase.length; i++){
+      if(phrase[i] === ' '){ var sp = document.createElement('span'); sp.className = 'space'; revealEl.appendChild(sp); }
+      else { var s = document.createElement('span'); s.className = 'char'; s.textContent = phrase[i]; revealEl.appendChild(s); chars.push(s); }
     }
-    // 逐字显示
-    chars.forEach((c, i) => {
-      setTimeout(()=> c.classList.add('visible'), 40 * i);
-    });
-    // 逐字隐藏
-    const totalShow = 40 * chars.length + 1500;
-    chars.forEach((c, i) => {
-      setTimeout(()=> c.classList.remove('visible'), totalShow + 30 * i);
-    });
-    // 下一轮
-    const totalTime = totalShow + 30 * chars.length + 600;
-    setTimeout(()=>{
-      revealIdx = (revealIdx + 1) % revealPhrases.length;
-      doReveal();
-    }, totalTime);
+    chars.forEach(function(c, i){ setTimeout(function(){ c.classList.add('visible'); }, 40 * i); });
+    var totalShow = 40 * chars.length + 1500;
+    chars.forEach(function(c, i){ setTimeout(function(){ c.classList.remove('visible'); }, totalShow + 30 * i); });
+    setTimeout(function(){ revealIdx = (revealIdx + 1) % revealPhrases.length; doReveal(); }, totalShow + 30 * chars.length + 600);
   }
   doReveal();
 
-  /* ========== 4. 字重波浪（展示区） ========== */
-  const weightEl = document.getElementById('weightWave');
-  const weightText = 'Variable Font Wave';
-  const weightLetters = [];
-  for(let i = 0; i < weightText.length; i++){
-    const span = document.createElement('span');
+  // Weight wave
+  var weightEl = document.getElementById('weightWave');
+  var weightText = 'Variable Font Wave';
+  var weightLetters = [];
+  for(var i = 0; i < weightText.length; i++){
+    var span = document.createElement('span');
     span.className = 'wl';
     span.textContent = weightText[i] === ' ' ? '\u00A0' : weightText[i];
     weightEl.appendChild(span);
     weightLetters.push(span);
   }
-
-  let wPhase = 0;
+  var wPhase = 0;
   function animateWeight(){
     wPhase += 0.04;
-    for(let i = 0; i < weightLetters.length; i++){
-      const val = Math.sin(wPhase + i * 0.5);
-      const weight = Math.round(500 + val * 400);
-      weightLetters[i].style.fontWeight = weight;
-      // 颜色也跟着变
-      const colorIdx = Math.floor(((val + 1) / 2) * (DIA_COLORS.length - 1));
+    for(var i = 0; i < weightLetters.length; i++){
+      var val = Math.sin(wPhase + i * 0.5);
+      weightLetters[i].style.fontWeight = Math.round(500 + val * 400);
+      var colorIdx = Math.floor(((val + 1) / 2) * (DIA_COLORS.length - 1));
       weightLetters[i].style.color = DIA_COLORS[colorIdx];
     }
     requestAnimationFrame(animateWeight);
   }
   animateWeight();
 
-  /* ========== 5. 模糊切换 ========== */
-  const blurEl = document.getElementById('blurSwap');
-  const blurWords = ['Innovate','Collaborate','Accelerate','Dominate'];
-  let blurIdx = 0;
-
-  // 初始化
-  blurWords.forEach((w, i) => {
-    const span = document.createElement('span');
+  // Blur swap
+  var blurEl = document.getElementById('blurSwap');
+  var blurWords = ['Innovate','Collaborate','Accelerate','Dominate'];
+  var blurIdx = 0;
+  blurWords.forEach(function(w, i){
+    var span = document.createElement('span');
     span.className = 'bs-word ' + (i === 0 ? 'active' : 'below');
     span.textContent = w;
     blurEl.appendChild(span);
   });
-
-  const bsEls = blurEl.querySelectorAll('.bs-word');
-  setInterval(()=>{
-    const prev = blurIdx;
+  var bsEls = blurEl.querySelectorAll('.bs-word');
+  setInterval(function(){
+    var prev = blurIdx;
     blurIdx = (blurIdx + 1) % blurWords.length;
     bsEls[prev].className = 'bs-word above';
     bsEls[blurIdx].className = 'bs-word active';
-    // 重置其他
-    setTimeout(()=>{
-      bsEls.forEach((el, i) => {
-        if(i !== blurIdx && !el.classList.contains('above')){
-          el.className = 'bs-word below';
-        }
-      });
-    }, 100);
-    setTimeout(()=>{
-      bsEls[prev].className = 'bs-word below';
-    }, 700);
+    setTimeout(function(){ bsEls.forEach(function(el, i){ if(i !== blurIdx && !el.classList.contains('above')) el.className = 'bs-word below'; }); }, 100);
+    setTimeout(function(){ bsEls[prev].className = 'bs-word below'; }, 700);
   }, 2200);
 
-  /* ========== 6. 打字机 ========== */
-  const typeEl = document.getElementById('typewriter');
-  const typePhrases = [
-    'The future is now.',
-    'Less noise, more signal.',
-    'Built for deep work.',
-    'Your browser, reimagined.'
-  ];
-  let typeIdx = 0;
-  let typeCharIdx = 0;
-  let typeDeleting = false;
-
+  // Typewriter
+  var typeEl = document.getElementById('typewriter');
+  var typePhrases = ['The future is now.','Less noise, more signal.','Built for deep work.','Your browser, reimagined.'];
+  var typeIdx = 0, typeCharIdx = 0, typeDeleting = false;
   function typeStep(){
-    const phrase = typePhrases[typeIdx];
+    var phrase = typePhrases[typeIdx];
     if(!typeDeleting){
       typeCharIdx++;
       typeEl.textContent = phrase.substring(0, typeCharIdx);
-      if(typeCharIdx >= phrase.length){
-        setTimeout(()=>{ typeDeleting = true; typeStep(); }, 1800);
-        return;
-      }
+      if(typeCharIdx >= phrase.length){ setTimeout(function(){ typeDeleting = true; typeStep(); }, 1800); return; }
       setTimeout(typeStep, 60 + Math.random() * 40);
     } else {
       typeCharIdx--;
       typeEl.textContent = phrase.substring(0, typeCharIdx);
-      if(typeCharIdx <= 0){
-        typeDeleting = false;
-        typeIdx = (typeIdx + 1) % typePhrases.length;
-        setTimeout(typeStep, 400);
-        return;
-      }
+      if(typeCharIdx <= 0){ typeDeleting = false; typeIdx = (typeIdx + 1) % typePhrases.length; setTimeout(typeStep, 400); return; }
       setTimeout(typeStep, 30);
     }
   }
   typeStep();
 
+  // ========== Copy system ==========
+  var effectCodes = {
+    'wave-hero': {
+      name: '\u5b57\u91cd\u6ce2\u6d6a (Dia \u98ce\u683c\u53ef\u53d8\u5b57\u4f53)',
+      css: "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');\n\n.wave-word {\n  display: inline-flex;\n  font-size: clamp(2.5rem, 7vw, 5.5rem);\n  font-weight: 800;\n  color: #fff;\n  font-family: 'Inter', sans-serif;\n}\n.wave-word .letter {\n  display: inline-block;\n  white-space: pre;\n  transition: font-weight .4s cubic-bezier(.22,1,.36,1);\n  will-change: font-weight;\n}",
+      html: '<span class="wave-word" id="waveWord">works</span>',
+      js: "const el = document.getElementById('waveWord');\nconst letters = [];\nconst text = el.textContent.trim();\nel.textContent = '';\nfor (let i = 0; i < text.length; i++) {\n  const span = document.createElement('span');\n  span.className = 'letter';\n  span.textContent = text[i];\n  el.appendChild(span);\n  letters.push(span);\n}\nlet phase = 0;\nfunction animate() {\n  phase += 0.06;\n  for (let i = 0; i < letters.length; i++) {\n    const val = Math.sin(phase + i * 0.8);\n    letters[i].style.fontWeight = Math.round(500 + val * 400);\n  }\n  requestAnimationFrame(animate);\n}\nanimate();"
+    },
+    'swap': {
+      name: '\u6587\u5b57\u8f6e\u64ad\u5207\u6362 (\u6e10\u53d8\u5f69\u8272)',
+      css: ".swap-container {\n  display: inline-block;\n  position: relative;\n  height: 1.2em;\n  overflow: hidden;\n  vertical-align: bottom;\n}\n.swap-track {\n  position: relative;\n  transition: transform .7s cubic-bezier(.22,1,.36,1);\n}\n.swap-word {\n  display: block;\n  height: 1.2em;\n  line-height: 1.2em;\n  font-weight: 800;\n  background: linear-gradient(135deg, #FFACE3, #FFF1AC, #79C9FF, #4A60D1);\n  background-size: 300% 300%;\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n  animation: gradientShift 6s ease infinite;\n  white-space: nowrap;\n}\n@keyframes gradientShift {\n  0% { background-position: 0% 50% }\n  50% { background-position: 100% 50% }\n  100% { background-position: 0% 50% }\n}",
+      html: '<span class="swap-container">\n  <span class="swap-track" id="swapTrack">\n    <span class="swap-word">with you</span>\n    <span class="swap-word">for you</span>\n    <span class="swap-word">beside you</span>\n  </span>\n</span>',
+      js: "const track = document.getElementById('swapTrack');
+const words = track.querySelectorAll('.swap-word');
+let index = 0;
+setInterval(() => {
+  index = (index + 1) % words.length;
+  track.style.transform = 'translateY(-' + (index * 1.2) + 'em)';
+}, 2500);"
+    },
+    'reveal': {
+      name: '\u9010\u5b57\u63ed\u793a (\u6a21\u7cca\u6de1\u5165)',
+      css: ".reveal-text {\n  font-size: clamp(1.8rem, 4vw, 3rem);\n  font-weight: 700;\n  color: #fff;\n  letter-spacing: -.03em;\n  line-height: 1.3;\n}\n.reveal-text .char {\n  display: inline-block;\n  opacity: 0;\n  transform: translateY(20px);\n  filter: blur(8px);\n  transition: all .5s cubic-bezier(.22,1,.36,1);\n}\n.reveal-text .char.visible {\n  opacity: 1;\n  transform: translateY(0);\n  filter: blur(0);\n}\n.reveal-text .space {\n  display: inline-block;\n  width: .3em;\n}",
+      html: '<div class="reveal-text" id="revealText"></div>',
+      js: "const el = document.getElementById('revealText');\nconst phrases = ['Build something extraordinary.','Design with intention.','Create without limits.'];\nlet idx = 0;\nfunction doReveal() {\n  const phrase = phrases[idx];\n  el.innerHTML = '';\n  const chars = [];\n  for (let i = 0; i < phrase.length; i++) {\n    if (phrase[i] === ' ') { const sp = document.createElement('span'); sp.className = 'space'; el.appendChild(sp); }\n    else { const s = document.createElement('span'); s.className = 'char'; s.textContent = phrase[i]; el.appendChild(s); chars.push(s); }\n  }\n  chars.forEach((c, i) => setTimeout(() => c.classList.add('visible'), 40 * i));\n  const totalShow = 40 * chars.length + 1500;\n  chars.forEach((c, i) => setTimeout(() => c.classList.remove('visible'), totalShow + 30 * i));\n  setTimeout(() => { idx = (idx + 1) % phrases.length; doReveal(); }, totalShow + 30 * chars.length + 600);\n}\ndoReveal();"
+    },
+    'weight': {
+      name: '\u5b57\u91cd\u5f69\u8272\u6ce2\u6d6a (\u53ef\u53d8\u5b57\u4f53 + \u989c\u8272\u8054\u52a8)',
+      css: "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');\n\n.weight-wave {\n  font-size: clamp(2rem,5vw,3.5rem);\n  color: #fff;\n  letter-spacing: -.03em;\n  display: flex;\n  justify-content: center;\n  flex-wrap: wrap;\n  font-family: 'Inter', sans-serif;\n}\n.weight-wave .wl {\n  display: inline-block;\n  white-space: pre;\n  font-weight: 100;\n  transition: font-weight .35s cubic-bezier(.22,1,.36,1), color .35s ease;\n  will-change: font-weight;\n}",
+      html: '<div class="weight-wave" id="weightWave"></div>',
+      js: "const COLORS = ['#FFACE3','#FFF1AC','#79C9FF','#4A60D1','#5092C7','#3C6AFF'];\nconst el = document.getElementById('weightWave');\nconst text = 'Variable Font Wave';\nconst letters = [];\nfor (let i = 0; i < text.length; i++) {\n  const span = document.createElement('span');\n  span.className = 'wl';\n  span.textContent = text[i] === ' ' ? '\\u00A0' : text[i];\n  el.appendChild(span);\n  letters.push(span);\n}\nlet phase = 0;\nfunction animate() {\n  phase += 0.04;\n  for (let i = 0; i < letters.length; i++) {\n    const val = Math.sin(phase + i * 0.5);\n    letters[i].style.fontWeight = Math.round(500 + val * 400);\n    letters[i].style.color = COLORS[Math.floor(((val+1)/2) * (COLORS.length-1))];\n  }\n  requestAnimationFrame(animate);\n}\nanimate();"
+    },
+    'blur': {
+      name: '\u6a21\u7cca\u5207\u6362 (Blur Swap)',
+      css: ".blur-swap {\n  font-size: clamp(2rem,5vw,3.5rem);\n  font-weight: 700;\n  color: #fff;\n  position: relative;\n  height: 1.3em;\n  overflow: hidden;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.blur-swap .bs-word {\n  position: absolute;\n  transition: all .6s cubic-bezier(.22,1,.36,1);\n  white-space: nowrap;\n}\n.blur-swap .bs-word.active { opacity:1; transform:translateY(0) scale(1); filter:blur(0); }\n.blur-swap .bs-word.above { opacity:0; transform:translateY(-60px) scale(.95); filter:blur(12px); }\n.blur-swap .bs-word.below { opacity:0; transform:translateY(60px) scale(.95); filter:blur(12px); }",
+      html: '<div class="blur-swap" id="blurSwap"></div>',
+      js: "const el = document.getElementById('blurSwap');\nconst words = ['Innovate','Collaborate','Accelerate','Dominate'];\nlet idx = 0;\nwords.forEach((w, i) => {\n  const span = document.createElement('span');\n  span.className = 'bs-word ' + (i === 0 ? 'active' : 'below');\n  span.textContent = w;\n  el.appendChild(span);\n});\nconst els = el.querySelectorAll('.bs-word');\nsetInterval(() => {\n  const prev = idx;\n  idx = (idx + 1) % words.length;\n  els[prev].className = 'bs-word above';\n  els[idx].className = 'bs-word active';\n  setTimeout(() => els.forEach((e, i) => { if(i !== idx && !e.classList.contains('above')) e.className = 'bs-word below'; }), 100);\n  setTimeout(() => { els[prev].className = 'bs-word below'; }, 700);\n}, 2200);"
+    },
+    'type': {
+      name: '\u6253\u5b57\u673a\u6548\u679c (Typewriter + \u5149\u6807)',
+      css: ".typewriter {\n  font-size: clamp(1.5rem,3.5vw,2.5rem);\n  font-weight: 600;\n  color: #fff;\n  letter-spacing: -.02em;\n  display: inline;\n}\n.typewriter .cursor {\n  display: inline-block;\n  width: 2px;\n  height: 1em;\n  background: #FFACE3;\n  margin-left: 2px;\n  vertical-align: text-bottom;\n  animation: blink .6s step-end infinite;\n}\n@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }",
+      html: '<span class="typewriter" id="typewriter"></span><span class="typewriter"><span class="cursor"></span></span>',
+      js: "const el = document.getElementById('typewriter');\nconst phrases = ['The future is now.','Less noise, more signal.','Built for deep work.'];\nlet idx = 0, charIdx = 0, deleting = false;\nfunction step() {\n  const phrase = phrases[idx];\n  if (!deleting) {\n    charIdx++;\n    el.textContent = phrase.substring(0, charIdx);\n    if (charIdx >= phrase.length) { setTimeout(() => { deleting = true; step(); }, 1800); return; }\n    setTimeout(step, 60 + Math.random() * 40);\n  } else {\n    charIdx--;\n    el.textContent = phrase.substring(0, charIdx);\n    if (charIdx <= 0) { deleting = false; idx = (idx + 1) % phrases.length; setTimeout(step, 400); return; }\n    setTimeout(step, 30);\n  }\n}\nstep();"
+    }
+  };
+
+  // Copy button handler
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var key = btn.getAttribute('data-effect');
+      var data = effectCodes[key];
+      if (!data) return;
+
+      var text = '\u8bf7\u5e2e\u6211\u5b9e\u73b0\u4ee5\u4e0b\u524d\u7aef\u52a8\u6548\uff0c\u751f\u6210\u53ef\u76f4\u63a5\u4f7f\u7528\u7684\u4ee3\u7801\uff1a\n\n';
+      text += '## \u6548\u679c\u540d\u79f0\n' + data.name + '\n\n';
+      text += '## \u53c2\u8003\u4ee3\u7801\n\n';
+      if (data.css) text += '### CSS\n```css\n' + data.css + '\n```\n\n';
+      if (data.html) text += '### HTML\n```html\n' + data.html + '\n```\n\n';
+      if (data.js) text += '### JavaScript\n```javascript\n' + data.js + '\n```\n\n';
+      text += '## \u8981\u6c42\n';
+      text += '1. \u5c06\u989c\u8272\u3001\u5c3a\u5bf8\u3001\u52a8\u753b\u65f6\u957f\u7b49\u53c2\u6570\u62bd\u53d6\u4e3a CSS \u53d8\u91cf\u6216\u914d\u7f6e\u5bf9\u8c61\uff0c\u65b9\u4fbf\u5b9a\u5236\n';
+      text += '2. \u8c03\u6574 class \u547d\u540d\u907f\u514d\u51b2\u7a81\uff0c\u9002\u914d\u6211\u7684\u9879\u76ee\n';
+      text += '3. \u7eaf HTML/CSS/JS \u5b9e\u73b0\uff0c\u96f6\u4f9d\u8d56\n';
+      text += '4. \u54cd\u5e94\u5f0f\u9002\u914d\n';
+      text += '5. \u63d0\u4f9b init()/destroy() \u65b9\u6cd5\uff0c\u65b9\u4fbf SPA \u6302\u8f7d\u5378\u8f7d\n';
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ showCopied(btn); }).catch(function(){ fallbackCopy(text, btn); });
+      } else {
+        fallbackCopy(text, btn);
+      }
+    });
+  });
+
+  function showCopied(btn){
+    var orig = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2"><polyline points="20 6 9 17 4 12"/></svg> \u5df2\u590d\u5236';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+  }
+
+  function fallbackCopy(text, btn){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(btn); } catch(e) {}
+    document.body.removeChild(ta);
+  }
 })();
 </script>
-
 </body>
 </html>
